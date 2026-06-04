@@ -1,0 +1,26 @@
+{
+  "name": "collapsible",
+  "category": "data-display",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "collapsible.story.ts",
+  "variants": [
+    "default",
+    "bordered"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

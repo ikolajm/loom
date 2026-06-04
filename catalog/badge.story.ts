@@ -1,0 +1,18 @@
+import { Badge } from '../components/atoms/Badge';
+
+export const badgeStory = {
+  component: Badge,
+  name: 'Badge',
+  defaultProps: {
+    variant: 'filled',
+    size: 'md',
+    children: 'Badge',
+  },
+  controls: [
+    { type: 'select' as const, prop: 'variant', label: 'Variant', options: ['default'] },
+    { type: 'select' as const, prop: 'size', label: 'Size', options: ['sm', 'md', 'lg'] },
+    { type: 'text' as const, prop: 'children', label: 'Label' },
+    { type: 'boolean' as const, prop: 'showLeadingIcon', label: 'Leading Icon' },
+    { type: 'boolean' as const, prop: 'showTrailingIcon', label: 'Trailing Icon' },
+  ],
+};

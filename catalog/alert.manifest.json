@@ -1,0 +1,29 @@
+{
+  "name": "alert",
+  "category": "feedback",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "alert.story.ts",
+  "variants": [
+    "default",
+    "error",
+    "success",
+    "warning",
+    "info"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

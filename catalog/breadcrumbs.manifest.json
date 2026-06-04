@@ -1,0 +1,25 @@
+{
+  "name": "breadcrumbs",
+  "category": "navigation",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "breadcrumbs.story.ts",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

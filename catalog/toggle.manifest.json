@@ -1,0 +1,26 @@
+{
+  "name": "toggle",
+  "category": "button",
+  "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "toggle.story.ts",
+  "variants": [
+    "unpressed",
+    "pressed"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "input-otp",
+  "category": "form",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "input-otp.story.ts",
+  "variants": [
+    "default",
+    "focused",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

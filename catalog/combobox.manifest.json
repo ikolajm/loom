@@ -1,0 +1,26 @@
+{
+  "name": "combobox",
+  "category": "form",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "combobox.story.ts",
+  "variants": [
+    "default",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

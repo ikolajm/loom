@@ -32,6 +32,14 @@ const GENERATORS = {
       console.log('  tokens.css');
     },
   },
+  'doc-layout': {
+    description: 'doc-layout.css (gallery presentation layer — derived from presentation/layout.json)',
+    run: (outputDir) => {
+      const { generate } = require('./generate-doc-layout');
+      fs.writeFileSync(path.join(outputDir, 'doc-layout.css'), generate());
+      console.log('  doc-layout.css');
+    },
+  },
   'icons': {
     description: 'components/icons.ts (icon map + size classes)',
     run: (outputDir) => {

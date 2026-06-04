@@ -1,0 +1,25 @@
+{
+  "name": "command-palette",
+  "category": "navigation",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "command-palette.story.ts",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

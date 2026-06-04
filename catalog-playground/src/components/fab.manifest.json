@@ -1,0 +1,26 @@
+{
+  "name": "fab",
+  "category": "button",
+  "description": "Floating action button — primary screen action. Single variant by design. Extended mode adds a text label next to the icon. Positioning is consumer responsibility.",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing",
+    "effects"
+  ],
+  "composition": "slot",
+  "stories": "fab.story.ts",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

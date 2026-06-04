@@ -1,0 +1,26 @@
+{
+  "name": "toggle-group",
+  "category": "button",
+  "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
+  "version": "2026-06-04",
+  "dependencies": [
+    "toggle",
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "toggle-group.story.ts",
+  "variants": [
+    "segmented",
+    "spaced"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "accordion",
+  "category": "data-display",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "accordion.story.ts",
+  "variants": [
+    "default",
+    "filled"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

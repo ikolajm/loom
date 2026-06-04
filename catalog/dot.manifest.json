@@ -1,0 +1,28 @@
+{
+  "name": "dot",
+  "category": "feedback",
+  "description": "Status/severity indicator dot — a small colored circle keyed by state. Standalone primitive; compose into badges, alerts, list items, subheadings, nav. Distinct from badge-dot (the notification count bubble).",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "dot.story.ts",
+  "variants": [
+    "default",
+    "neutral",
+    "destructive",
+    "success",
+    "warning",
+    "info"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

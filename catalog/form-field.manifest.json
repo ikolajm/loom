@@ -1,0 +1,17 @@
+{
+  "name": "form-field",
+  "category": "form",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "form-field.story.ts"
+}

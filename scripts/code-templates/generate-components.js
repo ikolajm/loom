@@ -26,6 +26,7 @@ const { generateButton } = require('./components/button');
 const { generateFAB } = require('./components/fab');
 const { generateFabMenu } = require('./components/fab-menu');
 const { generateBadge } = require('./components/badge');
+const { generateDot } = require('./components/dot');
 const { generateTable } = require('./components/table');
 const { generateRadixDialog, generateRadixAlertDialog, generateRadixSheet } = require('./components/radix-dialogs');
 const { generateRadixCheckbox, generateRadixSwitch, generateRadixRadio, generateRadixSlider, generateRadixSelect } = require('./components/radix-form-controls');
@@ -103,6 +104,7 @@ function dispatch(name, config, meta) {
   if (name === 'FAB') return generateFAB(name, config, meta);
   if (name === 'FabMenu') return generateFabMenu(name, config, meta);
   if (name === 'Badge') return generateBadge(name, config, meta);
+  if (name === 'Dot') return generateDot(name, config, meta);
   if (name === 'Table') return generateTable(name, config, meta);
   if (name === 'BadgeDot') return generateBadgeDot(name, config, meta);
   if (name === 'EmptyState') return generateEmptyState(name, config, meta);

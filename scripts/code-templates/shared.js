@@ -137,6 +137,60 @@ function buildVariantStyles(variants) {
   return styles;
 }
 
+/**
+ * Map a role-token path (color/primary/on-primary) to its runtime CSS variable — var(--on-primary).
+ * The token pipeline emits role tokens to :root as --{role} (e.g. --primary, --on-surface, --outline).
+ * NOTE: it must be --{role}, NOT --color-{role}: the @theme block is `@theme inline`, which inlines
+ * values into utilities and does NOT register --color-* on :root, so only --{role} resolves at runtime.
+ */
+function colorToVar(colorPath) {
+  if (!colorPath || colorPath === 'transparent') return null;
+  const role = colorPath.split('/').pop();
+  return `var(--${role})`;
+}
+
+/**
+ * Catalog-wide treatment vocabulary for orthogonal atoms. A treatment is a fixed consumer
+ * of the per-color CSS vars (--v-bg/--v-fg for the solid fill, --v-text/--v-border for the
+ * line/text). The color axis sets those vars; the treatment reads them — so variant and color
+ * are independent CVA axes (no N×M compound matrix). Shared by Button (filled/outline/ghost)
+ * and Badge (filled/outline/dot); each atom picks the treatments it exposes via `treatments`.
+ */
+const TREATMENT_CLASSES = {
+  filled: 'bg-[color:var(--v-bg)] text-[color:var(--v-fg)]',
+  outline: 'bg-transparent border border-[color:var(--v-border)] text-[color:var(--v-text)]',
+  ghost: 'bg-transparent text-[color:var(--v-text)]',
+  dot: 'bg-[color:var(--v-border)]',
+};
+
+/**
+ * Build the per-color CSS-variable declaration classes for an orthogonal atom.
+ * Each color is declared ONCE as { bg, fg, text, border } token paths; this emits the
+ * Tailwind arbitrary-property classes that set --v-bg/--v-fg/--v-text/--v-border on the
+ * element. The treatment classes (TREATMENT_CLASSES) then consume them.
+ *
+ * Returns { colorNames, varClass } where varClass[name] is the declaration string.
+ * Axis-name-agnostic — the caller names the CVA dimension ('color' for Button, 'state' for Badge).
+ */
+function buildColorVars(colorsCfg) {
+  const colorNames = Object.keys(colorsCfg).filter((k) => !k.startsWith('$'));
+  const varClass = {};
+  for (const name of colorNames) {
+    const c = colorsCfg[name] || {};
+    const parts = [];
+    const bg = colorToVar(c.bg);
+    const fg = colorToVar(c.fg);
+    const text = colorToVar(c.text);
+    const border = colorToVar(c.border);
+    if (bg) parts.push(`[--v-bg:${bg}]`);
+    if (fg) parts.push(`[--v-fg:${fg}]`);
+    if (text) parts.push(`[--v-text:${text}]`);
+    if (border) parts.push(`[--v-border:${border}]`);
+    varClass[name] = parts.join(' ');
+  }
+  return { colorNames, varClass };
+}
+
 function buildSizeStyles(sizes) {
   const styles = {};
   for (const [name, sz] of Object.entries(sizes)) {
@@ -225,6 +279,7 @@ function getComponentRegistry(configs) {
     'FAB': { source: buttonConfig, key: 'fab', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', iconOnly: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
     'FabMenu': { source: buttonConfig, key: 'fab-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
     'Badge': { source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Dot': { source: buttonConfig, key: 'dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, noChildren: true, variantKey: 'state', textFamily: null, category: 'Feedback', template: 'cva-only', primitive: null },
     'Toggle': { source: buttonConfig, key: 'toggle', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle', variantKey: 'state' },
     'ToggleGroup': { source: buttonConfig, key: 'toggle-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle-group' },
 
@@ -327,6 +382,9 @@ module.exports = {
   fontWeightToClass,
   letterSpacingToClass,
   buildVariantStyles,
+  colorToVar,
+  TREATMENT_CLASSES,
+  buildColorVars,
   buildSizeStyles,
   buildTypographyClasses,
   resolveBase,

@@ -1,0 +1,27 @@
+{
+  "name": "spinner",
+  "category": "feedback",
+  "description": "",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "spinner.story.ts",
+  "variants": [
+    "default",
+    "muted",
+    "inherit"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

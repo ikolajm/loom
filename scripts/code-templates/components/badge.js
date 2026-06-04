@@ -1,44 +1,11 @@
-const { colorToClass, spacingToClass, radiusToClass, buildTypographyClasses } = require('../shared');
+const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
-  // Variant × state matrix — build per-combo class strings
-  const variantsCfg = config.variants || {};
-  const variantNames = Object.keys(variantsCfg).filter(k => !k.startsWith('$'));
-  const stateNames = ['default', 'neutral', 'destructive', 'success', 'warning', 'info'];
-
-  // For each variant × state combo, build the class string.
-  // outline-mono collapses state — a single compound variant without `state` matches any state.
-  // dot variant only sets bg (no fg/border).
-  const buildStateClasses = (stateCfg) => {
-    const classes = [];
-    const bg = colorToClass(stateCfg.bg, 'bg');
-    const fg = stateCfg.fg ? colorToClass(stateCfg.fg, 'text') : null;
-    const border = stateCfg.border ? colorToClass(stateCfg.border, 'border') : null;
-    if (bg) classes.push(bg);
-    if (fg) classes.push(fg);
-    if (border) classes.push(border, 'border');
-    return classes.join(' ');
-  };
-
-  const compoundMatrix = [];
-  for (const variantName of variantNames) {
-    const variantCfg = variantsCfg[variantName];
-    const states = variantCfg.states || {};
-    const stateKeys = Object.keys(states).filter(k => !k.startsWith('$'));
-    const onlyDefault = stateKeys.length === 1 && stateKeys[0] === 'default';
-
-    if (onlyDefault) {
-      compoundMatrix.push({ variant: variantName, state: null, classes: buildStateClasses(states.default) });
-      continue;
-    }
-
-    for (const stateName of stateNames) {
-      const stateCfg = states[stateName];
-      if (!stateCfg) continue;
-      compoundMatrix.push({ variant: variantName, state: stateName, classes: buildStateClasses(stateCfg) });
-    }
-  }
+  // Orthogonal axes (independent, no compound matrix — shared with Button via buildColorVars):
+  // variant = treatment (filled/outline/dot) consuming per-state CSS vars; state sets those vars.
+  const treatments = config.treatments || ['filled', 'outline'];
+  const { colorNames: stateNames, varClass } = buildColorVars(config.colors || {});
 
   // Text-bearing sizes
   const sizes = filterSizes(config.sizes || {});
@@ -65,18 +32,6 @@ function generateBadge(name, config, meta) {
     sizeClasses[tier] = classes.join(' ');
   }
 
-  // Dot sizes (square circles)
-  const dotSizes = filterSizes(config['dot-sizes'] || {});
-  const dotSizeClasses = {};
-  for (const [tier, sz] of Object.entries(dotSizes)) {
-    const classes = [];
-    if (sz.size && typeof sz.size === 'string' && sz.size.startsWith('icon/')) {
-      classes.push(`size-${sz.size.replace('icon/', '')}`);
-    }
-    classes.push('rounded-pill');
-    dotSizeClasses[tier] = classes.join(' ');
-  }
-
   // Icon wrapper classes per text size
   const iconClasses = {};
   for (const [tier, sz] of Object.entries(sizes)) {
@@ -86,16 +41,23 @@ function generateBadge(name, config, meta) {
     }
   }
 
+  // Segment padding per size — used by the interactive+onRemove split layout, where
+  // padding moves off the container onto the two button segments.
+  const segmentPad = {};
+  for (const [tier, sz] of Object.entries(sizes)) {
+    const cls = [];
+    const px = spacingToClass(sz['x-padding'], 'px');
+    if (px) cls.push(px);
+    const yp = sz['y-padding'];
+    if (yp) {
+      if (typeof yp === 'string' && yp.match(/^\d/)) cls.push(`py-[${yp}]`);
+      else { const py = spacingToClass(yp, 'py'); if (py) cls.push(py); }
+    }
+    segmentPad[tier] = cls.join(' ');
+  }
+
   const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
-
-  const compoundLines = compoundMatrix.map(({ variant, state, classes }) => {
-    if (state === null) return `      { variant: '${variant}', class: '${classes}' },`;
-    return `      { variant: '${variant}', state: '${state}', class: '${classes}' },`;
-  });
-  const dotSizeCompoundLines = Object.entries(dotSizeClasses).map(
-    ([k, v]) => `      { variant: 'dot', size: '${k}', class: '${v} !p-0 !gap-0' },`
-  );
 
   return `import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -107,19 +69,15 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-${variantNames.map(v => `        '${v}': '',`).join('\n')}
+${treatments.map(v => `        '${v}': '${TREATMENT_CLASSES[v]}',`).join('\n')}
       },
       state: {
-${stateNames.map(s => `        ${s}: '',`).join('\n')}
+${stateNames.map(s => `        ${s}: '${varClass[s]}',`).join('\n')}
       },
       size: {
 ${Object.entries(sizeClasses).map(([k, v]) => `        ${k}: '${v}',`).join('\n')}
       },
     },
-    compoundVariants: [
-${compoundLines.join('\n')}
-${dotSizeCompoundLines.join('\n')}
-    ],
     defaultVariants: {
       variant: '${dflt.variant || 'filled'}',
       state: '${dflt.state || 'default'}',
@@ -132,8 +90,12 @@ const badgeIconSize: Record<string, string> = {
 ${Object.entries(iconClasses).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
 };
 
+const badgeSegmentPad: Record<string, string> = {
+${Object.entries(segmentPad).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
+};
+
 type BadgeSize = 'sm' | 'md' | 'lg';
-type BadgeVariant = ${variantNames.map(v => `'${v}'`).join(' | ')};
+type BadgeVariant = ${treatments.map(v => `'${v}'`).join(' | ')};
 type BadgeState = ${stateNames.map(s => `'${s}'`).join(' | ')};
 
 type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
@@ -162,19 +124,6 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
     const iconCls = badgeIconSize[size];
     const computedClasses = badgeVariants({ variant, state, size });
-
-    // Dot variant — no content, just a colored circle
-    if (variant === 'dot') {
-      const Comp = interactive ? 'button' : 'span';
-      return (
-        <Comp
-          ref={ref as any}
-          className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)}
-          onClick={interactive ? (onClick as any) : undefined}
-          {...(props as any)}
-        />
-      );
-    }
 
     const content = (
       <>
@@ -211,19 +160,29 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
       );
     }
 
-    // interactive + onRemove — two sibling buttons inside a span (avoids nested buttons)
+    // interactive + onRemove — container carries the fill/radius; two transparent
+    // segments split it, each padded like a button and rounded only on its outer edge,
+    // for a uniform button-like split hover. Padding moves off the container (!p-0 !gap-0).
     if (interactive && onRemove) {
+      const segPad = badgeSegmentPad[size];
+      const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
       return (
-        <span ref={ref as any} className={cn(computedClasses, className)} {...(props as any)}>
+        <span ref={ref as any} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} {...(props as any)}>
           <button
             type="button"
-            className={INTERACTIVE_CLASSES}
+            className={cn(segmentBase, 'rounded-l-[inherit]', segPad)}
             onClick={onClick as any}
-            style={{ background: 'inherit', color: 'inherit', font: 'inherit', padding: 0, border: 0 }}
           >
             {content}
           </button>
-          {closeButton}
+          <button
+            type="button"
+            className={cn(segmentBase, 'rounded-r-[inherit] border-l border-current/15', segPad)}
+            onClick={onRemove}
+            aria-label="Remove"
+          >
+            <CloseIcon className={iconCls} />
+          </button>
         </span>
       );
     }

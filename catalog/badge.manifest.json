@@ -1,0 +1,22 @@
+{
+  "name": "badge",
+  "category": "button",
+  "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
+  "version": "2026-06-04",
+  "dependencies": [
+    "cn"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "slot",
+  "stories": "badge.story.ts",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}
