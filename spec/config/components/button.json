@@ -1,0 +1,279 @@
+{
+  "button": {
+    "$catalog": {
+      "category": "button",
+      "description": "Primary action button — variants imply color, sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild composition alongside icons.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "slottable"
+    },
+    "$note": "Semantic variant model — variant implies color. 7 variants × 4 sizes (sm/md/lg + icon). Icon size is square with no padding — icon centers via flexbox. Use iconOnly prop for icon-only buttons with any variant.",
+    "variants": {
+      "default":     { "bg": "color/primary/primary",                 "fg": "color/primary/on-primary" },
+      "secondary":   { "bg": "color/secondary/secondary",              "fg": "color/secondary/on-secondary" },
+      "destructive": { "bg": "color/error/error",                     "fg": "color/error/on-error" },
+      "success":     { "bg": "color/success/success",                 "fg": "color/success/on-success" },
+      "warning":     { "bg": "color/warning/warning",                 "fg": "color/warning/on-warning" },
+      "ghost":       { "bg": "transparent",                           "fg": "color/surface/on-surface" },
+      "outline":     { "bg": "transparent", "border": "color/outline/outline", "fg": "color/surface/on-surface" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.01em",
+      "text-transform": "none"
+    },
+    "icon-slots": {
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+    },
+    "sizes": {
+      "sm":   { "height": "height/ch-3", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md":   { "height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg":   { "height": "height/ch-7", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/component", "icon-size": "icon/icon-3" }
+    },
+    "icon-sizes": {
+      "$note": "Square sizing for icon-only mode (iconOnly prop). No padding — icon centers via flexbox. Touch target met at all sizes.",
+      "sm":   { "size": "height/ch-3", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md":   { "size": "height/ch-5", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg":   { "size": "height/ch-7", "radius": "radius/component", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "badge": {
+    "$catalog": {
+      "category": "button",
+      "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline, outline-mono, dot. Consolidates prior chip / tag-chip / badge-dot atoms.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "slot"
+    },
+    "$note": "Two orthogonal axes: variant (visual treatment) × state (color/severity). 4 variants × 6 states × 3 sizes. dot variant has no text or icon slots; outline-mono variant collapses state (always structural neutral). Behavior modes (interactive, onRemove) are template-level props — not encoded in JSON.",
+    "variants": {
+      "filled": {
+        "$note": "Container fill + on-container text. Current legacy badge treatment.",
+        "states": {
+          "default":     { "bg": "color/primary/primary-container",     "fg": "color/primary/on-primary-container" },
+          "neutral":     { "bg": "color/neutral/neutral-container",     "fg": "color/neutral/on-neutral-container" },
+          "destructive": { "bg": "color/error/error-container",         "fg": "color/error/on-error-container" },
+          "success":     { "bg": "color/success/success-container",     "fg": "color/success/on-success-container" },
+          "warning":     { "bg": "color/warning/warning-container",     "fg": "color/warning/on-warning-container" },
+          "info":        { "bg": "color/info/info-container",           "fg": "color/info/on-info-container" }
+        }
+      },
+      "outline": {
+        "$note": "Transparent fill + base-color border + base-color text. Stronger contrast than outline-mono; carries severity.",
+        "states": {
+          "default":     { "bg": "transparent", "border": "color/primary/primary",   "fg": "color/primary/primary" },
+          "neutral":     { "bg": "transparent", "border": "color/neutral/neutral",   "fg": "color/neutral/neutral" },
+          "destructive": { "bg": "transparent", "border": "color/error/error",       "fg": "color/error/error" },
+          "success":     { "bg": "transparent", "border": "color/success/success",   "fg": "color/success/success" },
+          "warning":     { "bg": "transparent", "border": "color/warning/warning",   "fg": "color/warning/warning" },
+          "info":        { "bg": "transparent", "border": "color/info/info",         "fg": "color/info/info" }
+        }
+      },
+      "outline-mono": {
+        "$note": "Transparent fill + outline-subtle border + on-surface text. Structural neutral — state ignored. Absorbs portfolio tag-chip.",
+        "states": {
+          "default":     { "bg": "transparent", "border": "color/outline/outline-subtle", "fg": "color/surface/on-surface" }
+        }
+      },
+      "dot": {
+        "$note": "Small filled circle, no text or icon slots. Uses base color (not container) for indicator strength. Absorbs feedback badge-dot.",
+        "states": {
+          "default":     { "bg": "color/primary/primary" },
+          "neutral":     { "bg": "color/neutral/neutral" },
+          "destructive": { "bg": "color/error/error" },
+          "success":     { "bg": "color/success/success" },
+          "warning":     { "bg": "color/warning/warning" },
+          "info":        { "bg": "color/info/info" }
+        }
+      }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.02em",
+      "text-transform": "none"
+    },
+    "icon-slots": {
+      "$note": "Suppressed for dot variant.",
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at 10px font size.", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/pill", "icon": "icon/icon-0" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/pill", "icon": "icon/icon-1" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/pill", "icon": "icon/icon-2" }
+    },
+    "dot-sizes": {
+      "$note": "Sizes for dot variant — square circles, no padding. Reuses icon size tokens.",
+      "sm": { "size": "icon/icon-0" },
+      "md": { "size": "icon/icon-1" },
+      "lg": { "size": "icon/icon-2" }
+    },
+    "default": { "variant": "filled", "state": "default", "size": "md" }
+  },
+  "fab": {
+    "$catalog": {
+      "category": "button",
+      "description": "Floating action button — primary screen action. Single variant by design. Extended mode adds a text label next to the icon. Positioning is consumer responsibility.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing", "effects"],
+      "composition": "slot"
+    },
+    "$note": "Floating action button. Primary screen action, one per screen. Positioned fixed bottom-right. Extended variant adds a text label next to the icon. Uses primary-container for a softer presence than button's saturated primary fill.",
+    "variants": {
+      "default": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.01em",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "size": "height/ch-5", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "md": { "size": "height/ch-8", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
+      "lg": { "size": "height/ch-9", "radius": "radius/card", "icon-size": "icon/icon-4", "shadow": "effects/shadow-3" }
+    },
+    "extended": {
+      "$note": "Extended FAB adds a label. Only md and lg — sm is too small for text.",
+      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "12px", "line-height": "16px" },
+      "md": { "height": "height/ch-8", "x-padding": "{scale.4}", "gap": "{scale.3}", "font-size": "14px", "line-height": "20px" },
+      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.3}", "font-size": "18px", "line-height": "28px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "fab-menu": {
+    "$catalog": {
+      "category": "button",
+      "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed in Sprint 1; expand animation wraps via motion library in Sprint 2.",
+      "dependencies": ["fab", "cn"],
+      "tokens": ["color", "typography", "spacing", "sizing", "effects"],
+      "composition": "slot"
+    },
+    "$note": "Trigger uses fab styling. Actions stack vertically above the trigger. Each action is a smaller circular button + optional label. No backdrop scrim by default.",
+    "variants": {
+      "default": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+    },
+    "trigger-sizes": {
+      "$note": "Trigger FAB sizes — matches fab atom.",
+      "sm": { "size": "height/ch-5", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "md": { "size": "height/ch-8", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
+      "lg": { "size": "height/ch-9", "radius": "radius/card", "icon-size": "icon/icon-4", "shadow": "effects/shadow-3" }
+    },
+    "action-sizes": {
+      "$note": "Action button sizes — one step smaller than trigger. Circular by default; extended adds label.",
+      "sm": { "size": "height/ch-3", "radius": "radius/card", "icon-size": "icon/icon-1", "shadow": "effects/shadow-1" },
+      "md": { "size": "height/ch-5", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "lg": { "size": "height/ch-7", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-2" }
+    },
+    "stack-spacing": {
+      "$note": "Gap between stacked actions when expanded.",
+      "sm": "{scale.2}",
+      "md": "{scale.3}",
+      "lg": "{scale.3}"
+    },
+    "action-label": {
+      "$note": "Optional label rendered next to action (right side). Pill shape, small typography.",
+      "font-family": "body",
+      "font-weight": 500,
+      "font-size": "12px",
+      "line-height": "16px",
+      "letter-spacing": "0.01em",
+      "x-padding": "{scale.2}",
+      "y-padding": "{scale.1}",
+      "radius": "radius/pill",
+      "bg": "color/surface/surface-2",
+      "fg": "color/surface/on-surface"
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "toolbar": {
+    "$catalog": {
+      "category": "button",
+      "description": "Horizontal flex container for grouped actions — houses buttons, toggles, separators, dropdowns. Children render as-is.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" },
+      "lg": { "height": "height/ch-8", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.3}", "font-size": "18px", "line-height": "28px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "toggle": {
+    "$catalog": {
+      "category": "button",
+      "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider control) and Chip (selection tag). Used for toolbar actions (bold, italic), view toggles, feature on/off. aria-pressed required.",
+    "state": {
+      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline-subtle" },
+      "pressed":   { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary-container" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.01em",
+      "text-transform": "none"
+    },
+    "icon-slots": {
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1", "font-size": "12px", "line-height": "16px" },
+      "md": { "height": "height/ch-5", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "14px", "line-height": "20px" },
+      "lg": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "state": "unpressed", "size": "md" }
+  },
+
+  "toggle-group": {
+    "$catalog": {
+      "category": "button",
+      "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
+      "dependencies": ["toggle", "cn"],
+      "tokens": ["color", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant: items share borders, radius collapses to first/last only (absorbs M3 segmented-button). Spaced variant: visible gaps between items, each toggle has its own borders/radius.",
+    "variants": {
+      "segmented": {
+        "$note": "Items touch (no gap), share borders, radius collapses to first/last only.",
+        "bg": "transparent",
+        "border": "color/outline/outline-subtle",
+        "gap": "{scale.0}"
+      },
+      "spaced": {
+        "$note": "Visible gaps between items, each toggle has its own borders/radius.",
+        "bg": "transparent",
+        "border": "transparent",
+        "gap": "{scale.2}"
+      }
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-3", "radius": "radius/component" },
+      "md": { "height": "height/ch-5", "radius": "radius/component" },
+      "lg": { "height": "height/ch-7", "radius": "radius/component" }
+    },
+    "default": { "variant": "segmented", "size": "md" }
+  }
+}

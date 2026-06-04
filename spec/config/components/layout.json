@@ -1,0 +1,89 @@
+{
+  "card": {
+    "variants": {
+      "default":  { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-1" },
+      "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-2" },
+      "outline":  { "bg": "transparent", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-0" }
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card" },
+      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card" },
+      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/card" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "dialog": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
+    },
+    "sizes": {
+      "$exception": "Dialog max-widths are hardcoded — layout-specific breakpoints, not derivable from spacing or sizing primitives.",
+      "sm":   { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
+      "md":   { "max-width": "560px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
+      "lg":   { "max-width": "720px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
+      "full": { "max-width": "100%",  "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/component" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "table": {
+    "variants": {
+      "default": { "header-bg": "color/surface/surface-2", "header-fg": "color/surface/on-surface", "row-bg": "color/surface/surface-1", "alt-row-bg": "color/surface/surface", "row-fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+    },
+    "typography": {
+      "header": {
+        "font-family": "body",
+        "font-weight": 500,
+        "letter-spacing": "0",
+        "text-transform": "none"
+      },
+      "cell": {
+        "font-family": "body",
+        "font-weight": 400,
+        "letter-spacing": "0",
+        "text-transform": "none"
+      }
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "font-size": "14px", "line-height": "20px" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "sheet": {
+    "$note": "Overlay panel that slides in from an edge. Bottom sheet (modal with drag handle) and side drawer (left/right). Shares dialog's overlay/scrim model. Dismiss via scrim click, escape, or drag-down (bottom). Top corners rounded for bottom sheet, no radius for side drawers (edge-to-edge).",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
+    },
+    "handle": {
+      "$note": "Drag handle for bottom sheet. Centered at top of sheet.",
+      "bg": "color/outline/outline-subtle",
+      "width": "{scale.10}",
+      "height": "{scale.1}",
+      "radius": "radius/pill"
+    },
+    "sizes": {
+      "sm":   { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
+      "md":   { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
+      "lg":   { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+  "separator": {
+    "color": "color/outline/outline-subtle",
+    "width": "border-width/bw-1"
+  },
+
+  "alert-dialog": {
+    "$note": "Stricter dialog variant for destructive or critical confirmations. No dismiss on click-outside or escape — user must take an explicit action (confirm or cancel). Shares dialog's visual styling but enforces modal behavior. Use for delete confirmations, irreversible actions, data loss warnings.",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
+    },
+    "sizes": {
+      "sm": { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
+      "md": { "max-width": "480px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
+      "lg": { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  }
+}

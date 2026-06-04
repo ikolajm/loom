@@ -1,0 +1,380 @@
+{
+  "$schema": "Maps questionnaire answers to concrete design token values. Used by the generation skill.",
+
+  "product-type": {
+    "$note": "Tier 1 — product type suggests a style direction and component manifest. Suggestions only — user overrides anything. style-suggestions are ordered by likelihood (first = most common for this type). components use config key names.",
+
+    "dashboard": {
+      "style-suggestions": ["clean", "corporate"],
+      "density": "compact",
+      "type-scale": "compact",
+      "shadow-depth": "flat",
+      "components": [
+        "button", "icon-button", "badge", "chip",
+        "text-input", "select", "combobox", "date-picker", "checkbox", "switch",
+        "card", "dialog", "table", "separator",
+        "toast", "alert", "tooltip", "popover", "dropdown-menu", "skeleton", "progress-bar", "empty-state",
+        "avatar", "accordion",
+        "top-bar", "sidebar", "tabs", "pagination", "command-palette"
+      ]
+    },
+
+    "marketing": {
+      "style-suggestions": ["bold", "editorial"],
+      "density": "airy",
+      "type-scale": "dramatic",
+      "shadow-depth": "elevated",
+      "components": [
+        "button", "icon-button", "badge",
+        "card", "separator",
+        "toast", "accordion", "empty-state",
+        "avatar",
+        "top-bar", "navigation-menu"
+      ]
+    },
+
+    "e-commerce": {
+      "style-suggestions": ["clean", "soft"],
+      "density": "comfortable",
+      "type-scale": "standard",
+      "shadow-depth": "elevated",
+      "components": [
+        "button", "icon-button", "badge", "chip",
+        "text-input", "select", "checkbox", "radio",
+        "card", "dialog", "separator",
+        "toast", "skeleton", "dropdown-menu",
+        "avatar",
+        "top-bar", "breadcrumbs", "tabs", "pagination",
+        "carousel"
+      ]
+    },
+
+    "content": {
+      "style-suggestions": ["editorial"],
+      "density": "airy",
+      "type-scale": "dramatic",
+      "shadow-depth": "flat",
+      "components": [
+        "button", "icon-button", "badge",
+        "card", "table", "separator",
+        "tooltip", "accordion",
+        "avatar",
+        "top-bar", "breadcrumbs", "tabs", "pagination"
+      ]
+    },
+
+    "admin": {
+      "style-suggestions": ["clean", "corporate"],
+      "density": "compact",
+      "type-scale": "compact",
+      "shadow-depth": "flat",
+      "components": [
+        "button", "icon-button", "badge",
+        "text-input", "textarea", "select", "combobox", "date-picker", "checkbox", "radio", "switch", "file-upload",
+        "card", "dialog", "table", "separator",
+        "toast", "alert", "dropdown-menu", "skeleton", "empty-state",
+        "avatar",
+        "top-bar", "sidebar", "tabs", "pagination", "command-palette"
+      ]
+    },
+
+    "consumer-mobile": {
+      "style-suggestions": ["soft"],
+      "density": "comfortable",
+      "type-scale": "standard",
+      "shadow-depth": "elevated",
+      "components": [
+        "button", "icon-button", "fab", "badge", "chip",
+        "text-input", "select", "checkbox", "switch",
+        "card", "dialog", "sheet",
+        "toast", "skeleton", "progress-bar",
+        "avatar",
+        "top-bar", "bottom-nav", "tabs",
+        "carousel"
+      ]
+    },
+
+    "portfolio": {
+      "style-suggestions": ["bold", "editorial", "brutalist"],
+      "density": "airy",
+      "type-scale": "dramatic",
+      "shadow-depth": "flat",
+      "components": [
+        "button", "icon-button", "badge",
+        "card", "dialog", "separator",
+        "tooltip",
+        "top-bar", "tabs",
+        "carousel"
+      ]
+    },
+
+    "game": {
+      "style-suggestions": ["playful", "retro"],
+      "density": "comfortable",
+      "type-scale": "dramatic",
+      "shadow-depth": "elevated",
+      "components": [
+        "button", "icon-button", "badge",
+        "slider", "switch",
+        "card", "dialog",
+        "toast", "tooltip", "progress-bar",
+        "avatar",
+        "tabs"
+      ]
+    },
+
+    "documentation": {
+      "style-suggestions": ["clean"],
+      "density": "comfortable",
+      "type-scale": "standard",
+      "shadow-depth": "flat",
+      "components": [
+        "button", "icon-button", "badge",
+        "card", "table", "separator",
+        "tooltip", "accordion",
+        "kbd",
+        "top-bar", "sidebar", "breadcrumbs", "tabs", "command-palette"
+      ]
+    },
+
+    "social": {
+      "style-suggestions": ["soft", "bold"],
+      "density": "comfortable",
+      "type-scale": "standard",
+      "shadow-depth": "elevated",
+      "components": [
+        "button", "icon-button", "badge", "chip",
+        "text-input", "textarea", "switch", "file-upload",
+        "card", "dialog",
+        "toast", "popover", "dropdown-menu", "skeleton", "empty-state",
+        "avatar",
+        "top-bar", "bottom-nav", "tabs", "pagination"
+      ]
+    }
+  },
+
+  "style-direction": {
+    "$note": "Tier 1 intent → Tier 2 defaults. Each style maps to default values for edges, density, shadow-depth, and type-scale. User can override any Tier 2 value.",
+    "clean":     { "edges": "sharp",  "density": "compact",     "shadow-depth": "flat",     "type-scale": "standard" },
+    "soft":      { "edges": "soft",   "density": "comfortable", "shadow-depth": "elevated", "type-scale": "standard" },
+    "bold":      { "edges": "sharp",  "density": "comfortable", "shadow-depth": "elevated", "type-scale": "dramatic" },
+    "editorial": { "edges": "none",   "density": "airy",        "shadow-depth": "flat",     "type-scale": "dramatic" },
+    "brutalist": { "edges": "none",   "density": "compact",     "shadow-depth": "flat",     "type-scale": "standard" },
+    "corporate": { "edges": "sharp",  "density": "compact",     "shadow-depth": "flat",     "type-scale": "compact"  },
+    "glass":     { "edges": "soft",   "density": "comfortable", "shadow-depth": "elevated", "type-scale": "standard" },
+    "retro":     { "edges": "sharp",  "density": "comfortable", "shadow-depth": "flat",     "type-scale": "dramatic" },
+    "luxury":    { "edges": "none",   "density": "airy",        "shadow-depth": "flat",     "type-scale": "dramatic" },
+    "playful":   { "edges": "soft",   "density": "comfortable", "shadow-depth": "elevated", "type-scale": "dramatic" }
+  },
+
+  "edges": {
+    "none": {
+      "semantic-radius": {
+        "component": "br-0",
+        "card": "br-0",
+        "input": "br-0",
+        "modal": "br-0",
+        "pill": "br-0"
+      }
+    },
+    "sharp": {
+      "semantic-radius": {
+        "component": "br-2",
+        "card": "br-3",
+        "input": "br-2",
+        "modal": "br-4",
+        "pill": "br-999"
+      },
+      "source": "Shadcn"
+    },
+    "soft": {
+      "semantic-radius": {
+        "component": "br-4",
+        "card": "br-6",
+        "input": "br-4",
+        "modal": "br-7",
+        "pill": "br-999"
+      },
+      "source": "Material Design"
+    }
+  },
+
+  "density": {
+    "compact": {
+      "spacing-categories": {
+        "screen": {
+          "default": { "x-padding": "{scale.3}", "y-padding": "{scale.6}" },
+          "compact": { "x-padding": "{scale.2}", "y-padding": "{scale.4}" }
+        },
+        "content": {
+          "default": { "x-padding": "{scale.4}", "y-padding": "{scale.6}", "gap": "{scale.8}", "max-width": "1280px" },
+          "compact": { "x-padding": "{scale.3}", "y-padding": "{scale.4}", "gap": "{scale.6}", "max-width": "1280px" }
+        },
+        "section": {
+          "default": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.8}" },
+          "compact": { "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.4}" }
+        },
+        "group": {
+          "default": { "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.3}" },
+          "compact": { "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
+        },
+        "component": {
+          "default": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
+          "compact": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}" }
+        }
+      },
+      "source": "Shadcn"
+    },
+    "comfortable": {
+      "spacing-categories": {
+        "screen": {
+          "default": { "x-padding": "{scale.4}", "y-padding": "{scale.8}" },
+          "compact": { "x-padding": "{scale.3}", "y-padding": "{scale.6}" }
+        },
+        "content": {
+          "default": { "x-padding": "{scale.6}", "y-padding": "{scale.8}", "gap": "{scale.12}", "max-width": "1280px" },
+          "compact": { "x-padding": "{scale.4}", "y-padding": "{scale.6}", "gap": "{scale.8}", "max-width": "1280px" }
+        },
+        "section": {
+          "default": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.10}" },
+          "compact": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.6}" }
+        },
+        "group": {
+          "default": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}" },
+          "compact": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
+        },
+        "component": {
+          "default": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
+          "compact": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}" }
+        }
+      },
+      "source": "Material Design"
+    },
+    "airy": {
+      "spacing-categories": {
+        "screen": {
+          "default": { "x-padding": "{scale.6}", "y-padding": "{scale.12}" },
+          "compact": { "x-padding": "{scale.4}", "y-padding": "{scale.8}" }
+        },
+        "content": {
+          "default": { "x-padding": "{scale.8}", "y-padding": "{scale.12}", "gap": "{scale.16}", "max-width": "1280px" },
+          "compact": { "x-padding": "{scale.6}", "y-padding": "{scale.8}", "gap": "{scale.10}", "max-width": "1280px" }
+        },
+        "section": {
+          "default": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.12}" },
+          "compact": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.8}" }
+        },
+        "group": {
+          "default": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}" },
+          "compact": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
+        },
+        "component": {
+          "default": { "x-padding": "{scale.5}", "y-padding": "{scale.3}", "gap": "{scale.3}" },
+          "compact": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
+        }
+      },
+      "source": "Bootstrap"
+    }
+  },
+
+  "shadow-depth": {
+    "flat": {
+      "$note": "No shadows. Relies on borders and color for visual separation.",
+      "shadow": {
+        "shadow-1": "none",
+        "shadow-2": "none",
+        "shadow-3": "none"
+      }
+    },
+    "elevated": {
+      "$note": "Standard shadow progression around 0.3 alpha. Tune per project in effects.json if needed.",
+      "shadow": {
+        "shadow-1": "0 1px 3px rgba(0, 0, 0, 0.2)",
+        "shadow-2": "0 3px 8px rgba(0, 0, 0, 0.25)",
+        "shadow-3": "0 6px 16px rgba(0, 0, 0, 0.3)"
+      }
+    }
+  },
+
+  "type-scale": {
+    "$note": "Text style families × size tiers. display and title vary per scale. body, action, label, input are universal ($shared). Each family defines font (heading|body), weight, letter-spacing at the family level; size/line-height per tier.",
+
+    "$shared": {
+      "body": {
+        "font": "body", "weight": 400, "letter-spacing": "0",
+        "sm": { "size": "14px", "line-height": "20px" },
+        "md": { "size": "16px", "line-height": "24px" },
+        "lg": { "size": "18px", "line-height": "28px" }
+      },
+      "action": {
+        "font": "body", "weight": 500, "letter-spacing": "0",
+        "sm": { "size": "12px", "line-height": "16px" },
+        "md": { "size": "14px", "line-height": "20px" },
+        "lg": { "size": "16px", "line-height": "24px" }
+      },
+      "label": {
+        "font": "body", "weight": 500, "letter-spacing": "0.02em",
+        "sm": { "size": "10px", "line-height": "14px" },
+        "md": { "size": "12px", "line-height": "16px" },
+        "lg": { "size": "14px", "line-height": "20px" }
+      },
+      "input": {
+        "font": "body", "weight": 400, "letter-spacing": "0",
+        "sm": { "size": "14px", "line-height": "20px" },
+        "md": { "size": "16px", "line-height": "24px" },
+        "lg": { "size": "18px", "line-height": "28px" }
+      }
+    },
+
+    "compact": {
+      "display": {
+        "font": "heading", "weight": 700, "letter-spacing": "-0.02em",
+        "sm": { "size": "24px", "line-height": "32px" },
+        "md": { "size": "32px", "line-height": "40px" },
+        "lg": { "size": "40px", "line-height": "48px" }
+      },
+      "title": {
+        "font": "heading", "weight": 600, "letter-spacing": "-0.01em",
+        "sm": { "size": "16px", "line-height": "24px" },
+        "md": { "size": "18px", "line-height": "24px" },
+        "lg": { "size": "24px", "line-height": "32px" }
+      },
+      "source": "Material Design"
+    },
+    "standard": {
+      "display": {
+        "font": "heading", "weight": 700, "letter-spacing": "-0.02em",
+        "sm": { "size": "32px", "line-height": "40px" },
+        "md": { "size": "36px", "line-height": "44px" },
+        "lg": { "size": "48px", "line-height": "56px" }
+      },
+      "title": {
+        "font": "heading", "weight": 600, "letter-spacing": "-0.01em",
+        "sm": { "size": "18px", "line-height": "24px" },
+        "md": { "size": "20px", "line-height": "28px" },
+        "lg": { "size": "24px", "line-height": "32px" }
+      },
+      "source": "Shadcn"
+    },
+    "dramatic": {
+      "display": {
+        "font": "heading", "weight": 700, "letter-spacing": "-0.03em",
+        "sm": { "size": "36px", "line-height": "44px" },
+        "md": { "size": "48px", "line-height": "56px" },
+        "lg": { "size": "72px", "line-height": "80px" }
+      },
+      "title": {
+        "font": "heading", "weight": 600, "letter-spacing": "-0.01em",
+        "sm": { "size": "20px", "line-height": "28px" },
+        "md": { "size": "24px", "line-height": "32px" },
+        "lg": { "size": "32px", "line-height": "40px" }
+      },
+      "source": "Bootstrap"
+    }
+  },
+
+  "component-spacing-shape": {
+    "$note": "All component configs must define this shape. Values reference the spacing scale.",
+    "required-keys": ["x-padding", "y-padding", "gap"]
+  }
+}

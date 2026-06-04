@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+html, body {
+  background-color: var(--surface);
+  color: var(--on-surface);
+}

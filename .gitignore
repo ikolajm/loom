@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+
+# Generated on demand (created by scripts/code-templates/orchestrator.js)
+generated/
+
+# Logs / env / OS
+*.log
+.env*
+.DS_Store

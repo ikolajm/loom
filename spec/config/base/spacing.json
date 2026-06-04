@@ -1,0 +1,65 @@
+{
+  "$note": "Spacing categories for \"comfortable\" density. Scale primitives live in config/standards.json → spacing.scale. All values reference {scale.N} tokens.",
+  "categories": {
+    "screen": {
+      "default": {
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.8}"
+      },
+      "compact": {
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.6}"
+      }
+    },
+    "content": {
+      "default": {
+        "x-padding": "{scale.6}",
+        "y-padding": "{scale.8}",
+        "gap": "{scale.12}",
+        "max-width": "1280px"
+      },
+      "compact": {
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.6}",
+        "gap": "{scale.8}",
+        "max-width": "1280px"
+      }
+    },
+    "section": {
+      "default": {
+        "x-padding": "{scale.6}",
+        "y-padding": "{scale.6}",
+        "gap": "{scale.10}"
+      },
+      "compact": {
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.4}",
+        "gap": "{scale.6}"
+      }
+    },
+    "group": {
+      "default": {
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.4}",
+        "gap": "{scale.4}"
+      },
+      "compact": {
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.2}",
+        "gap": "{scale.2}"
+      }
+    },
+    "component": {
+      "default": {
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.2}",
+        "gap": "{scale.2}"
+      },
+      "compact": {
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.1}",
+        "gap": "{scale.1}"
+      }
+    }
+  }
+}

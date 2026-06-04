@@ -1,0 +1,261 @@
+{
+  "text-field": {
+    "$note": "Shared visual foundation for all text-input-style components (input, select, textarea, date-picker). Components reference this base — changing it changes all text fields uniformly.",
+    "state": {
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "placeholder": "color/surface/on-surface-variant" },
+      "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error", "placeholder": "color/surface/on-surface-variant" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "icon-slots": {
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+    },
+    "width": "280px",
+    "sizes": {
+      "sm": { "height": "height/ch-3", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input", "icon-size": "icon/icon-3" }
+    }
+  },
+
+  "input": {
+    "$base": "text-field",
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "select": {
+    "$base": "text-field",
+    "state": {
+      "default": { "indicator": "color/surface/on-surface-variant" },
+      "error":   { "indicator": "color/surface/on-surface-variant" }
+    },
+    "icon-slots": {
+      "trailing": { "default-visible": true, "default-icon": "icon/chevron-down", "persistent": true }
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "textarea": {
+    "$base": "text-field",
+    "$note": "Extends text-field but replaces fixed height with min-height. No icon slots — trailing/leading icons don't apply to multi-line input.",
+    "$exception": "Textarea min-heights are hardcoded — content-area minimums specific to multi-line input, not derivable from sizing primitives.",
+    "sizes": {
+      "sm": { "min-height": "80px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input" },
+      "md": { "min-height": "120px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input" },
+      "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input" }
+    },
+    "resize": "vertical",
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "date-picker": {
+    "$base": "text-field",
+    "$note": "Text-field variant with a persistent calendar trailing icon. The calendar panel component is deferred.",
+    "icon-slots": {
+      "trailing": { "default-visible": true, "default-icon": "icon/calendar", "persistent": true }
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "toggle-base": {
+    "$note": "Shared visual foundation for binary toggle controls (checkbox, radio). Same state logic, same sizes, different shape.",
+    "checked": {
+      "false": { "bg": "color/surface/surface", "border": "color/outline/outline" },
+      "true":  { "bg": "color/primary/primary", "fg": "color/primary/on-primary", "border": "color/primary/primary" }
+    },
+    "$exception": "Toggle indicator sizes are hardcoded — proportional to the control's visual weight, not derived from icon or component-height primitives.",
+    "sizes": {
+      "sm": { "size": "16px" },
+      "md": { "size": "20px" },
+      "lg": { "size": "24px" }
+    }
+  },
+
+  "checkbox": {
+    "$base": "toggle-base",
+    "radius": "radius/component",
+    "default": { "checked": "false", "size": "md" }
+  },
+
+  "radio": {
+    "$base": "toggle-base",
+    "radius": "radius/pill",
+    "$note": "Visually identical to checkbox but circular. Radio buttons operate in exclusive groups — only one selected at a time within a group.",
+    "default": { "checked": "false", "size": "md" }
+  },
+
+  "switch": {
+    "active": {
+      "false": { "track-bg": "color/surface/surface-1", "thumb-bg": "color/surface/on-surface-variant" },
+      "true":  { "track-bg": "color/primary/primary", "thumb-bg": "color/primary/on-primary" }
+    },
+    "$exception": "Switch track dimensions are hardcoded as a cohesive set — width:height ratio is intentional and should not drift independently via primitives.",
+    "sizes": {
+      "sm": { "width": "36px", "height": "20px", "radius": "radius/pill" },
+      "md": { "width": "44px", "height": "24px", "radius": "radius/pill" },
+      "lg": { "width": "52px", "height": "28px", "radius": "radius/pill" }
+    },
+    "default": { "active": "false", "size": "md" }
+  },
+
+  "combobox": {
+    "$base": "text-field",
+    "$note": "Combines text input with filterable dropdown. Extends text-field for the trigger, adds dropdown panel styling. Keyboard navigation required (arrow keys, enter, escape). Single-select, multi-select, and creatable variants share the same config — variant logic is code-only.",
+    "icon-slots": {
+      "trailing": { "default-visible": true, "default-icon": "icon/chevron-down", "persistent": true }
+    },
+    "dropdown": {
+      "bg": "color/surface/surface-1",
+      "fg": "color/surface/on-surface",
+      "hover-bg": "color/surface/surface-2",
+      "shadow": "effects/shadow-2",
+      "radius": "radius/input"
+    },
+    "item": {
+      "sizes": {
+        "sm": { "height": "height/ch-3", "x-padding": "{scale.2}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px" },
+        "md": { "height": "height/ch-4", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+        "lg": { "height": "height/ch-5", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" }
+      }
+    },
+    "empty": {
+      "fg": "color/surface/on-surface-variant",
+      "font-size": "14px",
+      "line-height": "20px"
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "slider": {
+    "$note": "Single value or range slider. Track + thumb model. Range variant has two thumbs — code-only distinction, same visual config. Always pair with a visible value label.",
+    "variants": {
+      "default": { "track-bg": "color/surface/surface-1", "fill-bg": "color/primary/primary", "thumb-bg": "color/primary/primary" }
+    },
+    "sizes": {
+      "sm": { "track-height": "{scale.1}", "thumb-size": "16px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
+      "md": { "track-height": "{scale.1}", "thumb-size": "20px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
+      "lg": { "track-height": "{scale.2}", "thumb-size": "24px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "file-upload": {
+    "$note": "Dropzone variant — dashed border area for drag-and-drop or click-to-browse. Button trigger variant is just a button (use button config). States like dragover and uploading are code-only.",
+    "variants": {
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "icon-fg": "color/surface/on-surface-variant" },
+      "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-2", "font-size": "14px", "line-height": "20px" },
+      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-3", "font-size": "16px", "line-height": "24px" },
+      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-4", "font-size": "18px", "line-height": "28px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "input-otp": {
+    "$note": "One-time password input. Row of individual character cells. Auto-advance on digit entry, paste support required. Separated boxes variant — each cell is a standalone input box.",
+    "state": {
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" },
+      "focused": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/primary/primary" },
+      "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 600,
+      "letter-spacing": "0.1em",
+      "text-transform": "none"
+    },
+    "$exception": "OTP cells are square — width equals height. Monospace-like letter-spacing ensures centered digits. Cell sizes are hardcoded to maintain square proportions.",
+    "sizes": {
+      "sm": { "cell-size": "height/ch-5", "gap": "{scale.2}", "radius": "radius/input", "font-size": "16px", "line-height": "24px", "border-width": "border-width/bw-1" },
+      "md": { "cell-size": "height/ch-7", "gap": "{scale.2}", "radius": "radius/input", "font-size": "20px", "line-height": "28px", "border-width": "border-width/bw-1" },
+      "lg": { "cell-size": "height/ch-9", "gap": "{scale.3}", "radius": "radius/input", "font-size": "24px", "line-height": "32px", "border-width": "border-width/bw-2" }
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "label": {
+    "state": {
+      "default": { "fg": "color/surface/on-surface" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.01em",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "font-size": "12px", "line-height": "16px" },
+      "md": { "font-size": "14px", "line-height": "20px" },
+      "lg": { "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "helper-text": {
+    "state": {
+      "default": { "fg": "color/surface/on-surface-variant" },
+      "error":   { "fg": "color/error/error" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0.02em",
+      "text-transform": "none"
+    },
+    "$exception": "Helper text sm font-size (11px) is below the caption preset minimum (12px) — must remain visually subordinate to label at every size tier.",
+    "sizes": {
+      "sm": { "font-size": "11px", "line-height": "16px" },
+      "md": { "font-size": "12px", "line-height": "16px" },
+      "lg": { "font-size": "14px", "line-height": "20px" }
+    },
+    "default": { "state": "default", "size": "md" }
+  },
+
+  "calendar": {
+    "$note": "Calendar grid panel for date selection. Used standalone (scheduling views) or as the dropdown panel inside date-picker. Day cells are buttons semantically (interactive, trigger selection). Full keyboard navigation (arrow keys between days, page up/down for months).",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-2" }
+    },
+    "day": {
+      "state": {
+        "default":  { "bg": "transparent", "fg": "color/surface/on-surface" },
+        "selected": { "bg": "color/primary/primary", "fg": "color/primary/on-primary" },
+        "today":    { "bg": "transparent", "fg": "color/primary/primary", "border": "color/primary/primary" },
+        "hover":    { "bg": "color/surface/surface-2", "fg": "color/surface/on-surface" },
+        "disabled": { "bg": "transparent", "fg": "color/surface/on-surface-variant" },
+        "range":    { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+      }
+    },
+    "header-typography": {
+      "font-family": "body",
+      "font-weight": 600,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "day-typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-3", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "12px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
+      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-5", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "14px", "day-line-height": "20px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
+      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "cell-size": "height/ch-7", "header-font-size": "16px", "header-line-height": "24px", "day-font-size": "16px", "day-line-height": "24px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "top-bar": {
+    "$note": "App header bar. Holds title, navigation icon (left), and action icons (right). Scrolled state adds elevation — code-only state change. 2-3 action icons max, overflow menu for the rest.",
+    "variants": {
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-bottom": "color/outline/outline-subtle" },
+      "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border-bottom": "none", "shadow": "effects/shadow-1" }
+    },
+    "typography": {
+      "title": {
+        "font-family": "body",
+        "font-weight": 600,
+        "letter-spacing": "-0.01em",
+        "text-transform": "none"
+      }
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-7", "x-padding": "{scale.3}", "gap": "{scale.2}", "title-font-size": "16px", "title-line-height": "24px", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/ch-8", "x-padding": "{scale.4}", "gap": "{scale.3}", "title-font-size": "18px", "title-line-height": "28px", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.4}", "title-font-size": "20px", "title-line-height": "28px", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "sidebar": {
+    "$note": "Vertical navigation panel. Permanent (desktop), collapsible, or rail (icons only). Items use list-item structure with leading icon + label. Active item highlighted with primary color. Rail variant hides labels and narrows to icon column.",
+    "variants": {
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" }
+    },
+    "item": {
+      "state": {
+        "default":  { "bg": "transparent", "fg": "color/surface/on-surface-variant", "icon-fg": "color/surface/on-surface-variant" },
+        "active":   { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "icon-fg": "color/primary/primary" },
+        "hover":    { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "icon-fg": "color/surface/on-surface" }
+      },
+      "typography": {
+        "font-family": "body",
+        "font-weight": 500,
+        "letter-spacing": "0",
+        "text-transform": "none"
+      }
+    },
+    "sizes": {
+      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/ch-5", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/ch-7", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/ch-8", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "tabs": {
+    "$note": "Horizontal tab strip. Active tab indicated by bottom border. One tab active at a time. Full keyboard navigation (arrow keys between tabs). Content panel linked via aria-controls.",
+    "variants": {
+      "default": {
+        "bg": "transparent",
+        "active-fg": "color/primary/primary",
+        "inactive-fg": "color/surface/on-surface-variant",
+        "indicator": "color/primary/primary",
+        "indicator-width": "border-width/bw-2"
+      }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.01em",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/ch-8", "x-padding": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "bottom-nav": {
+    "$note": "Mobile bottom navigation bar. 3-5 destinations only. Always includes labels — never icon-only. Active item uses primary color.",
+    "variants": {
+      "default": { "bg": "color/surface/surface", "border-top": "color/outline/outline-subtle" }
+    },
+    "item": {
+      "state": {
+        "default": { "fg": "color/surface/on-surface-variant", "icon-fg": "color/surface/on-surface-variant" },
+        "active":  { "fg": "color/primary/primary", "icon-fg": "color/primary/primary" }
+      },
+      "typography": {
+        "font-family": "body",
+        "font-weight": 500,
+        "letter-spacing": "0.02em",
+        "text-transform": "none"
+      }
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-8", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/ch-9", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-2" },
+      "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "breadcrumbs": {
+    "$note": "Horizontal trail showing page hierarchy. Separator between items (typically /). Current page is plain text (not a link). Use aria-label='Breadcrumb' on nav, aria-current='page' on current.",
+    "variants": {
+      "default": {
+        "link-fg": "color/surface/on-surface-variant",
+        "current-fg": "color/surface/on-surface",
+        "separator-fg": "color/outline/outline-subtle"
+      }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "separator": "/",
+    "sizes": {
+      "sm": { "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-1" },
+      "lg": { "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "pagination": {
+    "$note": "Page navigation control. Numbered pages variant uses button-like items. Active page highlighted. Includes prev/next arrows. aria-current='page' on active item.",
+    "variants": {
+      "default": {
+        "bg": "transparent",
+        "fg": "color/surface/on-surface-variant",
+        "active-bg": "color/primary/primary",
+        "active-fg": "color/primary/on-primary",
+        "hover-bg": "color/surface/surface-1"
+      }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "item-size": "height/ch-3", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "item-size": "height/ch-5", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "item-size": "height/ch-7", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "navigation-menu": {
+    "$note": "Horizontal menu bar with optional dropdown/mega-menu panels. For site-level navigation (marketing, content sites). Distinct from sidebar (app navigation) and dropdown-menu (contextual actions).",
+    "variants": {
+      "default": {
+        "bg": "transparent",
+        "fg": "color/surface/on-surface",
+        "active-fg": "color/primary/primary",
+        "hover-bg": "color/surface/surface-1"
+      }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "panel": {
+      "bg": "color/surface/surface-1",
+      "fg": "color/surface/on-surface",
+      "shadow": "effects/shadow-2",
+      "radius": "radius/card"
+    },
+    "sizes": {
+      "sm": { "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "14px", "line-height": "20px" },
+      "md": { "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+      "lg": { "item-height": "height/ch-8", "item-x-padding": "{scale.6}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "command-palette": {
+    "$note": "Keyboard-first search + action overlay (Cmd+K). Combines search input with filterable item list. Common in dashboards for quick navigation across views, records, and actions. Fuzzy matching, recent items, grouped results. Escape to close. Shares modal overlay model.",
+    "variants": {
+      "default": {
+        "bg": "color/surface/surface-1",
+        "fg": "color/surface/on-surface",
+        "overlay": "color/surface/scrim",
+        "shadow": "effects/shadow-3",
+        "border": "color/outline/outline-subtle"
+      }
+    },
+    "input": {
+      "$note": "Search input at top of palette. No border, larger font, integrated into the palette header.",
+      "bg": "transparent",
+      "fg": "color/surface/on-surface",
+      "placeholder-fg": "color/surface/on-surface-variant"
+    },
+    "item": {
+      "state": {
+        "default": { "bg": "transparent", "fg": "color/surface/on-surface" },
+        "active":  { "bg": "color/surface/surface-2", "fg": "color/surface/on-surface" }
+      },
+      "typography": {
+        "font-family": "body",
+        "font-weight": 400,
+        "letter-spacing": "0",
+        "text-transform": "none"
+      }
+    },
+    "group-label": {
+      "fg": "color/surface/on-surface-variant",
+      "font-weight": 500,
+      "letter-spacing": "0.02em",
+      "text-transform": "uppercase"
+    },
+    "sizes": {
+      "sm": { "max-width": "480px", "radius": "radius/modal", "input-font-size": "16px", "input-line-height": "24px", "input-x-padding": "{scale.3}", "input-height": "height/ch-7", "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "10px", "group-line-height": "14px", "icon-size": "icon/icon-1" },
+      "md": { "max-width": "560px", "radius": "radius/modal", "input-font-size": "18px", "input-line-height": "28px", "input-x-padding": "{scale.4}", "input-height": "height/ch-8", "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" },
+      "lg": { "max-width": "640px", "radius": "radius/modal", "input-font-size": "20px", "input-line-height": "28px", "input-x-padding": "{scale.6}", "input-height": "height/ch-9", "item-height": "height/ch-8", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "16px", "item-line-height": "24px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  }
+}

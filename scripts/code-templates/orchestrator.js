@@ -1,0 +1,128 @@
+#!/usr/bin/env node
+/**
+ * Code Templates Orchestrator
+ *
+ * Produces the complete generated/ bundle:
+ *   tokens.css, components/, stories/, playground/, scripts/, HANDOFF.md
+ *
+ * Each generator is a separate module with a generate(config, outputDir) function.
+ *
+ * Usage:
+ *   node orchestrator.js                    — writes to generated/
+ *   node orchestrator.js --output ./out     — writes to custom path
+ *   node orchestrator.js --only components  — run a single generator
+ *   node orchestrator.js --list             — list available generators
+ */
+const fs = require('fs');
+const path = require('path');
+const { loadAllConfigs, getComponentRegistry } = require('./shared');
+
+// --- Load config once ---
+const configs = loadAllConfigs();
+const registry = getComponentRegistry(configs);
+
+// --- Generator modules ---
+const GENERATORS = {
+  'tokens': {
+    description: 'tokens.css',
+    run: (outputDir) => {
+      const { generate } = require('./generate-tokens-css');
+      const output = generate();
+      fs.writeFileSync(path.join(outputDir, 'tokens.css'), output);
+      console.log('  tokens.css');
+    },
+  },
+  'icons': {
+    description: 'components/icons.ts (icon map + size classes)',
+    run: (outputDir) => {
+      const { generate } = require('./generate-icons');
+      return generate(configs, outputDir);
+    },
+  },
+  'components': {
+    description: 'components/*.tsx + cn.ts',
+    run: (outputDir) => {
+      const { generate } = require('./generate-components');
+      return generate(registry, outputDir, configs);
+    },
+  },
+  'stories': {
+    description: 'stories/*.story.ts + registry.ts',
+    run: (outputDir) => {
+      const { generate } = require('./generate-stories');
+      return generate(registry, outputDir);
+    },
+  },
+  'playground': {
+    description: 'playground/ComponentPlayground.tsx',
+    run: (outputDir) => {
+      const { generate } = require('./generate-playground');
+      generate(configs, outputDir);
+    },
+  },
+  'scaffold': {
+    description: 'scaffold/ (setup.sh, globals.css, ThemeProvider, layout, /design-system route)',
+    run: (outputDir) => {
+      const { generate } = require('./scaffold');
+      generate(configs, registry, outputDir);
+    },
+  },
+  'handoff': {
+    description: 'HANDOFF.md',
+    run: (outputDir) => {
+      const { generate } = require('./generate-handoff');
+      generate(configs, registry, outputDir);
+    },
+  },
+};
+
+// --- CLI ---
+if (require.main === module) {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--list')) {
+    console.log('Available generators:\n');
+    for (const [name, gen] of Object.entries(GENERATORS)) {
+      console.log(`  ${name.padEnd(16)} ${gen.description}`);
+    }
+    process.exit(0);
+  }
+
+  const outputDir = args.includes('--output')
+    ? args[args.indexOf('--output') + 1]
+    : path.resolve(__dirname, '../../generated');
+
+  const only = args.includes('--only')
+    ? args[args.indexOf('--only') + 1]
+    : null;
+
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  console.log(`\n=== Generating → ${outputDir} ===\n`);
+
+  // Copy answers.json as a receipt — the DNA of this generation
+  const answersPath = path.resolve(__dirname, '../../spec/answers.json');
+  if (fs.existsSync(answersPath)) {
+    fs.copyFileSync(answersPath, path.join(outputDir, 'answers.json'));
+    console.log('[answers]\n  answers.json\n');
+  }
+
+  const toRun = only
+    ? { [only]: GENERATORS[only] }
+    : GENERATORS;
+
+  if (only && !GENERATORS[only]) {
+    console.error(`Unknown generator: "${only}". Use --list to see available generators.`);
+    process.exit(1);
+  }
+
+  for (const [name, gen] of Object.entries(toRun)) {
+    console.log(`[${name}]`);
+    gen.run(outputDir);
+    console.log('');
+  }
+
+  console.log('=== Done ===');
+}
+
+module.exports = { GENERATORS };

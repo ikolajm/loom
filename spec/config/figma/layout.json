@@ -1,0 +1,64 @@
+{
+  "$note": "Documentation layout config. Hue-neutral, mode-independent. These values are for the design system presentation layer — not the client's product. Client component colors showcase against these neutral frames. All color values are direct hex (not semantic aliases) to decouple documentation from light/dark mode.",
+
+  "page": {
+    "background": "#000000"
+  },
+
+  "default-mode": "light",
+  "$default-mode-note": "Documentation layer mode — independent of standards.json default-mode (client product). Light frames use light mode components. Change to dark if delivering dark-themed documentation.",
+
+  "frame": {
+    "$note": "Each section is an independent frame on the canvas. Frames are spaced by frame-group-gap.",
+    "background": "#F5F5F5",
+    "foreground": "#1A1A1A",
+    "foreground-muted": "#737373",
+    "padding": "{scale.12}",
+    "radius": "radius/card",
+    "min-width": "400px"
+  },
+
+  "surface": {
+    "$note": "Elevation levels for nesting within frames. Surface-1 for card-like containers, surface-2 for recessed areas.",
+    "surface-1": "#EDEDED",
+    "surface-2": "#E5E5E5"
+  },
+
+  "outline": {
+    "default": "#E0E0E0",
+    "subtle": "#EBEBEB"
+  },
+
+  "accent": {
+    "$note": "Agency branding accent for the documentation layer. Placeholder — set to agency color when delivering to clients.",
+    "color": "#E91E8C",
+    "on-accent": "#FFFFFF"
+  },
+
+  "spacing": {
+    "$note": "Nesting hierarchy: frame-group-gap (between frames on canvas) > section-gap (between sections within a frame) > component-group-gap (between groups of related components) > component-gap (between individual components in a row) > label-gap (between a label and its content) > description-gap (between title and description text).",
+    "frame-group-gap": "{scale.16}",
+    "section-gap": "{scale.10}",
+    "component-group-gap": "{scale.6}",
+    "component-gap": "{scale.4}",
+    "label-gap": "{scale.2}",
+    "description-gap": "{scale.1}"
+  },
+
+  "typography": {
+    "frame-title": "title",
+    "section-label": "subtitle",
+    "section-description": "body",
+    "body": "body",
+    "spec-label": "caption",
+    "defaults": {
+      "sample-sentence": "The quick brown fox jumps over the lazy dog.",
+      "button-label": "Press Me",
+      "input-placeholder": "Placeholder text",
+      "select-placeholder": "Select option",
+      "chip-label": "Chip",
+      "badge-label": "Badge",
+      "try-me-label": "Try Me!"
+    }
+  }
+}

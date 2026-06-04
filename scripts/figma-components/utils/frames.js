@@ -1,0 +1,212 @@
+// =============================================================================
+// Frame Construction + Icon Slots
+// =============================================================================
+// Section frames, headers, interactive previews, base/preview frame pairs,
+// and icon slot creation. Shared by all shape builders.
+// Depends on: lookups.js (setDefaultMode)
+// =============================================================================
+
+/**
+ * Create a section frame following layout.json pattern.
+ * Returns the frame — caller adds children.
+ */
+function createSectionFrame(name, lookups) {
+  const { layoutVars } = lookups;
+  const bgVar = layoutVars["layout/frame-background"];
+  const padVar = layoutVars["layout/frame-padding"];
+  const radVar = layoutVars["layout/frame-radius"];
+  const sectionGapVar = layoutVars["layout/spacing/section-gap"];
+
+  const frame = figma.createFrame();
+  frame.name = name;
+  frame.layoutMode = "VERTICAL";
+  frame.primaryAxisSizingMode = "AUTO";
+  frame.counterAxisSizingMode = "AUTO";
+  frame.clipsContent = false;
+  frame.minWidth = 400;
+
+  if (bgVar) frame.fills = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.96, g: 0.96, b: 0.96 } }, "color", bgVar
+  )];
+  if (padVar) {
+    frame.setBoundVariable("paddingTop", padVar);
+    frame.setBoundVariable("paddingRight", padVar);
+    frame.setBoundVariable("paddingBottom", padVar);
+    frame.setBoundVariable("paddingLeft", padVar);
+  }
+  if (radVar) {
+    frame.setBoundVariable("topLeftRadius", radVar);
+    frame.setBoundVariable("topRightRadius", radVar);
+    frame.setBoundVariable("bottomLeftRadius", radVar);
+    frame.setBoundVariable("bottomRightRadius", radVar);
+  }
+  if (sectionGapVar) frame.setBoundVariable("itemSpacing", sectionGapVar);
+
+  return frame;
+}
+
+/**
+ * Add a Header LG instance to a frame.
+ * @param {FrameNode} frame - Parent frame
+ * @param {string} title - Header title text
+ * @param {string|null} description - Description text, or null to hide
+ * @returns {InstanceNode} The header instance
+ */
+function addHeader(frame, title, description) {
+  const headerSet = figma.root.findOne(n => n.type === "COMPONENT_SET" && n.name === "template/header");
+  const headerLgDiv = headerSet.findChild(n => n.name === "size=lg, divider=on");
+  const inst = headerLgDiv.createInstance();
+  frame.appendChild(inst);
+  inst.layoutSizingHorizontal = "FILL";
+
+  const titleNode = inst.findOne(n => n.name === "title" && n.type === "TEXT");
+  if (titleNode) titleNode.characters = title;
+
+  if (description) {
+    const descNode = inst.findOne(n => n.name === "description" && n.type === "TEXT");
+    if (descNode) descNode.characters = description;
+  } else {
+    const descPropKey = Object.keys(inst.componentProperties).find(k => k.includes("showDescription"));
+    if (descPropKey) inst.setProperties({ [descPropKey]: false });
+  }
+
+  return inst;
+}
+
+/**
+ * Create an interactive preview frame pattern with a component instance inside.
+ * Auto-height with 68px bottom padding for Try Me clearance.
+ * @param {InstanceNode|null} componentInstance - Component to showcase, or null for empty
+ * @param {object} lookups - Variable lookups
+ * @returns {FrameNode} The interactive preview frame
+ */
+function createInteractivePreview(componentInstance, lookups) {
+  const { layoutVars, semRadius, primBW } = lookups;
+  const surface1Var = layoutVars["layout/surface-1"];
+  const accentVar = layoutVars["layout/accent"];
+  const radComp = semRadius["radius/component"];
+  const bw2 = primBW["border-width/2"];
+  const tryMeComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "template/try-me-button");
+
+  const ip = figma.createFrame();
+  ip.name = "interactive-preview";
+  ip.resize(500, 100);
+  ip.layoutMode = "VERTICAL";
+  ip.primaryAxisSizingMode = "AUTO";
+  ip.counterAxisSizingMode = "AUTO";
+  ip.primaryAxisAlignItems = "CENTER";
+  ip.counterAxisAlignItems = "CENTER";
+  ip.paddingTop = 24;
+  ip.paddingRight = 40;
+  ip.paddingBottom = 68;
+  ip.paddingLeft = 40;
+
+  if (surface1Var) ip.fills = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.93, g: 0.93, b: 0.93 } }, "color", surface1Var
+  )];
+  if (accentVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.91, g: 0.12, b: 0.55 } }, "color", accentVar
+  )];
+  if (bw2) ip.setBoundVariable("strokeWeight", bw2);
+  ip.dashPattern = [8, 8];
+  if (radComp) {
+    ip.setBoundVariable("topLeftRadius", radComp);
+    ip.setBoundVariable("topRightRadius", radComp);
+    ip.setBoundVariable("bottomLeftRadius", radComp);
+    ip.setBoundVariable("bottomRightRadius", radComp);
+  }
+
+  // Component instance
+  if (componentInstance) {
+    ip.appendChild(componentInstance);
+  }
+
+  // Try Me button — absolute bottom-right
+  if (tryMeComp) {
+    const tm = tryMeComp.createInstance();
+    ip.appendChild(tm);
+    tm.layoutPositioning = "ABSOLUTE";
+    tm.constraints = { horizontal: "MAX", vertical: "MAX" };
+    tm.x = ip.width - tm.width - 12;
+    tm.y = ip.height - tm.height - 12;
+  }
+
+  return ip;
+}
+
+/**
+ * Create a complete preview frame: section frame + header (no description) + interactive preview.
+ * @param {string} componentName - Used for frame name and header title
+ * @param {InstanceNode|null} componentInstance - Component to preview
+ * @param {object} lookups - Variable lookups
+ * @param {string} defaultMode - Mode name to apply ("light" or "dark")
+ * @returns {FrameNode}
+ */
+function createPreviewFrame(componentName, componentInstance, lookups, defaultMode) {
+  const frame = createSectionFrame(`preview.${componentName}`, lookups);
+  addHeader(frame, `${componentName.charAt(0).toUpperCase() + componentName.slice(1)} Preview`, null);
+
+  const ip = createInteractivePreview(componentInstance, lookups);
+  frame.appendChild(ip);
+  ip.layoutSizingHorizontal = "FILL";
+
+  setDefaultMode(frame, defaultMode);
+  return frame;
+}
+
+/**
+ * Create a complete base frame: section frame + header (with description) + component set.
+ * @param {string} componentName - Used for frame name and header title
+ * @param {string} description - Semantic description
+ * @param {ComponentSetNode} componentSet - The component set to include
+ * @param {object} lookups - Variable lookups
+ * @param {string} defaultMode - Mode name
+ * @returns {FrameNode}
+ */
+function createBaseFrame(componentName, description, componentSet, lookups, defaultMode) {
+  const frame = createSectionFrame(`base.${componentName}`, lookups);
+  addHeader(frame, componentName.charAt(0).toUpperCase() + componentName.slice(1), description);
+  frame.appendChild(componentSet);
+  setDefaultMode(frame, defaultMode);
+  return frame;
+}
+
+/**
+ * Create an icon slot (leading or trailing) with boolean visibility toggle.
+ * Uses flattened filled vectors for reliable color inheritance on swap.
+ * @param {ComponentNode} comp - Parent component
+ * @param {string} slotName - "leading-icon" or "trailing-icon"
+ * @param {Variable} fgVar - Foreground color variable (for icon fill)
+ * @param {Variable} iconSizeVar - Icon size variable
+ * @param {string} propName - Boolean property name ("showLeadingIcon" or "showTrailingIcon")
+ * @returns {InstanceNode} The icon instance (already appended to comp)
+ */
+function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
+  const placeholderIcon = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!placeholderIcon) throw new Error("icon/placeholder not found");
+
+  const inst = placeholderIcon.createInstance();
+  inst.name = slotName;
+
+  if (iconSizeVar) {
+    inst.setBoundVariable("width", iconSizeVar);
+    inst.setBoundVariable("height", iconSizeVar);
+  }
+
+  if (fgVar) {
+    const vecs = inst.findAll(n => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE" || n.type === "ELLIPSE" || n.type === "RECTANGLE");
+    const paint = [figma.variables.setBoundVariableForPaint(
+      { type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 } }, "color", fgVar
+    )];
+    for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
+  }
+
+  inst.visible = false;
+  comp.appendChild(inst);
+
+  // Add boolean property and link visibility
+  const propKey = comp.addComponentProperty(propName, "BOOLEAN", false);
+  inst.componentPropertyReferences = { "visible": propKey };
+
+  return inst;
+}

@@ -1,0 +1,83 @@
+{
+  "stepper": {
+    "$note": "Multi-step progress indicator. Horizontal or vertical orientation. Each step is independently validatable. Back navigation preserves state. Step indicator uses pill radius (circular number/icon).",
+    "step-state": {
+      "incomplete": { "indicator-bg": "color/surface/surface-1", "indicator-fg": "color/surface/on-surface-variant", "label-fg": "color/surface/on-surface-variant", "connector": "color/outline/outline-subtle" },
+      "active":     { "indicator-bg": "color/primary/primary", "indicator-fg": "color/primary/on-primary", "label-fg": "color/surface/on-surface", "connector": "color/outline/outline-subtle" },
+      "completed":  { "indicator-bg": "color/primary/primary", "indicator-fg": "color/primary/on-primary", "label-fg": "color/surface/on-surface", "connector": "color/primary/primary" },
+      "error":      { "indicator-bg": "color/error/error", "indicator-fg": "color/error/on-error", "label-fg": "color/error/error", "connector": "color/outline/outline-subtle" }
+    },
+    "label-typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "description-typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "indicator-size": "height/ch-1", "connector-width": "border-width/bw-1", "gap": "{scale.2}", "label-font-size": "12px", "label-line-height": "16px", "description-font-size": "10px", "description-line-height": "14px" },
+      "md": { "indicator-size": "height/ch-3", "connector-width": "border-width/bw-1", "gap": "{scale.3}", "label-font-size": "14px", "label-line-height": "20px", "description-font-size": "12px", "description-line-height": "16px" },
+      "lg": { "indicator-size": "height/ch-5", "connector-width": "border-width/bw-2", "gap": "{scale.4}", "label-font-size": "16px", "label-line-height": "24px", "description-font-size": "14px", "description-line-height": "20px" }
+    },
+    "default": { "size": "md" }
+  },
+
+  "carousel": {
+    "$note": "Sliding content container. CSS scroll-snap based. Image gallery, card carousel, testimonial slider. Keyboard navigation (arrow keys). Pause auto-play on hover/focus. Navigation via dots, arrows, or both.",
+    "variants": {
+      "default": { "bg": "transparent" }
+    },
+    "navigation": {
+      "arrow": {
+        "$note": "Uses icon-button/ghost for prev/next arrows.",
+        "icon-size": "icon/icon-2"
+      },
+      "dots": {
+        "default-bg": "color/outline/outline-subtle",
+        "active-bg": "color/primary/primary",
+        "size": "{scale.2}",
+        "radius": "radius/pill",
+        "gap": "{scale.2}"
+      }
+    },
+    "sizes": {
+      "sm": { "gap": "{scale.3}", "slide-radius": "radius/card", "arrow-offset": "{scale.2}", "dots-y-offset": "{scale.3}" },
+      "md": { "gap": "{scale.4}", "slide-radius": "radius/card", "arrow-offset": "{scale.3}", "dots-y-offset": "{scale.4}" },
+      "lg": { "gap": "{scale.6}", "slide-radius": "radius/card", "arrow-offset": "{scale.4}", "dots-y-offset": "{scale.6}" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "tree-view": {
+    "$note": "Hierarchical list with expandable/collapsible nodes. Single or multi-select. Full keyboard navigation (arrow keys expand/collapse/navigate, enter to select). aria-expanded on parent nodes. Indent per depth level.",
+    "item": {
+      "state": {
+        "default":  { "bg": "transparent", "fg": "color/surface/on-surface", "icon-fg": "color/surface/on-surface-variant" },
+        "selected": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "icon-fg": "color/primary/primary" },
+        "hover":    { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "icon-fg": "color/surface/on-surface" }
+      },
+      "typography": {
+        "font-family": "body",
+        "font-weight": 400,
+        "letter-spacing": "0",
+        "text-transform": "none"
+      }
+    },
+    "connector": {
+      "$note": "Vertical/horizontal lines connecting parent to children. Optional — some tree views omit them.",
+      "color": "color/outline/outline-subtle",
+      "width": "border-width/bw-1"
+    },
+    "sizes": {
+      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "indent": "{scale.4}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1", "expand-icon": "icon/icon-1" },
+      "md": { "item-height": "height/ch-5", "x-padding": "{scale.3}", "indent": "{scale.5}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-1" },
+      "lg": { "item-height": "height/ch-7", "x-padding": "{scale.4}", "indent": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-2" }
+    },
+    "default": { "size": "md" }
+  }
+}

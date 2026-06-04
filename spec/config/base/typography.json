@@ -1,0 +1,111 @@
+{
+  "$note": "Generated from \"standard\" type scale + font pairing (Finlandica / Finlandica). Text style families with sm/md/lg tiers. Components bind to a family; the size prop selects the tier. Change via questionnaire, not manual editing.",
+  "families": {
+    "heading": "Finlandica",
+    "body": "Finlandica"
+  },
+  "textStyles": {
+    "display": {
+      "font": "heading",
+      "weight": 700,
+      "letter-spacing": "-0.02em",
+      "sm": {
+        "size": "32px",
+        "line-height": "40px"
+      },
+      "md": {
+        "size": "36px",
+        "line-height": "44px"
+      },
+      "lg": {
+        "size": "48px",
+        "line-height": "56px"
+      }
+    },
+    "title": {
+      "font": "heading",
+      "weight": 600,
+      "letter-spacing": "-0.01em",
+      "sm": {
+        "size": "18px",
+        "line-height": "24px"
+      },
+      "md": {
+        "size": "20px",
+        "line-height": "28px"
+      },
+      "lg": {
+        "size": "24px",
+        "line-height": "32px"
+      }
+    },
+    "body": {
+      "font": "body",
+      "weight": 400,
+      "letter-spacing": "0",
+      "sm": {
+        "size": "14px",
+        "line-height": "20px"
+      },
+      "md": {
+        "size": "16px",
+        "line-height": "24px"
+      },
+      "lg": {
+        "size": "18px",
+        "line-height": "28px"
+      }
+    },
+    "action": {
+      "font": "body",
+      "weight": 500,
+      "letter-spacing": "0",
+      "sm": {
+        "size": "12px",
+        "line-height": "16px"
+      },
+      "md": {
+        "size": "14px",
+        "line-height": "20px"
+      },
+      "lg": {
+        "size": "16px",
+        "line-height": "24px"
+      }
+    },
+    "label": {
+      "font": "body",
+      "weight": 500,
+      "letter-spacing": "0.02em",
+      "sm": {
+        "size": "10px",
+        "line-height": "14px"
+      },
+      "md": {
+        "size": "12px",
+        "line-height": "16px"
+      },
+      "lg": {
+        "size": "14px",
+        "line-height": "20px"
+      }
+    },
+    "input": {
+      "font": "body",
+      "weight": 400,
+      "letter-spacing": "0",
+      "sm": {
+        "size": "14px",
+        "line-height": "20px"
+      },
+      "md": {
+        "size": "16px",
+        "line-height": "24px"
+      },
+      "lg": {
+        "size": "18px",
+        "line-height": "28px"
+      }
+    }
+  }
+}

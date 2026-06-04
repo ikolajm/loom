@@ -1,0 +1,100 @@
+{
+  "avatar": {
+    "variants": {
+      "default": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 600,
+      "letter-spacing": "0",
+      "text-transform": "uppercase"
+    },
+    "$exception": "Avatar initials use line-height equal to font-size — required for vertical centering within a fixed circle. Sizes below caption preset (12px) are necessary at small avatar dimensions.",
+    "sizes": {
+      "sm": { "size": "height/ch-1", "font-size": "10px", "line-height": "10px" },
+      "md": { "size": "height/ch-3", "font-size": "12px", "line-height": "12px" },
+      "lg": { "size": "height/ch-5", "font-size": "14px", "line-height": "14px" },
+      "xl": { "size": "height/ch-7", "font-size": "16px", "line-height": "16px" }
+    },
+    "shapes": {
+      "circle":  { "radius": "radius/pill" },
+      "rounded": { "radius": "radius/component" }
+    },
+    "default": { "variant": "default", "size": "md", "shape": "circle" }
+  },
+
+  "list-item": {
+    "$note": "Structural shell with three slots: leading (icon/avatar), content (consumer-driven), trailing (action/icon). No internal text styling — content fills the slots.",
+    "variants": {
+      "default":  { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "none" },
+      "bordered": { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "color/outline/outline-subtle" }
+    },
+    "sizes": {
+      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.2}" },
+      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "gap": "{scale.3}" },
+      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.4}" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "accordion": {
+    "$note": "Collapsible section. Header defines the toggle label — content area is a blank container for consumer-driven content.",
+    "variants": {
+      "default":  { "bg": "transparent", "border": "color/outline/outline-subtle" },
+      "filled":   { "bg": "color/surface/surface-1", "border": "none" }
+    },
+    "header-typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "indicator-icon": "icon/chevron-down",
+    "sizes": {
+      "sm": { "header-height": "height/ch-5", "header-x-padding": "{scale.3}", "header-gap": "{scale.2}", "content-padding": "{scale.3}", "header-font-size": "14px", "header-line-height": "20px", "indicator": "icon/icon-1" },
+      "md": { "header-height": "height/ch-7", "header-x-padding": "{scale.4}", "header-gap": "{scale.3}", "content-padding": "{scale.4}", "header-font-size": "16px", "header-line-height": "24px", "indicator": "icon/icon-2" },
+      "lg": { "header-height": "height/ch-9", "header-x-padding": "{scale.6}", "header-gap": "{scale.4}", "content-padding": "{scale.6}", "header-font-size": "18px", "header-line-height": "28px", "indicator": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "kbd": {
+    "$note": "Keyboard shortcut indicator. Inline element styled as a key cap. Platform-appropriate modifier keys (Cmd vs Ctrl) are code-only. Combination keys separated by + with gap between elements.",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0.02em",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum. Required to maintain proportional key cap at small font size.", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "10px", "line-height": "14px" },
+      "md": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "12px", "line-height": "16px" },
+      "lg": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "14px", "line-height": "20px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "collapsible": {
+    "$note": "Single collapsible panel. Simpler than Accordion — no group behavior, no mutual exclusion. Just a trigger + content that toggles open/closed. Use for progressive disclosure, optional details, expandable sections. Maps to HTML details/summary for simple cases.",
+    "variants": {
+      "default":  { "bg": "transparent", "border": "none" },
+      "bordered": { "bg": "transparent", "border": "color/outline/outline-subtle" }
+    },
+    "trigger-typography": {
+      "font-family": "body",
+      "font-weight": 500,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "indicator-icon": "icon/chevron-down",
+    "sizes": {
+      "sm": { "trigger-height": "height/ch-5", "trigger-x-padding": "{scale.3}", "trigger-gap": "{scale.2}", "content-padding": "{scale.3}", "trigger-font-size": "14px", "trigger-line-height": "20px", "indicator": "icon/icon-1" },
+      "md": { "trigger-height": "height/ch-7", "trigger-x-padding": "{scale.4}", "trigger-gap": "{scale.3}", "content-padding": "{scale.4}", "trigger-font-size": "16px", "trigger-line-height": "24px", "indicator": "icon/icon-2" },
+      "lg": { "trigger-height": "height/ch-9", "trigger-x-padding": "{scale.6}", "trigger-gap": "{scale.4}", "content-padding": "{scale.6}", "trigger-font-size": "18px", "trigger-line-height": "28px", "indicator": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  }
+}

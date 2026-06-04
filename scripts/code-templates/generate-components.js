@@ -1,0 +1,239 @@
+/**
+ * Generate React component .tsx files + per-atom manifests into loom/catalog/.
+ *
+ * Architecture: Config → CVA (variant management) → Radix/lib primitives (behavior) → tokens (styling)
+ *
+ * Template types:
+ *   cva-only  — styled HTML element + CVA variants from config
+ *   radix     — Radix primitive + CVA styling from config
+ *   lib       — specialized library + CVA styling from config
+ *
+ * Output (per atom):
+ *   loom/catalog/[name].tsx          — component code
+ *   loom/catalog/[name].manifest.json — catalog metadata (from $catalog + inference)
+ *
+ * Also emits:
+ *   loom/catalog/cn.ts + cn.manifest.json — class-name merger utility (catalog atom)
+ */
+const fs = require('fs');
+const path = require('path');
+
+// --- Module imports ---
+const { resolveConfig } = require('./components/helpers');
+const { buildCnUtility } = require('./components/cn');
+const { generateCvaOnly } = require('./components/cva-only');
+const { generateButton } = require('./components/button');
+const { generateFAB } = require('./components/fab');
+const { generateFabMenu } = require('./components/fab-menu');
+const { generateBadge } = require('./components/badge');
+const { generateTable } = require('./components/table');
+const { generateRadixDialog, generateRadixAlertDialog, generateRadixSheet } = require('./components/radix-dialogs');
+const { generateRadixCheckbox, generateRadixSwitch, generateRadixRadio, generateRadixSlider, generateRadixSelect } = require('./components/radix-form-controls');
+const { generateRadixToggle, generateRadixToggleGroup } = require('./components/radix-toggle');
+const { generateRadixTabs, generateRadixAccordion, generateRadixCollapsible } = require('./components/radix-navigation');
+const { generateRadixTooltip, generateRadixPopover, generateRadixSeparator, generateRadixAvatar, generateRadixProgress, generateRadixHoverCard } = require('./components/radix-feedback');
+const { generateRadixDropdownMenu, generateRadixContextMenu } = require('./components/radix-menus');
+const { generateRadixToast } = require('./components/radix-toast');
+const { generateRadixNavigationMenu } = require('./components/radix-navigation-menu');
+const { generateRadixScrollArea, generateLib } = require('./components/radix-fallback');
+const { generateBadgeDot } = require('./components/badge-dot');
+const { generateEmptyState } = require('./components/empty-state');
+const { generateListItem } = require('./components/list-item');
+const { generateStepper } = require('./components/stepper');
+const { generateTreeView } = require('./components/tree-view');
+const { generateCarousel } = require('./components/carousel');
+const { generatePagination } = require('./components/pagination');
+const { generateFileUpload } = require('./components/file-upload');
+const { generateInputOTP } = require('./components/input-otp');
+const { generateCommandPalette } = require('./components/command-palette');
+const { generateCombobox } = require('./components/combobox');
+const { generateCalendar } = require('./components/calendar');
+const { generateDatePicker } = require('./components/date-picker');
+const { generateSkeleton } = require('./components/skeleton');
+const { generateFormField } = require('./components/form-field');
+
+// --- Catalog output directory (loom/catalog/) ---
+const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
+
+// ============================================================
+// === RADIX ROUTER
+// ============================================================
+
+function generateRadix(name, config, meta) {
+  const generators = {
+    'Dialog': generateRadixDialog,
+    'AlertDialog': generateRadixAlertDialog,
+    'Sheet': generateRadixSheet,
+    'Tabs': generateRadixTabs,
+    'Accordion': generateRadixAccordion,
+    'Collapsible': generateRadixCollapsible,
+    'Checkbox': generateRadixCheckbox,
+    'Switch': generateRadixSwitch,
+    'Radio': generateRadixRadio,
+    'Slider': generateRadixSlider,
+    'Toggle': generateRadixToggle,
+    'ToggleGroup': generateRadixToggleGroup,
+    'Tooltip': generateRadixTooltip,
+    'Popover': generateRadixPopover,
+    'Separator': generateRadixSeparator,
+    'Avatar': generateRadixAvatar,
+    'ProgressBar': generateRadixProgress,
+    'Select': generateRadixSelect,
+    'DropdownMenu': generateRadixDropdownMenu,
+    'ContextMenu': generateRadixContextMenu,
+    'HoverCard': generateRadixHoverCard,
+    'ScrollArea': generateRadixScrollArea,
+    'Toast': generateRadixToast,
+    'NavigationMenu': generateRadixNavigationMenu,
+  };
+
+  const gen = generators[name];
+  if (gen) return gen(name, config, meta);
+
+  console.warn(`  ${name}: Radix template not yet implemented, using cva-only fallback`);
+  return `// TODO: Add Radix primitive template for ${name} (${meta.primitive})\n` + generateCvaOnly(name, config, meta);
+}
+
+// ============================================================
+// === DISPATCH
+// ============================================================
+
+function dispatch(name, config, meta) {
+  if (name === 'Button') return generateButton(name, config, meta);
+  if (name === 'FAB') return generateFAB(name, config, meta);
+  if (name === 'FabMenu') return generateFabMenu(name, config, meta);
+  if (name === 'Badge') return generateBadge(name, config, meta);
+  if (name === 'Table') return generateTable(name, config, meta);
+  if (name === 'BadgeDot') return generateBadgeDot(name, config, meta);
+  if (name === 'EmptyState') return generateEmptyState(name, config, meta);
+  if (name === 'ListItem') return generateListItem(name, config, meta);
+  if (name === 'Stepper') return generateStepper(name, config, meta);
+  if (name === 'TreeView') return generateTreeView(name, config, meta);
+  if (name === 'Carousel') return generateCarousel(name, config, meta);
+  if (name === 'Pagination') return generatePagination(name, config, meta);
+  if (name === 'FileUpload') return generateFileUpload(name, config, meta);
+  if (name === 'InputOTP') return generateInputOTP(name, config, meta);
+  if (name === 'CommandPalette') return generateCommandPalette(name, config, meta);
+  if (name === 'Combobox') return generateCombobox(name, config, meta);
+  if (name === 'Calendar') return generateCalendar(name, config, meta);
+  if (name === 'DatePicker') return generateDatePicker(name, config, meta);
+  if (name === 'Skeleton') return generateSkeleton(name, config, meta);
+  if (name === 'FormField') return generateFormField();
+
+  switch (meta.template) {
+    case 'radix': return generateRadix(name, config, meta);
+    case 'lib': return generateLib(name, config, meta);
+    case 'cva-only':
+    default: return generateCvaOnly(name, config, meta);
+  }
+}
+
+// ============================================================
+// === MANIFEST BUILDER
+// ============================================================
+
+// Registry category → catalog category (manifest schema)
+const CATEGORY_MAP = {
+  'Actions': 'button',
+  'Inputs': 'form',
+  'Layout': 'layout',
+  'Feedback': 'feedback',
+  'Data Display': 'data-display',
+  'Navigation': 'navigation',
+  'Composite': 'composite',
+};
+
+function extractAxisKeys(obj) {
+  if (!obj) return [];
+  return Object.keys(obj).filter(k => !k.startsWith('$'));
+}
+
+function buildManifest(def, config, version) {
+  const cat = config?.$catalog || {};
+
+  // Primary axis: variants if present, else state, else checked, else active, else step-state
+  const axisKey = config?.variants ? 'variants'
+    : config?.state ? 'state'
+    : config?.checked ? 'checked'
+    : config?.active ? 'active'
+    : config?.['step-state'] ? 'step-state'
+    : null;
+  const variants = axisKey ? extractAxisKeys(config[axisKey]) : [];
+  const sizes = extractAxisKeys(config?.sizes);
+
+  const manifest = {
+    name: def.key,
+    category: cat.category || CATEGORY_MAP[def.category] || 'misc',
+    description: cat.description || '',
+    version: cat.version || version,
+    dependencies: cat.dependencies || ['cn'],
+    tokens: cat.tokens || ['color', 'typography', 'spacing', 'sizing'],
+    composition: cat.composition || 'none',
+    stories: `${def.key}.story.ts`,
+  };
+
+  if (variants.length > 0) manifest.variants = variants;
+  if (sizes.length > 0) manifest.sizes = sizes;
+
+  return manifest;
+}
+
+// ============================================================
+// === MAIN
+// ============================================================
+
+function generate(registry, outputDir, configs) {
+  // Catalog output: always loom/catalog/ regardless of outputDir.
+  // outputDir is ignored here (kept in signature for orchestrator compatibility).
+  fs.mkdirSync(CATALOG_DIR, { recursive: true });
+
+  const version = new Date().toISOString().slice(0, 10);
+  let count = 0;
+
+  for (const [name, def] of Object.entries(registry)) {
+    // Config-free utilities — generated directly
+    if (name === 'FormField') {
+      const tsx = generateFormField();
+      const manifest = buildManifest(def, null, version);
+      fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
+      fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
+      console.log(`  ${def.key}.tsx + manifest (utility)`);
+      count++;
+      continue;
+    }
+
+    const config = resolveConfig(def.source, def.key, def.baseKey);
+
+    if (!config) {
+      console.warn(`  ${name}: config not found, skipping`);
+      continue;
+    }
+
+    const tsx = dispatch(name, config, def);
+    const manifest = buildManifest(def, config, version);
+
+    fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
+    fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
+    console.log(`  ${def.key}.tsx + manifest (${def.template})`);
+    count++;
+  }
+
+  // cn — utility atom (catalog-resident, foundation dependency)
+  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), buildCnUtility(configs));
+  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.manifest.json'), JSON.stringify({
+    name: 'cn',
+    category: 'utility',
+    description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
+    version,
+    dependencies: [],
+    tokens: [],
+    composition: 'none',
+    stories: '',
+  }, null, 2) + '\n');
+  console.log(`  cn.ts + manifest (utility)`);
+
+  console.log(`\nCatalog: ${count + 1} atoms → ${CATALOG_DIR}`);
+  return count + 1;
+}
+
+module.exports = { generate, CATALOG_DIR };

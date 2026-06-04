@@ -1,0 +1,10 @@
+{
+  "$note": "Generated from \"flat\" shadow depth. Shadow values only — transitions, easing, and focus ring are universal values in config/standards.json (code-only for transitions/easing). Tune shadow values per project in this file if needed.",
+  "shadow": {
+    "shadow-0": "none",
+    "shadow-1": "none",
+    "shadow-2": "none",
+    "shadow-3": "none"
+  },
+  "shadow-properties": {}
+}

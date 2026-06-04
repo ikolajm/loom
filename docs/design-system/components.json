@@ -1,0 +1,101 @@
+{
+  "_meta": {
+    "title": "Component catalog",
+    "purpose": "UI components by category with variant/state/token anatomy. Loom's available-components reference — projects cherry-pick via a manifest; only picked components get built. Use-agnostic (grouped by what they are, not where used).",
+    "sources": "Distilled from Material Design 3, Shadcn/Radix, Apple HIG, Vercel. Live fetch endpoints for component source: registries.md (same folder).",
+    "consumedBy": "Loom catalog + per-project picker. Reconcile against CATALOG_AUDIT.md (the actually-generated atoms) during the catalog overhaul.",
+    "movedFrom": "knowledge/design/components.md — converted to JSON + relocated to loom 2026-06-03 (it's catalog substrate, not general design reference)."
+  },
+  "categories": [
+    {
+      "name": "Actions",
+      "description": "Trigger operations or represent user choices.",
+      "components": [
+        { "name": "Button", "variants": ["default (primary)", "secondary", "destructive", "success", "warning"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "active/pressed", "focused", "disabled", "loading"], "tokens": ["primary", "on-primary", "radius-component", "font-body", "space", "transition-fast", "shadow", "focus-ring"], "notes": "Semantic variant model — variant implies color, no outline/ghost appearances. Icon slot (leading/trailing). Loading replaces label with spinner. Touch target min 44px regardless of visual size." },
+        { "name": "Icon Button", "variants": ["ghost (default)", "default (primary fill)", "secondary", "destructive"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "active", "focused", "disabled"], "tokens": ["primary", "on-primary", "radius-component", "icon size", "transition-fast", "focus-ring"], "notes": "Ghost is default — icon buttons frequently serve structural/dismiss actions (dialog close, toast dismiss). Always requires aria-label. Touch-target padding when visual size < 44px. Composable inside dialogs, alerts, toasts, cards." },
+        { "name": "FAB (Floating Action Button)", "variants": ["standard", "extended (with label)"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "active", "focused"], "tokens": ["primary-container", "on-primary-container", "radius (large)", "shadow-3", "icon size", "font-body"], "notes": "One per screen. Extended preferred over icon-only for clarity. (Material Design 3)" },
+        { "name": "Chip", "variants": ["filter (toggleable)", "assist (suggestion)", "input (removable tag)"], "sizes": ["sm", "md", "lg"], "states": ["default", "selected", "hover", "focused", "disabled"], "tokens": ["surface", "on-surface", "outline", "radius-pill", "font", "space", "icon size", "transition-fast"], "notes": "Horizontal scroll or flow layout, never vertical stacks. (Material Design 3)" },
+        { "name": "Toggle / Switch", "variants": ["switch", "toggle button", "toggle group"], "sizes": ["sm", "md", "lg"], "states": ["off", "on", "hover", "focused", "disabled"], "tokens": ["primary", "surface-variant", "on-surface", "radius-pill or radius-component", "transition-fast", "focus-ring"], "notes": "Switch for binary settings. Toggle group for multi-option single/multi select." }
+      ]
+    },
+    {
+      "name": "Inputs",
+      "description": "Collect user data.",
+      "components": [
+        { "name": "Text Input", "variants": ["default", "with leading/trailing icon", "with prefix/suffix text", "with clear button"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "focused", "filled", "error", "disabled", "read-only"], "tokens": ["surface", "on-surface", "outline", "outline-subtle", "error", "radius-input", "font-body", "space", "transition-fast", "focus-ring", "bw"], "notes": "" },
+        { "name": "Textarea", "variants": ["default", "auto-resize"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "focused", "filled", "error", "disabled", "read-only"], "tokens": ["same as text input"], "notes": "Min/max height. Character count optional." },
+        { "name": "Select", "variants": ["native", "custom dropdown", "multi-select"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "focused/open", "filled", "error", "disabled"], "tokens": ["surface", "on-surface", "outline", "radius-input", "font-body", "space", "shadow", "z-dropdown", "transition-fast", "focus-ring"], "notes": "Native select for simple cases (better mobile UX). Custom only when needed for styling or multi-select." },
+        { "name": "Checkbox", "variants": ["single", "indeterminate"], "sizes": ["sm", "md", "lg"], "states": ["unchecked", "checked", "indeterminate", "hover", "focused", "disabled"], "tokens": ["primary", "on-primary", "outline", "radius (small)", "transition-fast", "focus-ring", "icon size"], "notes": "Label and control share single hit target. Group with fieldset/legend." },
+        { "name": "Radio Group", "variants": ["standard", "card-style"], "sizes": ["sm", "md", "lg"], "states": ["unselected", "selected", "hover", "focused", "disabled"], "tokens": ["primary", "on-primary", "outline", "transition-fast", "focus-ring"], "notes": "Always in groups. Group with fieldset/legend." },
+        { "name": "Combobox / Autocomplete", "variants": ["single select", "multi-select", "creatable"], "sizes": ["sm", "md", "lg"], "states": ["default", "focused/open", "filtering", "empty results", "error", "disabled"], "tokens": ["surface", "on-surface", "outline", "radius-input", "shadow", "font-body", "space", "z-dropdown", "transition-fast", "focus-ring"], "notes": "Combines text input with dropdown. Keyboard navigation required (arrows, enter, escape)." },
+        { "name": "Date Picker", "variants": ["single date", "date range", "month/year picker"], "sizes": ["sm", "md", "lg"], "states": ["default", "focused/open", "date selected", "range selecting", "error", "disabled"], "tokens": ["surface", "on-surface", "primary", "on-primary", "outline", "radius-card", "radius-component", "font-body", "space", "shadow", "z-dropdown"], "notes": "Consider native input type=date for simple cases. Calendar grid needs full keyboard navigation." },
+        { "name": "Slider", "variants": ["single value", "range"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "active/dragging", "focused", "disabled"], "tokens": ["primary", "surface-variant", "on-surface", "radius-pill", "transition-fast", "focus-ring"], "notes": "Always pair with visible value label. Touch target on thumb min 44px." },
+        { "name": "File Upload", "variants": ["button trigger", "dropzone", "inline preview"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover/dragover", "uploading", "complete", "error", "disabled"], "tokens": ["surface", "on-surface", "outline (dashed)", "primary", "radius-card", "font-body", "space"], "notes": "Show file type/size constraints. Preview for images. Progress indicator during upload." },
+        { "name": "Input OTP", "variants": ["separated boxes", "underline", "grouped"], "sizes": ["sm", "md", "lg"], "states": ["default", "focused", "filled", "error", "disabled"], "tokens": ["surface", "on-surface", "outline", "radius-input", "font-body (monospace)", "space", "transition-fast", "focus-ring"], "notes": "Auto-advance on digit entry. Paste support required. (Vercel/Shadcn)" }
+      ]
+    },
+    {
+      "name": "Display",
+      "description": "Present information.",
+      "components": [
+        { "name": "Card", "variants": ["default", "elevated", "outline"], "sizes": ["sm", "md", "lg"], "states": ["default", "hover", "focused", "disabled"], "tokens": ["surface/surface-1/surface-2", "on-surface", "outline", "radius-card", "shadow", "space", "font-body"], "notes": "Can be interactive (clickable) or static. Interactive cards need hover/focus states and keyboard activation." },
+        { "name": "Badge", "variants": ["default", "neutral", "destructive", "success", "warning", "info"], "sizes": ["sm", "md", "lg"], "tokens": ["primary (or error/success/warning)", "on-primary", "radius-pill", "font"], "notes": "Container fill pattern for categorization labels. Keep labels short (1-2 words or a number)." },
+        { "name": "Avatar", "variants": ["image", "initials fallback", "icon fallback"], "sizes": ["xs", "sm", "md", "lg", "xl"], "tokens": ["primary-container", "on-primary-container", "radius-pill", "font"], "notes": "Always include alt text for image variant. Group as overlapping stack for multi-user display." },
+        { "name": "Stat", "variants": ["simple", "with trend indicator", "with sparkline"], "tokens": ["on-surface", "on-surface-variant", "success/error", "font-heading", "font-body"], "notes": "Use tabular-nums for value alignment. Trend indicator needs color + icon (not color alone)." },
+        { "name": "Progress Bar", "variants": ["default", "success", "warning", "error"], "sizes": ["sm", "md", "lg"], "tokens": ["primary", "surface-variant", "radius-pill", "transition-slow"], "notes": "Include accessible label (aria-label or visible text). Announce completion via aria-live." },
+        { "name": "Skeleton", "variants": ["text line", "circle", "rectangle", "card-shaped"], "tokens": ["surface-variant", "radius (matches target)"], "notes": "Match the shape/size of the content being loaded. Animate with subtle pulse." },
+        { "name": "Chart", "variants": ["bar", "line", "area", "pie/donut", "scatter", "sparkline"], "tokens": ["primary", "secondary", "accent", "error", "success", "warning", "on-surface", "surface", "font-body"], "notes": "Legends required. Accessible colors (distinguishable without color — patterns or labels). Responsive reflow. Tabular alternative for screen readers." },
+        { "name": "Table", "variants": ["simple", "sortable", "with row selection", "with expandable rows"], "states": ["default", "row hover", "row selected", "column sort active"], "tokens": ["surface", "on-surface", "outline-subtle", "surface-variant", "font-body", "space", "tabular-nums"], "notes": "Virtualize for large datasets (50+ rows). Horizontal scroll wrapper for overflow, not page scroll. Sticky header for long tables." },
+        { "name": "Tooltip", "variants": ["text only", "rich"], "states": ["hidden", "visible"], "tokens": ["surface-inverse", "on-surface-inverse", "radius-component", "shadow-2", "font", "z-tooltip", "transition-fast"], "notes": "Triggered by hover AND focus. ~300ms delay. Dismiss on escape. Never put essential info in tooltips." },
+        { "name": "Empty State", "variants": ["illustration + message", "message only", "with action"], "sizes": ["sm", "md", "lg"], "tokens": ["on-surface-variant", "surface", "font-body", "space"], "notes": "Always provide a next action when possible. Don't leave the user staring at nothing." },
+        { "name": "Kbd", "variants": ["single key", "key combination"], "sizes": ["sm", "md", "lg"], "tokens": ["surface-variant", "on-surface", "outline-subtle", "radius (small)", "font (monospace)"], "notes": "Display platform-appropriate modifier keys (Cmd vs Ctrl)." }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "description": "Communicate status or require decisions.",
+      "components": [
+        { "name": "Dialog / Modal", "variants": ["alert", "confirmation", "form", "informational"], "sizes": ["sm", "md", "lg", "fullscreen"], "states": ["closed", "open", "closing"], "tokens": ["surface", "on-surface", "scrim", "radius-modal", "shadow-3", "z-modal", "space", "font-heading", "font-body", "transition-normal"], "notes": "Focus trap required. Return focus on close. Escape to dismiss (non-alert). Reserve for critical interruptions. (Material Design 3)" },
+        { "name": "Toast / Snackbar", "variants": ["informational", "success", "warning", "error", "with action"], "states": ["entering", "visible", "exiting"], "tokens": ["surface-inverse", "on-surface-inverse", "radius-component", "shadow-2", "font-body", "transition-normal", "z-tooltip"], "notes": "Auto-dismiss (5-10s). Single action max. Stack when multiple. Position above bottom nav, below FAB. (Material Design 3)" },
+        { "name": "Alert / Banner", "variants": ["info", "success", "warning", "error"], "states": ["default", "dismissible", "expandable"], "tokens": ["error/success/warning-container", "on-error-container", "radius-component", "icon size", "font-body", "space"], "notes": "Inline in page flow, not overlaid. Icon + text (not color alone). Persistent until dismissed or resolved." },
+        { "name": "Sheet / Drawer", "variants": ["bottom sheet", "side drawer (left/right)"], "sizes": ["sm", "md", "lg"], "states": ["closed", "open", "partially open"], "tokens": ["surface", "on-surface", "scrim", "radius-modal", "shadow-3", "z-modal", "space", "transition-normal"], "notes": "Drag handle required for bottom sheet. Escape/scrim click to dismiss modal variant. (Material Design 3)" }
+      ]
+    },
+    {
+      "name": "Navigation",
+      "description": "Move users through content.",
+      "components": [
+        { "name": "Top Bar / App Bar", "variants": ["default", "elevated"], "sizes": ["sm", "md", "lg"], "states": ["default", "scrolled"], "tokens": ["surface", "on-surface", "primary", "shadow", "font-heading", "icon size", "space", "z-sticky"], "notes": "2-3 action icons max, overflow menu for the rest. Scroll behavior (collapse, elevate, hide) depends on content. (Material Design 3)" },
+        { "name": "Sidebar / Nav Rail", "variants": ["permanent", "collapsible", "rail (icons only)", "rail with labels"], "sizes": ["sm", "md", "lg"], "states": ["expanded", "collapsed", "item default", "item active", "item hover", "item focused"], "tokens": ["surface", "surface-variant", "primary", "on-surface-variant", "radius-component", "space", "icon size", "font", "transition-normal"], "notes": "Rail for medium screens (600-839dp), permanent sidebar for expanded (840dp+). Active state via aria-current. (Material Design 3)" },
+        { "name": "Bottom Nav", "variants": ["standard (3-5 items)"], "sizes": ["sm", "md", "lg"], "states": ["item default", "item active", "item hover"], "tokens": ["surface", "primary", "on-surface-variant", "icon size", "font", "space", "z-sticky"], "notes": "3-5 destinations only. Always include labels — never icon-only. (Material Design 3)" },
+        { "name": "Breadcrumbs", "variants": ["text links", "with dropdown"], "sizes": ["sm", "md", "lg"], "tokens": ["on-surface-variant", "on-surface", "font-body", "space"], "notes": "Use aria-label=Breadcrumb on nav. Current page marked with aria-current=page." },
+        { "name": "Tabs", "variants": ["text only", "with icon", "with badge/count", "scrollable"], "sizes": ["sm", "md", "lg"], "states": ["default", "active", "hover", "focused", "disabled"], "tokens": ["primary", "on-surface", "on-surface-variant", "surface", "font", "space", "bw", "transition-fast"], "notes": "One tab active at a time. Full keyboard navigation (arrows between tabs). Content panel linked via aria-controls." },
+        { "name": "Command Palette", "variants": ["search-only", "search + actions", "nested groups"], "sizes": ["sm", "md", "lg"], "states": ["closed", "open", "filtering", "empty results"], "tokens": ["surface", "on-surface", "outline-subtle", "radius-modal", "shadow-3", "font-body", "z-modal", "space"], "notes": "Keyboard-first (Cmd+K trigger). Fuzzy matching. Recent items. Escape to close." },
+        { "name": "Pagination", "variants": ["numbered pages", "prev/next only", "load more button", "infinite scroll"], "sizes": ["sm", "md", "lg"], "tokens": ["primary", "on-surface-variant", "outline-subtle", "radius-component", "font-body", "space", "focus-ring"], "notes": "Current page via aria-current=page. Include Page X of Y for screen readers." },
+        { "name": "Navigation Menu", "variants": ["horizontal menu bar", "mega menu", "dropdown menu"], "sizes": ["sm", "md", "lg"], "states": ["default", "item hover", "item active", "submenu open"], "tokens": ["surface", "on-surface", "primary", "shadow", "radius-component", "font-body", "space", "z-dropdown", "transition-fast"], "notes": "Full keyboard navigation. Escape closes submenus. Menu items vs. menu links distinction." }
+      ]
+    },
+    {
+      "name": "Layout",
+      "description": "Organize and structure content areas.",
+      "components": [
+        { "name": "Popover", "variants": ["click-triggered", "context menu"], "states": ["closed", "open"], "tokens": ["surface", "on-surface", "outline-subtle", "radius-card", "shadow-2", "z-popover", "space", "transition-fast"], "notes": "Close on outside click and escape. Anchor positioning (flip/shift to stay in viewport)." },
+        { "name": "Dropdown Menu", "variants": ["simple", "with icons", "with keyboard shortcuts", "with submenus", "with checkable items"], "states": ["closed", "open", "item hover", "item focused", "item disabled"], "tokens": ["surface", "on-surface", "surface-variant", "outline-subtle", "radius-card", "shadow-2", "font-body", "space", "z-dropdown", "transition-fast"], "notes": "Full keyboard navigation (arrows, type-ahead, enter, escape). Anchor positioning." },
+        { "name": "Accordion", "variants": ["single open", "multiple open"], "states": ["collapsed", "expanded", "hover", "focused", "disabled"], "tokens": ["surface", "on-surface", "outline-subtle", "font-body", "space", "icon size", "transition-normal"], "notes": "Use details/summary for simple cases. Keyboard: enter/space to toggle." },
+        { "name": "Separator", "variants": ["horizontal", "vertical"], "tokens": ["outline-subtle", "bw-1"], "notes": "Decorative role — use role=separator or semantic hr." },
+        { "name": "Scroll Area", "variants": ["vertical", "horizontal", "both"], "sizes": ["sm", "md", "lg"], "tokens": ["surface", "on-surface-variant", "radius-pill"], "notes": "Custom scrollbar styling. Maintain native behavior. overscroll-behavior: contain in nested scroll areas." },
+        { "name": "Resizable", "variants": ["horizontal split", "vertical split", "multi-pane"], "sizes": ["sm", "md", "lg"], "states": ["default", "handle hover", "handle active/dragging"], "tokens": ["outline-subtle", "surface-variant", "transition-fast"], "notes": "Minimum pane sizes. Keyboard-operable handle (arrows to resize). Double-click to reset." }
+      ]
+    },
+    {
+      "name": "Composite",
+      "description": "Multi-component patterns combining simpler components.",
+      "components": [
+        { "name": "Stepper", "variants": ["horizontal", "vertical", "with validation per step"], "sizes": ["sm", "md", "lg"], "states": ["step incomplete", "step active", "step completed", "step error"], "tokens": ["primary", "on-surface-variant", "surface", "outline", "radius-pill", "font-body", "font-caption", "space"], "notes": "Each step independently validatable. Back navigation should preserve state." },
+        { "name": "Carousel", "variants": ["image gallery", "card carousel", "testimonial slider"], "sizes": ["sm", "md", "lg"], "states": ["default", "slide transitioning", "dot/arrow hover"], "tokens": ["surface", "on-surface", "primary", "shadow", "radius-card", "space", "transition-normal"], "notes": "Use CSS scroll-snap. Keyboard navigation (arrows). Pause auto-play on hover/focus. Accessible labels for slides and controls." },
+        { "name": "Tree View", "variants": ["single select", "multi-select", "with icons", "with drag-and-drop"], "sizes": ["sm", "md", "lg"], "states": ["item default", "item selected", "item expanded", "item collapsed", "item hover", "item focused"], "tokens": ["surface", "on-surface", "surface-variant", "primary", "outline-subtle", "icon size", "font-body", "space", "focus-ring"], "notes": "Full keyboard navigation (arrows expand/collapse/navigate, enter to select). aria-expanded on parent nodes." },
+        { "name": "Color Picker", "variants": ["spectrum", "palette swatches", "hex/rgb input", "with opacity"], "sizes": ["sm", "md", "lg"], "states": ["default", "picking", "value entered"], "tokens": ["surface", "on-surface", "outline", "radius-card", "shadow", "space"], "notes": "Must support keyboard input (not just pointer). Show selected color preview. Allow hex/rgb manual entry." }
+      ]
+    }
+  ]
+}

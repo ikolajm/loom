@@ -1,0 +1,232 @@
+{
+  "$schema": "Internal standard — values locked across all projects. Do not override per-project.",
+
+  "spacing": {
+    "scale": {
+      "0": "0",
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px",
+      "24": "96px"
+    }
+  },
+
+  "sizing": {
+    "border-radius": {
+      "br-0": "0px",
+      "br-1": "2px",
+      "br-2": "4px",
+      "br-3": "6px",
+      "br-4": "8px",
+      "br-5": "12px",
+      "br-6": "16px",
+      "br-7": "24px",
+      "br-8": "28px",
+      "br-9": "32px",
+      "br-999": "9999px"
+    },
+    "border-width": {
+      "bw-0": "0px",
+      "bw-1": "1px",
+      "bw-2": "2px",
+      "bw-3": "4px"
+    },
+    "icon-size": {
+      "icon-0": "12px",
+      "icon-1": "16px",
+      "icon-2": "20px",
+      "icon-3": "24px",
+      "icon-4": "32px"
+    },
+    "component-height": {
+      "ch-0": "20px",
+      "ch-1": "24px",
+      "ch-2": "28px",
+      "ch-3": "32px",
+      "ch-4": "36px",
+      "ch-5": "40px",
+      "ch-6": "44px",
+      "ch-7": "48px",
+      "ch-8": "56px",
+      "ch-9": "64px"
+    },
+    "touch-target": {
+      "min": "44px"
+    }
+  },
+
+  "effects": {
+    "transition": {
+      "fast": "100ms",
+      "normal": "200ms",
+      "slow": "400ms"
+    },
+    "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "focus-ring": {
+      "width": "2px",
+      "offset": "2px",
+      "color": "primary"
+    },
+    "shadow": {
+      "$note": "Shadow levels generated in config/base/effects.json. shadow-0 (none) through shadow-N."
+    }
+  },
+
+  "colors": {
+    "default-mode": "dark",
+    "$note": "Both light and dark are equal mapping schemes. default-mode determines which loads first. Fixed variants reference the same palette stops in both modes — explicitly modeled in each.",
+
+    "modes": {
+      "light": {
+        "primary": {
+          "primary": "{palette.primary.600}",
+          "on-primary": "#FFFFFF",
+          "primary-container": "{palette.primary.100}",
+          "on-primary-container": "{palette.primary.900}",
+          "primary-fixed": "{palette.primary.200}",
+          "primary-fixed-dim": "{palette.primary.300}",
+          "on-primary-fixed": "{palette.primary.900}",
+          "on-primary-fixed-variant": "{palette.primary.700}"
+        },
+        "secondary": {
+          "secondary": "{palette.secondary.600}",
+          "on-secondary": "#FFFFFF",
+          "secondary-container": "{palette.secondary.100}",
+          "on-secondary-container": "{palette.secondary.900}",
+          "secondary-fixed": "{palette.secondary.200}",
+          "secondary-fixed-dim": "{palette.secondary.300}",
+          "on-secondary-fixed": "{palette.secondary.900}",
+          "on-secondary-fixed-variant": "{palette.secondary.700}"
+        },
+        "neutral": {
+          "neutral": "{palette.neutral.60}",
+          "on-neutral": "#FFFFFF",
+          "neutral-container": "{palette.neutral.90}",
+          "on-neutral-container": "{palette.neutral.10}"
+        },
+        "surface": {
+          "surface": "{palette.neutral.95}",
+          "surface-1": "{palette.neutral.90}",
+          "surface-2": "{palette.neutral.85}",
+          "surface-3": "{palette.neutral.80}",
+          "on-surface": "{palette.neutral.10}",
+          "on-surface-variant": "{palette.neutral.30}",
+          "surface-inverse": "{palette.neutral.20}",
+          "on-surface-inverse": "{palette.neutral.95}",
+          "inverse-primary": "{palette.primary.300}",
+          "scrim": "rgba(0, 0, 0, 0.3)"
+        },
+        "outline": {
+          "outline": "{palette.neutral.50}",
+          "outline-subtle": "{palette.neutral.80}"
+        },
+        "error": {
+          "error": "{palette.error.600}",
+          "on-error": "#FFFFFF",
+          "error-container": "{palette.error.100}",
+          "on-error-container": "{palette.error.900}"
+        },
+        "success": {
+          "success": "{palette.success.600}",
+          "on-success": "#FFFFFF",
+          "success-container": "{palette.success.100}",
+          "on-success-container": "{palette.success.900}"
+        },
+        "warning": {
+          "warning": "{palette.warning.600}",
+          "on-warning": "#FFFFFF",
+          "warning-container": "{palette.warning.100}",
+          "on-warning-container": "{palette.warning.900}"
+        },
+        "info": {
+          "info": "{palette.info.600}",
+          "on-info": "#FFFFFF",
+          "info-container": "{palette.info.100}",
+          "on-info-container": "{palette.info.900}"
+        },
+        "common": {
+          "on-color": "#FFFFFF"
+        }
+      },
+
+      "dark": {
+        "primary": {
+          "primary": "{palette.primary.300}",
+          "on-primary": "{palette.primary.900}",
+          "primary-container": "{palette.primary.800}",
+          "on-primary-container": "{palette.primary.100}",
+          "primary-fixed": "{palette.primary.200}",
+          "primary-fixed-dim": "{palette.primary.300}",
+          "on-primary-fixed": "{palette.primary.900}",
+          "on-primary-fixed-variant": "{palette.primary.700}"
+        },
+        "secondary": {
+          "secondary": "{palette.secondary.300}",
+          "on-secondary": "{palette.secondary.900}",
+          "secondary-container": "{palette.secondary.800}",
+          "on-secondary-container": "{palette.secondary.100}",
+          "secondary-fixed": "{palette.secondary.200}",
+          "secondary-fixed-dim": "{palette.secondary.300}",
+          "on-secondary-fixed": "{palette.secondary.900}",
+          "on-secondary-fixed-variant": "{palette.secondary.700}"
+        },
+        "neutral": {
+          "neutral": "{palette.neutral.80}",
+          "on-neutral": "{palette.neutral.10}",
+          "neutral-container": "{palette.neutral.25}",
+          "on-neutral-container": "{palette.neutral.90}"
+        },
+        "surface": {
+          "surface": "{palette.neutral.10}",
+          "surface-1": "{palette.neutral.15}",
+          "surface-2": "{palette.neutral.25}",
+          "surface-3": "{palette.neutral.40}",
+          "on-surface": "{palette.neutral.90}",
+          "on-surface-variant": "{palette.neutral.80}",
+          "surface-inverse": "{palette.neutral.90}",
+          "on-surface-inverse": "{palette.neutral.20}",
+          "inverse-primary": "{palette.primary.600}",
+          "scrim": "rgba(0, 0, 0, 0.5)"
+        },
+        "outline": {
+          "outline": "{palette.neutral.60}",
+          "outline-subtle": "{palette.neutral.30}"
+        },
+        "error": {
+          "error": "{palette.error.400}",
+          "on-error": "{palette.error.900}",
+          "error-container": "{palette.error.800}",
+          "on-error-container": "{palette.error.100}"
+        },
+        "success": {
+          "success": "{palette.success.400}",
+          "on-success": "{palette.success.900}",
+          "success-container": "{palette.success.800}",
+          "on-success-container": "{palette.success.100}"
+        },
+        "warning": {
+          "warning": "{palette.warning.400}",
+          "on-warning": "{palette.warning.900}",
+          "warning-container": "{palette.warning.800}",
+          "on-warning-container": "{palette.warning.100}"
+        },
+        "info": {
+          "info": "{palette.info.400}",
+          "on-info": "{palette.info.900}",
+          "info-container": "{palette.info.800}",
+          "on-info-container": "{palette.info.100}"
+        },
+        "common": {
+          "on-color": "#FFFFFF"
+        }
+      }
+    }
+  }
+}

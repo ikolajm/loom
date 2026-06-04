@@ -1,0 +1,234 @@
+{
+  "toast": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-inverse", "fg": "color/surface/on-surface-inverse" },
+      "error":   { "bg": "color/error/error-container", "fg": "color/error/on-error-container" },
+      "success": { "bg": "color/success/success-container", "fg": "color/success/on-success-container" },
+      "warning": { "bg": "color/warning/warning-container", "fg": "color/warning/on-warning-container" },
+      "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" }
+    },
+    "icon-slots": {
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/x" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "alert": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface" },
+      "error":   { "bg": "color/error/error-container", "fg": "color/error/on-error-container" },
+      "success": { "bg": "color/success/success-container", "fg": "color/success/on-success-container" },
+      "warning": { "bg": "color/warning/warning-container", "fg": "color/warning/on-warning-container" },
+      "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" }
+    },
+    "icon-slots": {
+      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
+      "trailing": { "default-visible": false, "default-icon": "icon/x" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "tooltip": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "shadow": "effects/shadow-1" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "10px", "line-height": "14px" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "14px", "line-height": "20px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "popover": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "shadow": "effects/shadow-2" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card", "font-size": "12px", "line-height": "16px" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card", "font-size": "14px", "line-height": "20px" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "dropdown-menu": {
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "hover-bg": "color/surface/surface-2", "shadow": "effects/shadow-2" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px" },
+      "md": { "item-height": "height/ch-4", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px" },
+      "lg": { "item-height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "skeleton": {
+    "$note": "Loading placeholder component. Shimmer animation is code-only — not a Figma variable.",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1" }
+    },
+    "shapes": {
+      "text":   { "height": "{scale.2}", "radius": "radius/component", "width": "100%" },
+      "avatar": { "height": "{scale.10}", "radius": "radius/pill", "width": "{scale.10}" },
+      "card":   { "height": "{scale.24}", "radius": "radius/card", "width": "100%" }
+    },
+    "animation": "shimmer",
+    "default": { "variant": "default" }
+  },
+
+  "progress-bar": {
+    "variants": {
+      "default": { "track-bg": "color/surface/surface-1", "fill-bg": "color/primary/primary" },
+      "success": { "track-bg": "color/surface/surface-1", "fill-bg": "color/success/success" },
+      "warning": { "track-bg": "color/surface/surface-1", "fill-bg": "color/warning/warning" },
+      "error":   { "track-bg": "color/surface/surface-1", "fill-bg": "color/error/error" }
+    },
+    "sizes": {
+      "sm": { "height": "{scale.1}", "radius": "radius/pill" },
+      "md": { "height": "{scale.2}", "radius": "radius/pill" },
+      "lg": { "height": "{scale.3}", "radius": "radius/pill" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "badge-dot": {
+    "$note": "Notification indicator dot. Positioned on icons/avatars. Optionally displays a count number.",
+    "variants": {
+      "default": { "bg": "color/error/error", "fg": "color/error/on-error" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 600,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "$exception": "Badge-dot count text uses sizes below typography preset minimum (12px). 8–10px fonts required to fit within the dot dimensions across all sizes.",
+      "sm": { "size": "{scale.2}", "radius": "radius/pill", "font-size": "8px", "line-height": "8px" },
+      "md": { "size": "{scale.3}", "radius": "radius/pill", "font-size": "10px", "line-height": "10px" },
+      "lg": { "size": "{scale.4}", "radius": "radius/pill", "font-size": "10px", "line-height": "10px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "empty-state": {
+    "$note": "Placeholder shown when a view has no content — zero results, first-time use, empty list. Icon/illustration + heading + description + optional action button. Always provide a next action when possible. Distinct from skeleton (loading placeholder) — empty state appears after loading completes with no data.",
+    "variants": {
+      "default": { "icon-fg": "color/surface/on-surface-variant", "heading-fg": "color/surface/on-surface", "description-fg": "color/surface/on-surface-variant" }
+    },
+    "heading-typography": {
+      "font-family": "body",
+      "font-weight": 600,
+      "letter-spacing": "-0.01em",
+      "text-transform": "none"
+    },
+    "description-typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "gap": "{scale.3}", "icon-size": "icon/icon-3", "heading-font-size": "16px", "heading-line-height": "24px", "description-font-size": "14px", "description-line-height": "20px" },
+      "md": { "gap": "{scale.4}", "icon-size": "icon/icon-4", "heading-font-size": "20px", "heading-line-height": "28px", "description-font-size": "16px", "description-line-height": "24px" },
+      "lg": { "gap": "{scale.6}", "icon-size": "icon/icon-4", "heading-font-size": "24px", "heading-line-height": "32px", "description-font-size": "18px", "description-line-height": "28px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "context-menu": {
+    "$note": "Right-click triggered menu. Shares visual styling with dropdown-menu but uses a different trigger mechanism (contextmenu event instead of click). Supports items, separators, sub-menus, and checkable items.",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "hover-bg": "color/surface/surface-2", "shadow": "effects/shadow-2" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "item-height": "height/ch-4", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "item-height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "hover-card": {
+    "$note": "Hover-triggered preview card. Richer than tooltip (supports structured content — images, links, metadata). Different from popover (hover trigger vs click trigger). Delay before show (~300ms), dismiss on mouse leave. Anchor positioning.",
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-2" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "max-width": "240px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card", "font-size": "12px", "line-height": "16px" },
+      "md": { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card", "font-size": "14px", "line-height": "20px" },
+      "lg": { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card", "font-size": "16px", "line-height": "24px" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "spinner": {
+    "$note": "Indeterminate loading indicator. Distinct from Skeleton (content placeholder) and ProgressBar (determinate progress). CSS animation — not a Figma variable. Use aria-label for accessibility. Can be inlined in buttons (loading state) or standalone.",
+    "variants": {
+      "default": { "fg": "color/primary/primary" },
+      "muted":   { "fg": "color/surface/on-surface-variant" },
+      "inherit": { "fg": "currentColor" }
+    },
+    "sizes": {
+      "sm": { "size": "icon/icon-1", "border-width": "border-width/bw-2" },
+      "md": { "size": "icon/icon-2", "border-width": "border-width/bw-2" },
+      "lg": { "size": "icon/icon-3", "border-width": "border-width/bw-3" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  }
+}
