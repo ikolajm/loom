@@ -9,7 +9,8 @@
       "fab",
       "fab-menu",
       "toggle",
-      "toggle-group"
+      "toggle-group",
+      "sidebar"
     ]
   }
 }

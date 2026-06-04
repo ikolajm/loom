@@ -1,24 +1,38 @@
 /* === Doc layout — gallery presentation layer (derived from presentation/layout.json) === */
-/* Sphere-neutral source shared with the Figma scaffold. Hue-neutral + mode-independent: */
-/* client components showcase against these frames. */
+/* Sphere-neutral source shared with the Figma scaffold. The frame COLORS are per-mode, keyed */
+/* by data-theme so one attribute on a frame swaps both its chrome and its components in */
+/* lockstep; mode-independent layout (spacing/padding/accent) lives in :root. */
 :root {
   --doc-page-bg: #000000;
-  --doc-frame-bg: #F5F5F5;
-  --doc-frame-fg: #1A1A1A;
-  --doc-frame-fg-muted: #737373;
   --doc-frame-padding: 48px;
   --doc-frame-radius: var(--radius-card);
   --doc-frame-min-width: 400px;
-  --doc-surface-1: #EDEDED;
-  --doc-surface-2: #E5E5E5;
-  --doc-outline: #E0E0E0;
-  --doc-outline-subtle: #EBEBEB;
-  --doc-accent: #E91E8C;
-  --doc-on-accent: #FFFFFF;
+  --doc-accent: var(--primary);
+  --doc-on-accent: var(--on-primary);
   --doc-frame-group-gap: 64px;
   --doc-section-gap: 40px;
   --doc-component-group-gap: 24px;
   --doc-component-gap: 16px;
   --doc-label-gap: 8px;
   --doc-description-gap: 4px;
+}
+
+[data-theme="light"] {
+  --doc-frame-bg: #F5F5F5;
+  --doc-frame-fg: #1A1A1A;
+  --doc-frame-fg-muted: #737373;
+  --doc-surface-1: #EDEDED;
+  --doc-surface-2: #E5E5E5;
+  --doc-outline: #E0E0E0;
+  --doc-outline-subtle: #EBEBEB;
+}
+
+[data-theme="dark"] {
+  --doc-frame-bg: #1C1C1C;
+  --doc-frame-fg: #F0F0F0;
+  --doc-frame-fg-muted: #8A8A8A;
+  --doc-surface-1: #262626;
+  --doc-surface-2: #303030;
+  --doc-outline: #3A3A3A;
+  --doc-outline-subtle: #2A2A2A;
 }

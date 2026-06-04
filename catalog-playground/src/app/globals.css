@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./doc-layout.css";
 
 html, body {
-  background-color: var(--surface);
+  background-color: var(--doc-page-bg);
   color: var(--on-surface);
 }

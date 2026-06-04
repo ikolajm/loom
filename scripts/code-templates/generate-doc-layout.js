@@ -33,39 +33,45 @@ function generate() {
 
   const lines = [
     '/* === Doc layout — gallery presentation layer (derived from presentation/layout.json) === */',
-    '/* Sphere-neutral source shared with the Figma scaffold. Hue-neutral + mode-independent: */',
-    '/* client components showcase against these frames. */',
+    '/* Sphere-neutral source shared with the Figma scaffold. The frame COLORS are per-mode, keyed */',
+    '/* by data-theme so one attribute on a frame swaps both its chrome and its components in */',
+    '/* lockstep; mode-independent layout (spacing/padding/accent) lives in :root. */',
     ':root {',
   ];
-
   const push = (name, val) => lines.push(`  --doc-${name}: ${val};`);
 
-  // Frame
+  // Mode-independent: canvas, layout geometry, agency accent, spacing hierarchy.
   push('page-bg', layout.page.background);
-  push('frame-bg', layout.frame.background);
-  push('frame-fg', layout.frame.foreground);
-  push('frame-fg-muted', layout.frame['foreground-muted']);
   push('frame-padding', resolveSpace(layout.frame.padding));
   push('frame-radius', resolveRadius(layout.frame.radius));
   push('frame-min-width', layout.frame['min-width']);
-
-  // Surfaces (nesting) + outlines
-  push('surface-1', layout.surface['surface-1']);
-  push('surface-2', layout.surface['surface-2']);
-  push('outline', layout.outline.default);
-  push('outline-subtle', layout.outline.subtle);
-
-  // Doc accent (agency branding — the interactive-preview frame + Try Me)
-  push('accent', layout.accent.color);
-  push('on-accent', layout.accent['on-accent']);
-
-  // Spacing hierarchy: frame-group > section > component-group > component > label > description
+  // Doc accent = the consumer's own primary, so every scaffold reads as entirely theirs
+  // (no separate agency-branding decision). layout.json's accent stays for the Figma sphere.
+  push('accent', 'var(--primary)');
+  push('on-accent', 'var(--on-primary)');
   for (const [key, val] of Object.entries(layout.spacing)) {
     if (key.startsWith('$')) continue;
     push(key, resolveSpace(val));
   }
-
   lines.push('}');
+
+  // Per-mode frame colors. Light = the top-level frame/surface/outline; dark = the `dark` block.
+  const frameColorBlock = (selector, frame, surface, outline) => {
+    lines.push('', `${selector} {`);
+    push('frame-bg', frame.background);
+    push('frame-fg', frame.foreground);
+    push('frame-fg-muted', frame['foreground-muted']);
+    push('surface-1', surface['surface-1']);
+    push('surface-2', surface['surface-2']);
+    push('outline', outline.default);
+    push('outline-subtle', outline.subtle);
+    lines.push('}');
+  };
+  frameColorBlock('[data-theme="light"]', layout.frame, layout.surface, layout.outline);
+  if (layout.dark) {
+    frameColorBlock('[data-theme="dark"]', layout.dark.frame, layout.dark.surface, layout.dark.outline);
+  }
+
   return lines.join('\n') + '\n';
 }
 

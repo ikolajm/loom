@@ -1,4 +1,4 @@
-const { buildSizeStyles, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES } = require('../shared');
+const { buildSizeStyles, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, extractIconSizes, buildSizeStylesWithText } = require('./helpers');
 
 function generateButton(name, config, meta) {
@@ -95,14 +95,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {iconOnly ? (
-          <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>
+          <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>
             {loading ? <LoadingSpinner /> : children}
           </span>
         ) : (
           <>
-            {effectiveLeadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{effectiveLeadingIcon}</span>}
+            {effectiveLeadingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{effectiveLeadingIcon}</span>}
             <Slottable>{children}</Slottable>
-            {trailingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{trailingIcon}</span>}
+            {trailingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{trailingIcon}</span>}
           </>
         )}
       </Comp>

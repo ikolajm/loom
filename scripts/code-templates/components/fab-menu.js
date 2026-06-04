@@ -1,4 +1,4 @@
-const { buildVariantStyles, buildSizeStyles, colorToClass, spacingToClass, radiusToClass } = require('../shared');
+const { buildVariantStyles, buildSizeStyles, colorToClass, spacingToClass, radiusToClass, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, extractIconSizes } = require('./helpers');
 
 function generateFabMenu(name, config, meta) {
@@ -138,7 +138,7 @@ const FabMenu = forwardRef<HTMLDivElement, FabMenuProps>(
             aria-haspopup="menu"
             onClick={() => handleOpenChange(!open)}
           >
-            <span className={cn('shrink-0 [&>svg]:size-full', triggerIconCls)}>{triggerIcon}</span>
+            <span className={cn('${ICON_SLOT_CLASS}', triggerIconCls)}>{triggerIcon}</span>
             {triggerLabel && <span className="ml-2">{triggerLabel}</span>}
           </button>
         </div>
@@ -170,7 +170,7 @@ const FabAction = forwardRef<HTMLButtonElement, FabActionProps>(
           aria-label={label}
           {...props}
         >
-          <span className={cn('shrink-0 [&>svg]:size-full', actionIconCls)}>{icon}</span>
+          <span className={cn('${ICON_SLOT_CLASS}', actionIconCls)}>{icon}</span>
         </button>
       </div>
     );

@@ -1,4 +1,4 @@
-const { buildVariantStyles, buildSizeStyles, buildTypographyClasses, spacingToClass } = require('../shared');
+const { buildVariantStyles, buildSizeStyles, buildTypographyClasses, spacingToClass, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, extractIconSizes, buildSizeStylesWithText, prefixClasses } = require('./helpers');
 
 function generateRadixToggle(name, config, meta) {
@@ -44,9 +44,9 @@ const Toggle = forwardRef<React.ComponentRef<typeof TogglePrimitive.Root>, Toggl
     const iconCls = toggleIconSize[size || 'md'] || '';
     return (
       <TogglePrimitive.Root ref={ref} className={cn(toggleVariants({ size }), className)} {...props}>
-        {leadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{leadingIcon}</span>}
+        {leadingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{leadingIcon}</span>}
         {children}
-        {trailingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{trailingIcon}</span>}
+        {trailingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{trailingIcon}</span>}
       </TogglePrimitive.Root>
     );
   }

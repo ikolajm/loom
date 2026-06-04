@@ -1,4 +1,4 @@
-const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES } = require('../shared');
+const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
@@ -127,9 +127,9 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
 
     const content = (
       <>
-        {leadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{leadingIcon}</span>}
+        {leadingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{leadingIcon}</span>}
         {children}
-        {trailingIcon && !onRemove && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{trailingIcon}</span>}
+        {trailingIcon && !onRemove && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{trailingIcon}</span>}
       </>
     );
 
@@ -148,9 +148,9 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
     if (asChild) {
       return (
         <Slot
-          ref={ref as any}
+          ref={ref}
           className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)}
-          {...(props as any)}
+          {...props}
         >
           <>
             {content}
@@ -163,15 +163,16 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
     // interactive + onRemove — container carries the fill/radius; two transparent
     // segments split it, each padded like a button and rounded only on its outer edge,
     // for a uniform button-like split hover. Padding moves off the container (!p-0 !gap-0).
+    // ref is narrowed per branch — a polymorphic span/button ref can't be expressed at the type level.
     if (interactive && onRemove) {
       const segPad = badgeSegmentPad[size];
       const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
       return (
-        <span ref={ref as any} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} {...(props as any)}>
+        <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} {...props}>
           <button
             type="button"
             className={cn(segmentBase, 'rounded-l-[inherit]', segPad)}
-            onClick={onClick as any}
+            onClick={onClick}
           >
             {content}
           </button>
@@ -191,11 +192,11 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
     if (interactive) {
       return (
         <button
-          ref={ref as any}
+          ref={ref as React.Ref<HTMLButtonElement>}
           type="button"
           className={cn(computedClasses, INTERACTIVE_CLASSES, className)}
-          onClick={onClick as any}
-          {...(props as any)}
+          onClick={onClick}
+          {...props}
         >
           {content}
         </button>
@@ -204,7 +205,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
 
     // span (plain or onRemove only)
     return (
-      <span ref={ref as any} className={cn(computedClasses, className)} {...(props as any)}>
+      <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, className)} {...props}>
         {content}
         {closeButton}
       </span>

@@ -1,4 +1,4 @@
-const { buildVariantStyles, buildSizeStyles, buildTypographyClasses } = require('../shared');
+const { buildVariantStyles, buildSizeStyles, buildTypographyClasses, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, extractIconSizes } = require('./helpers');
 
 function generateFAB(name, config, meta) {
@@ -83,8 +83,8 @@ const FAB = forwardRef<HTMLButtonElement, FABProps>(
         className={cn(fabVariants({ variant, size: resolvedSize as any }), className)}
         {...props}
       >
-        {icon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{icon}</span>}
-        {!icon && children && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{children}</span>}
+        {icon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{icon}</span>}
+        {!icon && children && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{children}</span>}
         {label && <span>{label}</span>}
       </button>
     );

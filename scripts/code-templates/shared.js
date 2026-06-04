@@ -26,6 +26,10 @@ function loadAllConfigs() {
   };
 }
 
+// Shared icon-slot wrapper class — the span that holds a leading/trailing/standalone icon and
+// makes its svg fill the slot. Interpolated into component templates so the literal lives once.
+const ICON_SLOT_CLASS = 'shrink-0 [&>svg]:size-full';
+
 // --- Tailwind class mappers ---
 
 function colorToClass(colorPath, prefix = 'bg') {
@@ -384,6 +388,7 @@ module.exports = {
   buildVariantStyles,
   colorToVar,
   TREATMENT_CLASSES,
+  ICON_SLOT_CLASS,
   buildColorVars,
   buildSizeStyles,
   buildTypographyClasses,
