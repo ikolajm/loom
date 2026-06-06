@@ -1,8 +1,8 @@
 {
-  "name": "alert",
-  "category": "feedback",
-  "description": "",
-  "version": "9312ae2e9495",
+  "name": "toolbar",
+  "category": "layout",
+  "description": "Horizontal flex container for grouped actions — houses buttons, toggles, separators, dropdowns. Children render as-is.",
+  "version": "e2dd9f3befdc",
   "dependencies": [
     "cn"
   ],
@@ -16,13 +16,9 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "alert.story.ts",
+  "stories": "toolbar.story.ts",
   "variants": [
-    "default",
-    "error",
-    "success",
-    "warning",
-    "info"
+    "default"
   ],
   "sizes": [
     "sm",

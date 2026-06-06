@@ -3,7 +3,8 @@
     "variants": {
       "default":  { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-1" },
       "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-2" },
-      "outline":  { "bg": "transparent", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-0" }
+      "outline":  { "bg": "transparent", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-0" },
+      "flush":    { "bg": "transparent", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-0" }
     },
     "sizes": {
       "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card" },
@@ -27,7 +28,7 @@
   },
   "table": {
     "variants": {
-      "default": { "header-bg": "color/surface/surface-2", "header-fg": "color/surface/on-surface", "row-bg": "color/surface/surface-1", "alt-row-bg": "color/surface/surface", "row-fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+      "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
     },
     "typography": {
       "header": {
@@ -83,6 +84,31 @@
       "sm": { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
       "md": { "max-width": "480px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
       "lg": { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" }
+    },
+    "default": { "variant": "default", "size": "md" }
+  },
+
+  "toolbar": {
+    "$catalog": {
+      "category": "layout",
+      "description": "Horizontal flex container for grouped actions — houses buttons, toggles, separators, dropdowns. Children render as-is.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "variants": {
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+    },
+    "typography": {
+      "font-family": "body",
+      "font-weight": 400,
+      "letter-spacing": "0",
+      "text-transform": "none"
+    },
+    "sizes": {
+      "sm": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
+      "md": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
+      "lg": { "x-padding": "{scale.5}", "y-padding": "{scale.3}", "gap": "{scale.3}" }
     },
     "default": { "variant": "default", "size": "md" }
   }

@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-navigation-menu",
+    "lucide-react"
+  ],
   "tokens": [
     "color",
     "typography",

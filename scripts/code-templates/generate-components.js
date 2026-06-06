@@ -151,7 +151,23 @@ function extractAxisKeys(obj) {
   return Object.keys(obj).filter(k => !k.startsWith('$'));
 }
 
-function buildManifest(def, config, version) {
+// External npm packages a generated atom imports — the consumer install set.
+// Scans `from '<spec>'`; keeps non-relative specifiers, drops react/react-dom (peer deps
+// a React app already has). Scoped pkgs collapse to @scope/name, subpaths to the package root.
+function extractNpmDeps(src) {
+  const deps = new Set();
+  const re = /from\s+['"]([^'"]+)['"]/g;
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    const spec = m[1];
+    if (spec.startsWith('.')) continue;
+    if (spec === 'react' || spec === 'react-dom' || spec.startsWith('react/') || spec.startsWith('react-dom/')) continue;
+    deps.add(spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]);
+  }
+  return [...deps].sort();
+}
+
+function buildManifest(def, config, version, src) {
   const cat = config?.$catalog || {};
 
   // Primary axis: variants if present, else state, else checked, else active, else step-state
@@ -170,6 +186,7 @@ function buildManifest(def, config, version) {
     description: cat.description || '',
     version: cat.version || version,
     dependencies: cat.dependencies || ['cn'],
+    npmDependencies: extractNpmDeps(src || ''),
     tokens: cat.tokens || ['color', 'typography', 'spacing', 'sizing'],
     composition: cat.composition || 'none',
     stories: `${def.key}.story.ts`,
@@ -202,7 +219,7 @@ function generate(registry, outputDir, configs) {
     // Config-free utilities — generated directly
     if (name === 'FormField') {
       const tsx = generateFormField();
-      const manifest = buildManifest(def, null, contentVersion(tsx));
+      const manifest = buildManifest(def, null, contentVersion(tsx), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
       console.log(`  ${def.key}.tsx + manifest (utility)`);
@@ -218,7 +235,7 @@ function generate(registry, outputDir, configs) {
     }
 
     const tsx = dispatch(name, config, def);
-    const manifest = buildManifest(def, config, contentVersion(tsx));
+    const manifest = buildManifest(def, config, contentVersion(tsx), tsx);
 
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
@@ -235,6 +252,7 @@ function generate(registry, outputDir, configs) {
     description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
     version: contentVersion(cnSrc),
     dependencies: [],
+    npmDependencies: extractNpmDeps(cnSrc),
     tokens: [],
     composition: 'none',
     stories: '',

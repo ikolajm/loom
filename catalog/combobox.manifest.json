@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "cmdk",
+    "lucide-react"
+  ],
   "tokens": [
     "color",
     "typography",

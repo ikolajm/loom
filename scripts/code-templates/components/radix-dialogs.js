@@ -1,6 +1,22 @@
 const { buildVariantStyles, buildSizeStyles } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
+/**
+ * Built-in close affordance, shared by Dialog and Sheet (both wrap @radix-ui/react-dialog).
+ * `alias` is the imported primitive namespace (DialogPrimitive / SheetPrimitive); `pad` is the
+ * leading indent for the block. Single source for the close-button markup + styling.
+ */
+function closeButton(alias, pad) {
+  return [
+    `${pad}{showClose && (`,
+    `${pad}  <${alias}.Close className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none">`,
+    `${pad}    <X className="size-4" />`,
+    `${pad}    <span className="sr-only">Close</span>`,
+    `${pad}  </${alias}.Close>`,
+    `${pad})}`,
+  ].join('\n');
+}
+
 function generateRadixDialog(name, config, meta) {
   const sizes = filterSizes(config.sizes);
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
@@ -13,7 +29,6 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 import { cn } from './cn';
-import { Button } from './Button';
 
 const dialogContentVariants = cva(
   'fixed left-1/2 top-1/2 z-[var(--z-modal)] w-full -translate-x-1/2 -translate-y-1/2 flex flex-col ${variantStyles.default || 'bg-surface-1 text-on-surface shadow-[var(--shadow-3)]'}',
@@ -46,8 +61,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & VariantProps<typeof dialogContentVariants>
->(({ size, className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & VariantProps<typeof dialogContentVariants> & { showClose?: boolean }
+>(({ size, showClose = true, className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -56,6 +71,7 @@ const DialogContent = forwardRef<
       {...props}
     >
       {children}
+${closeButton('DialogPrimitive', '      ')}
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
@@ -196,7 +212,6 @@ import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 import { cn } from './cn';
-import { Button } from './Button';
 
 const sheetSideVariants = cva(
   'fixed z-[var(--z-modal)] flex flex-col bg-surface-1 text-on-surface shadow-[var(--shadow-3)] transition-transform',
@@ -239,10 +254,10 @@ SheetOverlay.displayName = 'SheetOverlay';
 
 type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>
   & VariantProps<typeof sheetSideVariants>
-  & { size?: 'sm' | 'md' | 'lg' };
+  & { size?: 'sm' | 'md' | 'lg'; showClose?: boolean };
 
 const SheetContent = forwardRef<React.ComponentRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  ({ side = 'right', size = 'md', className, children, ...props }, ref) => {
+  ({ side = 'right', size = 'md', showClose = true, className, children, ...props }, ref) => {
     const s = sheetSizeMap[size];
     const isHorizontal = side === 'left' || side === 'right';
     return (
@@ -254,6 +269,7 @@ const SheetContent = forwardRef<React.ComponentRef<typeof SheetPrimitive.Content
           {...props}
         >
           {children}
+${closeButton('SheetPrimitive', '          ')}
         </SheetPrimitive.Content>
       </SheetPortal>
     );

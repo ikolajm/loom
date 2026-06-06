@@ -176,30 +176,6 @@
     },
     "default": { "variant": "default", "size": "md" }
   },
-  "toolbar": {
-    "$catalog": {
-      "category": "button",
-      "description": "Horizontal flex container for grouped actions — houses buttons, toggles, separators, dropdowns. Children render as-is.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
-      "composition": "none"
-    },
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" },
-      "lg": { "height": "height/ch-8", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.3}", "font-size": "18px", "line-height": "28px" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
   "toggle": {
     "$catalog": {

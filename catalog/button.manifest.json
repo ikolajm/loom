@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority"
+  ],
   "tokens": [
     "color",
     "typography",

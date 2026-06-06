@@ -2,9 +2,12 @@
   "name": "sidebar",
   "category": "navigation",
   "description": "",
-  "version": "2026-06-04",
+  "version": "5b712c2ca6bd",
   "dependencies": [
     "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
   ],
   "tokens": [
     "color",

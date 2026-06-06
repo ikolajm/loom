@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
   "tokens": [
     "color",
     "typography",

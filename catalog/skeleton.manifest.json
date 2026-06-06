@@ -6,6 +6,7 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [],
   "tokens": [
     "color",
     "typography",

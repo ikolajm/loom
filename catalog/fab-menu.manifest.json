@@ -7,6 +7,9 @@
     "fab",
     "cn"
   ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
   "tokens": [
     "color",
     "typography",

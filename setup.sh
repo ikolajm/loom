@@ -47,8 +47,14 @@ cp "$TOKENS_TMP/tokens.css" "$SRC/tokens.css"
 echo "  + src/tokens.css"
 
 echo "Done → $DEST"
+
+# npm packages the picked atoms import — reported, not installed (consumer owns their lockfile).
+NPM_DEPS="$(node "$LOOM_ROOT/scripts/resolve-picks.js" "$PICKS" "$CATALOG" --npm)"
 echo ""
-echo "Next step — wire the substrate into your global stylesheet (once):"
+echo "Next step 1 — install the packages these atoms import (once):"
+echo "  npm install $NPM_DEPS"
+echo ""
+echo "Next step 2 — wire the substrate into your global stylesheet (once):"
 echo "  @import \"tailwindcss\";"
 echo "  @import \"../tokens.css\";   /* from src/app/globals.css */"
 echo "(requires Tailwind v4 + @tailwindcss/postcss; atoms are role-token utilities)"

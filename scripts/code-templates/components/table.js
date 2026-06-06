@@ -8,13 +8,11 @@ function generateTable(name, config, meta) {
   const headerTypo = resolved.typography?.header || {};
   const cellTypo = resolved.typography?.cell || {};
 
-  // Colors from config
-  const headerBg = colorToClass(variant['header-bg'], 'bg') || 'bg-surface-2';
-  const headerFg = colorToClass(variant['header-fg'], 'text') || 'text-on-surface';
-  const rowBg = colorToClass(variant['row-bg'], 'bg') || 'bg-surface-1';
+  // Colors from config. Modern content-first treatment: no header fill, no zebra, no outer grid —
+  // hierarchy comes from a muted header, full-strength cells, light row borders + subtle hover.
+  const headerFg = colorToClass(variant['header-fg'], 'text') || 'text-on-surface-variant';
   const rowFg = colorToClass(variant['row-fg'], 'text') || 'text-on-surface';
   const border = colorToClass(variant['border'], 'border') || 'border-outline-subtle';
-  const altRowBg = colorToClass(variant['alt-row-bg'], 'bg') || 'bg-surface';
 
   // Typography
   const headerWeight = fontWeightToClass(headerTypo['font-weight']) || 'font-medium';
@@ -37,7 +35,11 @@ function generateTable(name, config, meta) {
     `  ${s.tier}: 'px-${s.px} py-${s.py} text-[${s.fs}] leading-[${s.lh}]',`
   ).join('\n');
 
-  return `import { forwardRef } from 'react';
+  const defaultSize = resolved.default?.size || 'md';
+
+  return `'use client';
+
+import { forwardRef, createContext, useContext } from 'react';
 import { cn } from './cn';
 
 const tableCellSize: Record<string, string> = {
@@ -50,27 +52,33 @@ ${headSizeMap}
 
 type TableSize = 'sm' | 'md' | 'lg';
 
+// Size is set once on <Table> and flows to every cell through context; a cell's own
+// size prop still overrides. (Context => this atom is client-rendered.)
+const TableSizeContext = createContext<TableSize>('${defaultSize}');
+
 interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
   size?: TableSize;
 }
 
 const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ size = 'md', className, ...props }, ref) => (
-    <table ref={ref} className={cn('w-full caption-bottom border-collapse ${border} border', className)} data-size={size} {...props} />
+  ({ size = '${defaultSize}', className, ...props }, ref) => (
+    <TableSizeContext.Provider value={size}>
+      <table ref={ref} className={cn('w-full caption-bottom border-collapse text-sm', className)} data-size={size} {...props} />
+    </TableSizeContext.Provider>
   )
 );
 Table.displayName = 'Table';
 
 const TableHeader = forwardRef<HTMLTableSectionElement, React.ComponentPropsWithoutRef<'thead'>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('${headerBg} ${headerFg}', className)} {...props} />
+    <thead ref={ref} className={cn('${headerFg}', className)} {...props} />
   )
 );
 TableHeader.displayName = 'TableHeader';
 
 const TableBody = forwardRef<HTMLTableSectionElement, React.ComponentPropsWithoutRef<'tbody'>>(
   ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={cn('${rowFg} [&_tr]:${rowBg} [&_tr:nth-child(even)]:${altRowBg} [&_tr]:transition-colors [&_tr:hover]:!bg-surface-2', className)} {...props} />
+    <tbody ref={ref} className={cn('${rowFg} [&_tr]:transition-colors [&_tr:hover]:bg-surface-1 [&_tr:last-child]:border-0', className)} {...props} />
   )
 );
 TableBody.displayName = 'TableBody';
@@ -83,16 +91,18 @@ const TableRow = forwardRef<HTMLTableRowElement, React.ComponentPropsWithoutRef<
 TableRow.displayName = 'TableRow';
 
 const TableHead = forwardRef<HTMLTableCellElement, React.ComponentPropsWithoutRef<'th'> & { size?: TableSize }>(
-  ({ size, className, ...props }, ref) => (
-    <th ref={ref} className={cn('text-left align-middle ${headerWeight}', tableHeadSize[size || 'md'], className)} {...props} />
-  )
+  ({ size, className, ...props }, ref) => {
+    const ctxSize = useContext(TableSizeContext);
+    return <th ref={ref} className={cn('text-left align-middle ${headerWeight}', tableHeadSize[size ?? ctxSize], className)} {...props} />;
+  }
 );
 TableHead.displayName = 'TableHead';
 
 const TableCell = forwardRef<HTMLTableCellElement, React.ComponentPropsWithoutRef<'td'> & { size?: TableSize }>(
-  ({ size, className, ...props }, ref) => (
-    <td ref={ref} className={cn('align-middle ${cellWeight}', tableCellSize[size || 'md'], className)} {...props} />
-  )
+  ({ size, className, ...props }, ref) => {
+    const ctxSize = useContext(TableSizeContext);
+    return <td ref={ref} className={cn('align-middle ${cellWeight}', tableCellSize[size ?? ctxSize], className)} {...props} />;
+  }
 );
 TableCell.displayName = 'TableCell';
 

@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-tooltip",
+    "class-variance-authority"
+  ],
   "tokens": [
     "color",
     "typography",

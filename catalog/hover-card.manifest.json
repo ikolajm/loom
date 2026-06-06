@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-hover-card",
+    "class-variance-authority"
+  ],
   "tokens": [
     "color",
     "typography",

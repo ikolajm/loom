@@ -10,7 +10,14 @@
       "fab-menu",
       "toggle",
       "toggle-group",
-      "sidebar"
+      "sidebar",
+      "card",
+      "dialog",
+      "alert-dialog",
+      "sheet",
+      "table",
+      "separator",
+      "toolbar"
     ]
   }
 }

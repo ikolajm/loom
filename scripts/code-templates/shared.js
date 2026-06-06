@@ -311,6 +311,7 @@ function getComponentRegistry(configs) {
     'Sheet': { source: layoutConfig, key: 'sheet', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
     'Separator': { source: layoutConfig, key: 'separator', element: 'hr', htmlType: 'HTMLAttributes<HTMLHRElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-separator' },
     'AlertDialog': { source: layoutConfig, key: 'alert-dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'alertdialog', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-alert-dialog' },
+    'Toolbar': { source: layoutConfig, key: 'toolbar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
 
     // === Feedback ===
     'Toast': { source: feedbackConfig, key: 'toast', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', textFamily: 'action', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-toast' },

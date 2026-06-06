@@ -69,7 +69,7 @@ Source: `spec/config/components/button.json`. Note: `icon-button` was merged int
 | fab-menu | new | FAB that expands into action menu (M3 speed-dial pattern) |
 | badge | refine | Variant axes expanded — absorbs `chip` / `tag-chip` / `badge-dot`. See detailed notes |
 | chip | drop | Consolidated into `badge` (interactive mode) |
-| toolbar | keep | |
+| toolbar | moved | → **Layout** group (it's a flex container, not a button). Config relocated `button.json`→`layout.json` during the Layout deep dive (2026-06-06) |
 | toggle | keep | |
 | toggle-group | refine | Absorb segmented-button as variant |
 
@@ -79,7 +79,7 @@ Source: `spec/config/components/button.json`. Note: `icon-button` was merged int
 
 - **`icon-button` drops from `spec/config/components/button.json`** — already merged into `button` via `iconOnly` mode per `[[project_loom]]`. JSON cleanup task for the orchestrator pass.
 - **`badge` JSON config refactor required** — current `variants` (6 colors) splits into orthogonal `state` (color) + `variants` (visual treatment: filled / outline / outline-mono / dot).
-- **`toolbar` category review** — toolbar is structurally a Layout primitive, not a Button. Source-of-truth JSON is currently button.json; revisit category move when we hit Layout deep dive.
+- **`toolbar` category review** — RESOLVED in the Layout deep dive (2026-06-06): toolbar is a Layout primitive; config moved `button.json`→`layout.json`, category button→layout, and it's now generated (was previously absent from the registry). See Layout § detailed notes.
 - **Catalog metadata source** — `$catalog` blocks inside the existing per-component JSON. See `CATALOG_SPEC.md` § Manifests.
 
 ---
@@ -164,9 +164,9 @@ Consolidates `badge` + `chip` + `tag-chip` (marketing candidate) + `badge-dot` (
 
 ---
 
-**toolbar (keep)**
+**toolbar (moved → Layout)** — full detailed block now lives in the Layout § (config relocated to `layout.json`, category layout, generated 2026-06-06). Block below retained for history.
 
-- **Category:** button (revisit when we hit Layout deep dive — possibly belongs in Layout group; source-of-truth JSON is currently button.json, not moving config until then)
+- **Category:** ~~button~~ → **layout** (moved 2026-06-06)
 - **Dependencies:** `cn-helper`
 - **Tokens:** color (surface-1, on-surface, outline-subtle), typography, spacing, sizing
 - **Composition:** `none` — layout primitive. Children render as-is in flex row
@@ -219,12 +219,13 @@ Source: `spec/config/components/layout.json`. Drops from `[[project_loom]]`: `sc
 
 | Atom | Status | Notes |
 |---|---|---|
-| card | refine | Add `bare` size variant — closes 4 of 5 portfolio shadowing pairs |
-| dialog | keep | |
-| alert-dialog | keep | |
-| sheet | refine | Single Sheet with `side` prop (top / right / bottom / left) — absorbs M3 bottom-sheet + side-sheet |
-| table | keep | |
-| separator | keep | |
+| card | refine | Added `flush` variant (transparent, no border/shadow — sits level with the surface; takes borders/padding back via override). No `asChild` — stays a plain div (Jacob's call) |
+| dialog | refine | Built-in close X (`showClose`, default true); dropped dead `Button` import |
+| alert-dialog | keep | Unchanged — no dismiss-X by design (explicit action only), no dead imports |
+| sheet | refine | `side` prop already done; added built-in close X (`showClose`). Bottom drag-handle **deferred to Sprint 2** (handle without drag-to-dismiss is ornament) |
+| table | refine | (1) Size set once on `<Table>`, propagates to cells via context; per-cell `size` overrides. Now `'use client'`. (2) Modern content-first treatment — no header fill, muted header, no zebra, light row borders + subtle hover, no outer grid |
+| separator | keep | Unchanged |
+| toolbar | new (moved) | Moved from Buttons (`button.json` → `layout.json`, category button→layout); was never generated — now in registry + generated |
 | scroll-area | drop | Per `[[project_loom]]` — overflow-auto is sufficient |
 | resizable | drop | Per `[[project_loom]]` — app-level layout concern |
 
@@ -232,7 +233,87 @@ Triage skipped: adaptive-panes (M3 — app-level concern), image-crop / image-zo
 
 ### Detailed notes — Layout
 
-*(Empty — filled during deep dive)*
+**Layout deep dive complete (2026-06-06).** Confirmed with Jacob via decision round; implemented by editing config + generators (not the generated `catalog/*.tsx`) and regenerating. Validated by `next build` green in the standing portability harness (`loom-test-project`) with all Layout atoms picked + smoke-used; emitted CSS confirmed the new utilities survived purge.
+
+Cross-cutting decisions:
+
+- **Built-in close X on dialog + sheet (not alert-dialog).** Both templates imported `{ X }` + `{ Button }` but rendered neither (dead imports). Resolved by rendering a top-right close affordance via the Radix `Close` primitive + lucide `X`, behind a `showClose` prop (default true). Uses Radix `Close` directly, **not** the Button atom — keeps dialog/sheet dependency surface at just `cn`; dropped the `Button` import. Hover treatment is opacity (per `[[hover-defaults-opacity]]`). AlertDialog intentionally excluded — it has no dismiss-X by design and had no dead imports.
+- **Toolbar category move.** Toolbar is structurally a horizontal flex container for grouped actions — a Layout primitive, not a Button. Config moved `button.json` → `layout.json` (`$catalog.category` button→layout) and a `Toolbar` registry entry added in `shared.js`. It had **never been generated** (absent from the registry) — this pass closes that gap. Dropped the config's fixed `height` (a container housing buttons should size to content, not clip them) and the inert `font-size`/`line-height` (cva-only reads neither — only `table`'s special generator does).
+
+---
+
+**card (refine)**
+
+- **Status:** refine
+- **Category:** layout
+- **Dependencies:** `cn`
+- **Tokens:** color, typography, spacing, sizing
+- **Composition:** `none` — **no `asChild`** (Jacob's call). Card stays a plain `div`; consumer wraps in their own `<a>`/`<button>` for clickable-card cases. Keeps the surface small; matches shadcn.
+- **Sizes:** sm / md / lg (unchanged).
+- **Variants:** default / elevated / outline + new **`flush`** (transparent bg, `border-0`, no shadow). `flush` = a card that sits level with its background, no separating chrome.
+  - *Naming history (resolved with Jacob via visual review):* first built as a `bare` **size** (zero padding) → Jacob: "that's a variant, not a size." Reframed to a variant. `bare` rejected as the name (a bare card *gaining* a border reads as a contradiction); `ghost` considered (vocab-consistent with Button) but **`flush`** chosen — a flush element taking a border later isn't an "offensive override," it just becomes outlined. Edge-to-edge media = `variant="flush"` + `className="p-0"` (atom is project-owned).
+- **Override surface:** Props: `variant`, `size`, standard div attrs. Frozen-but-editable: subcomponent structure (Header/Title/Description/Content/Footer).
+- **Open questions:** none.
+
+---
+
+**dialog (refine)**
+
+- **Status:** refine (close affordance)
+- **Category:** layout
+- **Dependencies:** `cn` (+ `@radix-ui/react-dialog`, `lucide-react` at runtime)
+- **Composition:** `none` (Radix Dialog primitive)
+- **Sizes:** sm / md / lg / full (unchanged).
+- **Change:** built-in close X behind `showClose` (default true) — see cross-cutting note. Dropped dead `Button` import.
+- **Override surface:** Props: `size`, `showClose`, Radix Content props. Frozen: overlay/scrim, positioning, Radix a11y contract.
+- **Open questions:** none.
+
+---
+
+**sheet (refine)**
+
+- **Status:** refine
+- **Category:** layout
+- **Dependencies:** `cn` (+ `@radix-ui/react-dialog`, `lucide-react`)
+- **Composition:** `none` (Radix Dialog primitive, used as an edge panel)
+- **`side` prop:** top / right / bottom / left (already implemented prior to this pass — size applies as width for left/right, height for top/bottom).
+- **Change:** built-in close X behind `showClose` (default true). Dropped dead `Button` import.
+- **Deferred to Sprint 2:** bottom drag-handle. The JSON `handle` config exists but is **not rendered** — a handle without drag-to-dismiss is ornament; it lands with the gesture in the Sprint 2 interaction pass.
+- **Override surface:** Props: `side`, `size`, `showClose`, Radix Content props. Frozen: overlay/scrim, edge-anchoring per side.
+- **Open questions:** none.
+
+---
+
+**table (refine)**
+
+- **Status:** refine (size propagation + visual treatment)
+- **Category:** layout
+- **Dependencies:** `cn`
+- **Composition:** `none`
+- **Change 1 — size propagation:** size is set once on `<Table size>` and flows to `TableHead`/`TableCell` through `TableSizeContext`; a cell's own `size` prop still overrides. Replaces the prior per-cell threading. **Cost:** context makes Table client-rendered (`'use client'`) — accepted to honor the per-cell-override requirement (the server-safe CSS-cascade alternative can't cleanly support override).
+- **Change 2 — visual treatment (from visual review):** the original generated table over-signaled — filled header (`surface-2`) + zebra rows + full border grid all at once (design-research consensus: pick one structuring device). Reworked to the **modern content-first** idiom (shadcn / Linear / Vercel): no header fill, muted header text (`on-surface-variant`) + `font-medium`, no zebra, light row bottom-borders + subtle `hover:bg-surface-1`, no outer grid, `text-sm`. Header recedes (it's labels); cell data is full-strength. Config dropped `header-bg` / `row-bg` / `alt-row-bg`.
+- **Sizes:** sm / md / lg.
+- **Override surface:** Props: `size` (on Table; cascades), per-cell `size` (override). Frozen-but-editable: single `default` variant, the row-border/hover treatment.
+- **Open questions:** none. (Zebra striping deliberately *not* offered as a variant — YAGNI until a long-data use demands it; best practice favors zebra only on long tables.)
+
+---
+
+**toolbar (new — moved from Buttons)**
+
+- **Status:** new to catalog (config moved from Buttons; was never generated)
+- **Category:** layout (was button)
+- **Dependencies:** `cn`
+- **Tokens:** color, typography, spacing, sizing
+- **Composition:** `none` — layout primitive; children (buttons / toggles / separators / dropdowns) render as-is in a flex row.
+- **Sizes:** sm / md / lg (padding + gap; **no fixed height** — sizes to content).
+- **A11y:** no `role="toolbar"` in Sprint 1 — the ARIA toolbar role implies roving-tabindex/arrow-key nav this static container doesn't implement; claiming it would be a false signal (Senior-Engineer smell flag). Revisit with `@radix-ui/react-toolbar` in the Sprint 2 interaction pass. Children stay individually tab-focusable.
+- **Variants:** `default` (surface-1 bg + on-surface text + subtle border).
+- **Override surface:** Props: `variant`, `size`. Frozen: horizontal layout, positioning (consumer-side).
+- **Open questions:** none.
+
+---
+
+**alert-dialog (keep) · separator (keep)** — unchanged this pass. AlertDialog: sm/md/lg + Action/Cancel, no dismiss-X by design. Separator: orientation prop, Radix-backed.
 
 ---
 

@@ -13,6 +13,10 @@ Three layers, three lifecycles:
 
 Rules: never re-run `setup.sh` on a running project (full regeneration is for new projects only); new reusable atoms get built in the project first, backported to the generator only once proven reusable across projects; no version tracking between generator and downstream — each project is independent after scaffold. This is the lifecycle the **shadcn-style catalog pattern** operationalizes.
 
+## npm deps are reported, not installed
+
+Each atom's manifest carries `npmDependencies` — the external packages it imports (Radix primitives, `class-variance-authority`, `lucide-react`, `clsx`/`tailwind-merge` from `cn`, lib deps like `cmdk`). It's derived at generation time by scanning the atom's own imports (`extractNpmDeps` in `generate-components.js`), so it's accurate by construction, not a hand-maintained list. `setup.sh` unions the picked set's `npmDependencies` (via `resolve-picks.js --npm`) and **prints** an `npm install <bare names>` line — it never runs install. Bare names, no version pinning: the consumer owns their lockfile, consistent with the no-version-tracking doctrine above.
+
 ## Atoms are production baselines (build quality)
 
 Atom components are the baseline for every project's molecules and organisms — so each must be a *good* component, not a scaffold. Build the component file and its story together, top to bottom, noting what can generalize back into the generator. Use real patterns (CVA, proper structural markup, real props, design tokens), not demos. After each batch, extract the repeatable patterns back into the generator scripts so future projects inherit the quality automatically. (Component-level UI + schematic diagrams: hand-build first, mechanize once the pattern proves out — see `codegen-pattern.md`.)

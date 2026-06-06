@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "lucide-react",
+    "react-day-picker"
+  ],
   "tokens": [
     "color",
     "typography",

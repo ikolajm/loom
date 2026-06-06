@@ -6,6 +6,10 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-avatar",
+    "class-variance-authority"
+  ],
   "tokens": [
     "color",
     "typography",

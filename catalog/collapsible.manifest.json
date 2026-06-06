@@ -6,6 +6,11 @@
   "dependencies": [
     "cn"
   ],
+  "npmDependencies": [
+    "@radix-ui/react-collapsible",
+    "class-variance-authority",
+    "lucide-react"
+  ],
   "tokens": [
     "color",
     "typography",
