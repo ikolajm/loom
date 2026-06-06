@@ -97,6 +97,15 @@ function main() {
   const standards = JSON.parse(fs.readFileSync(STANDARDS_PATH, 'utf-8'));
   const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf-8'));
 
+  // Propagate the questionnaire's default-mode into standards.json — the source the
+  // token generator reads. Without this, answers.defaultMode is decorative and the two
+  // can silently disagree. Idempotent: only writes when it actually differs.
+  if (standards.colors['default-mode'] !== answers.defaultMode) {
+    standards.colors['default-mode'] = answers.defaultMode;
+    fs.writeFileSync(STANDARDS_PATH, JSON.stringify(standards, null, 2) + '\n');
+    console.log(`  ✓ standards.json default-mode → ${answers.defaultMode}`);
+  }
+
   // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });

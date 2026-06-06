@@ -2,7 +2,7 @@
   "name": "toggle-group",
   "category": "button",
   "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
-  "version": "2026-06-04",
+  "version": "2026-06-06",
   "dependencies": [
     "toggle",
     "cn"

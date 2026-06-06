@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Module imports ---
+const { CATALOG_VERSION } = require('./shared');
 const { resolveConfig } = require('./components/helpers');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
@@ -189,7 +190,7 @@ function generate(registry, outputDir, configs) {
   // outputDir is ignored here (kept in signature for orchestrator compatibility).
   fs.mkdirSync(CATALOG_DIR, { recursive: true });
 
-  const version = new Date().toISOString().slice(0, 10);
+  const version = CATALOG_VERSION;
   let count = 0;
 
   for (const [name, def] of Object.entries(registry)) {
