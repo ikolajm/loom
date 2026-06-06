@@ -1,5 +1,5 @@
 {
-  "$note": "Generated from primary: #1E90FF, secondary: #1E90FF, accent: #1E90FF. Neutral tinted from primary hue (210°). Questionnaire is the override mechanism — change inputs and regenerate.",
+  "$note": "Generated from primary: #1E90FF, secondary: #ee8d2f, accent: #f42990. Neutral tinted from primary hue (210°). Questionnaire is the override mechanism — change inputs and regenerate.",
   "palette": {
     "primary": {
       "50": "#ecf2f9",
@@ -14,28 +14,28 @@
       "900": "#082745"
     },
     "secondary": {
-      "50": "#ecf2f9",
-      "100": "#d9e6f2",
-      "200": "#a8ccf0",
-      "300": "#4da7ff",
-      "400": "#0081ff",
-      "500": "#006dd6",
-      "600": "#005ab3",
-      "700": "#00488f",
-      "800": "#003970",
-      "900": "#082745"
+      "50": "#f8f2ed",
+      "100": "#f0e5db",
+      "200": "#eaccae",
+      "300": "#f2a55a",
+      "400": "#ec7e13",
+      "500": "#c66a10",
+      "600": "#a5580d",
+      "700": "#84460b",
+      "800": "#683708",
+      "900": "#40260c"
     },
     "accent": {
-      "50": "#ecf2f9",
-      "100": "#d9e6f2",
-      "200": "#a8ccf0",
-      "300": "#4da7ff",
-      "400": "#0081ff",
-      "500": "#006dd6",
-      "600": "#005ab3",
-      "700": "#00488f",
-      "800": "#003970",
-      "900": "#082745"
+      "50": "#f8ecf2",
+      "100": "#f1dae6",
+      "200": "#ecaccc",
+      "300": "#f655a7",
+      "400": "#f30c81",
+      "500": "#cc0a6d",
+      "600": "#aa095a",
+      "700": "#880748",
+      "800": "#6b0539",
+      "900": "#420b27"
     },
     "neutral": {
       "5": "#0c0d0e",
@@ -115,14 +115,14 @@
         "on-primary-fixed-variant": "#00488f"
       },
       "secondary": {
-        "secondary": "#005ab3",
+        "secondary": "#a5580d",
         "on-secondary": "#FFFFFF",
-        "secondary-container": "#d9e6f2",
-        "on-secondary-container": "#082745",
-        "secondary-fixed": "#a8ccf0",
-        "secondary-fixed-dim": "#4da7ff",
-        "on-secondary-fixed": "#082745",
-        "on-secondary-fixed-variant": "#00488f"
+        "secondary-container": "#f0e5db",
+        "on-secondary-container": "#40260c",
+        "secondary-fixed": "#eaccae",
+        "secondary-fixed-dim": "#f2a55a",
+        "on-secondary-fixed": "#40260c",
+        "on-secondary-fixed-variant": "#84460b"
       },
       "neutral": {
         "neutral": "#9299a0",
@@ -186,14 +186,14 @@
         "on-primary-fixed-variant": "#00488f"
       },
       "secondary": {
-        "secondary": "#4da7ff",
-        "on-secondary": "#082745",
-        "secondary-container": "#003970",
-        "on-secondary-container": "#d9e6f2",
-        "secondary-fixed": "#a8ccf0",
-        "secondary-fixed-dim": "#4da7ff",
-        "on-secondary-fixed": "#082745",
-        "on-secondary-fixed-variant": "#00488f"
+        "secondary": "#f2a55a",
+        "on-secondary": "#40260c",
+        "secondary-container": "#683708",
+        "on-secondary-container": "#f0e5db",
+        "secondary-fixed": "#eaccae",
+        "secondary-fixed-dim": "#f2a55a",
+        "on-secondary-fixed": "#40260c",
+        "on-secondary-fixed-variant": "#84460b"
       },
       "neutral": {
         "neutral": "#c8ccd0",

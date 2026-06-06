@@ -1,15 +1,15 @@
 {
-  "projectName": "party-wipe",
-  "productType": "game",
-  "styleDirection": "bold",
-  "defaultMode": "dark",
-  "primary": "#DAA520",
+  "projectName": "loom-default",
+  "productType": "dashboard",
+  "styleDirection": "clean",
+  "defaultMode": "light",
+  "primary": "#1E90FF",
   "secondary": null,
   "accent": null,
-  "heading": "Cinzel",
-  "body": "JetBrains Mono",
-  "edges": "sharp",
-  "density": "compact",
+  "heading": "Finlandica",
+  "body": "Finlandica",
+  "edges": "soft",
+  "density": "comfortable",
   "shadowDepth": "flat",
-  "typeScale": "compact"
+  "typeScale": "standard"
 }
