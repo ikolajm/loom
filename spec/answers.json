@@ -2,7 +2,7 @@
   "projectName": "loom-default",
   "productType": "dashboard",
   "styleDirection": "clean",
-  "defaultMode": "light",
+  "defaultMode": "dark",
   "primary": "#1E90FF",
   "secondary": null,
   "accent": null,

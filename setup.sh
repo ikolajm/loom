@@ -5,14 +5,16 @@
 #   Reads <project-dir>/loom-picks.json, resolves each picked atom's manifest
 #   `dependencies` transitively, and copies only the resolved atoms (+ cn) into
 #   <project-dir>/src/components/. Atoms are project-owned after install — edit
-#   freely; re-run setup.sh to resync. Tokens ship separately as the substrate bundle.
+#   freely; re-run setup.sh to resync. The token substrate (tokens.css) is
+#   generated fresh from spec/ and delivered to <project-dir>/src/tokens.css.
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")" && pwd)"
 CATALOG="$LOOM_ROOT/catalog"
 PROJECT="${1:?Usage: ./setup.sh <project-dir>}"
 PICKS="$PROJECT/loom-picks.json"
-DEST="$PROJECT/src/components"
+SRC="$PROJECT/src"
+DEST="$SRC/components"
 
 [ -d "$CATALOG" ] || { echo "ERROR: catalog/ not found — run: node scripts/code-templates/orchestrator.js --only components"; exit 1; }
 [ -f "$PICKS" ]   || { echo "ERROR: $PICKS not found"; exit 1; }
@@ -36,4 +38,17 @@ done
 cp "$CATALOG/cn.ts" "$DEST/cn.ts"
 echo "  + cn (utility)"
 
+# Token substrate — generated fresh from spec/ so it's always current.
+echo "Substrate:"
+TOKENS_TMP="$(mktemp -d)"
+trap 'rm -rf "$TOKENS_TMP"' EXIT
+node "$LOOM_ROOT/scripts/code-templates/orchestrator.js" --only tokens --output "$TOKENS_TMP" >/dev/null
+cp "$TOKENS_TMP/tokens.css" "$SRC/tokens.css"
+echo "  + src/tokens.css"
+
 echo "Done → $DEST"
+echo ""
+echo "Next step — wire the substrate into your global stylesheet (once):"
+echo "  @import \"tailwindcss\";"
+echo "  @import \"../tokens.css\";   /* from src/app/globals.css */"
+echo "(requires Tailwind v4 + @tailwindcss/postcss; atoms are role-token utilities)"
