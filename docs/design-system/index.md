@@ -7,6 +7,7 @@ How Loom works: the architecture, catalog model, and the codegen/Figma/scaffold 
 | Doc | What it covers |
 |-----|----------------|
 | [pipeline-architecture](pipeline-architecture.md) | The three-layer model (Config + CVA + Radix/lib), config-as-truth, component ownership — Loom's architecture |
+| [orthogonal-variant-color](orthogonal-variant-color.md) | Two independent style axes (treatment × color) via CSS-var axes — N+M, not an N×M compound matrix (Button/Badge) |
 | [shadcn-style-catalog-pattern](shadcn-style-catalog-pattern.md) | First-party catalog + per-project picker — the model Loom v2 implements |
 | [codegen-pattern](codegen-pattern.md) | R&D-then-mechanize — when to hand-build vs. generate |
 | [tokens-as-tailwind-utilities](tokens-as-tailwind-utilities.md) | Register `tokens.css` vars in Tailwind v4 `@theme` so utilities actually get used |
