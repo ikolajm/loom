@@ -2,7 +2,7 @@
   "name": "calendar",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "56c2f8ab2ff0",
   "dependencies": [
     "cn"
   ],

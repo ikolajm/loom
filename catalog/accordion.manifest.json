@@ -2,7 +2,7 @@
   "name": "accordion",
   "category": "data-display",
   "description": "",
-  "version": "2026-06-06",
+  "version": "f463353a17ed",
   "dependencies": [
     "cn"
   ],

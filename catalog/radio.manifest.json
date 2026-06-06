@@ -2,7 +2,7 @@
   "name": "radio",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "47ac4f4c97c7",
   "dependencies": [
     "cn"
   ],

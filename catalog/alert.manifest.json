@@ -2,7 +2,7 @@
   "name": "alert",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "9312ae2e9495",
   "dependencies": [
     "cn"
   ],

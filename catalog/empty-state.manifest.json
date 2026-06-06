@@ -2,7 +2,7 @@
   "name": "empty-state",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "70a1fabd6df0",
   "dependencies": [
     "cn"
   ],

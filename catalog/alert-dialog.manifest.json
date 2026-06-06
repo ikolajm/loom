@@ -2,7 +2,7 @@
   "name": "alert-dialog",
   "category": "layout",
   "description": "",
-  "version": "2026-06-06",
+  "version": "b792bca57add",
   "dependencies": [
     "cn"
   ],

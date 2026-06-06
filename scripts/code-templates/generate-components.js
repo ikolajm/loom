@@ -17,9 +17,9 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // --- Module imports ---
-const { CATALOG_VERSION } = require('./shared');
 const { resolveConfig } = require('./components/helpers');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
@@ -190,14 +190,19 @@ function generate(registry, outputDir, configs) {
   // outputDir is ignored here (kept in signature for orchestrator compatibility).
   fs.mkdirSync(CATALOG_DIR, { recursive: true });
 
-  const version = CATALOG_VERSION;
+  // Per-atom content version: a short hash of the atom's own generated source.
+  // Changes iff the atom's content changes — so regenerating an unchanged catalog
+  // is a no-op (no churn), and the consumer's staleness check fires exactly when
+  // that atom actually moved. Not wall-clock (over-fires) or a hand-bumped constant
+  // (forgotten-bump footgun). A config's $catalog.version still overrides (buildManifest).
+  const contentVersion = (src) => crypto.createHash('sha256').update(src).digest('hex').slice(0, 12);
   let count = 0;
 
   for (const [name, def] of Object.entries(registry)) {
     // Config-free utilities — generated directly
     if (name === 'FormField') {
       const tsx = generateFormField();
-      const manifest = buildManifest(def, null, version);
+      const manifest = buildManifest(def, null, contentVersion(tsx));
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
       console.log(`  ${def.key}.tsx + manifest (utility)`);
@@ -213,7 +218,7 @@ function generate(registry, outputDir, configs) {
     }
 
     const tsx = dispatch(name, config, def);
-    const manifest = buildManifest(def, config, version);
+    const manifest = buildManifest(def, config, contentVersion(tsx));
 
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
@@ -222,12 +227,13 @@ function generate(registry, outputDir, configs) {
   }
 
   // cn — utility atom (catalog-resident, foundation dependency)
-  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), buildCnUtility(configs));
+  const cnSrc = buildCnUtility(configs);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), cnSrc);
   fs.writeFileSync(path.join(CATALOG_DIR, 'cn.manifest.json'), JSON.stringify({
     name: 'cn',
     category: 'utility',
     description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
-    version,
+    version: contentVersion(cnSrc),
     dependencies: [],
     tokens: [],
     composition: 'none',

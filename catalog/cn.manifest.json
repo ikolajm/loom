@@ -2,7 +2,7 @@
   "name": "cn",
   "category": "utility",
   "description": "Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.",
-  "version": "2026-06-06",
+  "version": "7a0c49917f5c",
   "dependencies": [],
   "tokens": [],
   "composition": "none",

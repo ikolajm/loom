@@ -2,7 +2,7 @@
   "name": "command-palette",
   "category": "navigation",
   "description": "",
-  "version": "2026-06-06",
+  "version": "b1fc4f0036dc",
   "dependencies": [
     "cn"
   ],

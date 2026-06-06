@@ -2,7 +2,7 @@
   "name": "helper-text",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "5f9271e6bcb3",
   "dependencies": [
     "cn"
   ],

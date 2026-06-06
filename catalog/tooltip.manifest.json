@@ -2,7 +2,7 @@
   "name": "tooltip",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "052532cb6522",
   "dependencies": [
     "cn"
   ],

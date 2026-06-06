@@ -30,12 +30,6 @@ function loadAllConfigs() {
 // makes its svg fill the slot. Interpolated into component templates so the literal lives once.
 const ICON_SLOT_CLASS = 'shrink-0 [&>svg]:size-full';
 
-// Catalog version stamped into every atom manifest. Bump deliberately on a catalog
-// release — NOT from wall-clock generation time, so regenerating an unchanged catalog
-// is a no-op (no churn) and the consumer's "your picks are stale" check only fires
-// when the catalog actually moved. See CATALOG_SPEC.md → Manifests.
-const CATALOG_VERSION = '2026-06-06';
-
 // --- Tailwind class mappers ---
 
 function colorToClass(colorPath, prefix = 'bg') {
@@ -395,7 +389,6 @@ module.exports = {
   colorToVar,
   TREATMENT_CLASSES,
   ICON_SLOT_CLASS,
-  CATALOG_VERSION,
   buildColorVars,
   buildSizeStyles,
   buildTypographyClasses,

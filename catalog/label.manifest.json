@@ -2,7 +2,7 @@
   "name": "label",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "e79d43779502",
   "dependencies": [
     "cn"
   ],

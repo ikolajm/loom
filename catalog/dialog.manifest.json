@@ -2,7 +2,7 @@
   "name": "dialog",
   "category": "layout",
   "description": "",
-  "version": "2026-06-06",
+  "version": "280d01d994e4",
   "dependencies": [
     "cn"
   ],

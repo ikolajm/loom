@@ -27,7 +27,7 @@ function generate(configs, registry, outputDir) {
     { name: 'ThemeToggle.tsx', content: themeToggle.generate() },
     { name: 'layout.tsx', content: layout.generate(configs) },
     { name: 'design-system-page.tsx', content: designSystemPage.generate(configs, registry) },
-    { name: 'setup.sh', content: setupScript.generate(configs, registry), executable: true },
+    { name: 'init.sh', content: setupScript.generate(), executable: true },
     { name: 'ColorsView.tsx', content: colorsView.generate() },
     { name: 'TypographyView.tsx', content: typographyView.generate() },
   ];

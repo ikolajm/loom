@@ -2,7 +2,7 @@
   "name": "hover-card",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "f58e5bbf5852",
   "dependencies": [
     "cn"
   ],

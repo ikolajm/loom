@@ -2,7 +2,7 @@
   "name": "carousel",
   "category": "composite",
   "description": "",
-  "version": "2026-06-06",
+  "version": "10af788ce2e5",
   "dependencies": [
     "cn"
   ],

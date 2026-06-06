@@ -2,7 +2,7 @@
   "name": "input",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "9a07cefe40b8",
   "dependencies": [
     "cn"
   ],

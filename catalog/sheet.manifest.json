@@ -2,7 +2,7 @@
   "name": "sheet",
   "category": "layout",
   "description": "",
-  "version": "2026-06-06",
+  "version": "ffb85b1d952a",
   "dependencies": [
     "cn"
   ],

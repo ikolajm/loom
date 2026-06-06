@@ -2,7 +2,7 @@
   "name": "popover",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "367d998b6116",
   "dependencies": [
     "cn"
   ],

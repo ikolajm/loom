@@ -2,7 +2,7 @@
   "name": "file-upload",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "fee5f7650547",
   "dependencies": [
     "cn"
   ],

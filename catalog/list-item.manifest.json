@@ -2,7 +2,7 @@
   "name": "list-item",
   "category": "data-display",
   "description": "",
-  "version": "2026-06-06",
+  "version": "52a0decea2f2",
   "dependencies": [
     "cn"
   ],

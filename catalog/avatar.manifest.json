@@ -2,7 +2,7 @@
   "name": "avatar",
   "category": "data-display",
   "description": "",
-  "version": "2026-06-06",
+  "version": "b1fd8d8b7ef6",
   "dependencies": [
     "cn"
   ],

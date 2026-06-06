@@ -2,7 +2,7 @@
   "name": "bottom-nav",
   "category": "navigation",
   "description": "",
-  "version": "2026-06-06",
+  "version": "f15d5af1fe8f",
   "dependencies": [
     "cn"
   ],

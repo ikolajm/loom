@@ -2,7 +2,7 @@
   "name": "spinner",
   "category": "feedback",
   "description": "",
-  "version": "2026-06-06",
+  "version": "d8c0fbf71818",
   "dependencies": [
     "cn"
   ],

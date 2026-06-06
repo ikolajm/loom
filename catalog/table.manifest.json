@@ -2,7 +2,7 @@
   "name": "table",
   "category": "layout",
   "description": "",
-  "version": "2026-06-06",
+  "version": "634926c15436",
   "dependencies": [
     "cn"
   ],

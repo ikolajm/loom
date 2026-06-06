@@ -2,7 +2,7 @@
   "name": "kbd",
   "category": "data-display",
   "description": "",
-  "version": "2026-06-06",
+  "version": "7baccb04d4b2",
   "dependencies": [
     "cn"
   ],

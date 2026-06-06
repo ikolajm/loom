@@ -2,7 +2,7 @@
   "name": "form-field",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "2e1c9be107a2",
   "dependencies": [
     "cn"
   ],

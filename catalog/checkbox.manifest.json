@@ -2,7 +2,7 @@
   "name": "checkbox",
   "category": "form",
   "description": "",
-  "version": "2026-06-06",
+  "version": "602bfba1aafc",
   "dependencies": [
     "cn"
   ],
