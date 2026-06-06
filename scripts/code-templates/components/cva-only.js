@@ -1,4 +1,4 @@
-const { colorToClass } = require('../shared');
+const { colorToClass, ICON_SLOT_CLASS } = require('../shared');
 const { buildCvaString, extractIconSizes, filterSizes } = require('./helpers');
 
 function generateCvaOnly(name, config, meta) {
@@ -145,14 +145,15 @@ function generateCvaOnly(name, config, meta) {
   } else {
     lines.push(`    return (`);
     lines.push(`      <${compEl} ${attrs.join(' ')}>`);
+    const iconSlotCls = iconSizes
+      ? `cn('${ICON_SLOT_CLASS}', ${lcName}IconSize[size || '${cva.defaults.size || 'md'}'])`
+      : `'${ICON_SLOT_CLASS}'`;
     if (hasIconSlots && config['icon-slots'].leading && !config['icon-slots'].leading.persistent) {
-      const sizeRef = iconSizes ? ` \${${lcName}IconSize[size || '${cva.defaults.size || 'md'}']}` : '';
-      lines.push(`        {leadingIcon && <span className={\`shrink-0${sizeRef} [&>svg]:size-full\`}>{leadingIcon}</span>}`);
+      lines.push(`        {leadingIcon && <span className={${iconSlotCls}}>{leadingIcon}</span>}`);
     }
     lines.push(`        {children}`);
     if (hasIconSlots && config['icon-slots'].trailing && !config['icon-slots'].trailing.persistent) {
-      const sizeRef = iconSizes ? ` \${${lcName}IconSize[size || '${cva.defaults.size || 'md'}']}` : '';
-      lines.push(`        {trailingIcon && <span className={\`shrink-0${sizeRef} [&>svg]:size-full\`}>{trailingIcon}</span>}`);
+      lines.push(`        {trailingIcon && <span className={${iconSlotCls}}>{trailingIcon}</span>}`);
     }
     lines.push(`      </${compEl}>`);
     lines.push(`    );`);

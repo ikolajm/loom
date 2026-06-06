@@ -54,7 +54,7 @@ const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     const s = size || 'md';
     return (
       <div ref={ref} className={cn(emptyStateVariants({ variant, size }), className)} {...props}>
-        {icon && <span className={cn('text-on-surface-variant [&>svg]:size-full', iconSize[s])}>{icon}</span>}
+        {icon && <span className={cn('text-on-surface-variant shrink-0 [&>svg]:size-full', iconSize[s])}>{icon}</span>}
         {heading && <h3 className={cn('font-semibold tracking-[-0.01em] text-on-surface', headingSize[s])}>{heading}</h3>}
         {description && <p className={cn('text-on-surface-variant', descriptionSize[s])}>{description}</p>}
         {action}

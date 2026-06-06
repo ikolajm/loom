@@ -134,6 +134,7 @@ export {
 `;
 
   const outPath = path.join(outputDir, 'components', 'icons.ts');
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, output);
   console.log(`  icons.ts (${sortedIcons.length} icons, ${sizeEntries.length} sizes)`);
   return sortedIcons.length;

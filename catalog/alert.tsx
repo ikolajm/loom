@@ -43,9 +43,9 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
   ({ variant, size, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
     return (
       <div ref={ref} role="alert" className={cn(alertVariants({ variant, size }), className)} {...props}>
-        {leadingIcon && <span className={`shrink-0 ${alertIconSize[size || 'md']} [&>svg]:size-full`}>{leadingIcon}</span>}
+        {leadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', alertIconSize[size || 'md'])}>{leadingIcon}</span>}
         {children}
-        {trailingIcon && <span className={`shrink-0 ${alertIconSize[size || 'md']} [&>svg]:size-full`}>{trailingIcon}</span>}
+        {trailingIcon && <span className={cn('shrink-0 [&>svg]:size-full', alertIconSize[size || 'md'])}>{trailingIcon}</span>}
       </div>
     );
   }
