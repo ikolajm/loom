@@ -1,0 +1,29 @@
+{
+  "name": "list-item",
+  "category": "data-display",
+  "description": "",
+  "version": "52a0decea2f2",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "list-item.story.ts",
+  "variants": [
+    "default",
+    "bordered"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

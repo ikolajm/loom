@@ -1,0 +1,18 @@
+{
+  "name": "avatar-group",
+  "category": "data-display",
+  "description": "",
+  "version": "2c21fb06e2bc",
+  "dependencies": [
+    "cn",
+    "avatar"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "avatar-group.story.ts"
+}

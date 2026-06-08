@@ -270,7 +270,7 @@ const BUILDERS = {
     ]
   },
   'data-display': {
-    description: 'Data Display page (avatar, kbd + list-item/accordion pattern mocks)',
+    description: 'Data Display page (avatar, kbd + list-item/accordion/collapsible/avatar-group/number/relative-time/video-player pattern mocks)',
     pageName: 'Data Display',
     config: { components: dataDisplayConfig, layout },
     components: [
@@ -280,7 +280,11 @@ const BUILDERS = {
       'data-display/build-avatar.js',
       'data-display/build-pattern-list-item.js',
       'data-display/build-pattern-accordion.js',
-      'data-display/build-pattern-collapsible.js'
+      'data-display/build-pattern-collapsible.js',
+      'data-display/build-pattern-avatar-group.js',
+      'data-display/build-pattern-number.js',
+      'data-display/build-pattern-relative-time.js',
+      'data-display/build-pattern-video-player.js'
     ]
   },
   'navigation': {

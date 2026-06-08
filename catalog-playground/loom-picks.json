@@ -36,7 +36,16 @@
       "rating",
       "time-picker",
       "search-bar",
-      "popover"
+      "popover",
+      "avatar",
+      "list-item",
+      "accordion",
+      "kbd",
+      "collapsible",
+      "avatar-group",
+      "number",
+      "relative-time",
+      "video-player"
     ]
   }
 }

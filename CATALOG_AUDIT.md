@@ -445,17 +445,81 @@ Source: `spec/config/components/data-display.json`.
 | accordion | keep | |
 | kbd | keep | |
 | collapsible | keep | |
-| avatar-group | new | Stacked avatars — distinct enough from single avatar |
-| number | new | Formatted number primitive (static). Sprint 2 `CountUp` motion atom wraps it |
-| relative-time | new | "2 hours ago" temporal display |
-| video-player | new | Media display primitive |
-| qr-code | new | Generator utility |
+| avatar-group | new | Stacked avatars + `+N` overflow — composition over `avatar` |
+| number | new | Formatted number primitive (`Intl.NumberFormat`, RSC-safe). Sprint 2 `CountUp` motion atom wraps it |
+| relative-time | new | "2 hours ago" — `Intl.RelativeTimeFormat` + native `<time>` |
+| video-player | new | Styled native container (browser owns controls) — see detailed notes |
+| qr-code | drop | Cut at the deep dive (2026-06-08) — narrow utility; project pulls a lib directly if needed |
 
-Triage skipped: kanban / gantt (shadcn — too complex / project-specific).
+Triage skipped: kanban / gantt (shadcn — too complex / project-specific). qr-code dropped at deep dive (narrow leaf utility — substrate shouldn't carry a QR encoder; project adds `qrcode.react` itself if it needs one).
 
 ### Detailed notes — Data display
 
-*(Empty — filled during deep dive)*
+**Deep dive complete (2026-06-08).** 5 keeps confirmed schema-clean (no refine); 4 new atoms designed; qr-code dropped. Cross-cutting decisions:
+
+- **Avatar stays single-variant** — initials bg is decorative, not semantic. Adding the orthogonal `variant × color` axis here would be ambition, not substrate. Deliberate omission.
+- **All 4 new atoms are bespoke `lib` templates** — hand-authored `.tsx` emitted by a generator fn in `scripts/code-templates/components/`, each with a registry entry + a small `data-display.json` config block.
+- **No new npm deps** — avatar-group composes `avatar`; number/relative-time use native `Intl`; video-player wraps native `<video>`. qr-code (the one lib candidate) was dropped.
+
+---
+
+**avatar-group (new)**
+
+- **Category:** data-display
+- **Dependencies:** `cn`, `avatar` (registry dep — picker pulls avatar transitively)
+- **Tokens:** color, spacing, sizing
+- **Composition:** `none`
+- **Shape:** horizontal stack; overlap via negative margin + a ring in the surface/background color so adjacent edges read. `max` caps visible avatars; overflow renders a `+N` counter as a final Avatar-shaped fallback (reuses `Avatar`, so size/shape inherit).
+- **Variants:** none (single shape). **Sizes:** forwarded to children (sm/md/lg/xl, matching `avatar`).
+- **Override surface:**
+  - Props: `max`, `size` (forwarded), `spacing` (overlap amount), children (Avatars)
+  - Frozen: the ring/overlap mechanism, the `+N` fallback structure
+- **Open questions:** none.
+
+---
+
+**number (new)**
+
+- **Category:** data-display
+- **Dependencies:** `cn`
+- **Tokens:** typography (`tabular-nums`)
+- **Composition:** `none` — **RSC-safe** (no hooks, deterministic). Sprint 2 `CountUp` wraps it.
+- **Shape:** a `<span>` rendering `Intl.NumberFormat(locale, options).format(value)`, with `font-variant-numeric: tabular-nums` so digits don't jitter.
+- **Override surface:**
+  - Props: `value`, `format` (`decimal` | `currency` | `percent` | `unit`), `currency`, `unit`, `notation` (`standard` | `compact` | `scientific`), `locale`, plus escape-hatch `options` (raw `Intl.NumberFormatOptions`, spread last)
+  - Frozen: the `<span>` + tabular-nums default
+- **Open questions:** none — `Intl` over a formatting lib.
+
+---
+
+**relative-time (new)**
+
+- **Category:** data-display
+- **Dependencies:** `cn`
+- **Tokens:** typography
+- **Composition:** `none` — client component (`'use client'`); needs "now".
+- **Shape:** renders `<time dateTime={iso}>` (SSR-stable anchor) and computes the relative string (`Intl.RelativeTimeFormat`) on the client after mount, avoiding server-now ≠ client-now hydration mismatch. Optional `live` prop ticks an interval (cleared on unmount) to keep the string fresh.
+- **Override surface:**
+  - Props: `date` (Date | string | number), `live` (bool, default false), `locale`, `numeric` (`auto` | `always`)
+  - Frozen: the `<time>` element + mount-safe computation + interval cleanup
+- **Open questions:** none — hydration handling is a conscious choice, flagged here.
+
+---
+
+**video-player (new)**
+
+Scope decision (2026-06-08): **styled native container, not a custom player.** Loom is substrate — the project skins controls itself if it wants. Browser owns the control chrome via native `<video controls>`; Loom owns only the styled container. No JS state, no npm dep.
+
+- **Category:** data-display
+- **Dependencies:** `cn`
+- **Tokens:** sizing (radius), spacing, effects (optional shadow)
+- **Composition:** `none`
+- **Shape:** wraps native `<video>` in a token-styled container — rounded clipping, aspect-ratio box, object-fit, poster pass-through.
+- **Variants:** `aspectRatio` axis (`16/9` default | `4/3` | `1/1` | `auto`). **Sizes:** none (width-driven by container).
+- **Override surface:**
+  - Props: `src`, `poster`, `aspectRatio`, `fit` (`cover` | `contain`), `controls` (default true), plus native video attrs (`autoPlay`, `loop`, `muted`, `preload`, etc. via spread)
+  - Frozen: the styled container + rounded clipping
+- **Open questions:** none.
 
 ---
 

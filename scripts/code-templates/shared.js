@@ -336,6 +336,10 @@ function getComponentRegistry(configs) {
     'Accordion': { source: dataDisplayConfig, key: 'accordion', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-accordion' },
     'Kbd': { source: dataDisplayConfig, key: 'kbd', element: 'kbd', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'cva-only', primitive: null },
     'Collapsible': { source: dataDisplayConfig, key: 'collapsible', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-collapsible' },
+    'AvatarGroup': { source: dataDisplayConfig, key: 'avatar-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'lib', primitive: null },
+    'NumberDisplay': { source: dataDisplayConfig, key: 'number', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
+    'RelativeTime': { source: dataDisplayConfig, key: 'relative-time', element: 'time', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
+    'VideoPlayer': { source: dataDisplayConfig, key: 'video-player', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
 
     // === Navigation ===
     'TopBar': { source: navigationConfig, key: 'top-bar', element: 'header', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'title', category: 'Navigation', template: 'cva-only', primitive: null },

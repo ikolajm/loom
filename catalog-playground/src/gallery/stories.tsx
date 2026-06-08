@@ -33,6 +33,15 @@ import { FileUpload, FileUploadItem } from '@/components/file-upload';
 import { Rating } from '@/components/rating';
 import { TimePicker, type TimeValue } from '@/components/time-picker';
 import { SearchBar } from '@/components/search-bar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
+import { AvatarGroup } from '@/components/avatar-group';
+import { ListItem } from '@/components/list-item';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/accordion';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/collapsible';
+import { Kbd } from '@/components/kbd';
+import { NumberDisplay } from '@/components/number';
+import { RelativeTime } from '@/components/relative-time';
+import { VideoPlayer } from '@/components/video-player';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
 const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>;
@@ -480,6 +489,96 @@ export const STORIES: GalleryStory[] = [
       { label: 'default (search glyph)', content: <div className="w-64"><SearchBar placeholder="Search…" /></div> },
       { label: 'no leading icon (text to edge)', content: <div className="w-64"><SearchBar icon={null} placeholder="No icon — text at the edge" /></div> },
       { label: 'leading icon · sizes (slot scales)', content: SIZES.map((s) => <div key={s} className="w-64"><SearchBar size={s} icon={<Star />} placeholder={`size ${s}`} /></div>) },
+    ],
+  },
+  {
+    name: 'Avatar',
+    category: 'Data Display',
+    description: 'Initials / image avatar. Single decorative variant (no color axis — bg is decoration, not severity). circle / rounded × sm–xl.',
+    sections: [
+      { label: 'sizes', content: (['sm', 'md', 'lg', 'xl'] as const).map((s) => <Avatar key={s} size={s}><AvatarFallback>JI</AvatarFallback></Avatar>) },
+      { label: 'shapes', content: [<Avatar key="c" shape="circle"><AvatarFallback>JI</AvatarFallback></Avatar>, <Avatar key="r" shape="rounded"><AvatarFallback>JI</AvatarFallback></Avatar>] },
+      { label: 'image + fallback', content: [<Avatar key="1" size="lg"><AvatarImage src="data:," alt="" /><AvatarFallback>AB</AvatarFallback></Avatar>, <Avatar key="2" size="lg"><AvatarFallback>CD</AvatarFallback></Avatar>] },
+    ],
+  },
+  {
+    name: 'AvatarGroup',
+    category: 'Data Display',
+    description: 'Stacked avatars over the surface ring; size forwards to children. max caps the visible set, overflow becomes a +N counter avatar.',
+    sections: [
+      { label: 'stacked', content: <AvatarGroup><Avatar><AvatarFallback>JI</AvatarFallback></Avatar><Avatar><AvatarFallback>AB</AvatarFallback></Avatar><Avatar><AvatarFallback>CD</AvatarFallback></Avatar></AvatarGroup> },
+      { label: 'max=3 + overflow', content: <AvatarGroup max={3}><Avatar><AvatarFallback>JI</AvatarFallback></Avatar><Avatar><AvatarFallback>AB</AvatarFallback></Avatar><Avatar><AvatarFallback>CD</AvatarFallback></Avatar><Avatar><AvatarFallback>EF</AvatarFallback></Avatar><Avatar><AvatarFallback>GH</AvatarFallback></Avatar></AvatarGroup> },
+      { label: 'sizes (forwarded)', content: (['sm', 'md', 'lg'] as const).map((s) => <AvatarGroup key={s} size={s} max={2}><Avatar><AvatarFallback>JI</AvatarFallback></Avatar><Avatar><AvatarFallback>AB</AvatarFallback></Avatar><Avatar><AvatarFallback>CD</AvatarFallback></Avatar></AvatarGroup>) },
+      { label: 'spacing', content: (['tight', 'normal', 'loose'] as const).map((sp) => <AvatarGroup key={sp} spacing={sp}><Avatar><AvatarFallback>JI</AvatarFallback></Avatar><Avatar><AvatarFallback>AB</AvatarFallback></Avatar><Avatar><AvatarFallback>CD</AvatarFallback></Avatar></AvatarGroup>) },
+    ],
+  },
+  {
+    name: 'ListItem',
+    category: 'Data Display',
+    description: 'Three-slot row shell (leading / content / trailing). default / bordered × sm–lg. No internal text styling — slots fill it.',
+    sections: [
+      { label: 'variants', content: (['default', 'bordered'] as const).map((v) => <div key={v} className="w-72"><ListItem variant={v} leading={<Star />} trailing={<Arrow />}>List item — {v}</ListItem></div>) },
+      { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-72"><ListItem size={s} leading={<Star />}>Size {s}</ListItem></div>) },
+      { label: 'leading avatar', content: <div className="w-72"><ListItem leading={<Avatar size="sm"><AvatarFallback>JI</AvatarFallback></Avatar>} trailing={<Kbd>⏎</Kbd>}>Jacob Ikola</ListItem></div> },
+    ],
+  },
+  {
+    name: 'Accordion',
+    category: 'Data Display',
+    description: 'Collapsible section group (mutual exclusion when type=single). default / filled. Chevron rotates on open.',
+    sections: [
+      { label: 'single (default)', content: <div className="w-80"><Accordion type="single" collapsible defaultValue="a"><AccordionItem value="a"><AccordionTrigger>What is Loom?</AccordionTrigger><AccordionContent>A token-driven design-system generator.</AccordionContent></AccordionItem><AccordionItem value="b"><AccordionTrigger>How are atoms picked?</AccordionTrigger><AccordionContent>Via loom-picks.json; setup.sh syncs the resolved set.</AccordionContent></AccordionItem></Accordion></div> },
+      { label: 'filled', content: <div className="w-80"><Accordion type="single" collapsible variant="filled"><AccordionItem value="a"><AccordionTrigger>Section one</AccordionTrigger><AccordionContent>Filled surface, no border.</AccordionContent></AccordionItem><AccordionItem value="b"><AccordionTrigger>Section two</AccordionTrigger><AccordionContent>Second panel.</AccordionContent></AccordionItem></Accordion></div> },
+    ],
+  },
+  {
+    name: 'Collapsible',
+    category: 'Data Display',
+    description: 'Single progressive-disclosure panel — no group behavior. Simpler than Accordion.',
+    sections: [
+      { label: 'default (open)', content: <div className="w-80"><Collapsible defaultOpen><CollapsibleTrigger>Toggle details</CollapsibleTrigger><CollapsibleContent><div className="px-4 py-2 text-on-surface-variant text-body-md">Optional detail content lives here.</div></CollapsibleContent></Collapsible></div> },
+      { label: 'bordered', content: <div className="w-80"><Collapsible variant="bordered"><CollapsibleTrigger>Show more</CollapsibleTrigger><CollapsibleContent><div className="px-4 py-2 text-on-surface-variant text-body-md">Hidden until toggled.</div></CollapsibleContent></Collapsible></div> },
+    ],
+  },
+  {
+    name: 'Kbd',
+    category: 'Data Display',
+    description: 'Keyboard shortcut key cap. Inline element; combos compose with a gap.',
+    sections: [
+      { label: 'sizes', content: SIZES.map((s) => <Kbd key={s} size={s}>⌘K</Kbd>) },
+      { label: 'combination', content: <span className="inline-flex items-center gap-1"><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></span> },
+    ],
+  },
+  {
+    name: 'NumberDisplay',
+    category: 'Data Display',
+    description: 'Intl.NumberFormat primitive. RSC-safe, tabular-nums. Sprint 2 CountUp wraps it. options spreads last as an escape hatch.',
+    sections: [
+      { label: 'decimal', content: <NumberDisplay value={1234567.89} /> },
+      { label: 'currency', content: [<NumberDisplay key="1" value={1299.99} format="currency" currency="USD" />, <NumberDisplay key="2" value={1299.99} format="currency" currency="EUR" locale="de-DE" />] },
+      { label: 'percent', content: <NumberDisplay value={0.4267} format="percent" /> },
+      { label: 'compact notation', content: [<NumberDisplay key="1" value={12500} notation="compact" />, <NumberDisplay key="2" value={3400000} notation="compact" />] },
+      { label: 'unit', content: <NumberDisplay value={72} format="unit" unit="mile-per-hour" /> },
+    ],
+  },
+  {
+    name: 'RelativeTime',
+    category: 'Data Display',
+    description: 'Intl.RelativeTimeFormat in a <time> element. SSR-stable date fallback, relative string after mount (avoids hydration mismatch). Optional live tick.',
+    sections: [
+      { label: 'past', content: <RelativeTime date="2026-06-08T07:00:00Z" /> },
+      { label: 'future', content: <RelativeTime date="2026-06-10T12:00:00Z" /> },
+      { label: 'weeks ago', content: <RelativeTime date="2026-05-20T12:00:00Z" /> },
+      { label: 'numeric=always', content: <RelativeTime date="2026-06-08T08:30:00Z" numeric="always" /> },
+    ],
+  },
+  {
+    name: 'VideoPlayer',
+    category: 'Data Display',
+    description: 'Styled native container — browser owns the controls; Loom owns the box (rounded clip, aspect-ratio, object-fit). No JS state, no deps. Shown empty so the container chrome reads.',
+    sections: [
+      { label: 'aspect ratios', content: (['16/9', '4/3', '1/1'] as const).map((ar) => <div key={ar} className="w-56"><VideoPlayer aspectRatio={ar} /></div>) },
+      { label: 'auto (intrinsic)', content: <div className="w-56"><VideoPlayer aspectRatio="auto" /></div> },
     ],
   },
 ];
