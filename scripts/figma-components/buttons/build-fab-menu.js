@@ -58,18 +58,8 @@ function buildFabMenu(lookups, defaultMode, page) {
 
     const iconPath = resolveIcon(sz['icon-size']);
     const iconSizeVar = iconPath ? primIconSize[iconPath] : null;
-    const iconComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/placeholder');
-    if (iconComp) {
-      const inst = iconComp.createInstance();
-      inst.name = 'icon';
-      if (iconSizeVar) { inst.setBoundVariable('width', iconSizeVar); inst.setBoundVariable('height', iconSizeVar); }
-      if (fgVar) {
-        const vecs = inst.findAll(n => ['VECTOR', 'BOOLEAN_OPERATION', 'LINE', 'ELLIPSE', 'RECTANGLE'].includes(n.type));
-        const paint = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', fgVar)];
-        for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-      }
-      comp.appendChild(inst);
-    }
+    const icon = makeIcon('icon/placeholder', fgVar, iconSizeVar);
+    if (icon) { icon.name = 'icon'; comp.appendChild(icon); }
     return comp;
   }
 

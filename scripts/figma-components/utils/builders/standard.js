@@ -34,21 +34,8 @@ function createStandardIconSlot(comp, slotName, fgVar, iconSizeVar, slotConfig, 
   if (!iconComp) iconComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/placeholder');
   if (!iconComp) return;
 
-  const inst = iconComp.createInstance();
+  const inst = styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar);
   inst.name = slotName;
-
-  if (iconSizeVar) {
-    inst.setBoundVariable('width', iconSizeVar);
-    inst.setBoundVariable('height', iconSizeVar);
-  }
-
-  if (fgVar) {
-    const vecs = inst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
-    const paint = [figma.variables.setBoundVariableForPaint(
-      { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', fgVar
-    )];
-    for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-  }
 
   if (slotConfig.persistent) {
     // Persistent: always visible, no boolean toggle

@@ -181,18 +181,15 @@ function createBaseFrame(componentName, description, componentSet, lookups, defa
  * @param {string} propName - Boolean property name ("showLeadingIcon" or "showTrailingIcon")
  * @returns {InstanceNode} The icon instance (already appended to comp)
  */
-function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
-  const placeholderIcon = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
-  if (!placeholderIcon) throw new Error("icon/placeholder not found");
-
-  const inst = placeholderIcon.createInstance();
-  inst.name = slotName;
-
+// Style an icon instance in place: bind size, and recolor its vectors to a
+// foreground variable. Catalog icons are stroked vectors (Lucide-style), so
+// color binds to strokes with fills cleared. Single source of truth for icon
+// recoloring — every builder that places an icon goes through here.
+function styleIconInstance(inst, fgVar, iconSizeVar) {
   if (iconSizeVar) {
     inst.setBoundVariable("width", iconSizeVar);
     inst.setBoundVariable("height", iconSizeVar);
   }
-
   if (fgVar) {
     const vecs = inst.findAll(n => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE" || n.type === "ELLIPSE" || n.type === "RECTANGLE");
     const paint = [figma.variables.setBoundVariableForPaint(
@@ -200,7 +197,24 @@ function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
     )];
     for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
   }
+  return inst;
+}
 
+// Create a sized, colored icon instance by component name, falling back to
+// icon/placeholder. Returns null if no icon component exists in the file.
+function makeIcon(iconName, fgVar, iconSizeVar) {
+  let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === iconName);
+  if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!iconComp) return null;
+  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar);
+}
+
+function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
+  const placeholderIcon = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!placeholderIcon) throw new Error("icon/placeholder not found");
+
+  const inst = styleIconInstance(placeholderIcon.createInstance(), fgVar, iconSizeVar);
+  inst.name = slotName;
   inst.visible = false;
   comp.appendChild(inst);
 
@@ -215,25 +229,7 @@ function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
 // behind `showClose` (default true) in v2. Returns a sized, colored icon/x
 // instance for the caller to append; null if no icon component is present.
 function createCloseIcon(fgVar, iconSizeVar) {
-  let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/x");
-  if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
-  if (!iconComp) return null;
-
-  const inst = iconComp.createInstance();
-  inst.name = "close";
-
-  if (iconSizeVar) {
-    inst.setBoundVariable("width", iconSizeVar);
-    inst.setBoundVariable("height", iconSizeVar);
-  }
-
-  if (fgVar) {
-    const vecs = inst.findAll(n => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE" || n.type === "ELLIPSE" || n.type === "RECTANGLE");
-    const paint = [figma.variables.setBoundVariableForPaint(
-      { type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 } }, "color", fgVar
-    )];
-    for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-  }
-
+  const inst = makeIcon("icon/x", fgVar, iconSizeVar);
+  if (inst) inst.name = "close";
   return inst;
 }
