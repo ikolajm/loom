@@ -22,7 +22,13 @@ function buildPatternFileUpload(lookups, defaultMode, page) {
   const groupGapVar = layoutVars['layout/spacing/component-group-gap'];
   if (groupGapVar) examples.setBoundVariable('itemSpacing', groupGapVar);
 
-  for (const [variantName, colors] of Object.entries(config.variants)) {
+  // `dragover` is an internal runtime state held outside the `variants` axis (code parity),
+  // but the browse reference still shows both resting + dragover dropzones side by side.
+  const zones = [
+    ...Object.entries(config.variants),
+    ...(config.dragover ? [['dragover', config.dragover]] : []),
+  ];
+  for (const [variantName, colors] of zones) {
     const zone = figma.createFrame();
     zone.name = `dropzone-${variantName}`;
     zone.layoutMode = 'VERTICAL';
@@ -64,19 +70,12 @@ function buildPatternFileUpload(lookups, defaultMode, page) {
     const fgVar = semColors[colors.fg];
     const iconFgVar = semColors[colors['icon-fg']];
 
-    // Icon placeholder
-    const iconComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/placeholder');
-    if (iconComp) {
-      const inst = iconComp.createInstance();
+    // Upload icon — sized + recolored via the shared helper (single source of truth).
+    const iconPath = resolveIcon(md['icon-size']);
+    const iconSizeVar = iconPath ? primIconSize[iconPath] : null;
+    const inst = makeIcon('icon/placeholder', iconFgVar, iconSizeVar);
+    if (inst) {
       inst.name = 'upload-icon';
-      const iconPath = resolveIcon(md['icon-size']);
-      const iconSizeVar = iconPath ? primIconSize[iconPath] : null;
-      if (iconSizeVar) { inst.setBoundVariable('width', iconSizeVar); inst.setBoundVariable('height', iconSizeVar); }
-      if (iconFgVar) {
-        const vecs = inst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
-        const paint = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', iconFgVar)];
-        for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-      }
       zone.appendChild(inst);
     }
 

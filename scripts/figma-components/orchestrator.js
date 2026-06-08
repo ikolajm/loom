@@ -201,12 +201,15 @@ const BUILDERS = {
       },
       {
         name: 'extended',
-        description: 'Extended input components (slider, input-otp, combobox, file-upload)',
+        description: 'Extended input components (slider, input-otp, combobox, file-upload, rating, time-picker, search-bar)',
         customScripts: [
           'forms/build-slider.js',
           'forms/build-input-otp.js',
           'forms/build-pattern-combobox.js',
-          'forms/build-pattern-file-upload.js'
+          'forms/build-pattern-file-upload.js',
+          'forms/build-pattern-rating.js',
+          'forms/build-pattern-time-picker.js',
+          'forms/build-pattern-search-bar.js'
         ]
       },
       {

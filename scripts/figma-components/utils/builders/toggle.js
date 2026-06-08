@@ -132,20 +132,12 @@ function buildToggleComponent(descriptor, compConfig, lookups, defaultMode, page
         const isChecked = stateName === 'true';
         if (isChecked) {
           if (shape === 'square') {
-            // Checkbox: check icon sized proportionally
-            const checkComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/check');
-            if (checkComp) {
-              const inst = checkComp.createInstance();
+            // Checkbox: check icon sized proportionally — recolored via the shared helper.
+            const inst = makeIcon('icon/check', fgVar, null);
+            if (inst) {
               inst.name = 'check-indicator';
               const iconDim = Math.round(dim * 0.7);
               inst.resize(iconDim, iconDim);
-              if (fgVar) {
-                const vecs = inst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
-                const paint = [figma.variables.setBoundVariableForPaint(
-                  { type: 'SOLID', color: { r: 1, g: 1, b: 1 } }, 'color', fgVar
-                )];
-                for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-              }
               comp.appendChild(inst);
             }
           } else if (shape === 'circle') {
