@@ -148,26 +148,26 @@ const BUILDERS = {
     template: 'build-core-page.js'
   },
   'buttons': {
-    description: 'Buttons page (button, icon-button, fab, badge, chip, toggle, toggle-group)',
+    description: 'Buttons page (button, badge, dot, fab, fab-menu, toggle, toggle-group)',
     pageName: 'Buttons',
     config: { components: buttonConfig, layout },
     batches: [
       {
         name: 'standard',
-        description: 'Button, Badge, Chip, Toggle (standard builder)',
+        description: 'Button, Badge, Toggle (standard builder)',
         components: [
           require('./buttons/build-button'),
           require('./buttons/build-badge'),
-          require('./buttons/build-chip'),
           require('./buttons/build-toggle')
         ]
       },
       {
         name: 'custom',
-        description: 'Icon Button, FAB, Toggle Group (custom builders)',
+        description: 'Dot, FAB, FAB Menu, Toggle Group (custom builders)',
         customScripts: [
-          'buttons/build-icon-button.js',
+          'buttons/build-dot.js',
           'buttons/build-fab.js',
+          'buttons/build-fab-menu.js',
           'buttons/build-pattern-toggle-group.js'
         ]
       }
@@ -221,12 +221,13 @@ const BUILDERS = {
     ]
   },
   'layout-page': {
-    description: 'Layout page (separator, card, dialog, alert-dialog, sheet, table pattern mocks)',
+    description: 'Layout page (separator, card, toolbar, dialog, alert-dialog, sheet, table pattern mocks)',
     pageName: 'Layout',
     config: { components: layoutConfig, layout },
     customScripts: [
       'layout/build-separator.js',
       'layout/build-pattern-card.js',
+      'layout/build-toolbar.js',
       'layout/build-pattern-table.js',
       'layout/build-pattern-dialog.js',
       'layout/build-pattern-sheet.js',

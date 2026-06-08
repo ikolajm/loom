@@ -66,6 +66,63 @@ function createStandardIconSlot(comp, slotName, fgVar, iconSizeVar, slotConfig, 
 }
 
 /**
+ * Resolve a component config into an ordered list of variant entries, each
+ * { namePrefix, colors: { bg, fg, border }, label }. Two config shapes:
+ *
+ *  - Orthogonal (button, badge): independent `treatments` × `colors` axes.
+ *    Each color declares { bg, fg, text, border }; each treatment is a fixed
+ *    consumer of those refs — filled → bg/fg, outline → border + text,
+ *    ghost → text only. This mirrors shared.js TREATMENT_CLASSES so the Figma
+ *    variant set matches the code catalog exactly. Expands to a multi-property
+ *    Figma variant set (variant=<treatment>, color=<name>).
+ *  - Single-axis (toggle, fab, toast…): the lone `variants` or `state` block,
+ *    used verbatim.
+ *
+ * @param {object} compConfig - The component's config object (resolved, no $base)
+ * @returns {Array<{ namePrefix: string, colors: object, label: string }>}
+ */
+function resolveVariantEntries(compConfig) {
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  if (compConfig.treatments && compConfig.colors) {
+    // The color axis is exposed under different prop names per atom
+    // (button → "color", badge → "state"). Derive it from the default block so
+    // the component variant names match the preview's default selector — which
+    // is built from those same default keys.
+    const dflt = compConfig.default || {};
+    const colorAxisKey = Object.keys(dflt).find(k => k !== 'variant' && k !== 'size') || 'color';
+    const TREATMENTS = {
+      filled:  (c) => ({ bg: c.bg, fg: c.fg, border: null }),
+      outline: (c) => ({ bg: null, fg: c.text, border: c.border }),
+      ghost:   (c) => ({ bg: null, fg: c.text, border: null }),
+    };
+    const entries = [];
+    for (const treatment of compConfig.treatments) {
+      const resolve = TREATMENTS[treatment];
+      if (!resolve) continue;
+      for (const [colorName, c] of Object.entries(compConfig.colors)) {
+        if (colorName.startsWith('$')) continue;
+        entries.push({
+          namePrefix: `variant=${treatment}, ${colorAxisKey}=${colorName}`,
+          colors: resolve(c),
+          label: cap(colorName),
+        });
+      }
+    }
+    return entries;
+  }
+
+  const variantKey = compConfig.state ? 'state' : 'variants';
+  const prefix = variantKey === 'state' ? 'state' : 'variant';
+  const entries = [];
+  for (const [varName, colors] of Object.entries(compConfig[variantKey])) {
+    if (varName.startsWith('$')) continue;
+    entries.push({ namePrefix: `${prefix}=${varName}`, colors, label: cap(varName) });
+  }
+  return entries;
+}
+
+/**
  * Build a standard component from a descriptor + config.
  *
  * @param {object} descriptor - { name, configKey, description }
@@ -77,21 +134,25 @@ function createStandardIconSlot(comp, slotName, fgVar, iconSizeVar, slotConfig, 
  */
 function buildStandardComponent(descriptor, compConfig, lookups, defaultMode, page) {
   const { semColors, semRadius, primSpacing, primHeight, primIconSize, primBW } = lookups;
-  const variantKey = compConfig.state ? 'state' : 'variants';
-  const variantDefs = compConfig[variantKey];
   const variants = [];
   const iconSlots = compConfig['icon-slots'];
 
   // Component-level width (e.g. text-field width: "280px")
   const compWidth = parsePx(compConfig.width);
 
-  for (const [varName, colors] of Object.entries(variantDefs)) {
+  // Variant matrix — orthogonal (treatment × color) or single-axis. See
+  // resolveVariantEntries; orthogonal atoms become a multi-property Figma set.
+  const variantEntries = resolveVariantEntries(compConfig);
+
+  for (const entry of variantEntries) {
+    const colors = entry.colors;
     const bgVar = colors.bg ? semColors[colors.bg] : null;
     const fgVar = colors.fg ? semColors[colors.fg] : null;
 
     for (const [sizeName, sz] of Object.entries(compConfig.sizes)) {
+      if (sizeName.startsWith('$')) continue;
       const comp = figma.createComponent();
-      comp.name = `${variantKey === 'state' ? 'state' : 'variant'}=${varName}, size=${sizeName}`;
+      comp.name = `${entry.namePrefix}, size=${sizeName}`;
       comp.layoutMode = 'HORIZONTAL';
       comp.primaryAxisSizingMode = 'AUTO';
       comp.counterAxisAlignItems = 'CENTER';
@@ -196,7 +257,7 @@ function buildStandardComponent(descriptor, compConfig, lookups, defaultMode, pa
       // Label — bind to text style family/{size} (e.g. action/md)
       const label = figma.createText();
       label.name = 'label';
-      label.characters = varName.charAt(0).toUpperCase() + varName.slice(1);
+      label.characters = entry.label;
 
       // Look up text style by family/tier name
       const textStyleName = `${descriptor.textFamily || 'body'}/${sizeName}`;

@@ -92,6 +92,15 @@ function buildSharedUtils() {
   // resolvers defines fontStyle(weight, familyName).
   combined += `\n\nfunction weightToStyleName(familyName, weight) { return fontStyle(weight, familyName); }`;
 
+  // Make the bundle re-runnable in a persistent console. The Figma plugin
+  // console keeps scope across pastes, so a second paste of 00 (e.g. after a
+  // utils edit mid-iteration) throws "redeclaration of const X" on the first
+  // top-level const — and silently halts, so every later definition (and any
+  // fix in it) never loads. Rewriting top-level (column-0) const/let to var
+  // lets a re-paste redefine cleanly. Function-internal declarations are
+  // indented, so they're untouched and stay block-scoped.
+  combined = combined.replace(/^(const|let)\b/gm, 'var');
+
   // Deduplicate: buildLookup and bLookup are the same function.
   // The component utils use bLookup, semantic/style/layout use buildLookup.
   // Both are defined — no conflict since they have different names.

@@ -210,3 +210,30 @@ function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
 
   return inst;
 }
+
+// Close (X) affordance for overlay mocks (dialog, sheet) — the built-in close
+// behind `showClose` (default true) in v2. Returns a sized, colored icon/x
+// instance for the caller to append; null if no icon component is present.
+function createCloseIcon(fgVar, iconSizeVar) {
+  let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/x");
+  if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!iconComp) return null;
+
+  const inst = iconComp.createInstance();
+  inst.name = "close";
+
+  if (iconSizeVar) {
+    inst.setBoundVariable("width", iconSizeVar);
+    inst.setBoundVariable("height", iconSizeVar);
+  }
+
+  if (fgVar) {
+    const vecs = inst.findAll(n => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE" || n.type === "ELLIPSE" || n.type === "RECTANGLE");
+    const paint = [figma.variables.setBoundVariableForPaint(
+      { type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 } }, "color", fgVar
+    )];
+    for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
+  }
+
+  return inst;
+}

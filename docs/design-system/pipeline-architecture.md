@@ -26,7 +26,9 @@ spec/config/*.json
        └──► Code generators ──► tokens.css, components, stories
 ```
 
-**Why this works:** drift is impossible. Change a token, regenerate, both sides update. No more "the Figma file says one thing, the code says another."
+**Why this works:** token and value changes flow to both sides from one edit — change a token, regenerate, Figma and code update together.
+
+**The caveat (hard-won):** the two pipelines are *separate codebases* interpreting the same config. Values flow for free; **structure does not**. A change to config *shape* — a new variant axis (orthogonal `variant × color`), a renamed key (badge's color axis is `state`, not `color`), an atom moved between groups (`toolbar` Buttons → Layout) — must be taught to **both** the Figma builders and the code generators. Skip one side and they drift: the side you edited regenerates clean, the side you didn't silently lags.
 
 ## Component ownership model (Shadcn-style)
 
@@ -35,10 +37,21 @@ The design system is a *starter kit*, not a dependency. Downstream projects ejec
 | Layer | Lifecycle in downstream project |
 |-------|--------------------------------|
 | **Tokens** (`tokens.css`) | Safe to recopy. Components reference CSS variables — swapping tokens updates everything. |
-| **Atoms** (`components/atoms/`) | Project-owned after scaffold. Edit in place. Cherry-pick generator improvements by diffing, not re-scaffolding. |
+| **Atoms** (`components/`) | Picked per-project via `loom-picks.json` and copied in flat by `setup.sh`. Project-owned after install — edit in place. Pull generator improvements by diffing, not re-installing. |
 | **Molecules / organisms / pages** | Built downstream, never generated. The generator doesn't touch these directories. |
 
 **Why this works:** no upgrade treadmill, no version pinning, no breaking changes. Agency clients own their code on delivery. Personal projects evolve independently.
+
+### Two delivery models, one config
+
+The catalog model treats the two outputs asymmetrically — by role, not by accident:
+
+| Surface | What it delivers | Scope |
+|---------|------------------|-------|
+| **Code** | Picked atoms copied into the consuming project (`loom-picks.json` → `setup.sh`) | Per-project subset — projects take only what they use |
+| **Figma** | One canonical Loom file showing every catalog atom | All-atom browse reference; consumers don't get a filtered Figma file |
+
+Figma's job is *browse* ("what's available"), so all-atom is correct there; per-project picking is a code-delivery concern Figma doesn't share. Both still regenerate from the same `spec/config/`.
 
 ## Surface elevation rule
 
@@ -59,7 +72,7 @@ Atoms default to `surface-1` as their base background. Composition-level concern
 ## Failure modes
 
 - **Hand-built styles drift from configs.** If you eyeball a component, it will diverge from the config it's supposed to mirror. Always derive mechanically. See `codegen-pattern.md`.
-- **Cherry-picking components from the manifest.** Cheaper to ship the full library and ignore unused atoms than to maintain a filter.
+- **Updating one pipeline but not the other.** Figma builders and code generators are separate code over shared config. A structural config change regenerates clean on the side you edited and silently lags on the side you didn't. Update both, then **visual-confirm Figma** — a green assemble only proves the scripts *run*, not that they match the catalog (a builder reading a now-removed config key throws at paste time; one reading a stale shape renders the wrong thing without erroring).
 - **Re-scaffolding a running project.** Full regeneration is for new projects only. Once shipped, it's the consumer's code.
 
 ## Related

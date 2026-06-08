@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternSheet(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing } = lookups;
+  const { semColors, semRadius, primSpacing, primIconSize } = lookups;
   const config = CONFIG.components.sheet;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -88,6 +88,17 @@ function buildPatternSheet(lookups, defaultMode, page) {
 
   // Content placeholder
   const fgVar = semColors[colors.fg];
+
+  // Header row — title + built-in close (X). showClose defaults true in v2.
+  const headerRow = figma.createFrame();
+  headerRow.name = 'header';
+  headerRow.layoutMode = 'HORIZONTAL';
+  headerRow.primaryAxisSizingMode = 'AUTO';
+  headerRow.counterAxisSizingMode = 'AUTO';
+  headerRow.counterAxisAlignItems = 'CENTER';
+  headerRow.itemSpacing = 12;
+  headerRow.fills = [];
+
   const title = figma.createText();
   title.name = 'title';
   title.characters = 'Sheet Title';
@@ -95,7 +106,16 @@ function buildPatternSheet(lookups, defaultMode, page) {
   if (fgVar) title.fills = [figma.variables.setBoundVariableForPaint(
     { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fgVar
   )];
-  sheet.appendChild(title);
+  headerRow.appendChild(title);
+  title.layoutSizingHorizontal = 'FILL';
+
+  const closeIconSizeVar = primIconSize[resolveIcon('icon/icon-2')];
+  const closeMutedVar = semColors['color/surface/on-surface-variant'];
+  const closeX = createCloseIcon(closeMutedVar, closeIconSizeVar);
+  if (closeX) headerRow.appendChild(closeX);
+
+  sheet.appendChild(headerRow);
+  headerRow.layoutSizingHorizontal = 'FILL';
 
   const body = figma.createText();
   body.name = 'body';

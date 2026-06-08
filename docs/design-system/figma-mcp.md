@@ -26,6 +26,7 @@ Operational reference for working with the Figma Plugin API through MCP — data
 - **Shared utils architecture:** paste utils once at session start, then run small step scripts that reference globals. 50–70% size reduction per script. See the `assemble-figma.js` orchestrator pattern.
 - Variable IDs are session-specific. Get references in the same script — don't hardcode IDs across runs.
 - Console scope collisions between scripts are real. Wrap step scripts in async IIFEs.
+- **Re-pasting the shared-utils bundle throws `redeclaration of const X` and *silently halts*.** The console scope persists across pastes, and top-level `const`/`let` can't be redeclared — so on a second paste of `00`, execution dies at the first collision and every helper defined *below* it never reloads (a fix you just made silently won't take). `assemble-figma.js` emits the bundle with top-level `const`/`let` rewritten to `var` so re-pastes redefine cleanly. The one exception: the first hop *out of* a `const`-era session still needs a console reload, because a `var` can't redeclare an existing `const` of the same name. After that, re-pasting `00` after a utils edit is friction-free — no reload, no re-pasting 01–16 (the file keeps its variables/styles/components).
 
 ## API quirks
 
