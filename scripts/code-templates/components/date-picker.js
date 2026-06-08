@@ -4,10 +4,11 @@ function generateDatePicker(name, config, meta) {
   return `'use client';
 
 import { forwardRef, useState } from 'react';
-import { Popover, PopoverTrigger, PopoverContent } from './Popover';
-import { Calendar } from './Calendar';
+import { Popover, PopoverTrigger, PopoverContent } from './popover';
+import { Calendar } from './calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from './cn';
+import { useFieldError } from './form-field';
 
 const triggerSizeMap: Record<string, string> = {
   sm: 'h-ch-3 px-2 text-input-sm',
@@ -27,12 +28,15 @@ type DatePickerProps = {
   onValueChange?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
+  error?: boolean;
   className?: string;
 };
 
 const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
-  ({ size = '${defaultSize}', value, onValueChange, placeholder = 'Pick a date', disabled, className }, ref) => {
+  ({ size = '${defaultSize}', value, onValueChange, placeholder = 'Pick a date', disabled, error, className }, ref) => {
     const [open, setOpen] = useState(false);
+    // Error border cascades off FormFieldContext unless an explicit error prop is given.
+    const isError = useFieldError(error);
 
     const formatted = value
       ? value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -50,6 +54,7 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               triggerSizeMap[size],
+              isError && 'border-error',
               className,
             )}
           >

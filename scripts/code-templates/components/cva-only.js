@@ -42,6 +42,8 @@ function generateCvaOnly(name, config, meta) {
   imports.push(`import { cn } from './cn';`);
   if (name === 'Button') imports.push(`import { Slot } from '@radix-ui/react-slot';`);
   if (name === 'Spinner') imports.push(`import { Loader } from 'lucide-react';`);
+  // Form controls cascade their error state off FormFieldContext (see form-field atom).
+  if (meta.formControl) imports.push(`import { useFieldError } from './form-field';`);
 
   // Extend type
   const extendsType = omitSize ? `Omit<React.${htmlType}, 'size'>` : `React.${htmlType}`;
@@ -118,9 +120,16 @@ function generateCvaOnly(name, config, meta) {
   if (name === 'Button') {
     lines.push(`    const Comp = asChild ? Slot : '${el}';`);
   }
+  // Resolve the control's state from FormFieldContext.error unless explicitly set.
+  if (meta.formControl) {
+    lines.push(`    const resolvedState = ${cva.propName} ?? (useFieldError() ? 'error' : undefined);`);
+  }
 
   // Build className
-  const cnArgs = [`${lcName}Variants({ ${[hasVariants ? cva.propName : null, hasSizes ? 'size' : null].filter(Boolean).join(', ')} })`];
+  const variantArg = hasVariants
+    ? (meta.formControl ? `${cva.propName}: resolvedState` : cva.propName)
+    : null;
+  const cnArgs = [`${lcName}Variants({ ${[variantArg, hasSizes ? 'size' : null].filter(Boolean).join(', ')} })`];
   if (extraBaseClasses) cnArgs.unshift(`'${extraBaseClasses.trim()}'`);
 
   // Build JSX

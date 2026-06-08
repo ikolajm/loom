@@ -1,0 +1,24 @@
+{
+  "name": "time-picker",
+  "category": "form",
+  "description": "Time picker — composes three Select atoms (hour / minute / period). 12h or 24h, configurable minute step.",
+  "version": "d8594cb461a8",
+  "dependencies": [
+    "cn",
+    "select"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "time-picker.story.ts",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

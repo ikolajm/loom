@@ -53,6 +53,10 @@ const { generateCalendar } = require('./components/calendar');
 const { generateDatePicker } = require('./components/date-picker');
 const { generateSkeleton } = require('./components/skeleton');
 const { generateFormField } = require('./components/form-field');
+const { generateHelperText } = require('./components/helper-text');
+const { generateRating } = require('./components/rating');
+const { generateTimePicker } = require('./components/time-picker');
+const { generateSearchBar } = require('./components/search-bar');
 
 // --- Catalog output directory (loom/catalog/) ---
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
@@ -122,6 +126,10 @@ function dispatch(name, config, meta) {
   if (name === 'DatePicker') return generateDatePicker(name, config, meta);
   if (name === 'Skeleton') return generateSkeleton(name, config, meta);
   if (name === 'FormField') return generateFormField();
+  if (name === 'HelperText') return generateHelperText(name, config, meta);
+  if (name === 'Rating') return generateRating(name, config, meta);
+  if (name === 'TimePicker') return generateTimePicker(name, config, meta);
+  if (name === 'SearchBar') return generateSearchBar(name, config, meta);
 
   switch (meta.template) {
     case 'radix': return generateRadix(name, config, meta);

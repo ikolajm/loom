@@ -15,6 +15,6 @@ export const calendarStory = {
     size: 'md',
   },
   controls: [
-    { type: 'select' as const, prop: 'size', label: 'Size', options: ['sm', 'md', 'lg'] },
+    { type: 'select' as const, prop: 'size', label: 'Size', options: ['compact', 'sm', 'md', 'lg'] },
   ],
 };

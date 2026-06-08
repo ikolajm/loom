@@ -17,7 +17,26 @@
       "sheet",
       "table",
       "separator",
-      "toolbar"
+      "toolbar",
+      "input",
+      "select",
+      "textarea",
+      "date-picker",
+      "checkbox",
+      "radio",
+      "switch",
+      "combobox",
+      "slider",
+      "file-upload",
+      "input-otp",
+      "label",
+      "helper-text",
+      "form-field",
+      "calendar",
+      "rating",
+      "time-picker",
+      "search-bar",
+      "popover"
     ]
   }
 }

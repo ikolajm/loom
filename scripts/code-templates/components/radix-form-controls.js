@@ -284,6 +284,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from './cn';
+import { useFieldError } from './form-field';
 
 const selectTriggerVariants = cva(
   'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
@@ -309,10 +310,13 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & VariantProps<typeof selectTriggerVariants>
->(({ state, size, className, children, ...props }, ref) => (
+>(({ state, size, className, children, ...props }, ref) => {
+  // Cascade off FormFieldContext.error unless an explicit state is given.
+  const resolvedState = state ?? (useFieldError() ? 'error' : undefined);
+  return (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(selectTriggerVariants({ state, size }), className)}
+    className={cn(selectTriggerVariants({ state: resolvedState, size }), className)}
     {...props}
   >
     {children}
@@ -320,7 +324,8 @@ const SelectTrigger = forwardRef<
       <ChevronDown className="size-4 shrink-0 text-on-surface-variant" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
-));
+  );
+});
 SelectTrigger.displayName = 'SelectTrigger';
 
 const SelectContent = forwardRef<

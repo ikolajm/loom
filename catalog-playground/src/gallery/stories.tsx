@@ -15,6 +15,24 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/table';
 import { Separator } from '@/components/separator';
 import { Toolbar } from '@/components/toolbar';
+import { Input } from '@/components/input';
+import { Textarea } from '@/components/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/select';
+import { Checkbox } from '@/components/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/radio';
+import { Switch } from '@/components/switch';
+import { Slider } from '@/components/slider';
+import { Combobox } from '@/components/combobox';
+import { DatePicker } from '@/components/date-picker';
+import { Calendar } from '@/components/calendar';
+import { InputOTP } from '@/components/input-otp';
+import { Label } from '@/components/label';
+import { HelperText } from '@/components/helper-text';
+import { FormField } from '@/components/form-field';
+import { FileUpload, FileUploadItem } from '@/components/file-upload';
+import { Rating } from '@/components/rating';
+import { TimePicker, type TimeValue } from '@/components/time-picker';
+import { SearchBar } from '@/components/search-bar';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
 const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>;
@@ -49,6 +67,72 @@ function SegmentedExample() {
       <ToggleGroupItem value="center">Center</ToggleGroupItem>
       <ToggleGroupItem value="right">Right</ToggleGroupItem>
     </ToggleGroup>
+  );
+}
+
+// --- Forms stateful examples ---
+function SelectExample() {
+  const [v, setV] = useState<string>();
+  return (
+    <Select value={v} onValueChange={setV}>
+      <SelectTrigger className="w-48"><SelectValue placeholder="Pick a fruit" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="apple">Apple</SelectItem>
+        <SelectItem value="banana">Banana</SelectItem>
+        <SelectItem value="cherry">Cherry</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+function CheckboxExample() {
+  const [on, setOn] = useState(true);
+  return <label className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Checkbox checked={on} onCheckedChange={(c) => setOn(!!c)} /> Subscribe</label>;
+}
+function RadioExample() {
+  return (
+    <RadioGroup defaultValue="standard" className="flex-row gap-4">
+      {['standard', 'express', 'overnight'].map((v) => (
+        <label key={v} className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><RadioGroupItem value={v} /> {v}</label>
+      ))}
+    </RadioGroup>
+  );
+}
+function SwitchExample() {
+  const [on, setOn] = useState(false);
+  return <Switch checked={on} onCheckedChange={setOn} />;
+}
+function SliderExample() {
+  const [v, setV] = useState([40]);
+  return <div className="w-64"><Slider value={v} onValueChange={setV} max={100} step={1} /></div>;
+}
+function ComboboxExample() {
+  const [v, setV] = useState('');
+  return <div className="w-64"><Combobox value={v} onValueChange={setV} options={[{ value: 'next', label: 'Next.js' }, { value: 'remix', label: 'Remix' }, { value: 'astro', label: 'Astro' }]} placeholder="Pick a framework" /></div>;
+}
+function DatePickerExample() {
+  const [d, setD] = useState<Date>();
+  return <div className="w-56"><DatePicker value={d} onValueChange={setD} /></div>;
+}
+function OTPExample() {
+  const [v, setV] = useState('');
+  return <InputOTP value={v} onValueChange={setV} length={6} />;
+}
+function RatingExample({ allowHalf }: { allowHalf?: boolean }) {
+  const [v, setV] = useState(allowHalf ? 2.5 : 3);
+  return <Rating value={v} onValueChange={setV} allowHalf={allowHalf} />;
+}
+function TimePickerExample() {
+  const [t, setT] = useState<TimeValue>({ hour: 9, minute: 30, period: 'AM' });
+  return <TimePicker value={t} onValueChange={setT} />;
+}
+// The error-cascade headline: one <FormField error> reddens the control border + helper text.
+function FieldCascadeExample({ error }: { error?: boolean }) {
+  return (
+    <FormField error={error} className="w-72">
+      <Label htmlFor="email">Email</Label>
+      <Input id="email" placeholder="you@example.com" defaultValue={error ? 'not-an-email' : ''} />
+      <HelperText>{error ? 'Enter a valid email address.' : 'We never share your email.'}</HelperText>
+    </FormField>
   );
 }
 
@@ -264,6 +348,138 @@ export const STORIES: GalleryStory[] = [
           <TableBody><TableRow><TableCell>Ada</TableCell><TableCell>Engineer</TableCell></TableRow></TableBody>
         </Table>
       ) },
+    ],
+  },
+
+  // === Inputs (Forms group) ===
+  {
+    name: 'FormField + cascade',
+    category: 'Inputs',
+    description: 'Field-row primitive. <FormField error> cascades a red control border + red helper text to the whole field — no per-control wiring. Explicit state on a control still overrides.',
+    sections: [
+      { label: 'default', content: <FieldCascadeExample /> },
+      { label: 'error (border + helper cascade)', content: <FieldCascadeExample error /> },
+    ],
+  },
+  {
+    name: 'Input',
+    category: 'Inputs',
+    description: 'Text input (text-field base). state (default/error) × size; error also cascades from FormField.',
+    sections: [
+      { label: 'sizes', content: SIZES.map((s) => <Input key={s} size={s} placeholder={`size ${s}`} className="w-48" />) },
+      { label: 'error state (explicit)', content: <Input state="error" defaultValue="invalid" className="w-48" /> },
+      { label: 'disabled', content: <Input disabled placeholder="Disabled" className="w-48" /> },
+    ],
+  },
+  {
+    name: 'Textarea',
+    category: 'Inputs',
+    description: 'Multi-line input. min-height per size; vertical resize. Error cascades from FormField.',
+    sections: [
+      { label: 'sizes', content: SIZES.map((s) => <Textarea key={s} size={s} placeholder={`size ${s}`} className="w-56" />) },
+      { label: 'error', content: <Textarea state="error" defaultValue="Too short" className="w-56" /> },
+    ],
+  },
+  {
+    name: 'Select',
+    category: 'Inputs',
+    description: 'Radix Select with token-styled trigger + content. Error cascades from FormField.',
+    sections: [{ label: 'default', content: <SelectExample /> }],
+  },
+  {
+    name: 'Checkbox · Radio · Switch',
+    category: 'Inputs',
+    description: 'Binary + exclusive selection controls. Checkbox/radio share toggle-base; switch is its own track/thumb.',
+    sections: [
+      { label: 'checkbox', content: [<CheckboxExample key="c" />, ...SIZES.map((s) => <Checkbox key={s} size={s} defaultChecked />)] },
+      { label: 'radio group', content: <RadioExample /> },
+      { label: 'switch', content: [<SwitchExample key="s" />, ...SIZES.map((s) => <Switch key={s} size={s} defaultChecked />)] },
+    ],
+  },
+  {
+    name: 'Slider',
+    category: 'Inputs',
+    description: 'Single/range slider, Radix-backed. Pair with a visible value label.',
+    sections: [{ label: 'default', content: <SliderExample /> }],
+  },
+  {
+    name: 'Combobox',
+    category: 'Inputs',
+    description: 'Filterable single-select (cmdk + popover). Trigger error cascades from FormField.',
+    sections: [{ label: 'default', content: <ComboboxExample /> }],
+  },
+  {
+    name: 'DatePicker',
+    category: 'Inputs',
+    description: 'Text-field trigger + Calendar in a popover. Trigger error cascades from FormField.',
+    sections: [{ label: 'default', content: <DatePickerExample /> }],
+  },
+  {
+    name: 'Calendar',
+    category: 'Inputs',
+    description: 'Day grid (react-day-picker). New compact size absorbs the mini-calendar pattern.',
+    sections: [
+      { label: 'compact (new)', content: <Calendar size="compact" mode="single" /> },
+      { label: 'md', content: <Calendar size="md" mode="single" /> },
+    ],
+  },
+  {
+    name: 'InputOTP',
+    category: 'Inputs',
+    description: 'One-time-code input — per-cell boxes, auto-advance, paste support.',
+    sections: [{ label: '6-digit', content: <OTPExample /> }],
+  },
+  {
+    name: 'FileUpload',
+    category: 'Inputs',
+    description: 'Stateless dropzone (dragover is internal state, not a variant). Single-file: status shows in the dropzone via selectedFile. Multi-file: map files over FileUploadItem rows. Both share one status vocabulary; consumer owns the files + drives status/progress.',
+    sections: [
+      { label: 'dropzone (idle)', content: <div className="w-80"><FileUpload /></div> },
+      { label: 'single file · in-dropzone status', content: (
+        <div className="flex flex-wrap gap-4">
+          <div className="w-72"><FileUpload selectedFile={{ name: 'headshot.jpg', status: 'uploading', progress: 62 }} /></div>
+          <div className="w-72"><FileUpload selectedFile={{ name: 'resume.pdf', size: '248 KB', status: 'success' }} /></div>
+          <div className="w-72"><FileUpload selectedFile={{ name: 'archive.zip', status: 'error', error: 'Upload failed' }} /></div>
+        </div>
+      ) },
+      { label: 'multi file · FileUploadItem rows', content: (
+        <div className="w-80 flex flex-col gap-2">
+          <FileUploadItem name="cover-letter.docx" size="89 KB" onRemove={() => {}} />
+          <FileUploadItem name="headshot.jpg" status="uploading" progress={62} />
+          <FileUploadItem name="resume.pdf" size="248 KB" status="success" onRemove={() => {}} />
+          <FileUploadItem name="archive.zip" status="error" error="Upload failed" onRemove={() => {}} />
+        </div>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => <FileUpload key={s} size={s} className="w-44" />) },
+    ],
+  },
+  {
+    name: 'Rating',
+    category: 'Inputs',
+    description: 'Star (or custom-icon) rating. Interactive, optional half-steps, read-only. Filled = primary (project-owned).',
+    sections: [
+      { label: 'half steps', content: <RatingExample allowHalf /> },
+      { label: 'read-only', content: <Rating value={4} readOnly /> },
+      { label: 'sizes', content: SIZES.map((s) => <Rating key={s} size={s} value={3} readOnly />) },
+    ],
+  },
+  {
+    name: 'TimePicker',
+    category: 'Inputs',
+    description: 'Option A — three composed Selects (hour / minute / period). No masking; a11y via Select.',
+    sections: [
+      { label: '12-hour', content: <TimePickerExample /> },
+      { label: '24-hour', content: <TimePicker use24Hour value={{ hour: 14, minute: 0 }} /> },
+    ],
+  },
+  {
+    name: 'SearchBar',
+    category: 'Inputs',
+    description: 'In-body search shell — leading icon (optional) + clearable X. Distinct from command-palette (overlay).',
+    sections: [
+      { label: 'default (search glyph)', content: <div className="w-64"><SearchBar placeholder="Search…" /></div> },
+      { label: 'no leading icon (text to edge)', content: <div className="w-64"><SearchBar icon={null} placeholder="No icon — text at the edge" /></div> },
+      { label: 'leading icon · sizes (slot scales)', content: SIZES.map((s) => <div key={s} className="w-64"><SearchBar size={s} icon={<Star />} placeholder={`size ${s}`} /></div>) },
     ],
   },
 ];

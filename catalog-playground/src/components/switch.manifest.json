@@ -1,0 +1,30 @@
+{
+  "name": "switch",
+  "category": "form",
+  "description": "",
+  "version": "28d06b1011ea",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-switch",
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "switch.story.ts",
+  "variants": [
+    "false",
+    "true"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

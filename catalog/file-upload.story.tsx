@@ -16,7 +16,7 @@ export const fileuploadStory = {
     size: 'md',
   },
   controls: [
-    { type: 'select' as const, prop: 'variant', label: 'Variant', options: ['default', 'dragover'] },
+    { type: 'select' as const, prop: 'variant', label: 'Variant', options: ['default'] },
     { type: 'select' as const, prop: 'size', label: 'Size', options: ['sm', 'md', 'lg'] },
   ],
 };

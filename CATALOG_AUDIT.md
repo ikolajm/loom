@@ -324,31 +324,113 @@ Source: `spec/config/components/form.json`. Drops from `[[project_loom]]`: `inpu
 | Atom | Status | Notes |
 |---|---|---|
 | text-field | keep | `$base` for input/select/combobox |
-| input | keep | Extends text-field |
-| select | keep | Extends text-field |
-| textarea | keep | |
-| date-picker | keep | Composite — uses calendar |
+| input | keep | Extends text-field. **+ error cascade** (reads `FormFieldContext.error`) |
+| select | keep | Extends text-field. **+ error cascade** |
+| textarea | keep | Extends text-field. **+ error cascade** |
+| date-picker | keep | Composite — uses calendar. **+ error cascade** (trigger border) |
 | toggle-base | keep | `$base` for checkbox/radio |
 | checkbox | keep | Extends toggle-base. Uses always-visible Square/CheckSquare (not Radix ItemIndicator) |
 | radio | keep | Extends toggle-base |
 | switch | keep | |
-| combobox | keep | Composite — uses input + popover + command |
+| combobox | keep | Composite — uses input + popover + command. **+ error cascade** (trigger border) |
 | slider | keep | |
-| file-upload | refine | Consider dropzone-style drag-and-drop variant |
+| file-upload | refine | **Already dropzone** — refine is the selected-files affordance: stateless dropzone + `FileUploadItem` subcomponent. `dragover` demoted variant→internal state. + error cascade |
 | input-otp | keep | |
 | label | keep | |
-| helper-text | keep | Inline field error rendering lives here (absorbs the use case alert previously covered) |
+| helper-text | refine | Inline field error rendering lives here (absorbs alert's use case). **+ error cascade** (reads `FormFieldContext.error`) |
+| form-field | new | **Added to catalog** (was generated but untracked). Field-row primitive — provides `error` context the controls + helper-text cascade off |
 | calendar | refine | Add `compact` size to absorb shadcn's mini-calendar pattern |
 | input-group | drop | Per `[[project_loom]]` — Input icon slots + composition cover it |
 | rating | new | Star/numeric rating — common user-facing input |
-| time-picker | new | Distinct enough from date-picker to be its own atom (paired) |
-| search-bar | new | In-body search composite — distinct from command-palette (overlay) |
+| time-picker | new | Distinct enough from date-picker to be its own atom (paired). Composes three `Select`s (hour/min/period) |
+| search-bar | new | In-body search composite — distinct from command-palette (overlay). Static input shell Sprint 1 |
 
 Triage skipped: color-picker (shadcn — too narrow; `react-colorful` is the standard reach when needed), mini-calendar (absorbed as calendar `compact` size).
 
 ### Detailed notes — Forms
 
-*(Empty — filled during deep dive)*
+**Forms deep dive complete (2026-06-08).** Confirmed with Jacob via decision round; implemented by editing config (`form.json`) + generators/templates and regenerating (never the generated `catalog/*.tsx`). Biggest group (18 atoms + the untracked `form-field`), but the design energy concentrated in ~7 — the text-input family and selection controls are clean `keep`s on the existing `$base`/extend model.
+
+Cross-cutting decisions:
+
+- **The error cascade (C).** `FormField` is promoted to a tracked catalog atom (it was already generated but absent from the audit table, with a dead `useFormField()` context nothing consumed). Wiring made real: `HelperText` and the text-control borders (`input` / `select` / `textarea` / `combobox` / `date-picker`) **default to reading `FormFieldContext.error`**, with the explicit `state`/`error` prop still overriding. One `<FormField error>` now cascades a red border + red helper text to the whole field; standalone use (no FormField wrapper) is unchanged. This is what makes "helper-text absorbed alert's inline-error job" true by construction.
+- **file-upload was already a dropzone.** The audit's "consider dropzone variant" was stale. The honest refine is the **selected-files affordance**: the dropzone stays stateless (fires `onFilesSelected`, owns no file array), and a sibling **`FileUploadItem`** subcomponent (name + size + remove-X) ships as a frozen-but-editable piece the consumer maps over their own state — same composition pattern as Card/Table subcomponents, *not* a stateful black-box widget (Option 1, Jacob's call). `compact` size **deferred** (a single-row inline dropzone is a different layout, YAGNI). `dragover` **demoted** from the `variants` axis to an internal runtime state — it was never an author-time choice; file-upload is now single-variant.
+- **Composite import casing fixed in passing.** `combobox` / `date-picker` imported PascalCase siblings (`./Popover`, `./Calendar`) while generated files are lowercase — resolved only on case-insensitive (macOS) filesystems and had never been built (gallery picked only Buttons+Layout). Corrected to lowercase to match the `./cn` convention; new composites (`time-picker`, `search-bar`) follow it.
+- **Known latent gap (noted, not fixed):** composite manifests under-declare registry `dependencies` (e.g. `combobox` lists only `['cn']` despite composing Popover/Command). Inference can't see cross-atom deps. The new composites declare theirs correctly via `$catalog.dependencies`; back-filling the existing composites is a separate cleanup (flagged for the manifest-deps pass).
+
+---
+
+**Field-input family (input / select / textarea / date-picker / combobox) — keep + error cascade**
+
+- **Status:** keep (model unchanged), + error cascade.
+- **Category:** form. **Base:** `text-field` (input/select/textarea/date-picker/combobox all extend it).
+- **Change:** each text control resolves its `state` from `FormFieldContext.error` when not explicitly set. `input`/`textarea` (cva-only) gain a `formControl` meta flag that imports `useFormField`; `select` (radix) resolves in its trigger; `combobox`/`date-picker` (bespoke) gain an `error` prop that flips the trigger border and also reads context.
+- **Override surface:** unchanged props + the existing `state`/`error` override always wins over the cascade.
+- **Open questions:** none.
+
+**toggle-base / checkbox / radio / switch / slider — keep**
+
+- Unchanged this pass. `toggle-base` is the `$base` for checkbox/radio; checkbox uses always-visible `Check` indicator; switch + slider are Radix-backed with hardcoded cohesive dimensions (intentional `$exception`). No catalog-contract change.
+
+---
+
+**form-field (new — promoted from untracked)**
+
+- **Status:** new to the audit (the atom already generated; this tracks it + wires the dead context).
+- **Category:** form. **Dependencies:** `cn`. **Composition:** `none`.
+- **Role:** the field-row primitive — `flex flex-col` container that provides `FormFieldContext { error }`. Children (label / control / helper-text) cascade off it.
+- **Override surface:** Props: `error`, standard div attrs. Frozen-but-editable: the row gap.
+- **Open questions:** none.
+
+**helper-text (refine — error cascade)**
+
+- **Status:** refine. **Category:** form. **Dependencies:** `cn`, `form-field` (for `useFormField`).
+- **Change:** `state` defaults to `error` when inside a `<FormField error>`; explicit `state` prop overrides. Owns inline field-error rendering for the catalog (absorbed from the dropped `alert`).
+- **Override surface:** Props: `state`, `size`, standard `<p>` attrs.
+- **Open questions:** none.
+
+---
+
+**file-upload (refine — selected-files affordance)**
+
+- **Status:** refine. **Category:** form. **Dependencies:** `cn`. **Tokens:** color, typography, spacing, sizing.
+- **Composition:** stateless dropzone + `FileUploadItem` subcomponent (frozen-but-editable). Consumer owns the `files[]` array.
+- **`FileUploadItem`:** props `name`, `size?` (formatted string or bytes), `onRemove?` — renders a row with filename + size + a remove-X (hover = opacity per `[[hover-defaults-opacity]]`).
+- **Variants:** single `default` (dragover is now internal state, not a variant).
+- **Sizes:** sm / md / lg (compact deferred).
+- **Override surface:** Props on dropzone: `size`, `accept`, `multiple`, `onFilesSelected`, `disabled`, `error` (reads FormFieldContext). Frozen-but-editable: default dropzone copy, `FileUploadItem` row structure.
+- **Open questions:** none.
+
+**calendar (refine — compact size)**
+
+- **Status:** refine. **Category:** form. **Dependencies:** `cn` (+ `react-day-picker`).
+- **Change:** add a `compact` size tier (narrower width, smaller cells/typography) — absorbs shadcn's mini-calendar. Pure config add; the generator maps all size keys.
+- **Sizes:** compact / sm / md / lg.
+- **Open questions:** none.
+
+---
+
+**rating (new)**
+
+- **Status:** new. **Category:** form. **Dependencies:** `cn`. **Tokens:** color, sizing.
+- **Composition:** `none`. Star icons (lucide `Star`), filled vs empty driven by value.
+- **Override surface:** Props: `max` (default 5), `value` / `onValueChange`, `allowHalf`, `readOnly`, `icon` (swap star→heart etc.), `size` (sm/md/lg).
+- **Frozen-but-editable:** the fill/track token mapping (filled = `primary` / `warning`; empty = `outline`).
+- **Open questions:** none.
+
+**time-picker (new — Option A)**
+
+- **Status:** new. **Category:** form. **Dependencies:** `cn`, `select`. **Composition:** `none`.
+- **Approach (Jacob's call — Option A):** three composed `Select`s — hour / minute / period (AM-PM). Composes the existing Select substrate; no masking logic; accessible by construction. `24h` prop drops the period select and switches the hour range.
+- **Override surface:** Props: `value` / `onValueChange` (a `{hour, minute, period}` or `Date`), `size`, `minuteStep` (default 5), `use24Hour`, `disabled`.
+- **Open questions:** none.
+
+**search-bar (new — static shell Sprint 1)**
+
+- **Status:** new. **Category:** form. **Dependencies:** `cn`. **Composition:** `none`.
+- **Scope (Sprint 1):** the static input shell — leading `Search` icon + text input + clearable `X` (shows when non-empty). Distinct from `command-palette` (overlay). Live-results dropdown **deferred**.
+- **Override surface:** Props: `value` / `onValueChange`, `placeholder`, `size`, `onClear`, `disabled`, standard input attrs.
+- **Open questions:** results dropdown lands when a real in-body-search use demands it (not Sprint 1).
 
 ---
 

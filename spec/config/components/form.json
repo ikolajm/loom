@@ -145,11 +145,11 @@
   },
 
   "file-upload": {
-    "$note": "Dropzone variant — dashed border area for drag-and-drop or click-to-browse. Button trigger variant is just a button (use button config). States like dragover and uploading are code-only.",
+    "$note": "Dropzone — dashed-border drag-and-drop / click-to-browse area. Single-variant (the dropzone IS the atom; a button trigger is just a button). The dropzone is stateless — it fires onFilesSelected and owns no file array; the FileUploadItem subcomponent renders the selected-files list the consumer maps over. `dragover` is an internal runtime state (drag highlight), NOT a consumer-facing variant. `uploading` is code-only.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "icon-fg": "color/surface/on-surface-variant" },
-      "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" }
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "icon-fg": "color/surface/on-surface-variant" }
     },
+    "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" },
     "typography": {
       "font-family": "body",
       "font-weight": 400,
@@ -252,10 +252,62 @@
       "text-transform": "none"
     },
     "sizes": {
+      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-2", "header-font-size": "12px", "header-line-height": "16px", "day-font-size": "11px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
       "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-3", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "12px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
       "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-5", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "14px", "day-line-height": "20px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
       "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "cell-size": "height/ch-7", "header-font-size": "16px", "header-line-height": "24px", "day-font-size": "16px", "day-line-height": "24px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
+  },
+
+  "rating": {
+    "$catalog": {
+      "category": "form",
+      "description": "Star (or custom-icon) rating input. Interactive or read-only, optional half-steps. Filled vs empty driven by value.",
+      "dependencies": ["cn"],
+      "tokens": ["color", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Star rating. Filled overlay clipped to value for half-steps. Icon swappable via the `icon` prop (default lucide Star). Filled color = primary; empty = outline — project-owned, swap in the file.",
+    "sizes": {
+      "sm": { "icon-size": "icon/icon-2", "gap": "{scale.1}" },
+      "md": { "icon-size": "icon/icon-3", "gap": "{scale.1}" },
+      "lg": { "icon-size": "icon/icon-4", "gap": "{scale.2}" }
+    },
+    "default": { "size": "md" }
+  },
+
+  "time-picker": {
+    "$catalog": {
+      "category": "form",
+      "description": "Time picker — composes three Select atoms (hour / minute / period). 12h or 24h, configurable minute step.",
+      "dependencies": ["cn", "select"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Option A — composes Select (no input masking). Paired with date-picker. `use24Hour` drops the period select and switches the hour range; `minuteStep` controls the minute options.",
+    "sizes": {
+      "sm": {},
+      "md": {},
+      "lg": {}
+    },
+    "default": { "size": "md" }
+  },
+
+  "search-bar": {
+    "$catalog": {
+      "category": "form",
+      "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
+      "dependencies": ["cn"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Sprint 1 = static input shell (search icon + clear X). Live-results dropdown deferred to a later pass. Controlled (`value`) or uncontrolled.",
+    "sizes": {
+      "sm": { "height": "height/ch-3" },
+      "md": { "height": "height/ch-5" },
+      "lg": { "height": "height/ch-7" }
+    },
+    "default": { "size": "md" }
   }
 }

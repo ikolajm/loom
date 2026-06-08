@@ -1,0 +1,31 @@
+{
+  "name": "checkbox",
+  "category": "form",
+  "description": "",
+  "version": "602bfba1aafc",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-checkbox",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "checkbox.story.ts",
+  "variants": [
+    "false",
+    "true"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

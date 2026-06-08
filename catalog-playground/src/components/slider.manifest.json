@@ -1,0 +1,28 @@
+{
+  "name": "slider",
+  "category": "form",
+  "description": "",
+  "version": "12c461f7a78f",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-slider"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "slider.story.ts",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

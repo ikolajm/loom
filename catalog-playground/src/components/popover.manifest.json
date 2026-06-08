@@ -1,0 +1,29 @@
+{
+  "name": "popover",
+  "category": "feedback",
+  "description": "",
+  "version": "367d998b6116",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-popover",
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "stories": "popover.story.ts",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}
