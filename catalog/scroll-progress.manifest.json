@@ -1,0 +1,15 @@
+{
+  "name": "scroll-progress",
+  "category": "motion",
+  "description": "",
+  "version": "fddf00ed81fc",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color"
+  ],
+  "composition": "none",
+  "stories": "scroll-progress.story.ts"
+}

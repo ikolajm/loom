@@ -56,7 +56,11 @@
       "command-palette",
       "stepper",
       "carousel",
-      "tree-view"
+      "tree-view",
+      "reveal",
+      "stagger",
+      "count-up",
+      "scroll-progress"
     ]
   }
 }

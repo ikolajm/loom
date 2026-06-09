@@ -156,7 +156,11 @@ function buildSection6_Effects() {
   for (const [name, val] of Object.entries(standards.effects.transition)) {
     lines.push(`--transition-${name}: ${val};`);
   }
-  lines.push(`--easing: ${standards.effects.easing};`);
+  for (const [name, val] of Object.entries(standards.effects.easing)) {
+    if (name.startsWith('$')) continue;
+    lines.push(`--easing-${name}: ${val};`);
+  }
+  lines.push('--easing: var(--easing-standard);'); // back-compat alias
 
   lines.push('');
   lines.push('/* === Focus Ring === */');

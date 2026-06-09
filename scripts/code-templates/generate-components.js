@@ -44,6 +44,10 @@ const { generateListItem } = require('./components/list-item');
 const { generateStepper } = require('./components/stepper');
 const { generateTreeView } = require('./components/tree-view');
 const { generateCarousel } = require('./components/carousel');
+const { generateReveal } = require('./components/reveal');
+const { generateStagger } = require('./components/stagger');
+const { generateCountUp } = require('./components/count-up');
+const { generateScrollProgress } = require('./components/scroll-progress');
 const { generatePagination } = require('./components/pagination');
 const { generateFileUpload } = require('./components/file-upload');
 const { generateInputOTP } = require('./components/input-otp');
@@ -140,6 +144,10 @@ function dispatch(name, config, meta) {
   if (name === 'RelativeTime') return generateRelativeTime(name, config, meta);
   if (name === 'VideoPlayer') return generateVideoPlayer(name, config, meta);
   if (name === 'Sidebar') return generateSidebar(name, config, meta);
+  if (name === 'Reveal') return generateReveal(name, config, meta);
+  if (name === 'Stagger') return generateStagger(name, config, meta);
+  if (name === 'CountUp') return generateCountUp(name, config, meta);
+  if (name === 'ScrollProgress') return generateScrollProgress(name, config, meta);
 
   switch (meta.template) {
     case 'radix': return generateRadix(name, config, meta);
@@ -162,6 +170,7 @@ const CATEGORY_MAP = {
   'Data Display': 'data-display',
   'Navigation': 'navigation',
   'Composite': 'composite',
+  'Motion': 'motion',
 };
 
 function extractAxisKeys(obj) {

@@ -1,0 +1,14 @@
+{
+  "name": "count-up",
+  "category": "motion",
+  "description": "",
+  "version": "0e9318fe5301",
+  "dependencies": [
+    "cn",
+    "number"
+  ],
+  "npmDependencies": [],
+  "tokens": [],
+  "composition": "none",
+  "stories": "count-up.story.ts"
+}

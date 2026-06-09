@@ -23,6 +23,7 @@ function loadAllConfigs() {
     layoutConfig: load('components/layout.json'),
     navigationConfig: load('components/navigation.json'),
     compositeConfig: load('components/composite.json'),
+    motionConfig: load('components/motion.json'),
   };
 }
 
@@ -282,7 +283,7 @@ function resolveBase(allComponents, configKey) {
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
-  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig } = configs;
+  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig, motionConfig } = configs;
   return {
     // === Actions ===
     'Button': { source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
@@ -361,6 +362,12 @@ function getComponentRegistry(configs) {
     'Stepper': { source: compositeConfig, key: 'stepper', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, variantKey: 'step-state', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
     'Carousel': { source: compositeConfig, key: 'carousel', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Composite', template: 'lib', primitive: 'embla-carousel-react' },
     'TreeView': { source: compositeConfig, key: 'tree-view', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'tree', variantKey: 'item', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
+
+    // === Motion ===
+    'Reveal': { source: motionConfig, key: 'reveal', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'Stagger': { source: motionConfig, key: 'stagger', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'CountUp': { source: motionConfig, key: 'count-up', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Motion', template: 'lib', primitive: null },
+    'ScrollProgress': { source: motionConfig, key: 'scroll-progress', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
   };
 }
 

@@ -663,22 +663,56 @@ Triage applied the "generalizable pattern vs portfolio styling" lens. Survivors 
 
 ## Motion
 
-**Sprint 2.** Motion tokens (durations, easings, springs) ship with the substrate bundle in Sprint 1; the motion atom catalog is designed in Sprint 2 after Sprint 1 establishes the composition patterns (`slot` / `asChild`) that envelopes wrap against.
+**Triage locked 2026-06-09** (with Jacob, per-item). Candidate universe pulled from **motion.dev** (the primitive APIs — `whileInView`, `useScroll`, `useSpring`, `stagger`, `useReducedMotion`, layout/`layoutId`, `AnimatePresence`) and **Motion-Primitives** (`ibelick/motion-primitives`, 33-component reference). Triaged against Loom's envelope model and the generalizable-primitive-vs-portfolio-styling lens (the same lens that cut the Marketing group).
 
-Per spec, motion atoms are **envelopes, not pre-composed pairs** — consumers compose `<Reveal><Card /></Reveal>`, `<CountUp value={42} />`, `<Stagger><HeroBlock /></Stagger>`. No `AnimatedButton` parallels.
+Per spec, motion atoms are **envelopes** (wrap arbitrary children) or **leaf motion atoms** (animate own content) — not pre-composed pairs. Consumers compose `<Reveal><Card /></Reveal>`, `<Stagger><List /></Stagger>`, `<CountUp value={42} />`. No `AnimatedButton` parallels.
 
-Provisional inventory (to be expanded with the wider candidate set from motion.dev during Sprint 2 triage — scroll family, text family, cursor family, drag family, spring primitives, layout/shared transitions, etc.):
+### Core — the iteration's Motion scope (build these)
 
-| Atom | Status | Notes |
+| Atom | Shape | Maps to | Notes |
+|---|---|---|---|
+| reveal | envelope | MP `in-view` / motion `whileInView` | IntersectionObserver scroll-reveal — foundational motion atom. Fade/slide/scale on enter (keyframes already in substrate). |
+| stagger | envelope | MP `animated-group` / motion `stagger` | Orchestrated child delays; composes Reveal over mapped children with incremental `--index` delay. |
+| count-up | leaf | MP `animated-number` | Value interpolation for stats/metrics. |
+| scroll-progress | leaf | MP `scroll-progress` | Scroll/reading-progress indicator — broadly product-useful (docs, articles, long forms). Promoted over text-scramble. |
+
+**Build approach — zero-dep hand-roll, NOT `motion` (locked).** All four build on `requestAnimationFrame` + IntersectionObserver + the existing CSS keyframes. `motion` (the lib) earns its place only at the *wider families* (spring physics, layout/shared-element morph, scroll-`useTransform`, drag) — not pulled in for four atoms we can hand-roll cleanly. "Tools earn their place" + "build by hand until the shape is real." Keeps the iteration's Motion scope dependency-free. Adopting `motion` is a **later threshold decision**, gated on promoting a wider family.
+
+**Substrate to fill first (Sprint-1 gap, confirmed missing):** today there's *one* easing (`cubic-bezier(0.4,0,0.2,1)`) and *zero* springs. Add (1) a real **easing set** — enter / exit / emphasized — and (2) **spring presets** as motion tokens (JS spring constants / `linear()` easing) so `count-up`/`reveal` get spring *feel* without pulling `motion`. Both land before the atoms.
+
+**Cross-cutting contract:** every motion atom honors **`prefers-reduced-motion`** (no-op/reduce — trivial in the hand-rolled hooks); **IntersectionObserver disposal** + **`will-change` hygiene** as the perf contract.
+
+**Figma-motion: explicit deferral** — Smart Animate doesn't map to web motion tokens; out of scope this iteration.
+
+**Iteration boundary:** v2 ships only after the core 4 are built + reconciled (Motion is in-iteration, not post-ship). Deferred families below stay deferred to a later Sprint 2.x unless promoted.
+
+### Deferred candidates (real, not built — promote individually if needed)
+
+| Family | Members | Note |
 |---|---|---|
-| reveal | sprint-2 | Scroll-reveal IntersectionObserver wrapper — pure motion atom |
-| text-scramble | sprint-2 | Animated character substitution — portfolio's eyebrow treatment |
-| stagger | sprint-2 | Wrapper for staggered child animations — pattern used across portfolio sections |
-| ... | sprint-2 | Wider candidate set surfaced during Sprint 2 triage |
+| Text | text-scramble, text-effect, text-loop, text-morph, text-roll, text-shimmer(+wave), spinning-text | **text-scramble demoted from core** — portfolio/marketing styling, fails the generalizable-primitive bar (a stats/charts dashboard never reaches for it). |
+| Number | sliding-number | Odometer variant of count-up. |
+| Pointer/cursor | cursor, magnetic, tilt, spotlight, glow-effect, border-trail, progressive-blur | Breadth zone; most require `motion`. Defer wholesale. |
+| Transition/layout | transition-panel, animated-background, morphing-dialog, morphing-popover | Shared-element + layout morph — these are what would *force* `motion` adoption. |
+| Marquee | infinite-slider | **Taken from triage 2026-06-09, built, then PULLED before close** — Tailwind v4 in the playground kept stripping the custom `@keyframes marquee` and never emitted the `animate-marquee` utility (bare *and* `motion-safe:`-prefixed both failed, despite matching accordion's working `--animate-*` pattern; root cause unresolved). Deferred downstream to a project with real consuming context (Jacob's call) rather than burn more time on the build quirk. |
+
+### Drop — duplicates of existing atoms (motion is the atom's own Sprint-2 polish, not a new motion atom)
+
+accordion · carousel · dialog · toolbar-dynamic/expandable · disclosure (≈ collapsible) · image-comparison (= the `comparison` atom built+reverted; stays project-owned) · dock (niche, project-owned)
 
 ### Detailed notes — Motion
 
-*(Empty — Sprint 2)*
+**Built 2026-06-09 — the core 4, all zero-dep (no `motion` adopted).** Substrate landed first (easing set + spring `linear()` tokens), then each atom ran the per-group loop (dossier → sit-down → implement → gallery visual-confirm → smell gate). Figma reconcile skipped per the motion-deferral lock.
+
+**reveal (new, envelope).** IntersectionObserver + CSS transition; holds children hidden (`motion-safe:` from-classes → pure-CSS reduced-motion, instant under reduce) and transitions in on view. 6 variants (fade / fade-up/down/left/right / scale), `easing`/`duration`/`delay`/`threshold`(0)/`once`. threshold default **0** — a positive threshold on an element taller than the viewport can never fire. `will-change` only while pending. Merged ref via `useCallback` (smell-gate fix).
+
+**stagger (new, envelope).** Composes reveal — wraps each child in a `<Reveal delay={i*step}>`; the Stagger div is the layout container. `step` (80ms) + forwards reveal's props. Zero added animation logic. `dependencies: [cn, reveal]` — first cross-atom motion dep.
+
+**count-up (new, leaf).** Own IO trigger + rAF interpolation (`easeOutCubic`); composes `NumberDisplay` for all Intl formatting. **No spring/overshoot axis** — numeric overshoot reads as a *data error*. `duration` is numeric ms (1200), not the `--transition-*` token axis (content-dependent). Reduced-motion via JS `matchMedia` snap (a leaf animating a JS value can't use the CSS `motion-safe:` gate). `decimals` defaults to the target's precision. `dependencies: [cn, number]`.
+
+**scroll-progress (new, leaf).** Scroll-*linked*, not visibility-triggered: passive rAF-throttled listener writes a CSS var (`transform: scaleX`) — **no per-frame setState**. Tracks page or a `target` container. **Reduced-motion intentionally NOT handled** — direct manipulation (reflects actual scroll), not autonomous motion; suppressing it would break the indicator. The inverse of marquee, which (had it shipped) *would* honor reduced-motion as autonomous motion.
+
+**Decision — zero-dep core, `motion` deferred.** All four hand-rolled (rAF / IO / CSS) with no `motion` dep, mirroring the carousel-embla precedent of per-atom deps only when forced. `motion` adoption stays gated behind the deferred wider families (spring physics, layout/shared-element morph, scroll-`useTransform`) — none of which are in scope.
 
 ---
 

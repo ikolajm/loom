@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { GalleryStory } from './shell';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
@@ -54,6 +54,10 @@ import { CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPalette
 import { Stepper, Step } from '@/components/stepper';
 import { Carousel } from '@/components/carousel';
 import { TreeView, type TreeNodeData } from '@/components/tree-view';
+import { Reveal } from '@/components/reveal';
+import { Stagger } from '@/components/stagger';
+import { CountUp } from '@/components/count-up';
+import { ScrollProgress } from '@/components/scroll-progress';
 import { Home, BarChart3, Users, Settings, Bell, Menu, ChevronRight } from 'lucide-react';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
@@ -172,6 +176,94 @@ function FieldCascadeExample({ error }: { error?: boolean }) {
       <Input id="email" placeholder="you@example.com" defaultValue={error ? 'not-an-email' : ''} />
       <HelperText>{error ? 'Enter a valid email address.' : 'We never share your email.'}</HelperText>
     </FormField>
+  );
+}
+
+// Motion atoms can't show in a static frame — they reveal on mount and sit still. The Replay button
+// remounts every Reveal (key bump) so the enter transition re-runs on demand for visual-confirm.
+function RevealDemo() {
+  const [k, setK] = useState(0);
+  const box = (label: string, tone = 'bg-surface-1 text-on-surface') => (
+    <div className={`flex h-16 w-28 items-center justify-center rounded-card ${tone} text-body-md`}>{label}</div>
+  );
+  const variants = ['fade', 'fade-up', 'fade-down', 'fade-left', 'fade-right', 'scale'] as const;
+  const easings = ['decelerate', 'spring-smooth', 'spring-snappy', 'spring-bounce'] as const;
+  return (
+    <div className="flex flex-col gap-5">
+      <Button variant="filled" size="sm" className="w-fit" onClick={() => setK((n) => n + 1)}>Replay</Button>
+      <div className="flex flex-col gap-2">
+        <span className="text-body-sm text-on-surface">variants</span>
+        <div className="flex flex-wrap gap-3">
+          {variants.map((v) => (
+            <Reveal key={`${v}-${k}`} variant={v}>{box(v)}</Reveal>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-body-sm text-on-surface">easing · bezier vs spring presets</span>
+        <div className="flex flex-wrap gap-3">
+          {easings.map((e) => (
+            <Reveal key={`${e}-${k}`} variant="fade-up" easing={e}>{box(e, 'bg-primary-container text-on-primary-container')}</Reveal>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Stagger cascades its children in. Replay remounts the whole group so the cascade re-runs.
+function StaggerDemo() {
+  const [k, setK] = useState(0);
+  return (
+    <div className="flex flex-col gap-5">
+      <Button variant="filled" size="sm" className="w-fit" onClick={() => setK((n) => n + 1)}>Replay</Button>
+      <Stagger key={k} className="flex flex-wrap gap-3" step={90}>
+        {['One', 'Two', 'Three', 'Four', 'Five'].map((label) => (
+          <div key={label} className="flex h-16 w-28 items-center justify-center rounded-card bg-surface-1 text-on-surface text-body-md">{label}</div>
+        ))}
+      </Stagger>
+    </div>
+  );
+}
+
+// CountUp animates on in-view. In the always-visible gallery it counts on mount; Replay remounts
+// the group (key bump) to re-run. Shows formatting forwarded to NumberDisplay (separators, currency, percent).
+function CountUpDemo() {
+  const [k, setK] = useState(0);
+  const stat = (node: React.ReactNode, label: string) => (
+    <div className="flex flex-col gap-1">
+      <span className="text-title-lg text-on-surface">{node}</span>
+      <span className="text-body-sm text-on-surface">{label}</span>
+    </div>
+  );
+  return (
+    <div className="flex flex-col gap-5">
+      <Button variant="filled" size="sm" className="w-fit" onClick={() => setK((n) => n + 1)}>Replay</Button>
+      <div key={k} className="flex flex-wrap gap-10">
+        {stat(<CountUp value={147} />, 'Clients')}
+        {stat(<CountUp value={45200} format="currency" currency="USD" />, 'Revenue')}
+        {stat(<CountUp value={0.92} format="percent" decimals={0} />, 'Growth')}
+        {stat(<CountUp value={4.8} />, 'Rating')}
+      </div>
+    </div>
+  );
+}
+
+// ScrollProgress binds to scroll position. Demoed against a self-contained scroll container (target)
+// so it doesn't hijack the page scrollbar — the inline bar above the box fills as you scroll inside.
+function ScrollProgressDemo() {
+  const boxRef = useRef<HTMLDivElement>(null);
+  return (
+    <div className="w-[360px]">
+      <ScrollProgress target={boxRef} position="inline" showTrack className="rounded-full" />
+      <div ref={boxRef} className="mt-2 h-48 overflow-y-auto rounded-card border border-outline-subtle p-4">
+        <div className="flex flex-col gap-3 text-body-md text-on-surface">
+          {Array.from({ length: 12 }, (_, i) => (
+            <p key={i}>Paragraph {i + 1} — scroll this container to drive the progress bar above. The bar reflects scroll position directly; no autonomous animation.</p>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -916,6 +1008,38 @@ export const STORIES: GalleryStory[] = [
       { label: 'sizes', content: SIZES.map((s) => (
         <div key={s} className="w-[240px]"><TreeView size={s} data={treeSample} /></div>
       )) },
+    ],
+  },
+  {
+    name: 'Reveal',
+    category: 'Motion',
+    description: 'Scroll-reveal envelope on a hand-rolled IntersectionObserver — zero runtime dep. Holds children hidden, then transitions them in when scrolled into view. Honors prefers-reduced-motion in pure CSS (motion-safe: gate — content is instant under reduce). stagger composes this. Hit Replay to re-run the enter transition.',
+    sections: [
+      { label: 'variants · easing (replay to re-run)', content: <RevealDemo /> },
+    ],
+  },
+  {
+    name: 'Stagger',
+    category: 'Motion',
+    description: 'Cascade envelope — composes Reveal, wrapping each child at delay = index*step so the group enters one-by-one. The Stagger element is the layout container (here flex gap). Forwards variant/easing/duration to every child. Replay to re-run the cascade.',
+    sections: [
+      { label: 'step 90ms cascade (replay to re-run)', content: <StaggerDemo /> },
+    ],
+  },
+  {
+    name: 'CountUp',
+    category: 'Motion',
+    description: 'Leaf motion atom — animates a number from 0 to its target on scroll-into-view (rAF + easeOutCubic, own IO). Composes NumberDisplay for Intl formatting (separators / currency / percent). No overshoot — a stat shouldn’t count past its value. Replay to re-run.',
+    sections: [
+      { label: 'stats — integer · currency · percent · decimal (replay)', content: <CountUpDemo /> },
+    ],
+  },
+  {
+    name: 'ScrollProgress',
+    category: 'Motion',
+    description: 'Scroll-linked progress bar (reading indicator). Binds continuously to scroll position via a rAF-throttled passive listener writing a CSS var (transform: scaleX) — no per-frame React state. Tracks the page by default, or a container via target. Scroll the box to drive it.',
+    sections: [
+      { label: 'tracking a scroll container (target)', content: <ScrollProgressDemo /> },
     ],
   },
 ];

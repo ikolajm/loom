@@ -1,0 +1,24 @@
+{
+  "name": "stagger",
+  "category": "motion",
+  "description": "",
+  "version": "0d29c7a7d1ae",
+  "dependencies": [
+    "cn",
+    "reveal"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "spacing"
+  ],
+  "composition": "none",
+  "stories": "stagger.story.ts",
+  "variants": [
+    "fade",
+    "fade-up",
+    "fade-down",
+    "fade-left",
+    "fade-right",
+    "scale"
+  ]
+}
