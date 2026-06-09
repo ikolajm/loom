@@ -51,6 +51,9 @@ import { Breadcrumbs, BreadcrumbItem, BreadcrumbSeparator } from '@/components/b
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/pagination';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/navigation-menu';
 import { CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPaletteEmpty, CommandPaletteGroup, CommandPaletteItem, CommandPaletteSeparator, CommandPaletteShortcut } from '@/components/command-palette';
+import { Stepper, Step } from '@/components/stepper';
+import { Carousel } from '@/components/carousel';
+import { TreeView, type TreeNodeData } from '@/components/tree-view';
 import { Home, BarChart3, Users, Settings, Bell, Menu, ChevronRight } from 'lucide-react';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
@@ -62,6 +65,17 @@ const TREATMENTS = ['filled', 'outline', 'ghost'] as const;
 const COLORS = ['primary', 'secondary', 'destructive', 'success', 'warning', 'neutral'] as const;
 const SIZES = ['sm', 'md', 'lg'] as const;
 const BADGE_STATES = ['default', 'neutral', 'destructive', 'success', 'warning', 'info'] as const;
+
+const treeSample: TreeNodeData[] = [
+  { id: 'src', label: 'src', children: [
+    { id: 'components', label: 'components', children: [
+      { id: 'button', label: 'button.tsx' },
+      { id: 'card', label: 'card.tsx' },
+    ] },
+    { id: 'index', label: 'index.ts' },
+  ] },
+  { id: 'readme', label: 'README.md' },
+];
 
 // Stateful examples are small components so story content stays declarative.
 function ToggleExample() {
@@ -828,6 +842,80 @@ export const STORIES: GalleryStory[] = [
           </CommandPalette>
         </div>
       ) },
+    ],
+  },
+  // === Composite group ===
+  {
+    name: 'Stepper',
+    category: 'Composite',
+    description: 'Multi-step progress indicator. step-state axis (incomplete/active/completed/error) drives indicator + connector color; completed shows a check. Prop-driven — map your own steps.',
+    sections: [
+      { label: 'default (mixed states)', content: (
+        <div className="w-[460px]">
+          <Stepper>
+            <Step state="completed" step={1} label="Account" />
+            <Step state="completed" step={2} label="Profile" />
+            <Step state="active" step={3} label="Payment" />
+            <Step state="incomplete" step={4} label="Review" showConnector={false} />
+          </Stepper>
+        </div>
+      ) },
+      { label: 'error state', content: (
+        <div className="w-[360px]">
+          <Stepper>
+            <Step state="completed" step={1} label="Details" />
+            <Step state="error" step={2} label="Payment" />
+            <Step state="incomplete" step={3} label="Done" showConnector={false} />
+          </Stepper>
+        </div>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <div key={s} className="w-[300px]">
+          <Stepper size={s}>
+            <Step size={s} state="completed" step={1} label="One" />
+            <Step size={s} state="active" step={2} label="Two" />
+            <Step size={s} state="incomplete" step={3} label="Three" showConnector={false} />
+          </Stepper>
+        </div>
+      )) },
+    ],
+  },
+  {
+    name: 'Carousel',
+    category: 'Composite',
+    description: 'Sliding content on an embla base — drag/swipe, arrow keys, dots + arrow nav. Arrows disable at the ends (loop=false) or wrap (loop). Sprint-1 base structure; motion variants are Sprint 2.',
+    sections: [
+      { label: 'default (drag / arrows / dots)', content: (
+        <div className="w-[360px]">
+          <Carousel>
+            {['Slide 1', 'Slide 2', 'Slide 3'].map((s, i) => (
+              <div key={i} className="flex h-40 items-center justify-center rounded-card bg-surface-1 text-on-surface text-title-lg">{s}</div>
+            ))}
+          </Carousel>
+        </div>
+      ) },
+      { label: 'loop (wraps at ends, no dots)', content: (
+        <div className="w-[360px]">
+          <Carousel loop showDots={false}>
+            {['A', 'B', 'C'].map((s, i) => (
+              <div key={i} className="flex h-40 items-center justify-center rounded-card bg-primary-container text-on-primary-container text-title-lg">{s}</div>
+            ))}
+          </Carousel>
+        </div>
+      ) },
+    ],
+  },
+  {
+    name: 'TreeView',
+    category: 'Composite',
+    description: 'Hierarchical expand/collapse list (role=tree, aria-expanded). Data-driven; default Folder/File icons, override per node. Click a parent to expand; selection via selectedId/onSelect.',
+    sections: [
+      { label: 'default (click to expand)', content: (
+        <div className="w-[280px]"><TreeView data={treeSample} /></div>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <div key={s} className="w-[240px]"><TreeView size={s} data={treeSample} /></div>
+      )) },
     ],
   },
 ];

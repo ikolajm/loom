@@ -53,7 +53,10 @@
       "breadcrumbs",
       "pagination",
       "navigation-menu",
-      "command-palette"
+      "command-palette",
+      "stepper",
+      "carousel",
+      "tree-view"
     ]
   }
 }

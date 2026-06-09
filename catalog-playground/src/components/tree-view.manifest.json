@@ -1,14 +1,12 @@
 {
-  "name": "carousel",
+  "name": "tree-view",
   "category": "composite",
   "description": "",
-  "version": "b6d03a3e09ae",
+  "version": "71b6313bc6bc",
   "dependencies": [
-    "cn",
-    "button"
+    "cn"
   ],
   "npmDependencies": [
-    "embla-carousel-react",
     "lucide-react"
   ],
   "tokens": [
@@ -18,10 +16,7 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "carousel.story.ts",
-  "variants": [
-    "default"
-  ],
+  "stories": "tree-view.story.ts",
   "sizes": [
     "sm",
     "md",

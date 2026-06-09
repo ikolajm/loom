@@ -28,7 +28,8 @@
   },
 
   "carousel": {
-    "$note": "Sliding content container. CSS scroll-snap based. Image gallery, card carousel, testimonial slider. Keyboard navigation (arrow keys). Pause auto-play on hover/focus. Navigation via dots, arrows, or both.",
+    "$catalog": { "dependencies": ["cn", "button"] },
+    "$note": "Sliding content container on an embla-carousel-react base. Touch/drag + keyboard (arrow keys) + dot/arrow navigation. Image gallery, card carousel, testimonial slider. Sprint 1 = base structure; autoplay (embla-carousel-autoplay plugin) + motion variants (coverflow/parallax/lightbox/thumbnail) are Sprint 2. Arrows compose the ghost icon-button.",
     "variants": {
       "default": { "bg": "transparent" }
     },

@@ -54,6 +54,7 @@
   },
 
   "date-picker": {
+    "$catalog": { "dependencies": ["cn", "popover", "calendar", "form-field"] },
     "$base": "text-field",
     "$note": "Text-field variant with a persistent calendar trailing icon. The calendar panel component is deferred.",
     "icon-slots": {
@@ -104,6 +105,7 @@
   },
 
   "combobox": {
+    "$catalog": { "dependencies": ["cn", "popover", "form-field"] },
     "$base": "text-field",
     "$note": "Combines text input with filterable dropdown. Extends text-field for the trigger, adds dropdown panel styling. Keyboard navigation required (arrow keys, enter, escape). Single-select, multi-select, and creatable variants share the same config — variant logic is code-only.",
     "icon-slots": {

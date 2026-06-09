@@ -272,6 +272,10 @@ function resolveBase(allComponents, configKey) {
       }
     }
   }
+  // $catalog is the atom's own metadata (deps, tokens, composition) — base-independent.
+  // The merge loop skips all $-prefixed keys, so carry the child's $catalog through
+  // explicitly; otherwise a $base-extending atom can never declare its catalog manifest.
+  if (config['$catalog']) merged['$catalog'] = config['$catalog'];
   return merged;
 }
 

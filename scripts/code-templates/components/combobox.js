@@ -47,7 +47,7 @@ type ComboboxProps = {
   className?: string;
 };
 
-const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
+const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
   ({ size = '${defaultSize}', options, value, onValueChange, placeholder = 'Select...', searchPlaceholder = 'Search...', emptyMessage = 'No results found.', disabled, error, className }, ref) => {
     const [open, setOpen] = useState(false);
     const selected = options.find((o) => o.value === value);
@@ -58,7 +58,7 @@ const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
-            ref={ref as any}
+            ref={ref}
             type="button"
             role="combobox"
             aria-expanded={open}
