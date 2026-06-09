@@ -19,6 +19,7 @@ const buttonVariants = cva(
         success: '[--v-bg:var(--success)] [--v-fg:var(--on-success)] [--v-text:var(--success)] [--v-border:var(--success)]',
         warning: '[--v-bg:var(--warning)] [--v-fg:var(--on-warning)] [--v-text:var(--warning)] [--v-border:var(--warning)]',
         neutral: '[--v-bg:var(--neutral)] [--v-fg:var(--on-neutral)] [--v-text:var(--on-surface)] [--v-border:var(--outline)]',
+        inherit: '[--v-fg:currentColor] [--v-text:currentColor] [--v-border:currentColor]',
       },
       size: {
         'sm': 'h-ch-3 px-3 py-1 gap-1 rounded-component text-action-sm',

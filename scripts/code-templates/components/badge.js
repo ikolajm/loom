@@ -62,6 +62,7 @@ function generateBadge(name, config, meta) {
   return `import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from '@radix-ui/react-slot';
+import { X } from 'lucide-react';
 import { cn } from './cn';
 
 const badgeVariants = cva(
@@ -111,12 +112,6 @@ type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
     trailingIcon?: React.ReactNode;
   };
 
-const CloseIcon = ({ className }: { className?: string }) => (
-  <svg className={cn(className)} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
 const INTERACTIVE_CLASSES = 'interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 opacity-70 hover:opacity-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
@@ -140,7 +135,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
         onClick={onRemove}
         aria-label="Remove"
       >
-        <CloseIcon className={iconCls} />
+        <span className={cn('${ICON_SLOT_CLASS}', iconCls)}><X /></span>
       </button>
     ) : null;
 
@@ -182,7 +177,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
             onClick={onRemove}
             aria-label="Remove"
           >
-            <CloseIcon className={iconCls} />
+            <span className={cn('${ICON_SLOT_CLASS}', iconCls)}><X /></span>
           </button>
         </span>
       );

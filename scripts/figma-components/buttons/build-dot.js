@@ -3,8 +3,8 @@
 // =============================================================================
 // Status/severity indicator dot — a small colored circle keyed by state.
 // state (6 colors) × size (3) = 18 variants. Always a circle (radius/pill).
-// Standalone primitive (own atom in v2); compose into badges, alerts,
-// list items, subheadings, nav. Distinct from badge-dot (notification bubble).
+// Standalone primitive (own atom in v2); compose into badges, banners,
+// list items, subheadings, nav. For a notification count bubble, use Badge size="sm".
 // =============================================================================
 
 function buildDot(lookups, defaultMode, page) {

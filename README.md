@@ -35,7 +35,7 @@ spec/config/
 │   ├── button.json             ← button, icon-button, fab, badge, chip, toolbar, toggle, toggle-group
 │   ├── form.json               ← text-field, input, select, textarea, date-picker, toggle-base, checkbox, radio, switch, combobox, slider, file-upload, input-otp, label, helper-text, calendar, input-group
 │   ├── layout.json             ← card, dialog, alert-dialog, sheet, table, separator, scroll-area, resizable
-│   ├── feedback.json           ← toast, alert, tooltip, popover, dropdown-menu, skeleton, progress-bar, badge-dot, empty-state, context-menu, hover-card, spinner
+│   ├── feedback.json           ← toast, banner, tooltip, popover, dropdown-menu, skeleton, progress-bar, empty-state, context-menu, hover-card, spinner
 │   ├── data-display.json       ← avatar, list-item, accordion, kbd, collapsible
 │   ├── navigation.json         ← top-bar, sidebar, tabs, bottom-nav, breadcrumbs, pagination, navigation-menu, command-palette
 │   └── composite.json          ← stepper, carousel, tree-view
@@ -392,7 +392,7 @@ cd lab/ds-test && npm run build
 
 **$base inheritance**: Components like input, select, combobox extend text-field. Checkbox/radio extend toggle-base. Change the base, all inheritors update.
 
-**Icon-slots**: Button, Badge, Chip, Toggle, Toast, Alert, and text-field-derived components support optional leading/trailing icons via boolean toggles in Figma and optional props in code.
+**Icon-slots**: Button, Badge, Chip, Toggle, Toast, Banner, and text-field-derived components support optional leading/trailing icons via boolean toggles in Figma and optional props in code.
 
 **Component spacing shape**: Every component config defines `x-padding`, `y-padding`, and `gap`. Enforced across all component files.
 

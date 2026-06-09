@@ -525,60 +525,54 @@ Scope decision (2026-06-08): **styled native container, not a custom player.** L
 
 ## Feedback
 
-Source: `spec/config/components/feedback.json`.
+Source: `spec/config/components/feedback.json`. **Done — shipped 2026-06-08** (5 of 9 groups). 2 changes, 11 keeps.
 
 | Atom | Status | Notes |
 |---|---|---|
 | toast | keep | |
-| alert | drop | Consolidated into `banner` (inline field errors live in `helper-text`) |
+| alert | drop | Renamed + refactored into `banner` (inline field errors live in `helper-text`) |
 | banner | new | Consolidates alert. See detailed notes |
 | tooltip | keep | |
 | popover | keep | |
 | dropdown-menu | keep | Shares `radix-menus.js` template with context-menu |
 | skeleton | keep | |
 | progress-bar | keep | |
-| badge-dot | drop | Consolidated into `badge` (variant `dot`) |
+| badge-dot | drop | **No fold.** `Dot` (blank indicator) + `Badge size="sm"` (count) cover it — removes the system's only sub-12px font exception |
 | empty-state | keep | Structurally distinct (centered, illustration-anchored) — does NOT consolidate into banner |
 | context-menu | keep | Shares `radix-menus.js` template with dropdown-menu |
 | hover-card | keep | |
-| spinner | refine | Static shape variants: `circle` (default) / `pulse-dots` / `jumping-dots` / `ripple`. Motion behavior is Sprint 2 |
+| spinner | keep | Shape-variant axis (`pulse-dots`/`jumping-dots`/`ripple`) deferred to Sprint 2 — they're inert without motion; `circle` works today via CSS spin, so Sprint 1 = no change |
 
-Triage skipped: status (shadcn — absorb into badge), announcement (shadcn — banner covers it), M3 loading variants (absorb into spinner variant axis).
+Triage skipped: status (shadcn — absorb into badge), announcement (shadcn — banner covers it), M3 loading variants (→ spinner shape axis, Sprint 2).
+
+Also landed this group (out of the Feedback scope, surfaced by the smell gate): **Button gained an `inherit` color** (`--v-text:currentColor`) so an iconOnly Button can serve an in-surface affordance that takes the parent's foreground — used by Banner's dismiss; `colorToVar` now passes `currentColor`/`transparent` literals through. **Badge** swapped its hand-rolled close-X SVG for lucide `X` (kills cross-atom duplication; Badge stays decoupled from Button because Button's `icon-sm = ch-3` size floor is too large for a chip-scale remove affordance).
 
 ### Detailed notes — Feedback
 
-**Banner consolidation (new — consolidates alert)**
+**Banner (new — renames + refactors alert)**
 
-Consolidates `alert` + `banner` into one umbrella atom. The functional differences (position, size, severity) are variant axes inside one atom; field-level inline errors stay with `helper-text` (which already has error state).
+Renames `alert` → `banner` and folds the position/size/severity differences into variant axes on one atom; field-level inline errors stay with `helper-text` (which already has error state).
 
 - **Category:** feedback
-- **Dependencies:** `cn-helper`, optional `button` (for action slot)
+- **Dependencies:** `cn` + `button` (the dismiss affordance composes an iconOnly Button)
 - **Tokens:** color, typography, spacing, sizing
-- **Variants:** `info` | `success` | `warning` | `error` | `promo`
-- **Sizes:** `compact` (current alert default) | `standard` | `prominent`
-- **Behavior:** `dismissible` prop (renders close affordance), optional `action` slot (button / link)
-- **Slots:** leading-icon | trailing
-- **Position:** consumer decides — top-of-page, inside-form, inline section. No `position` prop; banner is layout-agnostic
-- **Drops:** `alert` (consolidated)
-
-Composition examples for the consuming dev (not catalog metadata; just for the deep-dive reference):
+- **Variants:** `info` | `success` | `warning` | `error` — severity axis only. `info` is the default (the old neutral-surface `default` was dropped; info subsumes it). **`promo` was NOT added** — a marketing strip is `variant="info"` + className or a Marketing-group atom, not a severity (keeps the axis meaning clean).
+- **Sizes:** `sm` | `md` | `lg` — kept the system-wide scale rather than the audit's earlier `compact/standard/prominent` (cross-atom consistency over local descriptiveness).
+- **Behavior:** **stateless dismiss keyed off `onDismiss` presence** (no `dismissible` flag — that flag could only ever produce a dead close button; keying off the handler removes the footgun and stays RSC-safe). Optional `action` slot (consumer-provided ReactNode).
+- **Dismiss affordance:** composes `<Button iconOnly variant="ghost" color="inherit">` + lucide `X` — inherits the banner's foreground, reuses Button's focus/hover (the shared `interactive` opacity-hover), no hand-rolled button or SVG.
+- **Slots:** leading-icon (consumer-provided node). A `trailing` dismiss-x slot is declared for the **Figma** reference (toggleable x, mirrors Toast); in **code** that slot is honored by the `onDismiss` Button, not a `trailingIcon` prop (asymmetric by role — `banner.js` ignores the slot).
+- **Position:** consumer decides — top-of-page, in-form, inline. No `position` prop; banner is layout-agnostic. `role="status"` (polite), overridable via props.
+- **Drops:** `alert` (renamed).
 
 ```tsx
-<Banner variant="promo" dismissible>Save 20% this weekend.</Banner>
-<Banner variant="error" size="compact">Please fix the following errors before submitting.</Banner>
-<Banner variant="warning">This section is in beta.</Banner>
+<Banner variant="info" leadingIcon={<Info />}>Heads up — a new version is available.</Banner>
+<Banner variant="error">Please fix the following errors before submitting.</Banner>
+<Banner variant="warning" onDismiss={() => setShow(false)} action={<Button size="sm">Review</Button>}>Your trial ends in 3 days.</Banner>
 ```
 
-**spinner (refine)**
+**spinner (keep — shape axis deferred to Sprint 2)**
 
-Static shape variants land in Sprint 1; motion behavior wraps them in Sprint 2 via the motion library. Shape variant axis:
-
-- `circle` (default — current spinner)
-- `pulse-dots`
-- `jumping-dots`
-- `ripple`
-
-Drawn from motion.dev's loading family. M3's shape-morphing loading-indicator absorbs as another variant when motion lands in Sprint 2.
+The shape-variant axis (`circle` / `pulse-dots` / `jumping-dots` / `ripple`, drawn from motion.dev's loading family) was reclassified from "refine" to a **Sprint 2 motion item**: rendered static, the dot/ripple shapes read as inert (they only make sense with motion). `circle` is already motion-legible today via CSS `animate-spin`, so Sprint 1 leaves spinner unchanged. M3's shape-morphing loading-indicator absorbs as another shape when motion lands.
 
 ---
 

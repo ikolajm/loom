@@ -238,20 +238,19 @@ const BUILDERS = {
     ]
   },
   'feedback': {
-    description: 'Feedback page (toast, alert, progress-bar, badge-dot, empty-state + pattern mocks)',
+    description: 'Feedback page (toast, banner, progress-bar, empty-state + pattern mocks)',
     pageName: 'Feedback',
     config: { components: feedbackConfig, layout },
     batches: [
       {
         name: 'components',
-        description: 'Toast, Alert (standard builder) + Progress Bar, Badge Dot (custom)',
+        description: 'Toast, Banner (standard builder) + Progress Bar (custom)',
         components: [
           require('./feedback/build-toast'),
-          require('./feedback/build-alert')
+          require('./feedback/build-banner')
         ],
         customScripts: [
-          'feedback/build-progress-bar.js',
-          'feedback/build-badge-dot.js'
+          'feedback/build-progress-bar.js'
         ]
       },
       {

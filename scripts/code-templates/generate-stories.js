@@ -974,7 +974,7 @@ export const ${name.toLowerCase()}Story = {
   } else if (skipVariantProp) {
     story += `
     size: '${defaultSize}',`;
-  } else if (name === 'Alert') {
+  } else if (name === 'Banner') {
     story += `
     ${variantPropName}: 'info',
     size: '${defaultSize}',`;
@@ -989,14 +989,12 @@ export const ${name.toLowerCase()}Story = {
     story += `\n    icon: createElement(Plus, { size: 20 }),`;
   } else if (iconOnly) {
     story += `\n    children: createElement(Plus, { size: 20 }),`;
-  } else if (name === 'Alert') {
+  } else if (name === 'Banner') {
     story += `\n    children: 'Your session will expire in 5 minutes.',`;
     story += `\n    showLeadingIcon: true,`;
-    story += `\n    showTrailingIcon: true,`;
+    story += `\n    showDismiss: true,`;
   } else if (name === 'ProgressBar') {
     story += `\n    value: 60,`;
-  } else if (name === 'BadgeDot') {
-    story += `\n    children: '3',`;
   } else if (name === 'Kbd') {
     story += `\n    children: '⌘K',`;
   } else if (!selfClosing && !meta.noChildren && meta.element !== 'textarea' && !isCompound) {
@@ -1056,14 +1054,12 @@ export const ${name.toLowerCase()}Story = {
   if (name === 'Sheet') story += `\n    { type: 'select' as const, prop: 'side', label: 'Side', options: ['left', 'right', 'top', 'bottom'] },`;
 
   // Custom controls for specific non-compound components
-  if (name === 'Alert') {
+  if (name === 'Banner') {
     story += `\n    { type: 'text' as const, prop: 'children', label: 'Label' },`;
     story += `\n    { type: 'boolean' as const, prop: 'showLeadingIcon', label: 'Leading Icon' },`;
-    story += `\n    { type: 'boolean' as const, prop: 'showTrailingIcon', label: 'Trailing Icon' },`;
+    story += `\n    { type: 'boolean' as const, prop: 'showDismiss', label: 'Dismissible' },`;
   } else if (name === 'ProgressBar') {
     story += `\n    { type: 'text' as const, prop: 'value', label: 'Value (0-100)' },`;
-  } else if (name === 'BadgeDot') {
-    story += `\n    { type: 'text' as const, prop: 'children', label: 'Count' },`;
   } else if (name === 'Kbd') {
     story += `\n    { type: 'text' as const, prop: 'children', label: 'Label' },`;
   } else {

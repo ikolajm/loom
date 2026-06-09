@@ -149,6 +149,7 @@ function buildVariantStyles(variants) {
  */
 function colorToVar(colorPath) {
   if (!colorPath || colorPath === 'transparent') return null;
+  if (colorPath === 'currentColor') return 'currentColor';
   const role = colorPath.split('/').pop();
   return `var(--${role})`;
 }
@@ -318,13 +319,12 @@ function getComponentRegistry(configs) {
 
     // === Feedback ===
     'Toast': { source: feedbackConfig, key: 'toast', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', textFamily: 'action', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-toast' },
-    'Alert': { source: feedbackConfig, key: 'alert', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'alert', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
+    'Banner': { source: feedbackConfig, key: 'banner', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'Tooltip': { source: feedbackConfig, key: 'tooltip', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, role: 'tooltip', textFamily: 'label', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-tooltip' },
     'Popover': { source: feedbackConfig, key: 'popover', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-popover' },
     'DropdownMenu': { source: feedbackConfig, key: 'dropdown-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-dropdown-menu' },
     'Skeleton': { source: feedbackConfig, key: 'skeleton', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'ProgressBar': { source: feedbackConfig, key: 'progress-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'block', noIconSlots: true, role: 'progressbar', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-progress' },
-    'BadgeDot': { source: feedbackConfig, key: 'badge-dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Feedback', template: 'cva-only', primitive: null },
     'EmptyState': { source: feedbackConfig, key: 'empty-state', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'ContextMenu': { source: feedbackConfig, key: 'context-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-context-menu' },
     'HoverCard': { source: feedbackConfig, key: 'hover-card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-hover-card' },

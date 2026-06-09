@@ -25,17 +25,24 @@
     "default": { "variant": "default", "size": "md" }
   },
 
-  "alert": {
+  "banner": {
+    "$catalog": {
+      "category": "feedback",
+      "description": "Inline status/severity banner — semantic variant (info/success/warning/error) × size (sm/md/lg). Consolidates the old alert. Optional leading icon, action slot (consumer-provided node), and stateless dismiss: pass onDismiss and a close button renders (composed from iconOnly Button at color=inherit); consumer owns visibility. Layout-agnostic — the consumer places it top-of-page, in-form, or inline. role=status (polite), overridable.",
+      "dependencies": ["cn", "button"],
+      "tokens": ["color", "typography", "spacing", "sizing"],
+      "composition": "none"
+    },
+    "$note": "Severity axis only — info is the neutral-notice default (the old surface `default` variant was dropped; info subsumes it). promo was intentionally not added — a marketing strip is variant=info + className or a Marketing-group atom, not a severity. Dismiss is stateless and keyed off onDismiss presence (no `dismissible` flag — that flag could only produce a dead close button) to stay RSC-safe. The container is non-interactive; the close affordance composes the iconOnly Button at color=inherit so it takes the banner's foreground and reuses the shared focus/hover treatment.",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface" },
-      "error":   { "bg": "color/error/error-container", "fg": "color/error/on-error-container" },
+      "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" },
       "success": { "bg": "color/success/success-container", "fg": "color/success/on-success-container" },
       "warning": { "bg": "color/warning/warning-container", "fg": "color/warning/on-warning-container" },
-      "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" }
+      "error":   { "bg": "color/error/error-container", "fg": "color/error/on-error-container" }
     },
     "icon-slots": {
       "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
-      "trailing": { "default-visible": false, "default-icon": "icon/x" }
+      "trailing": { "default-visible": false, "default-icon": "icon/x", "$note": "Dismiss affordance. Figma renders it as a toggleable trailing x slot (mirrors Toast); in code it is NOT a trailingIcon prop — the dismiss is the onDismiss-driven iconOnly Button (banner.js ignores this slot). The slot declares the spec intent; each surface honors it per its idiom." }
     },
     "typography": {
       "font-family": "body",
@@ -48,7 +55,7 @@
       "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
       "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
     },
-    "default": { "variant": "default", "size": "md" }
+    "default": { "variant": "info", "size": "md" }
   },
 
   "tooltip": {
@@ -130,26 +137,6 @@
       "sm": { "height": "{scale.1}", "radius": "radius/pill" },
       "md": { "height": "{scale.2}", "radius": "radius/pill" },
       "lg": { "height": "{scale.3}", "radius": "radius/pill" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
-
-  "badge-dot": {
-    "$note": "Notification indicator dot. Positioned on icons/avatars. Optionally displays a count number.",
-    "variants": {
-      "default": { "bg": "color/error/error", "fg": "color/error/on-error" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 600,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$exception": "Badge-dot count text uses sizes below typography preset minimum (12px). 8–10px fonts required to fit within the dot dimensions across all sizes.",
-      "sm": { "size": "{scale.2}", "radius": "radius/pill", "font-size": "8px", "line-height": "8px" },
-      "md": { "size": "{scale.3}", "radius": "radius/pill", "font-size": "10px", "line-height": "10px" },
-      "lg": { "size": "{scale.4}", "radius": "radius/pill", "font-size": "10px", "line-height": "10px" }
     },
     "default": { "variant": "default", "size": "md" }
   },

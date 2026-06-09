@@ -38,7 +38,7 @@ const { generateRadixDropdownMenu, generateRadixContextMenu } = require('./compo
 const { generateRadixToast } = require('./components/radix-toast');
 const { generateRadixNavigationMenu } = require('./components/radix-navigation-menu');
 const { generateRadixScrollArea, generateLib } = require('./components/radix-fallback');
-const { generateBadgeDot } = require('./components/badge-dot');
+const { generateBanner } = require('./components/banner');
 const { generateEmptyState } = require('./components/empty-state');
 const { generateListItem } = require('./components/list-item');
 const { generateStepper } = require('./components/stepper');
@@ -115,7 +115,7 @@ function dispatch(name, config, meta) {
   if (name === 'Badge') return generateBadge(name, config, meta);
   if (name === 'Dot') return generateDot(name, config, meta);
   if (name === 'Table') return generateTable(name, config, meta);
-  if (name === 'BadgeDot') return generateBadgeDot(name, config, meta);
+  if (name === 'Banner') return generateBanner(name, config, meta);
   if (name === 'EmptyState') return generateEmptyState(name, config, meta);
   if (name === 'ListItem') return generateListItem(name, config, meta);
   if (name === 'Stepper') return generateStepper(name, config, meta);

@@ -85,7 +85,7 @@ The original scaffold organized the design system page by atomic level (Atoms �
 - **Actions** — Button, FAB, Badge, Chip, Toggle, ToggleGroup
 - **Inputs** — Input, Select, Textarea, DatePicker, Checkbox, Radio, Switch, Combobox, Slider, FileUpload, InputOTP, Label, HelperText, FormField, Calendar
 - **Layout** — Card, Dialog, Table, Sheet, Separator, AlertDialog
-- **Feedback** — Toast, Alert, Tooltip, Popover, DropdownMenu, Skeleton, ProgressBar, BadgeDot, EmptyState, ContextMenu, HoverCard, Spinner
+- **Feedback** — Toast, Banner, Tooltip, Popover, DropdownMenu, Skeleton, ProgressBar, EmptyState, ContextMenu, HoverCard, Spinner
 - **Data Display** — Avatar, ListItem, Accordion, Kbd, Collapsible
 - **Navigation** — TopBar, Sidebar, Tabs, BottomNav, Breadcrumbs, Pagination, NavigationMenu, CommandPalette
 - **Composite** — Stepper, Carousel, TreeView

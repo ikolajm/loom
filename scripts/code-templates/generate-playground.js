@@ -111,6 +111,11 @@ function resolveIconProps(props: Record<string, any>): Record<string, any> {
   if (resolved.iconOnly) {
     resolved.children = createElement(Star, { size: 16 });
   }
+  // showDismiss boolean → an onDismiss handler (the close button renders off onDismiss presence)
+  if ('showDismiss' in resolved) {
+    if (resolved.showDismiss === true) resolved.onDismiss = () => {};
+    delete resolved.showDismiss;
+  }
   for (const key of Object.keys(resolved)) {
     if (key.startsWith('show') && key.endsWith('Icon') && resolved[key] === true) {
       const realProp = key.slice(4, 5).toLowerCase() + key.slice(5); // showLeadingIcon → leadingIcon

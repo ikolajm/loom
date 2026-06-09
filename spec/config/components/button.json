@@ -2,7 +2,7 @@
   "button": {
     "$catalog": {
       "category": "button",
-      "description": "Primary action button — orthogonal variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons.",
+      "description": "Primary action button — orthogonal variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral/inherit). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons. The `inherit` color reads currentColor — for icon-button affordances embedded in colored surfaces (e.g. a Banner dismiss) that must take the parent's foreground.",
       "dependencies": ["cn"],
       "tokens": ["color", "typography", "spacing", "sizing"],
       "composition": "slottable"
@@ -15,7 +15,8 @@
       "destructive": { "bg": "color/error/error",         "fg": "color/error/on-error",         "text": "color/error/error",         "border": "color/error/error" },
       "success":     { "bg": "color/success/success",     "fg": "color/success/on-success",     "text": "color/success/success",     "border": "color/success/success" },
       "warning":     { "bg": "color/warning/warning",     "fg": "color/warning/on-warning",     "text": "color/warning/warning",     "border": "color/warning/warning" },
-      "neutral":     { "bg": "color/neutral/neutral",     "fg": "color/neutral/on-neutral",     "text": "color/surface/on-surface",  "border": "color/outline/outline" }
+      "neutral":     { "bg": "color/neutral/neutral",     "fg": "color/neutral/on-neutral",     "text": "color/surface/on-surface",  "border": "color/outline/outline" },
+      "inherit":     { "bg": "transparent",               "fg": "currentColor",                 "text": "currentColor",              "border": "currentColor" }
     },
     "typography": {
       "font-family": "body",
@@ -79,7 +80,7 @@
   "dot": {
     "$catalog": {
       "category": "feedback",
-      "description": "Status/severity indicator dot — a small colored circle keyed by state. Standalone primitive; compose into badges, alerts, list items, subheadings, nav. Distinct from badge-dot (the notification count bubble).",
+      "description": "Status/severity indicator dot — a small colored circle keyed by state. Standalone primitive; compose into badges, banners, list items, subheadings, nav. For a notification count bubble, use Badge size=\"sm\".",
       "dependencies": ["cn"],
       "tokens": ["color", "sizing"],
       "composition": "none"

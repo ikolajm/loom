@@ -4,6 +4,7 @@ import type { GalleryStory } from './shell';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
 import { Dot } from '@/components/dot';
+import { Banner } from '@/components/banner';
 import { FAB } from '@/components/fab';
 import { FabMenu, FabAction } from '@/components/fab-menu';
 import { Toggle } from '@/components/toggle';
@@ -77,6 +78,12 @@ function SegmentedExample() {
       <ToggleGroupItem value="right">Right</ToggleGroupItem>
     </ToggleGroup>
   );
+}
+function BannerDismissExample() {
+  const [show, setShow] = useState(true);
+  return show
+    ? <div className="w-[460px]"><Banner variant="success" onDismiss={() => setShow(false)}>Saved. Click the × to dismiss.</Banner></div>
+    : <Button size="sm" variant="outline" color="neutral" onClick={() => setShow(true)}>Restore banner</Button>;
 }
 
 // --- Forms stateful examples ---
@@ -189,6 +196,18 @@ export const STORIES: GalleryStory[] = [
       { label: 'states', content: BADGE_STATES.map((s) => <span key={s} className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state={s} />{s}</span>) },
       { label: 'sizes', content: SIZES.map((s) => <Dot key={s} size={s} />) },
       { label: 'composed', content: [<span key="1" className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state="success" /> Online</span>, <Badge key="2" state="warning"><Dot state="warning" className="mr-1" />Pending</Badge>] },
+    ],
+  },
+  {
+    name: 'Banner',
+    category: 'Feedback',
+    description: 'Inline status/severity strip (consolidates the old alert). Severity variant × size, optional leading icon, action slot, stateless dismiss.',
+    sections: [
+      { label: 'variants', content: (['info', 'success', 'warning', 'error'] as const).map((v) => <div key={v} className="w-[460px]"><Banner variant={v}>This is a {v} banner.</Banner></div>) },
+      { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-[460px]"><Banner size={s}>Banner at {s} size.</Banner></div>) },
+      { label: 'leading icon', content: <div className="w-[460px]"><Banner variant="info" leadingIcon={<Star />}>Heads up — a new version is available.</Banner></div> },
+      { label: 'action slot', content: <div className="w-[460px]"><Banner variant="warning" leadingIcon={<Star />} action={<Button size="sm" variant="outline" color="neutral">Review</Button>}>Your trial ends in 3 days.</Banner></div> },
+      { label: 'dismissible', content: <BannerDismissExample /> },
     ],
   },
   {
