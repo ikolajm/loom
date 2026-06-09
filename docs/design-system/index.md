@@ -13,6 +13,8 @@ How Loom works: the architecture, catalog model, and the codegen/Figma/scaffold 
 | [tokens-as-tailwind-utilities](tokens-as-tailwind-utilities.md) | Register `tokens.css` vars in Tailwind v4 `@theme` so utilities actually get used |
 | [figma-mcp](figma-mcp.md) | Figma Plugin API gotchas, data formats, validated patterns, shared-utils architecture |
 | [scaffold-playground-patterns](scaffold-playground-patterns.md) | Playground/stories bug fixes + conventions (from Paperboy upstream feedback) |
+| [reduced-motion-semantics](reduced-motion-semantics.md) | `prefers-reduced-motion` is per-atom: autonomous motion honors it, direct-manipulation (scroll-progress) deliberately doesn't |
+| [tailwind-v4-gotchas](tailwind-v4-gotchas.md) | `.interactive` position footgun (tailwind-merge can't dedupe custom vs position utility — resolved) + custom-keyframe stripping (marquee — OPEN) |
 
 ## Catalog substrate (data)
 
