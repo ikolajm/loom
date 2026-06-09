@@ -1,12 +1,13 @@
 {
-  "name": "sidebar",
+  "name": "tabs",
   "category": "navigation",
   "description": "",
-  "version": "b53b51818ccc",
+  "version": "cd566bd3e3ca",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
+    "@radix-ui/react-tabs",
     "class-variance-authority"
   ],
   "tokens": [
@@ -16,10 +17,9 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "sidebar.story.ts",
+  "stories": "tabs.story.ts",
   "variants": [
-    "default",
-    "rail"
+    "default"
   ],
   "sizes": [
     "sm",

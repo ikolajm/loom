@@ -2,7 +2,7 @@
   "name": "sidebar",
   "category": "navigation",
   "description": "",
-  "version": "5b712c2ca6bd",
+  "version": "b53b51818ccc",
   "dependencies": [
     "cn"
   ],
@@ -18,7 +18,8 @@
   "composition": "none",
   "stories": "sidebar.story.ts",
   "variants": [
-    "default"
+    "default",
+    "rail"
   ],
   "sizes": [
     "sm",

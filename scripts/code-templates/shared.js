@@ -63,6 +63,8 @@ function heightToClass(val) {
   // Scale reference: {scale.N} → N (maps to Tailwind h-N)
   const scale = scaleToValue(val);
   if (scale) return scale;
+  // Raw value (e.g. "72px") → arbitrary value (caller emits h-[72px])
+  if (val.match(/^\d/)) return `[${val}]`;
   return null;
 }
 

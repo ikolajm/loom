@@ -46,7 +46,14 @@
       "avatar-group",
       "number",
       "relative-time",
-      "video-player"
+      "video-player",
+      "top-bar",
+      "tabs",
+      "bottom-nav",
+      "breadcrumbs",
+      "pagination",
+      "navigation-menu",
+      "command-palette"
     ]
   }
 }

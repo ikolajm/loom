@@ -595,7 +595,21 @@ Triage skipped: navigation-rail (absorbed → sidebar variant), bottom-app-bar (
 
 ### Detailed notes — Navigation
 
-*(Empty — filled during deep dive)*
+Deep dive 2026-06-09. **6 keeps, 2 refines, 2 bug-fixes.** All atoms pre-existed; the dive refined the override surfaces and fixed two latent bugs the gallery/scanner surfaced.
+
+**sidebar (refine — `rail` variant).** Added the icon-only collapsed variant (absorbs M3 navigation-rail). Mechanism decided in the sit-down (CSS group marker over context/per-item prop): rail width differs per size (56/64/72), so each size tier sets BOTH widths as namespaced CSS vars (`--sidebar-w` / `--sidebar-rail-w`) and the `variant` picks which to consume — keeping rail a single flat variant, not a compound `variant × size` matrix (which `buildCvaString` doesn't emit). `SidebarItem` labels collapse + icons center via the parent's `is-rail` group marker (`group-[.is-rail]:hidden` / `:justify-center` / `:px-0`) — pure CSS, no context, RSC-safe; set rail once on `<Sidebar>` and every item responds. **Outgrew the generic `cva-only` path → promoted to a dedicated `sidebar.js` generator module** (Sidebar + SidebarItem co-located; removed the old `Sidebar` entry from the cva-only SUBCOMPONENTS table). Custom-prop names namespaced `--sidebar-*` (not `--sb-*`) for collision-safety since atoms are copied into consumer code.
+
+**breadcrumbs (refine — `BreadcrumbSeparator`).** Was Breadcrumbs + BreadcrumbItem only; the config's `separator: "/"` rendered nothing (consumer hand-placed). Added `BreadcrumbSeparator` — renders the config glyph by default, `children` override (e.g. a chevron), `role="presentation" aria-hidden` (matches shadcn). Implemented as a generic `separator` branch in the cva-only SUBCOMPONENTS renderer (reusable for future divider subs).
+
+**navigation-menu (keep + refine).** `NavigationMenuLink` was exported as the raw `Radix.Link` — no hover/focus affordance, so dropdown panel links gave no pointer/keyboard feedback (caught at gallery confirm). Gave it a default affordance mirroring the trigger. **Surface-level finding:** the link's hover/focus steps to `surface-2`, NOT `surface-1` — links sit *on* the panel (`surface-1`), so a `surface-1` hover is invisible (same color as the panel); the trigger correctly uses `surface-1` because it sits on the page surface, a level below. Same container→item level-up precedent as `CommandPaletteItem` (`surface-1` list, `surface-2` selected). A standalone styled atom's default states must account for which surface it composes onto.
+
+**command-palette (keep + fix).** `CommandPaletteGroup` built the group-heading font-size class by interpolating the `[&_[cmdk-group-heading]]:` prefix at **runtime** — Tailwind's static scanner never sees those classes, so the group-label sizing silently no-op'd. Fixed at the generator: prefix the heading classes at **generation** time so the strings are statically scannable.
+
+**bottom-nav (keep + fix).** `lg` size used a raw `72px` height (a config `$exception`, not a `height/ch-*` token); `heightToClass` only handled token refs + `{scale.N}`, so it dropped the value and `lg` rendered heightless. Fixed `heightToClass` to emit an arbitrary value (`h-[72px]`) for raw CSS lengths — generic robustness, mirrors what `spacingToClass` already did, helps any raw-px size.
+
+**top-bar / tabs / pagination — clean keeps.** top-bar: `variant default|elevated × size`, container only. tabs: Radix, `size` only, single underline variant (no color axis — deliberate, consistent with the color-axis-opt-in stance). pagination: `<a>`-link semantics (navigation, not buttons), full shadcn part-set.
+
+**Both surfaces:** code catalog regenerated + playground synced (7 atoms added to picks; `@radix-ui/react-tabs` + `react-navigation-menu` installed). Figma: `build-pattern-sidebar.js` gained the rail column (default + rail side by side); scripts `27`/`28` reassembled. Smell gate (Senior Engineer, `code-core`+`code-react`): one flag (custom-prop naming), fixed at source.
 
 ---
 

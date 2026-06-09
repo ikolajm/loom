@@ -43,6 +43,15 @@ import { Kbd } from '@/components/kbd';
 import { NumberDisplay } from '@/components/number';
 import { RelativeTime } from '@/components/relative-time';
 import { VideoPlayer } from '@/components/video-player';
+import { TopBar } from '@/components/top-bar';
+import { Sidebar, SidebarItem } from '@/components/sidebar';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/tabs';
+import { BottomNav, BottomNavItem } from '@/components/bottom-nav';
+import { Breadcrumbs, BreadcrumbItem, BreadcrumbSeparator } from '@/components/breadcrumbs';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/pagination';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/navigation-menu';
+import { CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPaletteEmpty, CommandPaletteGroup, CommandPaletteItem, CommandPaletteSeparator, CommandPaletteShortcut } from '@/components/command-palette';
+import { Home, BarChart3, Users, Settings, Bell, Menu, ChevronRight } from 'lucide-react';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
 const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>;
@@ -598,6 +607,227 @@ export const STORIES: GalleryStory[] = [
     sections: [
       { label: 'aspect ratios', content: (['16/9', '4/3', '1/1'] as const).map((ar) => <div key={ar} className="w-56"><VideoPlayer aspectRatio={ar} /></div>) },
       { label: 'auto (intrinsic)', content: <div className="w-56"><VideoPlayer aspectRatio="auto" /></div> },
+    ],
+  },
+  {
+    name: 'TopBar',
+    category: 'Navigation',
+    description: 'App header bar — title + nav/action icons. default (border) vs elevated (shadow). Container only; content is composed.',
+    sections: [
+      { label: 'variants', content: (['default', 'elevated'] as const).map((v) => (
+        <TopBar key={v} variant={v} className="w-[460px]">
+          <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Menu"><Menu /></Button>
+          <span className="font-semibold">Dashboard</span>
+          <div className="ml-auto flex items-center gap-1">
+            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Notifications"><Bell /></Button>
+            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Settings"><Settings /></Button>
+          </div>
+        </TopBar>
+      )) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <TopBar key={s} size={s} className="w-[460px]">
+          <Button iconOnly variant="ghost" color="inherit" size={s} aria-label="Menu"><Menu /></Button>
+          <span className="font-semibold">{s.toUpperCase()}</span>
+        </TopBar>
+      )) },
+    ],
+  },
+  {
+    name: 'Sidebar',
+    category: 'Navigation',
+    description: 'Vertical app nav. default (labeled) and rail (icon-only, narrow) variants on one axis — rail labels collapse via a parent group marker (no context, RSC-safe). Active item uses primary-container.',
+    sections: [
+      { label: 'default', content: (
+        <Sidebar className="h-[300px] gap-1 py-2">
+          <SidebarItem active icon={<Home size={20} />}>Dashboard</SidebarItem>
+          <SidebarItem icon={<BarChart3 size={20} />}>Analytics</SidebarItem>
+          <SidebarItem icon={<Users size={20} />}>Team</SidebarItem>
+          <SidebarItem icon={<Settings size={20} />}>Settings</SidebarItem>
+        </Sidebar>
+      ) },
+      { label: 'rail (icon-only — same items)', content: (
+        <Sidebar variant="rail" className="h-[300px] gap-1 py-2">
+          <SidebarItem active icon={<Home size={20} />}>Dashboard</SidebarItem>
+          <SidebarItem icon={<BarChart3 size={20} />}>Analytics</SidebarItem>
+          <SidebarItem icon={<Users size={20} />}>Team</SidebarItem>
+          <SidebarItem icon={<Settings size={20} />}>Settings</SidebarItem>
+        </Sidebar>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <Sidebar key={s} size={s} className="h-[200px] gap-1 py-2">
+          <SidebarItem size={s} active icon={<Home size={18} />}>Dashboard</SidebarItem>
+          <SidebarItem size={s} icon={<Users size={18} />}>Team</SidebarItem>
+        </Sidebar>
+      )) },
+    ],
+  },
+  {
+    name: 'Tabs',
+    category: 'Navigation',
+    description: 'Horizontal tab strip (Radix). Active tab gets the primary underline; arrow-key nav; content linked via aria-controls.',
+    sections: [
+      { label: 'default', content: (
+        <Tabs defaultValue="overview" className="w-[420px]">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">Overview panel content.</TabsContent>
+          <TabsContent value="activity">Activity panel content.</TabsContent>
+          <TabsContent value="settings">Settings panel content.</TabsContent>
+        </Tabs>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <Tabs key={s} defaultValue="a" className="w-[360px]">
+          <TabsList size={s}>
+            <TabsTrigger size={s} value="a">First</TabsTrigger>
+            <TabsTrigger size={s} value="b">Second</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )) },
+    ],
+  },
+  {
+    name: 'BottomNav',
+    category: 'Navigation',
+    description: 'Mobile bottom bar — 3–5 destinations, always labeled. Active item uses primary.',
+    sections: [
+      { label: 'default', content: (
+        <BottomNav className="w-[400px]">
+          <BottomNavItem active icon={<Home size={20} />}>Home</BottomNavItem>
+          <BottomNavItem icon={<BarChart3 size={20} />}>Stats</BottomNavItem>
+          <BottomNavItem icon={<Bell size={20} />}>Alerts</BottomNavItem>
+          <BottomNavItem icon={<Settings size={20} />}>Settings</BottomNavItem>
+        </BottomNav>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <BottomNav key={s} size={s} className="w-[400px]">
+          <BottomNavItem active icon={<Home size={18} />}>Home</BottomNavItem>
+          <BottomNavItem icon={<Users size={18} />}>Team</BottomNavItem>
+        </BottomNav>
+      )) },
+    ],
+  },
+  {
+    name: 'Breadcrumbs',
+    category: 'Navigation',
+    description: 'Page-hierarchy trail. BreadcrumbSeparator renders / by default; pass children (e.g. a chevron) to override. Current page is plain text, not a link.',
+    sections: [
+      { label: 'default (/ separator)', content: (
+        <Breadcrumbs>
+          <BreadcrumbItem>Home</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Library</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem current>Data display</BreadcrumbItem>
+        </Breadcrumbs>
+      ) },
+      { label: 'custom separator', content: (
+        <Breadcrumbs>
+          <BreadcrumbItem>Home</BreadcrumbItem>
+          <BreadcrumbSeparator><ChevronRight className="size-3.5" /></BreadcrumbSeparator>
+          <BreadcrumbItem>Settings</BreadcrumbItem>
+          <BreadcrumbSeparator><ChevronRight className="size-3.5" /></BreadcrumbSeparator>
+          <BreadcrumbItem current>Profile</BreadcrumbItem>
+        </Breadcrumbs>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <Breadcrumbs key={s} size={s}>
+          <BreadcrumbItem>Home</BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem current>{s}</BreadcrumbItem>
+        </Breadcrumbs>
+      )) },
+    ],
+  },
+  {
+    name: 'Pagination',
+    category: 'Navigation',
+    description: 'Page nav using <a> links (navigation semantics, not buttons). Active page highlighted; prev/next arrows; ellipsis for gaps.',
+    sections: [
+      { label: 'default', content: (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem><PaginationPrevious href="#" /></PaginationItem>
+            <PaginationItem><PaginationLink href="#">1</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink href="#" isActive>2</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink href="#">3</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationEllipsis /></PaginationItem>
+            <PaginationItem><PaginationLink href="#">10</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationNext href="#" /></PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <Pagination key={s}>
+          <PaginationContent>
+            <PaginationItem><PaginationPrevious size={s} href="#" /></PaginationItem>
+            <PaginationItem><PaginationLink size={s} href="#">1</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink size={s} href="#" isActive>2</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationNext size={s} href="#" /></PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )) },
+    ],
+  },
+  {
+    name: 'NavigationMenu',
+    category: 'Navigation',
+    description: 'Site-level menu bar with dropdown panels (Radix). Hover or focus a trigger to open its content. For marketing/content sites — distinct from sidebar (app nav) and dropdown-menu (actions).',
+    sections: [
+      { label: 'menu bar (hover/focus to open)', content: (
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[320px] gap-1 p-3">
+                  <li><NavigationMenuLink href="#">Analytics</NavigationMenuLink></li>
+                  <li><NavigationMenuLink href="#">Automation</NavigationMenuLink></li>
+                  <li><NavigationMenuLink href="#">Reports</NavigationMenuLink></li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Company</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[320px] gap-1 p-3">
+                  <li><NavigationMenuLink href="#">About</NavigationMenuLink></li>
+                  <li><NavigationMenuLink href="#">Careers</NavigationMenuLink></li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      ) },
+    ],
+  },
+  {
+    name: 'CommandPalette',
+    category: 'Navigation',
+    description: 'Cmd+K search + action surface (cmdk). Shown inline here; in product it lives in a dialog. Type to filter; grouped results with shortcuts.',
+    sections: [
+      { label: 'inline (type to filter)', content: (
+        <div className="w-[420px]">
+          <CommandPalette>
+            <CommandPaletteInput placeholder="Type a command or search…" />
+            <CommandPaletteList>
+              <CommandPaletteEmpty>No results found.</CommandPaletteEmpty>
+              <CommandPaletteGroup heading="Suggestions">
+                <CommandPaletteItem>Dashboard</CommandPaletteItem>
+                <CommandPaletteItem>Analytics</CommandPaletteItem>
+                <CommandPaletteItem>Team</CommandPaletteItem>
+              </CommandPaletteGroup>
+              <CommandPaletteSeparator />
+              <CommandPaletteGroup heading="Settings">
+                <CommandPaletteItem>Profile <CommandPaletteShortcut>⌘P</CommandPaletteShortcut></CommandPaletteItem>
+                <CommandPaletteItem>Billing <CommandPaletteShortcut>⌘B</CommandPaletteShortcut></CommandPaletteItem>
+              </CommandPaletteGroup>
+            </CommandPaletteList>
+          </CommandPalette>
+        </div>
+      ) },
     ],
   },
 ];

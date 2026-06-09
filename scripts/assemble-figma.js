@@ -291,6 +291,13 @@ if (require.main === module) {
   // Build and write
   fs.mkdirSync(outputDir, { recursive: true });
 
+  // Sweep stale outputs first — this dir is fully owned + regenerated, so a rename
+  // or renumber must not leave orphans behind (the pre-numbering forms_*.js were
+  // exactly that). Clear all .js, then write fresh.
+  for (const f of fs.readdirSync(outputDir)) {
+    if (f.endsWith('.js')) fs.unlinkSync(path.join(outputDir, f));
+  }
+
   const sharedUtils = buildSharedUtils();
   const sharedPath = path.join(outputDir, '00_shared-utils.js');
   fs.writeFileSync(sharedPath, sharedUtils);

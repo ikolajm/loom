@@ -1,13 +1,13 @@
 {
-  "name": "sidebar",
+  "name": "pagination",
   "category": "navigation",
   "description": "",
-  "version": "b53b51818ccc",
+  "version": "5d4652bbe2af",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
-    "class-variance-authority"
+    "lucide-react"
   ],
   "tokens": [
     "color",
@@ -16,10 +16,9 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "sidebar.story.ts",
+  "stories": "pagination.story.ts",
   "variants": [
-    "default",
-    "rail"
+    "default"
   ],
   "sizes": [
     "sm",

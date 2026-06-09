@@ -1,8 +1,8 @@
 {
-  "name": "sidebar",
+  "name": "top-bar",
   "category": "navigation",
   "description": "",
-  "version": "b53b51818ccc",
+  "version": "9a0696f49e84",
   "dependencies": [
     "cn"
   ],
@@ -16,10 +16,10 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "sidebar.story.ts",
+  "stories": "top-bar.story.ts",
   "variants": [
     "default",
-    "rail"
+    "elevated"
   ],
   "sizes": [
     "sm",

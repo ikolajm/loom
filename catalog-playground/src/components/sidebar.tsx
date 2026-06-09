@@ -3,16 +3,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const sidebarVariants = cva(
-  'flex flex-col',
+  'group flex flex-col',
   {
     variants: {
       variant: {
-        default: 'bg-surface text-on-surface border-outline-subtle border-r',
+        default: 'bg-surface text-on-surface border-outline-subtle border-r w-[var(--sidebar-w)]',
+        rail: 'bg-surface text-on-surface border-outline-subtle border-r is-rail w-[var(--sidebar-rail-w)]',
       },
       size: {
-        sm: 'px-2 w-[220px]',
-        md: 'px-3 w-[256px]',
-        lg: 'px-3 w-[300px]',
+        sm: '[--sidebar-w:220px] [--sidebar-rail-w:56px] px-2',
+        md: '[--sidebar-w:256px] [--sidebar-rail-w:64px] px-3',
+        lg: '[--sidebar-w:300px] [--sidebar-rail-w:72px] px-3',
       },
     },
     defaultVariants: {
@@ -45,16 +46,17 @@ const sidebarItemSize: Record<string, string> = {
   lg: 'h-ch-8 px-4 gap-3 text-[16px] leading-[24px]',
 };
 
+// Label hides + item centers when an ancestor <Sidebar variant="rail"> carries .is-rail.
 const SidebarItem = forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'> & { active?: boolean; icon?: React.ReactNode; size?: 'sm' | 'md' | 'lg'; }>(
   ({ active = false, icon, size = 'md', className, children, ...props }, ref) => (
     <button ref={ref} type="button" className={cn(
-      'flex items-center w-full rounded-component font-medium cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant hover:bg-surface-1 hover:text-on-surface',
+      'flex items-center w-full rounded-component font-medium cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant hover:bg-surface-1 hover:text-on-surface group-[.is-rail]:justify-center group-[.is-rail]:px-0',
       sidebarItemSize[size],
       active && 'bg-primary-container text-on-primary-container',
       className
     )} {...props}>
       {icon && <span className="shrink-0">{icon}</span>}
-      {children}
+      <span className="min-w-0 flex-1 truncate text-left group-[.is-rail]:hidden">{children}</span>
     </button>
   )
 );

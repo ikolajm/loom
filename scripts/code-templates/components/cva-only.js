@@ -198,14 +198,12 @@ function generateCompoundSubs(name, config, meta) {
       { sub: 'TableHead', el: 'th', classes: 'h-ch-5 px-4 text-left align-middle font-medium text-on-surface-variant' },
       { sub: 'TableCell', el: 'td', classes: 'px-4 py-2 align-middle' },
     ],
-    'Sidebar': [
-      { sub: 'SidebarItem', el: 'button', classes: 'flex items-center w-full rounded-component font-medium cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant hover:bg-surface-1 hover:text-on-surface', extraProps: 'active?: boolean; icon?: React.ReactNode; size?: \'sm\' | \'md\' | \'lg\';', activeClasses: 'bg-primary-container text-on-primary-container', sizeMap: { sm: 'h-ch-5 px-3 gap-2 text-[14px] leading-[20px]', md: 'h-ch-7 px-4 gap-3 text-[14px] leading-[20px]', lg: 'h-ch-8 px-4 gap-3 text-[16px] leading-[24px]' } },
-    ],
     'BottomNav': [
       { sub: 'BottomNavItem', el: 'button', classes: 'flex flex-1 flex-col items-center justify-center gap-0.5 h-full px-3 interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant', extraProps: 'active?: boolean; icon?: React.ReactNode;', activeClasses: 'text-primary' },
     ],
     'Breadcrumbs': [
       { sub: 'BreadcrumbItem', el: 'span', classes: 'text-on-surface-variant hover:text-on-surface cursor-pointer', extraProps: 'current?: boolean;', activeClasses: 'text-on-surface font-medium cursor-default' },
+      { sub: 'BreadcrumbSeparator', el: 'span', classes: 'text-outline-subtle select-none', separator: config.separator || '/' },
     ],
   };
 
@@ -213,7 +211,7 @@ function generateCompoundSubs(name, config, meta) {
   if (!defs) return null;
 
   const lines = [];
-  for (const { sub, el, classes, extraProps, activeClasses, sizeMap } of defs) {
+  for (const { sub, el, classes, extraProps, activeClasses, sizeMap, separator } of defs) {
     const refType = el === 'th' || el === 'td' ? 'HTMLTableCellElement'
       : el === 'tr' ? 'HTMLTableRowElement'
       : el === 'thead' || el === 'tbody' ? 'HTMLTableSectionElement'
@@ -233,7 +231,16 @@ function generateCompoundSubs(name, config, meta) {
       lines.push('');
     }
 
-    if (activeClasses) {
+    if (separator) {
+      // Separator/divider sub — renders default glyph, children override (e.g. a chevron icon).
+      lines.push(`const ${sub} = forwardRef<${refType}, React.ComponentPropsWithoutRef<'${el}'>>(`);
+      lines.push(`  ({ className, children, ...props }, ref) => (`);
+      lines.push(`    <${el} ref={ref} role="presentation" aria-hidden className={cn('${classes}', className)} {...props}>`);
+      lines.push(`      {children ?? '${separator}'}`);
+      lines.push(`    </${el}>`);
+      lines.push(`  )`);
+      lines.push(`);`);
+    } else if (activeClasses) {
       // Component with active/current state
       lines.push(`const ${sub} = forwardRef<${refType}, React.ComponentPropsWithoutRef<'${el}'> & { ${extraProps} }>(`);
       const activeProp = extraProps.includes('current') ? 'current' : 'active';

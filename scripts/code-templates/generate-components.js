@@ -61,6 +61,7 @@ const { generateAvatarGroup } = require('./components/avatar-group');
 const { generateNumber } = require('./components/number');
 const { generateRelativeTime } = require('./components/relative-time');
 const { generateVideoPlayer } = require('./components/video-player');
+const { generateSidebar } = require('./components/sidebar');
 
 // --- Catalog output directory (loom/catalog/) ---
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
@@ -138,6 +139,7 @@ function dispatch(name, config, meta) {
   if (name === 'NumberDisplay') return generateNumber(name, config, meta);
   if (name === 'RelativeTime') return generateRelativeTime(name, config, meta);
   if (name === 'VideoPlayer') return generateVideoPlayer(name, config, meta);
+  if (name === 'Sidebar') return generateSidebar(name, config, meta);
 
   switch (meta.template) {
     case 'radix': return generateRadix(name, config, meta);
