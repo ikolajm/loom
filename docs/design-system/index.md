@@ -1,6 +1,6 @@
 # Loom — Design-System Engineering Docs
 
-How Loom works: the architecture, catalog model, and the codegen/Figma/scaffold knowledge behind the generator. Relocated from `knowledge/design/` (2026-06-03) — these document Loom specifically, not general design (general design patterns + reference stay in [`knowledge/design/`](../../../knowledge/design/index.md)).
+How Loom works: the architecture, catalog model, and the codegen/Figma/scaffold knowledge behind the generator. These document Loom's engineering specifically — not general design theory.
 
 ## Patterns & architecture
 

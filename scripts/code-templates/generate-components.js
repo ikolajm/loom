@@ -1,5 +1,5 @@
 /**
- * Generate React component .tsx files + per-atom manifests into loom/catalog/.
+ * Generate React component .tsx files + per-atom manifests into catalog/.
  *
  * Architecture: Config → CVA (variant management) → Radix/lib primitives (behavior) → tokens (styling)
  *
@@ -9,11 +9,11 @@
  *   lib       — specialized library + CVA styling from config
  *
  * Output (per atom):
- *   loom/catalog/[name].tsx          — component code
- *   loom/catalog/[name].manifest.json — catalog metadata (from $catalog + inference)
+ *   catalog/[name].tsx          — component code
+ *   catalog/[name].manifest.json — catalog metadata (from $catalog + inference)
  *
  * Also emits:
- *   loom/catalog/cn.ts + cn.manifest.json — class-name merger utility (catalog atom)
+ *   catalog/cn.ts + cn.manifest.json — class-name merger utility (catalog atom)
  */
 const fs = require('fs');
 const path = require('path');
@@ -67,7 +67,7 @@ const { generateRelativeTime } = require('./components/relative-time');
 const { generateVideoPlayer } = require('./components/video-player');
 const { generateSidebar } = require('./components/sidebar');
 
-// --- Catalog output directory (loom/catalog/) ---
+// --- Catalog output directory (catalog/) ---
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
 
 // ============================================================
@@ -230,7 +230,7 @@ function buildManifest(def, config, version, src) {
 // ============================================================
 
 function generate(registry, outputDir, configs) {
-  // Catalog output: always loom/catalog/ regardless of outputDir.
+  // Catalog output: always catalog/ regardless of outputDir.
   // outputDir is ignored here (kept in signature for orchestrator compatibility).
   fs.mkdirSync(CATALOG_DIR, { recursive: true });
 

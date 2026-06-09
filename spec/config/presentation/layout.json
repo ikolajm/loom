@@ -47,7 +47,7 @@
   },
 
   "accent": {
-    "$note": "Agency branding accent for the documentation layer. Placeholder — set to agency color when delivering to clients.",
+    "$note": "Accent for the Figma documentation sphere (Loom's own catalog presentation color). The generated code scaffold's doc layer instead binds to the consumer's --primary, so every scaffold reads as entirely theirs — no separate accent to set.",
     "color": "#E91E8C",
     "on-accent": "#FFFFFF"
   },

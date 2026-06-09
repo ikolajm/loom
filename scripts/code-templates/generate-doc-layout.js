@@ -40,13 +40,13 @@ function generate() {
   ];
   const push = (name, val) => lines.push(`  --doc-${name}: ${val};`);
 
-  // Mode-independent: canvas, layout geometry, agency accent, spacing hierarchy.
+  // Mode-independent: canvas, layout geometry, doc accent, spacing hierarchy.
   push('page-bg', layout.page.background);
   push('frame-padding', resolveSpace(layout.frame.padding));
   push('frame-radius', resolveRadius(layout.frame.radius));
   push('frame-min-width', layout.frame['min-width']);
   // Doc accent = the consumer's own primary, so every scaffold reads as entirely theirs
-  // (no separate agency-branding decision). layout.json's accent stays for the Figma sphere.
+  // (no separate brand decision). layout.json's accent stays for the Figma sphere.
   push('accent', 'var(--primary)');
   push('on-accent', 'var(--on-primary)');
   for (const [key, val] of Object.entries(layout.spacing)) {

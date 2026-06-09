@@ -2,7 +2,7 @@
 
 Token-driven design system generator + Figma pipeline. Produces config JSONs, Figma variables/styles/components, CSS tokens, and React scaffolds from a tiered project questionnaire.
 
-**Upstream from:** `lab/` (code projects consume tokens)
+**Consumed by:** any Next.js + Tailwind v4 project (atoms install via `setup.sh`)
 
 ## What to Load
 
@@ -14,7 +14,7 @@ Token-driven design system generator + Figma pipeline. Produces config JSONs, Fi
 | Build/rebuild Figma | `README.md` (Figma Scripts + Clearing and Rebuilding sections) |
 | Generate code bundle | `README.md` (Code Generation section) |
 | Validate code pipeline | `README.md` (Validation Workflow section) |
-| Refresh test project | `bash scripts/refresh-test.sh lab/ds-test` |
+| Refresh test project | `bash scripts/refresh-test.sh <project-dir>` |
 
 ## Workflow Summary
 
@@ -45,7 +45,7 @@ node scripts/code-templates/orchestrator.js
 | Generator | Output | Selective command |
 |-----------|--------|-------------------|
 | tokens | `generated/tokens.css` | `--only tokens` |
-| components | `generated/components/*.tsx` (61 scaffolds) | `--only components` |
+| components | `generated/components/*.tsx` (67 scaffolds) | `--only components` |
 | stories | `generated/stories/*.story.ts + registry.ts` | `--only stories` |
 | playground | `generated/playground/ComponentPlayground.tsx` | `--only playground` |
 | scaffold | `generated/scaffold/` (setup.sh, layout, theme, globals, /design-system route) | `--only scaffold` |
@@ -60,12 +60,13 @@ spec/config/
 │   ├── colors.json         ├── spacing.json
 │   ├── sizing.json         ├── typography.json
 │   └── effects.json
-├── components/             ← hand-authored (55 active components across 7 files)
+├── components/             ← hand-authored (67 atoms across 8 files)
 │   ├── button.json         ├── form.json         ├── layout.json
 │   ├── feedback.json       ├── data-display.json  ├── navigation.json
-│   └── composite.json
-└── figma/                  ← Figma presentation layer
-    ├── variable-collections.json  ├── color-palette.json
+│   ├── composite.json      └── motion.json
+├── figma/                  ← Figma variable-collection definitions
+│   ├── variable-collections.json  └── color-palette.json
+└── presentation/           ← documentation layout + templates (Figma chrome)
     ├── layout.json                └── templates.json
 ```
 
@@ -85,10 +86,10 @@ See `README.md` Making Changes and Clearing and Rebuilding sections for full det
 - **All components have sm, md, lg sizes** — no gaps
 - **Orthogonal variant × color where an atom spans colors** — `variant` is visual treatment (filled/outline/ghost), `color`/`state` is severity/brand; the two are **truly independent CVA axes** (Button, Badge). Mechanism: the color axis sets four CSS vars (`--v-bg`/`--v-fg`/`--v-text`/`--v-border`) declared once per color; each treatment is a fixed consumer of those vars (shared `TREATMENT_CLASSES` + `buildColorVars` in `shared.js`). No N×M compound matrix — adding a color or treatment is one line. Single-color atoms (FAB, Toggle, ToggleGroup, Toolbar) stay semantic-default — the color axis is opt-in, not forced. (Retires the old "variant implies color" rule.)
 - **$base inheritance** — input/select/combobox extend text-field; checkbox/radio extend toggle-base
-- **Icon-slots** — Button, Badge, Chip, Toggle, Toast, Alert support optional leading/trailing icons
+- **Icon-slots** — Button, Badge, Toggle, Toast, Banner support optional leading/trailing icons
 - **Component spacing shape** — every component defines x-padding, y-padding, gap
 
 ## How to Continue
 
 1. Read `README.md` for the full operations manual
-2. Figma MCP gotchas: `knowledge/design/figma-mcp.md`
+2. Figma MCP gotchas: `docs/design-system/figma-mcp.md`

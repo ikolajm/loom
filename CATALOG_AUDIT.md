@@ -8,7 +8,7 @@ Per-component decisions for the Loom catalog overhaul. See `CATALOG_SPEC.md` for
 
 Each atom gets a status, brief notes, and (when status is `refine` or `new`) a detailed audit block under the per-group "Detailed notes" section. The summary tables are the scan view; the detailed blocks are the design work.
 
-When the arc closes, this doc gets archived. The durable output is the per-atom `loom/catalog/[component].manifest.json` files plus the atom files themselves.
+When the arc closes, this doc gets archived. The durable output is the per-atom `catalog/[component].manifest.json` files plus the atom files themselves.
 
 ## Sprint split
 
@@ -60,7 +60,7 @@ When an atom is `refine` or `new`, capture:
 
 ## Buttons
 
-Source: `spec/config/components/button.json`. Note: `icon-button` was merged into `button` per `[[project_loom]]`.
+Source: `spec/config/components/button.json`. Note: `icon-button` was merged into `button` per the catalog plan.
 
 | Atom | Status | Notes |
 |---|---|---|
@@ -77,7 +77,7 @@ Source: `spec/config/components/button.json`. Note: `icon-button` was merged int
 
 **Session 1 deep dive complete (2026-05-29).** Per-atom blocks below capture the catalog contract for each Buttons-group atom. Cross-cutting decisions:
 
-- **`icon-button` drops from `spec/config/components/button.json`** — already merged into `button` via `iconOnly` mode per `[[project_loom]]`. JSON cleanup task for the orchestrator pass.
+- **`icon-button` drops from `spec/config/components/button.json`** — already merged into `button` via `iconOnly` mode per the catalog plan. JSON cleanup task for the orchestrator pass.
 - **`badge` JSON config refactor required** — current `variants` (6 colors) splits into orthogonal `state` (color) + `variants` (visual treatment: filled / outline / outline-mono / dot).
 - **`toolbar` category review** — RESOLVED in the Layout deep dive (2026-06-06): toolbar is a Layout primitive; config moved `button.json`→`layout.json`, category button→layout, and it's now generated (was previously absent from the registry). See Layout § detailed notes.
 - **Catalog metadata source** — `$catalog` blocks inside the existing per-component JSON. See `CATALOG_SPEC.md` § Manifests.
@@ -89,7 +89,7 @@ Source: `spec/config/components/button.json`. Note: `icon-button` was merged int
 - **Category:** button
 - **Dependencies:** `cn-helper`
 - **Tokens:** color, typography, spacing, sizing
-- **Composition:** `slottable` (Slot + Slottable — ported from portfolio per `[[radix-slot-slottable-pattern]]`; current template uses `Slot` only, refine includes the Slottable upgrade)
+- **Composition:** `slottable` (Slot + Slottable — the Radix Slot + Slottable composition pattern; current template uses `Slot` only, refine includes the Slottable upgrade)
 - **Variants:** current 6 (default, secondary, destructive, success, warning, ghost) + new `outline` (transparent fill + neutral border + surface text, per portfolio). Total: 7
 - **Sizes:** sm, md, lg
 - **Icon mode:** `iconOnly` prop — square, no padding, icon centers via flex. Absorbs former `icon-button`
@@ -215,7 +215,7 @@ Consolidates `badge` + `chip` + `tag-chip` (marketing candidate) + `badge-dot` (
 
 ## Layout
 
-Source: `spec/config/components/layout.json`. Drops from `[[project_loom]]`: `scroll-area` (overflow-auto sufficient), `resizable` (app-level concern).
+Source: `spec/config/components/layout.json`. Drops from the catalog plan: `scroll-area` (overflow-auto sufficient), `resizable` (app-level concern).
 
 | Atom | Status | Notes |
 |---|---|---|
@@ -226,8 +226,8 @@ Source: `spec/config/components/layout.json`. Drops from `[[project_loom]]`: `sc
 | table | refine | (1) Size set once on `<Table>`, propagates to cells via context; per-cell `size` overrides. Now `'use client'`. (2) Modern content-first treatment — no header fill, muted header, no zebra, light row borders + subtle hover, no outer grid |
 | separator | keep | Unchanged |
 | toolbar | new (moved) | Moved from Buttons (`button.json` → `layout.json`, category button→layout); was never generated — now in registry + generated |
-| scroll-area | drop | Per `[[project_loom]]` — overflow-auto is sufficient |
-| resizable | drop | Per `[[project_loom]]` — app-level layout concern |
+| scroll-area | drop | Per the catalog plan — overflow-auto is sufficient |
+| resizable | drop | Per the catalog plan — app-level layout concern |
 
 Triage skipped: adaptive-panes (M3 — app-level concern), image-crop / image-zoom / glimpse (shadcn — domain utilities), video-player (moved to data-display).
 
@@ -237,7 +237,7 @@ Triage skipped: adaptive-panes (M3 — app-level concern), image-crop / image-zo
 
 Cross-cutting decisions:
 
-- **Built-in close X on dialog + sheet (not alert-dialog).** Both templates imported `{ X }` + `{ Button }` but rendered neither (dead imports). Resolved by rendering a top-right close affordance via the Radix `Close` primitive + lucide `X`, behind a `showClose` prop (default true). Uses Radix `Close` directly, **not** the Button atom — keeps dialog/sheet dependency surface at just `cn`; dropped the `Button` import. Hover treatment is opacity (per `[[hover-defaults-opacity]]`). AlertDialog intentionally excluded — it has no dismiss-X by design and had no dead imports.
+- **Built-in close X on dialog + sheet (not alert-dialog).** Both templates imported `{ X }` + `{ Button }` but rendered neither (dead imports). Resolved by rendering a top-right close affordance via the Radix `Close` primitive + lucide `X`, behind a `showClose` prop (default true). Uses Radix `Close` directly, **not** the Button atom — keeps dialog/sheet dependency surface at just `cn`; dropped the `Button` import. Hover treatment is opacity (by default). AlertDialog intentionally excluded — it has no dismiss-X by design and had no dead imports.
 - **Toolbar category move.** Toolbar is structurally a horizontal flex container for grouped actions — a Layout primitive, not a Button. Config moved `button.json` → `layout.json` (`$catalog.category` button→layout) and a `Toolbar` registry entry added in `shared.js`. It had **never been generated** (absent from the registry) — this pass closes that gap. Dropped the config's fixed `height` (a container housing buttons should size to content, not clip them) and the inert `font-size`/`line-height` (cva-only reads neither — only `table`'s special generator does).
 
 ---
@@ -319,7 +319,7 @@ Cross-cutting decisions:
 
 ## Forms
 
-Source: `spec/config/components/form.json`. Drops from `[[project_loom]]`: `input-group` (Input icon slots + composition cover it).
+Source: `spec/config/components/form.json`. Drops from the catalog plan: `input-group` (Input icon slots + composition cover it).
 
 | Atom | Status | Notes |
 |---|---|---|
@@ -340,7 +340,7 @@ Source: `spec/config/components/form.json`. Drops from `[[project_loom]]`: `inpu
 | helper-text | refine | Inline field error rendering lives here (absorbs alert's use case). **+ error cascade** (reads `FormFieldContext.error`) |
 | form-field | new | **Added to catalog** (was generated but untracked). Field-row primitive — provides `error` context the controls + helper-text cascade off |
 | calendar | refine | Add `compact` size to absorb shadcn's mini-calendar pattern |
-| input-group | drop | Per `[[project_loom]]` — Input icon slots + composition cover it |
+| input-group | drop | Per the catalog plan — Input icon slots + composition cover it |
 | rating | new | Star/numeric rating — common user-facing input |
 | time-picker | new | Distinct enough from date-picker to be its own atom (paired). Composes three `Select`s (hour/min/period) |
 | search-bar | new | In-body search composite — distinct from command-palette (overlay). Static input shell Sprint 1 |
@@ -395,7 +395,7 @@ Cross-cutting decisions:
 
 - **Status:** refine. **Category:** form. **Dependencies:** `cn`. **Tokens:** color, typography, spacing, sizing.
 - **Composition:** stateless dropzone + `FileUploadItem` subcomponent (frozen-but-editable). Consumer owns the `files[]` array.
-- **`FileUploadItem`:** props `name`, `size?` (formatted string or bytes), `onRemove?` — renders a row with filename + size + a remove-X (hover = opacity per `[[hover-defaults-opacity]]`).
+- **`FileUploadItem`:** props `name`, `size?` (formatted string or bytes), `onRemove?` — renders a row with filename + size + a remove-X (hover = opacity by default).
 - **Variants:** single `default` (dragover is now internal state, not a variant).
 - **Sizes:** sm / md / lg (compact deferred).
 - **Override surface:** Props on dropzone: `size`, `accept`, `multiple`, `onFilesSelected`, `disabled`, `error` (reads FormFieldContext). Frozen-but-editable: default dropzone copy, `FileUploadItem` row structure.
@@ -727,7 +727,7 @@ Things that span multiple atoms or aren't atom-specific. Captured here so they d
 **Resolved during Session 0 triage:**
 
 - ~~`chip` vs `tag-chip`~~ — consolidated into `badge` (variants `outline-mono` + `interactive` + `onRemove`). `badge-dot` also consolidated.
-- ~~Catalog playground hosting~~ — Next.js consuming-project-of-itself in `loom/catalog-playground/`. See `CATALOG_SPEC.md` § Catalog playground hosting.
+- ~~Catalog playground hosting~~ — Next.js consuming-project-of-itself in `catalog-playground/`. See `CATALOG_SPEC.md` § Catalog playground hosting.
 - ~~`reveal` lives in two categories~~ — pure motion atom; Sprint 2 only.
 - **Three phase-1 items** (from earlier `project_loom` backlog) absorbed into per-atom or scaffold work, not separately tracked:
   - `@theme` registration of role tokens — folded into token bundle output
@@ -739,6 +739,4 @@ Things that span multiple atoms or aren't atom-specific. Captured here so they d
 ## Cross-references
 
 - `CATALOG_SPEC.md` — architectural reference (this audit operationalizes it)
-- `[[project_loom]]` — project state, supersedes L1 + L2 backlog
-- `[[reference_portfolio-site]]` — source for marketing candidates
-- `[[scaffold-playground-patterns]]` — Paperboy-derived patterns that inform `/design-system` auto-discovery
+- `docs/design-system/scaffold-playground-patterns.md` — playground/auto-discovery patterns that inform `/design-system`

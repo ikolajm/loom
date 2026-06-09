@@ -89,10 +89,10 @@ Doing it later is also fine — retrofit is straightforward, but you'll have alr
 
 ## Upstream into the scaffold
 
-If you maintain a generator (like Loom) that scaffolds downstream projects, **add the `@theme` block to the scaffold's `globals.css` template**. Otherwise every downstream project repeats the same anti-pattern until someone notices. The retrofit work scales with the number of consuming projects; the upstream fix is one edit. See [[pipeline-architecture]] for the broader principle.
+If you maintain a generator (like Loom) that scaffolds downstream projects, **add the `@theme` block to the scaffold's `globals.css` template**. Otherwise every downstream project repeats the same anti-pattern until someone notices. The retrofit work scales with the number of consuming projects; the upstream fix is one edit. See [pipeline-architecture.md](pipeline-architecture.md) for the broader principle.
 
 ## Related
 
-- [[pipeline-architecture]] — three-layer model for token-driven systems
-- [[codegen-pattern]] — when to hand-build vs. mechanize
-- [[design-before-build]] — foundation work pays off when set up before features
+- [pipeline-architecture.md](pipeline-architecture.md) — three-layer model for token-driven systems
+- [codegen-pattern.md](codegen-pattern.md) — when to hand-build vs. mechanize
+- **Design before build** — foundation work pays off when set up before features

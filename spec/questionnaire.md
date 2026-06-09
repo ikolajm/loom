@@ -10,7 +10,6 @@ Tier 1 (intent) sets the direction. Tier 2 (implementation) is pre-filled from T
 
 ### 1. Product Type (optional)
 > What kind of product is this? Suggests style direction defaults.
-> See `knowledge/design/product-patterns.md` for full descriptions.
 
 - [ ] **dashboard** — data-dense operational view
 - [ ] **marketing** — conversion-focused landing/sales pages
@@ -26,7 +25,6 @@ Tier 1 (intent) sets the direction. Tier 2 (implementation) is pre-filled from T
 
 ### 2. Style Direction
 > The overall visual philosophy. Pre-fills Tier 2 defaults.
-> See `knowledge/design/styles.md` for full descriptions and token implications.
 
 - [ ] **clean** — content-first, quiet surfaces, clear hierarchy (Shadcn, Linear, Notion)
 - [ ] **soft** — approachable, generous rounding, warm (Material Design, Stripe, Duolingo)
@@ -47,7 +45,6 @@ Tier 1 (intent) sets the direction. Tier 2 (implementation) is pre-filled from T
 
 ### 3. Primary Color
 > The brand's main color. Everything else can be derived from this.
-> See `knowledge/design/palettes.md` for curated starting points by tone.
 
 ```
 primary: #______
@@ -70,7 +67,6 @@ accent: #______
 
 ### 5. Font Pairing
 > Heading and body fonts. Defaults to Inter / Inter if not specified.
-> See `knowledge/design/typography.md` for pairings organized by personality.
 
 ```
 heading: ________
@@ -121,4 +117,4 @@ projectName: ________
 
 All answers are persisted to `answers.json` — both Tier 1 intent (productType, styleDirection, defaultMode, projectName) and Tier 2 implementation values. Tier 1 fields are metadata for downstream context; only Tier 2 fields drive config generation.
 
-All 55 active components ship by default. See `knowledge/design/components.md` for the full catalog with variants and token mappings.
+All 67 atoms are available in the catalog; projects pick the subset they need (see `CATALOG_SPEC.md`). The per-atom anatomy reference lives in `docs/design-system/components.json`.

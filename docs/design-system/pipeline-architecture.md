@@ -55,9 +55,11 @@ Figma's job is *browse* ("what's available"), so all-atom is correct there; per-
 
 ## Surface elevation rule
 
-Atoms default to `surface-1` as their base background. Composition-level concerns (cards inside dialogs, headers inside tables) override at the parent.
+Loom defines four surface levels: `surface` (page background) and `surface-1` / `-2` / `-3` (progressive elevation). **Atoms default to `surface-1`** — one step up from the page — so a bare atom dropped onto a page reads as a distinct surface with no configuration. The level controls the atom's background fill, and by extension the contrast its interactive states step *relative to*: an affordance sitting on `surface-1` steps its hover/selected state to `surface-2`, not back down to the page.
 
-**Why this works:** prevents elevation logic from getting baked into atomic configs, which would make composition brittle. Each atom is a clean primitive.
+**Composition-level concerns override at the parent, not the atom.** A `Card` inside an already-elevated `Dialog` takes its surface from the dialog context; a header inside a table sets its own. The atom never encodes where it will be composed — it stays a clean primitive that the parent positions.
+
+**Why default-at-the-atom, override-at-the-parent:** baking elevation logic into atomic configs would couple every atom to its eventual context and make composition brittle (every atom would need an elevation prop threaded through from wherever it lands). A sensible default plus parent override keeps atoms context-free and composition flexible.
 
 ## When to break which layer
 

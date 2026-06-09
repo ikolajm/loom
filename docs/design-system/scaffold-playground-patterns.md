@@ -1,6 +1,6 @@
 # Scaffold Playground & Stories Patterns
 
-Patterns surfaced while integrating the design system scaffold into Paperboy. Captured from `paperboy/docs/UPSTREAM_V1.md` so future generations and future projects bake these in from the start.
+Patterns surfaced while integrating the generated scaffold into a real consuming project, captured so future generations and future projects bake these in from the start.
 
 These apply to any generator that produces a component playground + Storybook-style story definitions consumed by an in-page design system browser.
 
@@ -96,10 +96,9 @@ Future generations should use these as `storyCategories` and in the design syste
 
 The scaffold creates a `components/molecules/` directory. In practice it stays empty — downstream composed components are domain-specific (`digest/shell`, `digest/news`, `digest/scores`) rather than generic composites.
 
-Keep `molecules/` as an empty scaffold directory for projects that need it, but don't expect it to be used universally. See [[pipeline-architecture]] — molecules are project-owned, never generated.
+Keep `molecules/` as an empty scaffold directory for projects that need it, but don't expect it to be used universally. See [pipeline-architecture.md](pipeline-architecture.md) — molecules are project-owned, never generated.
 
 ## Related
 
 - [pipeline-architecture.md](pipeline-architecture.md) — the architecture pattern these scaffold patterns serve
 - [codegen-pattern.md](codegen-pattern.md) — R&D-then-mechanize workflow
-- [color-layers.md](../../../knowledge/design/patterns/color-layers.md) — extending generated tokens with project-specific color systems

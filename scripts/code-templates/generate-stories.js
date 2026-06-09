@@ -984,8 +984,7 @@ export const ${name.toLowerCase()}Story = {
     size: '${defaultSize}',`;
   }
 
-  if (false) { // ToggleGroup is now a compound demo — old createElement pattern removed
-  } else if (isFAB) {
+  if (isFAB) {
     story += `\n    icon: createElement(Plus, { size: 20 }),`;
   } else if (iconOnly) {
     story += `\n    children: createElement(Plus, { size: 20 }),`;
@@ -1122,11 +1121,11 @@ ${categoryEntries}
 `;
 }
 
-// Catalog output directory (loom/catalog/) — stories land alongside their atoms.
+// Catalog output directory (catalog/) — stories land alongside their atoms.
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
 
 function generate(registry, outputDir) {
-  // Catalog output: always loom/catalog/ regardless of outputDir.
+  // Catalog output: always catalog/ regardless of outputDir.
   // outputDir is ignored here (kept in signature for orchestrator compatibility).
   fs.mkdirSync(CATALOG_DIR, { recursive: true });
 

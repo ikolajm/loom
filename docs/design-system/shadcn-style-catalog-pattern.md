@@ -62,7 +62,7 @@ Every catalog item ships with a sibling manifest declaring its contract:
 | `registryDependencies` | Other catalog items required — resolved transitively by the picker |
 | `files` | What lands in the consumer's source tree |
 
-shadcn's actual schema lives at `https://ui.shadcn.com/schema/registry-item.json` (see [[registries]] for the live endpoint reference). The pattern is the important part; the exact field set is shaped to your catalog's needs.
+shadcn's actual schema lives at `https://ui.shadcn.com/schema/registry-item.json` (see [registries.md](registries.md) for the live endpoint reference). The pattern is the important part; the exact field set is shaped to your catalog's needs.
 
 ## Versioning stamp on installed files
 
@@ -107,8 +107,8 @@ Hand-authored is right when the team is small enough that drift is managed by re
 
 ## Cross-references
 
-- [[registries]] — live reference endpoints for shadcn (and Material, Radix, etc.) — includes shadcn's actual registry-item schema for the picker manifest pattern
-- [[pipeline-architecture]] — three-layer model for token-driven design systems (config + CVA + Radix/lib) — this catalog pattern is what sits downstream of that pipeline when the consumer interface inverts from "ship all" to "pick what you need"
+- [registries.md](registries.md) — live reference endpoints for shadcn (and Material, Radix, etc.) — includes shadcn's actual registry-item schema for the picker manifest pattern
+- [pipeline-architecture.md](pipeline-architecture.md) — three-layer model for token-driven design systems (config + CVA + Radix/lib) — this catalog pattern is what sits downstream of that pipeline when the consumer interface inverts from "ship all" to "pick what you need"
 - [ownership-lifecycle.md](ownership-lifecycle.md) — the "atoms are project-owned, recopiable, never re-scaffold" lifecycle that this pattern operationalizes
-- [[substrate-not-ambition]] — tokens are foundation regardless of catalog model; this pattern only changes how components are shipped, not how tokens are
-- [[component-theft]] — related pattern (steal components, don't adopt frameworks) — this catalog pattern is the *production-grade* version of component theft, with consistency-enforcing authoring on the supply side
+- [substrate-not-ambition.md](../design-rationale/substrate-not-ambition.md) — tokens are foundation regardless of catalog model; this pattern only changes how components are shipped, not how tokens are
+- **Component theft** (steal components, don't adopt frameworks) — this catalog pattern is the *production-grade* version of component theft, with consistency-enforcing authoring on the supply side

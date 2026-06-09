@@ -3,8 +3,7 @@
     "title": "Component catalog",
     "purpose": "UI components by category with variant/state/token anatomy. Loom's available-components reference — projects cherry-pick via a manifest; only picked components get built. Use-agnostic (grouped by what they are, not where used).",
     "sources": "Distilled from Material Design 3, Shadcn/Radix, Apple HIG, Vercel. Live fetch endpoints for component source: registries.md (same folder).",
-    "consumedBy": "Loom catalog + per-project picker. Reconcile against CATALOG_AUDIT.md (the actually-generated atoms) during the catalog overhaul.",
-    "movedFrom": "knowledge/design/components.md — converted to JSON + relocated to loom 2026-06-03 (it's catalog substrate, not general design reference)."
+    "consumedBy": "Loom catalog + per-project picker. Reconcile against CATALOG_AUDIT.md (the actually-generated atoms)."
   },
   "categories": [
     {
