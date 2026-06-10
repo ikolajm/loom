@@ -73,6 +73,17 @@ heading: ________
 body: ________
 ```
 
+> **Must be Google Fonts family names.** The generated root layout loads fonts via a runtime
+> Google Fonts `<link>` (not `next/font`) — so an unrecognized name **falls back silently** to
+> system sans rather than failing the build. To self-host or use a non-Google font, edit the
+> generated `layout.tsx` (it's project-owned).
+>
+> **Design↔code parity.** Google Fonts and Figma's font set are not 1:1. For guaranteed parity,
+> pick from the recommended set in [`parity-safe-fonts.json`](parity-safe-fonts.json) (Google
+> Fonts that Figma reliably hosts). Any Google Font still works on the code side; off-list fonts
+> are allowed — `npm run configs` flags them, and the Figma typography paste reports availability
+> and **substitutes Inter** for any font this Figma can't render (the build completes, logged).
+
 ### 6. Edge Style
 > How rounded are corners throughout the system?
 

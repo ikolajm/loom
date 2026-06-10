@@ -3,7 +3,7 @@
  * Code Templates Orchestrator
  *
  * Produces the complete generated/ bundle:
- *   tokens.css, components/, stories/, playground/, scripts/, HANDOFF.md
+ *   tokens.css, components/, scaffold/, HANDOFF.md
  *
  * Each generator is a separate module with a generate(config, outputDir) function.
  *
@@ -54,25 +54,11 @@ const GENERATORS = {
       return generate(registry, outputDir, configs);
     },
   },
-  'stories': {
-    description: 'stories/*.story.ts + registry.ts',
-    run: (outputDir) => {
-      const { generate } = require('./generate-stories');
-      return generate(registry, outputDir);
-    },
-  },
-  'playground': {
-    description: 'playground/ComponentPlayground.tsx',
-    run: (outputDir) => {
-      const { generate } = require('./generate-playground');
-      generate(configs, outputDir);
-    },
-  },
   'scaffold': {
-    description: 'scaffold/ (setup.sh, globals.css, ThemeProvider, layout, /design-system route)',
+    description: 'scaffold/ (init.sh, globals.css, ThemeProvider, layout)',
     run: (outputDir) => {
       const { generate } = require('./scaffold');
-      generate(configs, registry, outputDir);
+      generate(configs, outputDir);
     },
   },
   'handoff': {

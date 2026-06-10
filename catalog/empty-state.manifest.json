@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "empty-state.story.ts",
   "variants": [
     "default"
   ],

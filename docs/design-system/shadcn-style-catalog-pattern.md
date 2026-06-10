@@ -23,15 +23,14 @@ The thing you're explicitly trading away: automatic propagation of upstream chan
 
 ## Core shape
 
-Three surfaces, three roles:
+Two surfaces, two roles:
 
 | Surface | Role | Lives in |
 |---|---|---|
 | **Catalog browser** | Canonical, read-only view of every atom in its blessed state. The "what's available" surface. Has prop controls so users can see variant space before picking. | Catalog repo |
-| **Project playground** | Live tinker surface in each consuming project. Shows only installed atoms (picked + project-authored). Full prop controls. Marks the surface where edits happen and where upstream-promotion candidates surface. Dev-only — not shipped to production. | Consuming project |
 | **Production app** | Just the picked + project-authored atom files. Zero playground/stories footprint. | Consuming project |
 
-The catalog browser is the "spec." The project playground is the "operational reality." Comparing them is the upstream-pitch surface.
+The catalog browser is the "spec"; a consuming project's installed atoms are the "operational reality." Comparing them is the upstream-pitch surface. (A project can optionally stand up its own playground over its installed atoms, but the pattern doesn't require one — the catalog browser covers discovery.)
 
 ## Picker mechanism
 
@@ -77,7 +76,7 @@ Cheap and load-bearing. Tells future-you (or a future-collaborator) how old the 
 
 ## Upstream-promote loop (manual)
 
-When a project's edits to an installed atom are generalizable, the maintainer manually ports them back to the catalog. There is no automated submission flow. The project playground is the staging surface — devs tinker, decide "this should be upstream," and port the diff by hand.
+When a project's edits to an installed atom are generalizable, the maintainer manually ports them back to the catalog. There is no automated submission flow. The consuming project is the staging surface — devs tinker with their installed atoms, decide "this should be upstream," and port the diff by hand.
 
 Speculative future tooling (don't build until friction proves it): a `promote` CLI that diffs an installed file against the catalog version and offers to merge the delta. Only worth building if manual port becomes a recurring drag.
 
@@ -93,7 +92,7 @@ The alternative — owning a versioning + diff-merge system that propagates upst
 ## How this dissolves common adjacent problems
 
 - **"Marketing variant" or "dashboard variant" flags on a bundled library.** Replaced by per-project picking — each project picks the atoms it needs; no variant-flag explosion.
-- **"Playground / stories shipping with production code."** Replaced by a dev-only playground route in each consuming project (e.g., Next.js route group `(dev)/playground/` excluded from production builds). Production never compiles the playground.
+- **"Playground / stories shipping with production code."** Avoided structurally: the catalog browser lives in the catalog repo, and consuming projects receive only atom files — no playground or story files enter a consumer at all, so there's nothing to scrub from production.
 - **"Should this catalog atom be configurable via prop X or hard-coded?"** Resolved post-install — the project edits the file directly. The catalog version stays opinionated; project versions diverge as needed.
 
 ## Catalog authoring options

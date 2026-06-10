@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "dialog.story.ts",
   "variants": [
     "default"
   ],

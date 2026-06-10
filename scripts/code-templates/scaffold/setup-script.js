@@ -7,10 +7,6 @@
  * (`./setup.sh <project>`), which resolves loom-picks.json. Two commands, two jobs:
  *   init.sh  → app shell + substrate (once)
  *   setup.sh → picked atoms + token refresh (repeatable)
- *
- * Component-coupled extras (ThemeToggle, the /design-system gallery route, the
- * foundation views) are NOT installed here — they consume atoms, so they belong to
- * the component flow and install after their atoms are synced.
  */
 
 function generate() {
@@ -78,9 +74,6 @@ echo "=== App shell ready ==="
 echo ""
 echo "Next — add atoms (from the loom repo):"
 echo "  ./setup.sh $FRONTEND_DIR   # loom-picks.json -> picked atoms + token refresh"
-echo ""
-echo "ThemeToggle and the /design-system gallery route consume atoms, so they install"
-echo "as part of the component flow once their atoms are synced — not here."
 `;
 }
 

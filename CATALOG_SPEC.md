@@ -2,9 +2,9 @@
 
 **Status:** Architectural reference for the v2 catalog model — *as built*. Designed 2026-05-28; catalog content-complete 2026-06-09. For the per-atom decisions behind the current catalog, see [`CATALOG_AUDIT.md`](CATALOG_AUDIT.md).
 
-The model in one paragraph: Loom does not ship all 67 atoms by default. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in a dev-only `/design-system` route that serves as the surface for tinkering and for surfacing changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom does not ship all 67 atoms by default. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
-This dissolved the two backlog items previously tracked for Loom: the marketing-variant flag and the playground/production separation. The playground/production split is solved structurally by the dev-only route group (below). The marketing-variant idea was retired differently than first planned — see [Marketing: evaluated and cut](#marketing-evaluated-and-cut).
+This dissolved the two backlog items previously tracked for Loom: the marketing-variant flag and the playground/production separation. The playground/production split is solved structurally — the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only picked atom files, with zero playground/stories footprint. The marketing-variant idea was retired differently than first planned — see [Marketing: evaluated and cut](#marketing-evaluated-and-cut).
 
 ---
 
@@ -12,7 +12,7 @@ This dissolved the two backlog items previously tracked for Loom: the marketing-
 
 The arc executed in two sprints. **Sprint 1 is complete** — it landed the primitives, infrastructure, the static catalog, *and* the zero-dependency motion core. Sprint 2 is the deferred motion remainder.
 
-**Sprint 1 — primitives, infrastructure, and motion core (DONE).** Manifest schema, picker, dependency resolution, the `setup.sh` rewrite, per-atom catalog generation, the catalog playground in `catalog-playground/`, the project `/design-system` route as a `(dev)` route group with `.story` auto-discovery, the Figma side resolved for static atoms, and per-atom triage + design across every group. Motion tokens shipped with the substrate (easings + spring `linear()` presets), and the **motion core was built zero-dependency**: `reveal`, `stagger`, `count-up`, `scroll-progress` — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no `motion` library. Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
+**Sprint 1 — primitives, infrastructure, and motion core (DONE).** Manifest schema, picker, dependency resolution, the `setup.sh` rewrite, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side resolved for static atoms, and per-atom triage + design across every group. Motion tokens shipped with the substrate (easings + spring `linear()` presets), and the **motion core was built zero-dependency**: `reveal`, `stagger`, `count-up`, `scroll-progress` — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no `motion` library. Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
 
 **Sprint 2 — wider motion families (DEFERRED).** The wider motion families behind a `motion`-library adoption decision (spring physics, layout morph, scroll-transform, text effects), sub-categorization within the motion group, motion-in-Figma resolution (or explicit deferral), and any motion layer for atoms that ship statically today. Sprint 2 is gated on a real adoption decision, not scheduled — the zero-dep core covers the common cases without it.
 
@@ -28,17 +28,18 @@ The original plan promoted marketing primitives (hero, media, stat, cross-link) 
 
 ---
 
-## Three surfaces, three roles
+## Two surfaces, two roles
 
 | Surface | Role | Lives in |
 |---|---|---|
-| **Loom catalog playground** | Canonical browse — read-only, all catalog atoms, full prop controls. The "what's available" surface. | `catalog-playground/` (this repo) |
-| **Project `/design-system` route** | Live tinker surface — full interactive playground, auto-discovers from `src/components/`, includes both picked and project-authored atoms. Dev-only route group, not compiled into production builds. | Consuming project |
+| **Loom catalog playground** | Canonical browse — all catalog atoms in their blessed state, full prop controls. The "what's available" surface. | `catalog-playground/` (this repo) |
 | **Production app** | Picked + project-authored atom files only. Zero playground/stories footprint. | Consuming project |
 
-The Loom catalog playground is the canonical view of every atom in its blessed state. The project `/design-system` route is *this project's* atoms in *their current state* — picked atoms with whatever local edits the project has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
+The Loom catalog playground is the canonical view of every atom in its blessed state. A consuming project holds its *own* atoms in *their current state* — picked atoms with whatever local edits it has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
 
-Comparing the two is the upstream-pitch surface. If the project's `Button` has grown variants the catalog `Button` doesn't have, that's the trigger for a manual upstream port.
+Comparing a project's atoms against the catalog playground is the upstream-pitch surface. If the project's `Button` has grown variants the catalog `Button` doesn't have, that's the trigger for a manual upstream port.
+
+> A per-project dev-only `/design-system` tinker route was originally specced as a third surface. It was built but never wired into the install flow, and was cut in the public-readiness pass (2026-06): the catalog playground already covers browse, and a project can stand up its own playground if it wants one.
 
 ---
 
@@ -86,12 +87,11 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
   "tokens": ["color", "typography", "spacing", "sizing"],
   "composition": "slottable",
   "variants": ["filled", "outline", "outline-mono", "dot"],
-  "sizes": ["sm", "md", "lg"],
-  "stories": "badge.story.ts"
+  "sizes": ["sm", "md", "lg"]
 }
 ```
 
-**Required:** `name`, `category`, `dependencies`, `tokens`, `composition`, `stories`
+**Required:** `name`, `category`, `dependencies`, `tokens`, `composition`
 **Optional:** `description`, `version`, `variants`, `sizes` (when applicable)
 
 | Field | Purpose |
@@ -105,7 +105,6 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 | `composition` | Slot pattern — the contract for motion envelopes. Enum: `none` / `slot` / `slottable` / `children-as-function` |
 | `variants` | Primary variant axis — drives playground prop controls |
 | `sizes` | Size axis — drives playground prop controls |
-| `stories` | Sibling story file (`.story.ts` / `.story.tsx`) for auto-discovery |
 
 ### `composition` enum
 
@@ -122,19 +121,6 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 - `iconOnly` — Button-specific usage mode; absorbed into how the atom is documented, not a manifest field.
 - `versionAdded` / `versionUpdated` — `loom-picks.json` already tracks resolution version; per-atom granularity is overkill for now.
 - `deprecated` — add when the first atom needs it.
-
----
-
-## Auto-discovery in `/design-system`
-
-The project `/design-system` route auto-discovers atoms by reading sibling story files in `src/components/`. Story file = the contract for "this component appears in the playground."
-
-Two consequences:
-
-1. **Picked atoms arrive with their story files.** `setup.sh` copies both the atom file and its sibling story file from `catalog/`.
-2. **Project-authored atoms get story files too.** When the project authors a new atom (e.g., a `HeroBlock` for a marketing site), the convention is: write a story file next to it. The story file is what makes it appear in `/design-system` with prop controls — and what marks it as a candidate for upstream promotion.
-
-This carries over the Paperboy stories+registry pattern (`generate-stories.js` already produces story files). The pattern carries over; what changes is filtering. See [`docs/design-system/scaffold-playground-patterns.md`](docs/design-system/scaffold-playground-patterns.md).
 
 ---
 
@@ -159,7 +145,7 @@ These costs are the shadcn tradeoff. The alternative is owning a versioning + di
 
 When a project's edits to a picked atom are generalizable, the dev manually ports them back to `catalog/[component].tsx`. There is no automated submission tool.
 
-Trigger: dev tinkers in `/design-system` → recognizes "this change should be in the catalog" → opens both files → ports the diff.
+Trigger: dev edits a picked atom in their project → recognizes "this change should be in the catalog" → opens both files → ports the diff.
 
 Speculative future tooling (don't build until friction proves it): a `promote.sh button --from ../portfolio-site` CLI that diffs the project's `Button` against the catalog `Button` and offers to merge the delta. Only worth building if manual port becomes a recurring drag.
 
@@ -186,9 +172,8 @@ The template pipeline (`scripts/code-templates/orchestrator.js` + the templates 
 
 | Concern | How it works |
 |---|---|
-| Generation | Orchestrator produces `catalog/[component].tsx` + `[component].manifest.json` + `[component].story.*` (per-atom files) |
+| Generation | Orchestrator produces `catalog/[component].tsx` + `[component].manifest.json` (per-atom files) |
 | Install | `setup.sh` reads `loom-picks.json`, resolves dependencies via manifests, copies only the picked subset into the consuming project's `src/components/` |
-| Stories | Ship inline with the catalog atom; arrive at the consuming project alongside their atom; render in `/design-system` only, not in production routes |
 
 Why templates instead of hand-authored:
 
@@ -209,17 +194,9 @@ Motion tokens land with the substrate bundle — easings (`standard` / `decelera
 
 ---
 
-## `/design-system` as a dev-only route group
-
-The project `/design-system` route ships as a Next.js route group: `src/app/(dev)/design-system/`. The `(dev)` group is excluded from production builds via Next.js config (or equivalent build-time filter). Result: production builds literally do not compile the route. No env branching at runtime, no dead code paths, no risk of the gate failing.
-
-This is the structural resolution of the playground-separation problem. The old framing was "scrub stories before ship." The catalog model's framing is "stories never enter production builds in the first place."
-
----
-
 ## Catalog playground hosting
 
-The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom. Same Next.js scaffold, same `(dev)/design-system` route group, same story auto-discovery harness as any downstream project — but its `loom-picks.json` lists every catalog atom.
+The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom: its `loom-picks.json` lists the full catalog, and `setup.sh` populates `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
 
 Structure:
 
@@ -228,23 +205,20 @@ loom/
   catalog/
     button.tsx
     button.manifest.json
-    button.story.ts
     …
   catalog-playground/             ← Next.js, consuming-project-of-itself
     loom-picks.json               ← picks every catalog atom
     src/
       components/                 ← populated by setup.sh from catalog/
-      gallery/                    ← the browse harness
+      gallery/                    ← hand-authored browse harness (shell + stories)
     next.config.ts
     tokens.css                    ← substrate bundle
 ```
 
 Implications:
 
-- **One story format** used identically by catalog and consuming projects.
-- **One playground renderer.** Catalog and consuming projects render through the same harness — pattern transfer is automatic.
-- **Dogfooding.** The catalog playground exercises `setup.sh` and the install ceremony every time it refreshes.
-- **No second engineering surface.** The catalog playground is the consuming-project scaffold pointed at `catalog/`.
+- **Dogfooding.** The catalog playground exercises `setup.sh` and the install ceremony every time it refreshes — the same path a downstream consumer runs.
+- **No second engineering surface.** It's the consuming-project scaffold pointed at `catalog/`, not a bespoke build.
 
 Costs accepted:
 
@@ -252,7 +226,7 @@ Costs accepted:
 
 Hosting deferred to a separate downstream decision. Local-only is fine; a static export to Netlify (`output: 'export'`) at a `loom.ikolajm.com` subdomain is a candidate for later.
 
-The governing principle is **story-harness parity**: the catalog playground and every consuming project render through the same story format and the same `(dev)/design-system` harness, so a pattern proven in one transfers to the others for free. That parity is the requirement — and it's what rules out **Vite** (a custom playground shell would diverge from consuming projects) and **Storybook** (its CSF format would diverge from the story harness, putting two story formats on every atom). The tools aren't rejected on preference; they're rejected because they break same-harness-everywhere.
+**Why a hand-authored gallery, not Storybook or Vite:** the playground is a single internal browse app, so a bespoke gallery (`src/gallery/`) is the lighter choice — no extra dependency, no second component/story format to maintain alongside the atoms, and full control over the gallery shell. Storybook's CSF would put a parallel story format on every atom for one internal app; a separate Vite shell would add a build surface the existing Next.js consuming-project scaffold already covers.
 
 ---
 
@@ -260,9 +234,9 @@ The governing principle is **story-harness parity**: the catalog playground and 
 
 The execution arc walked every existing atom through the audit framework (see [`CATALOG_AUDIT.md`](CATALOG_AUDIT.md)). The mechanical migration steps that fell out:
 
-1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json` + `.story.*`) into `catalog/` instead of producing a full `generated/components/` bundle.
+1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
 2. **`setup.sh` rewrite.** Reads `loom-picks.json`, resolves manifest dependencies, copies the picked subset into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
-3. **Scaffold output.** The generated `src/app/` scaffold includes the `(dev)/design-system/` route group with the auto-discovery harness.
+3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
 4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself with `loom-picks.json` picking every atom.
 
 ---
@@ -279,4 +253,4 @@ The execution arc walked every existing atom through the audit framework (see [`
 - [`CATALOG_AUDIT.md`](CATALOG_AUDIT.md) — the per-atom decisions; source of truth for what shipped
 - [`docs/design-system/ownership-lifecycle.md`](docs/design-system/ownership-lifecycle.md) — atoms are project-owned, recopiable (the lifecycle this spec's install ceremony aligns to)
 - [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md) — tokens are substrate; characterization is project-owned
-- [`docs/design-system/scaffold-playground-patterns.md`](docs/design-system/scaffold-playground-patterns.md) — the stories/registry and playground patterns that carry over
+- [`docs/design-system/scaffold-playground-patterns.md`](docs/design-system/scaffold-playground-patterns.md) — gotchas for building a story-driven component playground (apply to `catalog-playground/`)

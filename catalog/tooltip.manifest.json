@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "tooltip.story.ts",
   "variants": [
     "default"
   ],

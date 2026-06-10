@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "collapsible.story.ts",
   "variants": [
     "default",
     "bordered"

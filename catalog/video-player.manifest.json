@@ -11,6 +11,5 @@
     "sizing",
     "spacing"
   ],
-  "composition": "none",
-  "stories": "video-player.story.ts"
+  "composition": "none"
 }

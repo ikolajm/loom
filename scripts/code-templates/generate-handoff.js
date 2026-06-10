@@ -94,35 +94,28 @@ ${componentRows.length} component scaffolds. Variant/size class maps are generat
 |------|---------|------------|-------------|-------|
 ${componentRows.join('\n')}
 
-### stories/
-Story definitions for the playground. \`registry.ts\` indexes all stories by category.
-
-### playground/
-\`ComponentPlayground.tsx\` — generic playground renderer with live controls.
-
 ### scaffold/
-Project bootstrap files — run \`setup.sh\` to wire everything into a Next.js project.
+App-shell bootstrap files — \`init.sh\` wires the atom-agnostic shell into a Next.js project.
 
 | File | Purpose |
 |------|---------|
-| \`setup.sh <frontend-dir>\` | Orchestrates all scaffold steps into a Next.js + Tailwind v4 project |
+| \`init.sh <frontend-dir>\` | One-time: copies the shell + token substrate and installs core deps |
 | \`globals.css\` | Tailwind + tokens import, base body styles, scrollbar, selection |
 | \`ThemeProvider.tsx\` | React context for light/dark/system theme switching with localStorage persistence |
-| \`ThemeToggle.tsx\` | Cycle button for theme switching (light -> dark -> system) |
 | \`layout.tsx\` | Root layout with ThemeProvider, Google Fonts, data-theme attribute |
-| \`design-system-page.tsx\` | Complete /design-system route with sidebar navigation + playground |
 
 ## Setup
 
 \`\`\`bash
-# From the generated/ directory:
-./scaffold/setup.sh ./path-to-frontend
+# 1. App shell + substrate (once) — from the generated/ directory:
+./scaffold/init.sh ./path-to-frontend
 
-# Then:
+# 2. Picked atoms + token refresh (repeatable) — from the loom repo root:
+./setup.sh ./path-to-frontend     # reads loom-picks.json
+
+# 3. Install the npm deps setup.sh reports, then:
 cd ./path-to-frontend
-npm install lucide-react
 npm run dev
-# Visit /design-system
 \`\`\`
 
 ## Feedback Loop

@@ -1,4 +1,4 @@
-# Color Token Pipeline: Config → Component → Playground
+# Color Token Pipeline: Config → Component
 
 ## The Flow
 
@@ -9,8 +9,6 @@ button.json (config)
   ↓  generateButton() / buildCvaString() in generate-components.js
   ↓
 Button.tsx (generated component)
-  ↓
-ComponentPlayground.tsx (generated playground)
 ```
 
 ## Step-by-step
@@ -85,12 +83,6 @@ Tailwind resolves `text-on-primary` via the color mapping layer:
 /* Light mode */
 [data-theme="light"] { --on-primary: #FFFFFF; }
 ```
-
-### 6. Playground
-
-`scripts/code-templates/generate-playground.js` → `generated/playground/ComponentPlayground.tsx`
-
-Reads the same registry from `shared.js` → `getComponentRegistry()`. Variant names and size names are pulled from the config to generate the controls.
 
 ## Two legitimate color patterns
 

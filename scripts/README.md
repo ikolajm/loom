@@ -14,8 +14,6 @@ code-templates/            config JSONs → generated/ bundle
   ├── shared.js            Config loading, Tailwind mappers, component registry
   ├── generate-tokens-css  tokens.css (CSS vars + text family classes + @theme)
   ├── generate-components  components/*.tsx (text-{family}-${size} interpolation)
-  ├── generate-stories     stories/*.story.ts + registry.ts
-  ├── generate-playground  playground/ComponentPlayground.tsx
   └── generate-handoff     HANDOFF.md
 ```
 

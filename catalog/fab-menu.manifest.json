@@ -18,7 +18,6 @@
     "effects"
   ],
   "composition": "slot",
-  "stories": "fab-menu.story.ts",
   "variants": [
     "default"
   ]

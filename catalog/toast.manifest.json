@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "toast.story.ts",
   "variants": [
     "default",
     "error",

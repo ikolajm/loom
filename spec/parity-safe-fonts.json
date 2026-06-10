@@ -1,0 +1,26 @@
+{
+  "$note": "Google Fonts reliably available in Figma's font picker — the recommended set for design↔code parity. NOT exhaustive and NOT a gate: any Google Font works on the code side, and the Figma preflight (figma.listAvailableFontsAsync) is the authoritative availability check. An off-list font that this Figma can't render falls back to Inter in the Figma build (logged), while the code side loads it via the Google Fonts <link>.",
+  "families": [
+    "Inter",
+    "Roboto",
+    "Open Sans",
+    "Lato",
+    "Montserrat",
+    "Poppins",
+    "Work Sans",
+    "Nunito",
+    "Raleway",
+    "DM Sans",
+    "Manrope",
+    "Space Grotesk",
+    "Plus Jakarta Sans",
+    "IBM Plex Sans",
+    "Merriweather",
+    "Playfair Display",
+    "Lora",
+    "JetBrains Mono",
+    "Roboto Mono",
+    "Source Code Pro",
+    "Space Mono"
+  ]
+}

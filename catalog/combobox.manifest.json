@@ -19,7 +19,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "combobox.story.ts",
   "variants": [
     "default",
     "error"

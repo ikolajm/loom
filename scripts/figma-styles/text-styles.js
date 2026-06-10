@@ -69,10 +69,13 @@ function parseLetterSpacing(lsValue) {
 const typoPrimitives = buildLookup("primitives.typography");
 const tiers = ['sm', 'md', 'lg'];
 
+// Authoritative font-parity check + index (substitutes Inter for fonts this Figma lacks).
+await reportFontParity(CONFIG.families);
+
 // Collect unique font+weight combinations for loading
 const fontsToLoad = new Set();
 for (const [family, def] of Object.entries(CONFIG.textStyles)) {
-  const familyName = CONFIG.families[def.font];
+  const familyName = resolveFamily(CONFIG.families[def.font]);
   const styleName = weightToStyleName(familyName, def.weight);
   fontsToLoad.add(JSON.stringify({ family: familyName, style: styleName }));
 }
@@ -85,7 +88,7 @@ for (const fontJson of fontsToLoad) {
 let count = 0;
 
 for (const [family, def] of Object.entries(CONFIG.textStyles)) {
-  const familyName = CONFIG.families[def.font];
+  const familyName = resolveFamily(CONFIG.families[def.font]);
   const styleName = weightToStyleName(familyName, def.weight);
 
   for (const tier of tiers) {

@@ -409,6 +409,9 @@ function buildSection12_TailwindTheme() {
   }
 
   // Component Heights — enables h-ch-0 through h-ch-9
+  // NOTE: the custom scales emitted here (radius, ch-*, icon-*, spacing categories) must
+  // also be registered in components/cn.js so tailwind-merge dedupes className overrides
+  // against them. Add a scale here → add it there too.
   lines.push('');
   lines.push('  /* Component Heights */');
   for (const token of Object.keys(standards.sizing['component-height'])) {

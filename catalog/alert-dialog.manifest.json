@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "alert-dialog.story.ts",
   "variants": [
     "default"
   ],

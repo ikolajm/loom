@@ -477,12 +477,13 @@ function assembleBatch(def, batch, isFirst, isLast, fullOrder) {
   for (const family of fontFamilies) {
     for (const w of allWeights) {
       const style = resolveStyle(family, w);
-      fontLoadSet.add(`await figma.loadFontAsync({ family: "${family}", style: "${style}" });`);
+      fontLoadSet.add(`await safeLoadFont("${family}", "${style}");`);
     }
   }
-  // Ensure Regular weight is loaded for all project fonts (fallback text nodes)
+  // Ensure Regular weight is loaded for all project fonts (fallback text nodes).
+  // safeLoadFont substitutes Inter for any family this Figma can't render.
   for (const family of fontFamilies) {
-    fontLoadSet.add(`await figma.loadFontAsync({ family: "${family}", style: "Regular" });`);
+    fontLoadSet.add(`await safeLoadFont("${family}", "Regular");`);
   }
   // Always load Inter Regular — Figma's default font for new text nodes.
   // createText() nodes start as Inter Regular, and .characters assignment

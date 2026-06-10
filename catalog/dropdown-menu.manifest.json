@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "dropdown-menu.story.ts",
   "variants": [
     "default"
   ],

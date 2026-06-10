@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "input.story.ts",
   "variants": [
     "default",
     "error"

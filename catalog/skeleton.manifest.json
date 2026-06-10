@@ -14,7 +14,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "skeleton.story.ts",
   "variants": [
     "default"
   ]

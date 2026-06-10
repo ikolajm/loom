@@ -216,7 +216,6 @@ function buildManifest(def, config, version, src) {
     npmDependencies: extractNpmDeps(src || ''),
     tokens: cat.tokens || ['color', 'typography', 'spacing', 'sizing'],
     composition: cat.composition || 'none',
-    stories: `${def.key}.story.ts`,
   };
 
   if (variants.length > 0) manifest.variants = variants;
@@ -282,7 +281,6 @@ function generate(registry, outputDir, configs) {
     npmDependencies: extractNpmDeps(cnSrc),
     tokens: [],
     composition: 'none',
-    stories: '',
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
 

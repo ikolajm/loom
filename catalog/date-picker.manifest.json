@@ -19,7 +19,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "date-picker.story.ts",
   "variants": [
     "default",
     "error"

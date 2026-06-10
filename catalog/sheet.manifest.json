@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "sheet.story.ts",
   "variants": [
     "default"
   ],

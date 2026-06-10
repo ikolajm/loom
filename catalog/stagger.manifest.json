@@ -12,7 +12,6 @@
     "spacing"
   ],
   "composition": "none",
-  "stories": "stagger.story.ts",
   "variants": [
     "fade",
     "fade-up",

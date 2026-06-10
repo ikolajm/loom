@@ -46,9 +46,7 @@ node scripts/code-templates/orchestrator.js
 |-----------|--------|-------------------|
 | tokens | `generated/tokens.css` | `--only tokens` |
 | components | `generated/components/*.tsx` (67 scaffolds) | `--only components` |
-| stories | `generated/stories/*.story.ts + registry.ts` | `--only stories` |
-| playground | `generated/playground/ComponentPlayground.tsx` | `--only playground` |
-| scaffold | `generated/scaffold/` (setup.sh, layout, theme, globals, /design-system route) | `--only scaffold` |
+| scaffold | `generated/scaffold/` (init.sh, layout, theme, globals) | `--only scaffold` |
 | handoff | `generated/HANDOFF.md` | `--only handoff` |
 
 ## Config Architecture

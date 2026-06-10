@@ -1,22 +1,8 @@
-# Scaffold Playground & Stories Patterns
+# Component Playground Patterns
 
-Patterns surfaced while integrating the generated scaffold into a real consuming project, captured so future generations and future projects bake these in from the start.
+Gotchas surfaced while building a story-driven component playground — a browser that renders each atom with live prop controls. Captured so future playground work bakes these in from the start. They apply to Loom's in-repo `catalog-playground/` and to any consuming project that stands up its own playground.
 
-These apply to any generator that produces a component playground + Storybook-style story definitions consumed by an in-page design system browser.
-
-## Integration procedure (three steps)
-
-The scaffold lands in three steps:
-
-1. Generate the bundle in the design-system repo (`tokens.css`, `atoms/`, `stories/`, `playground/`, `providers/`)
-2. Copy the output into the target project's `frontend/src/`
-3. Import `tokens.css` in the project's `globals.css`:
-   ```css
-   @import "tailwindcss";
-   @import "../tokens.css";
-   ```
-
-`tokens.css` lives at `src/tokens.css` directly — no intermediate `generated/` directory. Flat path, fewer indirections.
+> **History:** these were first hit while building a generated per-project `/design-system` route. That consumer route was cut in the public-readiness pass — the in-repo catalog playground covers browse (see [`CATALOG_SPEC.md`](../../CATALOG_SPEC.md)) — but the rendering gotchas below are general to any story-driven playground and still apply.
 
 ## Bug patterns + fixes
 

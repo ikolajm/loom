@@ -13,6 +13,7 @@ function loadAllConfigs() {
   return {
     standards: load('standards.json'),
     sizing: load('base/sizing.json'),
+    spacing: load('base/spacing.json'),
     typography: load('base/typography.json'),
     colors: load('base/colors.json'),
     effects: load('base/effects.json'),

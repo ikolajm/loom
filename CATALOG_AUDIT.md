@@ -739,4 +739,4 @@ Things that span multiple atoms or aren't atom-specific. Captured here so they d
 ## Cross-references
 
 - `CATALOG_SPEC.md` — architectural reference (this audit operationalizes it)
-- `docs/design-system/scaffold-playground-patterns.md` — playground/auto-discovery patterns that inform `/design-system`
+- `docs/design-system/scaffold-playground-patterns.md` — gotchas for building a story-driven component playground

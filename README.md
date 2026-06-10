@@ -20,7 +20,7 @@ Loom started as a personal engine for spinning up consistent design systems acro
             ▼                           ▼
    Figma variables /            catalog/  →  67 React atoms
    styles / components          + tokens.css substrate
-   (paste into plugin console)  + per-atom manifests + stories
+   (paste into plugin console)  + per-atom manifests
                                         │
                                         ▼
                               consuming project
@@ -72,17 +72,24 @@ npm run dev          # → http://localhost:3000
 
 ### Use Loom in a project
 
-Consumption is shadcn-style — declare what you want, copy it in:
+Consumption is shadcn-style — declare what you want, copy it in. Bring your own Next.js + Tailwind v4 project (with `src/app/`); two commands, two jobs.
 
 ```bash
-# 1. In your project, create loom-picks.json:
+# 1. Bootstrap the app shell once — ThemeProvider, root layout + fonts, globals,
+#    token substrate, and core deps. Generate the scaffold, then run init.sh:
+npm run generate
+./generated/scaffold/init.sh /path/to/your-project
+
+# 2. In your project, declare the atoms you want in loom-picks.json:
 #    { "loom": { "version": "2026-06-04", "picks": ["button", "card", "combobox"] } }
 
-# 2. From the Loom repo, sync the picks into your project:
+# 3. From the Loom repo, sync the picked atoms in (re-run anytime to resync):
 ./setup.sh /path/to/your-project
 ```
 
-`setup.sh` resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `input` + `popover`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated `tokens.css` substrate. It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. Atoms require Tailwind v4 + `@tailwindcss/postcss`.
+`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated `tokens.css` substrate. It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+
+Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
 ### Regenerate from config
 
@@ -94,7 +101,17 @@ npm run generate     # regenerate the code catalog (catalog/ + tokens.css)
 npm run figma        # assemble the Figma plugin scripts (paste into Figma console)
 ```
 
-`node scripts/code-templates/orchestrator.js --list` shows the individual generators (`tokens`, `components`, `stories`, `scaffold`, …); `--only <target>` runs one.
+`node scripts/code-templates/orchestrator.js --list` shows the individual generators (`tokens`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+
+### Apply the Figma scripts
+
+`npm run figma` writes 30 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`29` step scripts (each a self-contained async IIFE). To build the Figma file:
+
+1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
+2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
+3. Paste the step scripts **`01` → `29` in numeric order**. Re-running a single page later only needs its own step script re-pasted (see [`CONTEXT.md`](CONTEXT.md) for the per-change subset).
+
+Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/design-system/fonts.md`](docs/design-system/fonts.md)).
 
 ---
 

@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "kbd.story.ts",
   "variants": [
     "default"
   ],
