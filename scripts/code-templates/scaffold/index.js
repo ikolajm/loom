@@ -10,26 +10,23 @@ const path = require('path');
 
 const globalsCss = require('./globals-css');
 const themeProvider = require('./theme-provider');
-const themeToggle = require('./theme-toggle');
 const layout = require('./layout');
-const designSystemPage = require('./design-system-page');
 const setupScript = require('./setup-script');
-const colorsView = require('./colors-view');
-const typographyView = require('./typography-view');
 
-function generate(configs, registry, outputDir) {
+// preview-page.tsx is a static asset (no config interpolation) — copied verbatim
+// into generated/scaffold/, then placed at src/app/preview/page.tsx by init.sh.
+const previewPage = fs.readFileSync(path.join(__dirname, 'preview-page.tsx'), 'utf8');
+
+function generate(configs, outputDir) {
   const scaffoldDir = path.join(outputDir, 'scaffold');
   fs.mkdirSync(scaffoldDir, { recursive: true });
 
   const files = [
     { name: 'globals.css', content: globalsCss.generate(configs) },
     { name: 'ThemeProvider.tsx', content: themeProvider.generate(configs) },
-    { name: 'ThemeToggle.tsx', content: themeToggle.generate() },
     { name: 'layout.tsx', content: layout.generate(configs) },
-    { name: 'design-system-page.tsx', content: designSystemPage.generate(configs, registry) },
-    { name: 'setup.sh', content: setupScript.generate(configs, registry), executable: true },
-    { name: 'ColorsView.tsx', content: colorsView.generate() },
-    { name: 'TypographyView.tsx', content: typographyView.generate() },
+    { name: 'preview-page.tsx', content: previewPage },
+    { name: 'init.sh', content: setupScript.generate(), executable: true },
   ];
 
   for (const file of files) {

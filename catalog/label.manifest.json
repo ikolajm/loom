@@ -1,0 +1,27 @@
+{
+  "name": "label",
+  "category": "form",
+  "description": "",
+  "version": "e79d43779502",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

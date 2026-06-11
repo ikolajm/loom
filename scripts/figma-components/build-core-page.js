@@ -8,13 +8,14 @@
 //   3. Surface elevation steps (light + dark)
 // =============================================================================
 
-// Load project fonts — text styles bind these, Figma needs them loaded for text mutations
+// Load project fonts — text styles bind these, Figma needs them loaded for text mutations.
+// safeLoadFont substitutes Inter for any family this Figma can't render (logged once).
 for (const family of Object.values(CONFIG_FONTS)) {
-  await figma.loadFontAsync({ family, style: "Regular" });
+  await safeLoadFont(family, "Regular");
 }
 // Load all weights used by text styles
 for (const [, def] of Object.entries(CONFIG.typography.textStyles)) {
-  const familyName = CONFIG_FONTS[def.font];
+  const familyName = resolveFamily(CONFIG_FONTS[def.font]);
   const style = fontStyle(def.weight, familyName);
   await figma.loadFontAsync({ family: familyName, style });
 }

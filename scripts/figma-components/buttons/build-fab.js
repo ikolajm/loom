@@ -60,18 +60,8 @@ function buildFab(lookups, defaultMode, page) {
     const iconRef = sz['icon-size'];
     const iconPath = resolveIcon(iconRef);
     const iconSizeVar = iconPath ? primIconSize[iconPath] : null;
-    let iconComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/placeholder');
-    if (iconComp) {
-      const inst = iconComp.createInstance();
-      inst.name = 'icon';
-      if (iconSizeVar) { inst.setBoundVariable('width', iconSizeVar); inst.setBoundVariable('height', iconSizeVar); }
-      if (fgVar) {
-        const vecs = inst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
-        const paint = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', fgVar)];
-        for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-      }
-      stdComp.appendChild(inst);
-    }
+    const stdIcon = makeIcon('icon/placeholder', fgVar, iconSizeVar);
+    if (stdIcon) { stdIcon.name = 'icon'; stdComp.appendChild(stdIcon); }
     variants.push(stdComp);
 
     // --- Extended FAB (icon + label) ---
@@ -116,17 +106,8 @@ function buildFab(lookups, defaultMode, page) {
       if (effectStyle) extComp.effectStyleId = effectStyle.id;
 
       // Icon
-      if (iconComp) {
-        const inst2 = iconComp.createInstance();
-        inst2.name = 'icon';
-        if (iconSizeVar) { inst2.setBoundVariable('width', iconSizeVar); inst2.setBoundVariable('height', iconSizeVar); }
-        if (fgVar) {
-          const vecs = inst2.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
-          const paint = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', fgVar)];
-          for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
-        }
-        extComp.appendChild(inst2);
-      }
+      const extIcon = makeIcon('icon/placeholder', fgVar, iconSizeVar);
+      if (extIcon) { extIcon.name = 'icon'; extComp.appendChild(extIcon); }
 
       // Label
       const label = figma.createText();

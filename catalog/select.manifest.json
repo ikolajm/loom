@@ -1,0 +1,30 @@
+{
+  "name": "select",
+  "category": "form",
+  "description": "",
+  "version": "f00ff88ff0a3",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-select",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

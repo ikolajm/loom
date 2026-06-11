@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternDialog(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing } = lookups;
+  const { semColors, semRadius, primSpacing, primIconSize } = lookups;
   const dialogConfig = CONFIG.components.dialog;
   const colors = dialogConfig.variants.default;
   const md = dialogConfig.sizes.md;
@@ -102,6 +102,16 @@ function buildPatternDialog(lookups, defaultMode, page) {
   // Dialog content
   const fgVar = semColors[colors.fg];
 
+  // Header row — title + built-in close (X). showClose defaults true in v2.
+  const headerRow = figma.createFrame();
+  headerRow.name = 'header';
+  headerRow.layoutMode = 'HORIZONTAL';
+  headerRow.primaryAxisSizingMode = 'AUTO';
+  headerRow.counterAxisSizingMode = 'AUTO';
+  headerRow.counterAxisAlignItems = 'CENTER';
+  headerRow.itemSpacing = 12;
+  headerRow.fills = [];
+
   const title = figma.createText();
   title.name = 'title';
   title.characters = 'Confirm Action';
@@ -109,8 +119,17 @@ function buildPatternDialog(lookups, defaultMode, page) {
   if (fgVar) title.fills = [figma.variables.setBoundVariableForPaint(
     { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fgVar
   )];
-  dialogBox.appendChild(title);
+  headerRow.appendChild(title);
   title.layoutSizingHorizontal = 'FILL';
+
+  // Mirrors the code close: an iconOnly ghost Button (size="sm" → icon-1 16px,
+  // color="inherit" → on-surface foreground). See radix-dialogs.js closeButton().
+  const closeIconSizeVar = primIconSize[resolveIcon('icon/icon-1')];
+  const closeX = createCloseIcon(fgVar, closeIconSizeVar);
+  if (closeX) headerRow.appendChild(closeX);
+
+  dialogBox.appendChild(headerRow);
+  headerRow.layoutSizingHorizontal = 'FILL';
 
   const body = figma.createText();
   body.name = 'body';

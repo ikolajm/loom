@@ -1,15 +1,15 @@
 {
-  "projectName": "party-wipe",
-  "productType": "game",
-  "styleDirection": "bold",
-  "defaultMode": "dark",
-  "primary": "#DAA520",
-  "secondary": null,
-  "accent": null,
-  "heading": "Cinzel",
-  "body": "JetBrains Mono",
-  "edges": "sharp",
-  "density": "compact",
+  "productType": "dashboard",
+  "styleDirection": "clean",
+  "primary": "#731DD8",
+  "secondary": "#48A9A6",
+  "accent": "#C0DA74",
+  "heading": "Finlandica",
+  "body": "Finlandica",
+  "edges": "soft",
+  "density": "comfortable",
   "shadowDepth": "flat",
-  "typeScale": "compact"
+  "typeScale": "standard",
+  "defaultMode": "dark",
+  "projectName": "loom-test"
 }

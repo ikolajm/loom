@@ -62,11 +62,6 @@ When scoping a marketing or portfolio build that uses a tokens-driven design sys
 
 1. Day 1: scaffold the substrate, get the foundation up. This is fast.
 2. Then: list the characterization atoms the project needs — mono accents, decoration SVGs, per-section media, layout treatments. Expect 15–25 of them for a portfolio.
-3. Build them in context as the page demands them, not speculatively. See `../design-system/ownership-lifecycle.md`.
+3. Build them in context as the page demands them, not speculatively.
 4. Per-section design passes after atoms exist. Each section is its own composition.
 5. The "is this Awwwards-worthy yet" question lives in the characterization layer's progress, never in the substrate's.
-
-## Related
-
-- `../design-system/pipeline-architecture.md` — three-layer model for token-driven systems
-- `../design-system/ownership-lifecycle.md` — build atoms in context as the page demands them

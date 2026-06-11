@@ -156,7 +156,11 @@ function buildSection6_Effects() {
   for (const [name, val] of Object.entries(standards.effects.transition)) {
     lines.push(`--transition-${name}: ${val};`);
   }
-  lines.push(`--easing: ${standards.effects.easing};`);
+  for (const [name, val] of Object.entries(standards.effects.easing)) {
+    if (name.startsWith('$')) continue;
+    lines.push(`--easing-${name}: ${val};`);
+  }
+  lines.push('--easing: var(--easing-standard);'); // back-compat alias
 
   lines.push('');
   lines.push('/* === Focus Ring === */');
@@ -405,6 +409,9 @@ function buildSection12_TailwindTheme() {
   }
 
   // Component Heights — enables h-ch-0 through h-ch-9
+  // NOTE: the custom scales emitted here (radius, ch-*, icon-*, spacing categories) must
+  // also be registered in components/cn.js so tailwind-merge dedupes className overrides
+  // against them. Add a scale here → add it there too.
   lines.push('');
   lines.push('  /* Component Heights */');
   for (const token of Object.keys(standards.sizing['component-height'])) {

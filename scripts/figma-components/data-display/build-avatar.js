@@ -58,7 +58,8 @@ function buildAvatar(lookups, defaultMode, page) {
       const text = figma.createText();
       text.name = 'initials';
       text.characters = 'AB';
-      text.fontName = { family: CONFIG_FONTS.body, style: fontStyle(config.typography['font-weight'], CONFIG_FONTS.body) };
+      const avatarFamily = resolveFamily(CONFIG_FONTS.body);
+      text.fontName = { family: avatarFamily, style: fontStyle(config.typography['font-weight'], avatarFamily) };
       text.fontSize = parsePx(sz['font-size']);
       text.lineHeight = { value: parsePx(sz['line-height']), unit: 'PIXELS' };
       text.textCase = 'UPPER';

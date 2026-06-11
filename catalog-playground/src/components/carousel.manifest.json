@@ -1,0 +1,29 @@
+{
+  "name": "carousel",
+  "category": "composite",
+  "description": "",
+  "version": "f7f641a313a6",
+  "dependencies": [
+    "cn",
+    "button"
+  ],
+  "npmDependencies": [
+    "embla-carousel-react",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "radio",
+  "category": "form",
+  "description": "",
+  "version": "47ac4f4c97c7",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-radio-group",
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "false",
+    "true"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

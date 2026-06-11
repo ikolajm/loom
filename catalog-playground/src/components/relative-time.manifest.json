@@ -1,0 +1,14 @@
+{
+  "name": "relative-time",
+  "category": "data-display",
+  "description": "",
+  "version": "70d88df37213",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "typography"
+  ],
+  "composition": "none"
+}

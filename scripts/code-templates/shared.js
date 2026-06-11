@@ -13,6 +13,7 @@ function loadAllConfigs() {
   return {
     standards: load('standards.json'),
     sizing: load('base/sizing.json'),
+    spacing: load('base/spacing.json'),
     typography: load('base/typography.json'),
     colors: load('base/colors.json'),
     effects: load('base/effects.json'),
@@ -23,8 +24,13 @@ function loadAllConfigs() {
     layoutConfig: load('components/layout.json'),
     navigationConfig: load('components/navigation.json'),
     compositeConfig: load('components/composite.json'),
+    motionConfig: load('components/motion.json'),
   };
 }
+
+// Shared icon-slot wrapper class — the span that holds a leading/trailing/standalone icon and
+// makes its svg fill the slot. Interpolated into component templates so the literal lives once.
+const ICON_SLOT_CLASS = 'shrink-0 [&>svg]:size-full';
 
 // --- Tailwind class mappers ---
 
@@ -59,6 +65,8 @@ function heightToClass(val) {
   // Scale reference: {scale.N} → N (maps to Tailwind h-N)
   const scale = scaleToValue(val);
   if (scale) return scale;
+  // Raw value (e.g. "72px") → arbitrary value (caller emits h-[72px])
+  if (val.match(/^\d/)) return `[${val}]`;
   return null;
 }
 
@@ -137,6 +145,61 @@ function buildVariantStyles(variants) {
   return styles;
 }
 
+/**
+ * Map a role-token path (color/primary/on-primary) to its runtime CSS variable — var(--on-primary).
+ * The token pipeline emits role tokens to :root as --{role} (e.g. --primary, --on-surface, --outline).
+ * NOTE: it must be --{role}, NOT --color-{role}: the @theme block is `@theme inline`, which inlines
+ * values into utilities and does NOT register --color-* on :root, so only --{role} resolves at runtime.
+ */
+function colorToVar(colorPath) {
+  if (!colorPath || colorPath === 'transparent') return null;
+  if (colorPath === 'currentColor') return 'currentColor';
+  const role = colorPath.split('/').pop();
+  return `var(--${role})`;
+}
+
+/**
+ * Catalog-wide treatment vocabulary for orthogonal atoms. A treatment is a fixed consumer
+ * of the per-color CSS vars (--v-bg/--v-fg for the solid fill, --v-text/--v-border for the
+ * line/text). The color axis sets those vars; the treatment reads them — so variant and color
+ * are independent CVA axes (no N×M compound matrix). Shared by Button (filled/outline/ghost)
+ * and Badge (filled/outline/dot); each atom picks the treatments it exposes via `treatments`.
+ */
+const TREATMENT_CLASSES = {
+  filled: 'bg-[color:var(--v-bg)] text-[color:var(--v-fg)]',
+  outline: 'bg-transparent border border-[color:var(--v-border)] text-[color:var(--v-text)]',
+  ghost: 'bg-transparent text-[color:var(--v-text)]',
+  dot: 'bg-[color:var(--v-border)]',
+};
+
+/**
+ * Build the per-color CSS-variable declaration classes for an orthogonal atom.
+ * Each color is declared ONCE as { bg, fg, text, border } token paths; this emits the
+ * Tailwind arbitrary-property classes that set --v-bg/--v-fg/--v-text/--v-border on the
+ * element. The treatment classes (TREATMENT_CLASSES) then consume them.
+ *
+ * Returns { colorNames, varClass } where varClass[name] is the declaration string.
+ * Axis-name-agnostic — the caller names the CVA dimension ('color' for Button, 'state' for Badge).
+ */
+function buildColorVars(colorsCfg) {
+  const colorNames = Object.keys(colorsCfg).filter((k) => !k.startsWith('$'));
+  const varClass = {};
+  for (const name of colorNames) {
+    const c = colorsCfg[name] || {};
+    const parts = [];
+    const bg = colorToVar(c.bg);
+    const fg = colorToVar(c.fg);
+    const text = colorToVar(c.text);
+    const border = colorToVar(c.border);
+    if (bg) parts.push(`[--v-bg:${bg}]`);
+    if (fg) parts.push(`[--v-fg:${fg}]`);
+    if (text) parts.push(`[--v-text:${text}]`);
+    if (border) parts.push(`[--v-border:${border}]`);
+    varClass[name] = parts.join(' ');
+  }
+  return { colorNames, varClass };
+}
+
 function buildSizeStyles(sizes) {
   const styles = {};
   for (const [name, sz] of Object.entries(sizes)) {
@@ -211,13 +274,17 @@ function resolveBase(allComponents, configKey) {
       }
     }
   }
+  // $catalog is the atom's own metadata (deps, tokens, composition) — base-independent.
+  // The merge loop skips all $-prefixed keys, so carry the child's $catalog through
+  // explicitly; otherwise a $base-extending atom can never declare its catalog manifest.
+  if (config['$catalog']) merged['$catalog'] = config['$catalog'];
   return merged;
 }
 
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
-  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig } = configs;
+  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig, motionConfig } = configs;
   return {
     // === Actions ===
     'Button': { source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
@@ -225,13 +292,14 @@ function getComponentRegistry(configs) {
     'FAB': { source: buttonConfig, key: 'fab', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', iconOnly: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
     'FabMenu': { source: buttonConfig, key: 'fab-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
     'Badge': { source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Dot': { source: buttonConfig, key: 'dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, noChildren: true, variantKey: 'state', textFamily: null, category: 'Feedback', template: 'cva-only', primitive: null },
     'Toggle': { source: buttonConfig, key: 'toggle', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle', variantKey: 'state' },
     'ToggleGroup': { source: buttonConfig, key: 'toggle-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle-group' },
 
     // === Inputs ===
-    'Input': { source: formConfig, key: 'input', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
+    'Input': { source: formConfig, key: 'input', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, formControl: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
     'Select': { source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-select', variantKey: 'state' },
-    'Textarea': { source: formConfig, key: 'textarea', baseKey: 'text-field', element: 'textarea', htmlType: 'TextareaHTMLAttributes<HTMLTextAreaElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
+    'Textarea': { source: formConfig, key: 'textarea', baseKey: 'text-field', element: 'textarea', htmlType: 'TextareaHTMLAttributes<HTMLTextAreaElement>', noIconSlots: true, formControl: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
     'DatePicker': { source: formConfig, key: 'date-picker', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, inputType: 'date', textFamily: 'input', category: 'Inputs', template: 'lib', primitive: 'react-day-picker', variantKey: 'state' },
     'Checkbox': { source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'checkbox', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-checkbox' },
     'Radio': { source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'radio', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-radio-group' },
@@ -244,6 +312,9 @@ function getComponentRegistry(configs) {
     'HelperText': { source: formConfig, key: 'helper-text', element: 'p', htmlType: 'HTMLAttributes<HTMLParagraphElement>', noInteractive: true, layout: 'row', textFamily: 'label', category: 'Inputs', template: 'cva-only', primitive: null },
     'FormField': { source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
     'Calendar': { source: formConfig, key: 'calendar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Inputs', template: 'lib', primitive: 'react-day-picker' },
+    'Rating': { source: formConfig, key: 'rating', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Inputs', template: 'lib', primitive: null },
+    'TimePicker': { source: formConfig, key: 'time-picker', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
+    'SearchBar': { source: formConfig, key: 'search-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
 
     // === Layout ===
     'Card': { source: layoutConfig, key: 'card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
@@ -252,16 +323,16 @@ function getComponentRegistry(configs) {
     'Sheet': { source: layoutConfig, key: 'sheet', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
     'Separator': { source: layoutConfig, key: 'separator', element: 'hr', htmlType: 'HTMLAttributes<HTMLHRElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-separator' },
     'AlertDialog': { source: layoutConfig, key: 'alert-dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'alertdialog', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-alert-dialog' },
+    'Toolbar': { source: layoutConfig, key: 'toolbar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
 
     // === Feedback ===
     'Toast': { source: feedbackConfig, key: 'toast', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', textFamily: 'action', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-toast' },
-    'Alert': { source: feedbackConfig, key: 'alert', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'alert', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
+    'Banner': { source: feedbackConfig, key: 'banner', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'Tooltip': { source: feedbackConfig, key: 'tooltip', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, role: 'tooltip', textFamily: 'label', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-tooltip' },
     'Popover': { source: feedbackConfig, key: 'popover', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-popover' },
     'DropdownMenu': { source: feedbackConfig, key: 'dropdown-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-dropdown-menu' },
     'Skeleton': { source: feedbackConfig, key: 'skeleton', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'ProgressBar': { source: feedbackConfig, key: 'progress-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'block', noIconSlots: true, role: 'progressbar', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-progress' },
-    'BadgeDot': { source: feedbackConfig, key: 'badge-dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Feedback', template: 'cva-only', primitive: null },
     'EmptyState': { source: feedbackConfig, key: 'empty-state', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
     'ContextMenu': { source: feedbackConfig, key: 'context-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-context-menu' },
     'HoverCard': { source: feedbackConfig, key: 'hover-card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-hover-card' },
@@ -273,6 +344,9 @@ function getComponentRegistry(configs) {
     'Accordion': { source: dataDisplayConfig, key: 'accordion', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-accordion' },
     'Kbd': { source: dataDisplayConfig, key: 'kbd', element: 'kbd', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'cva-only', primitive: null },
     'Collapsible': { source: dataDisplayConfig, key: 'collapsible', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-collapsible' },
+    'AvatarGroup': { source: dataDisplayConfig, key: 'avatar-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'lib', primitive: null },
+    'NumberDisplay': { source: dataDisplayConfig, key: 'number', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
+    'RelativeTime': { source: dataDisplayConfig, key: 'relative-time', element: 'time', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
 
     // === Navigation ===
     'TopBar': { source: navigationConfig, key: 'top-bar', element: 'header', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'title', category: 'Navigation', template: 'cva-only', primitive: null },
@@ -288,6 +362,12 @@ function getComponentRegistry(configs) {
     'Stepper': { source: compositeConfig, key: 'stepper', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, variantKey: 'step-state', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
     'Carousel': { source: compositeConfig, key: 'carousel', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Composite', template: 'lib', primitive: 'embla-carousel-react' },
     'TreeView': { source: compositeConfig, key: 'tree-view', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'tree', variantKey: 'item', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
+
+    // === Motion ===
+    'Reveal': { source: motionConfig, key: 'reveal', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'Stagger': { source: motionConfig, key: 'stagger', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'CountUp': { source: motionConfig, key: 'count-up', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Motion', template: 'lib', primitive: null },
+    'ScrollProgress': { source: motionConfig, key: 'scroll-progress', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
   };
 }
 
@@ -327,6 +407,10 @@ module.exports = {
   fontWeightToClass,
   letterSpacingToClass,
   buildVariantStyles,
+  colorToVar,
+  TREATMENT_CLASSES,
+  ICON_SLOT_CLASS,
+  buildColorVars,
   buildSizeStyles,
   buildTypographyClasses,
   resolveBase,

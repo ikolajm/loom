@@ -1,8 +1,11 @@
-const { buildVariantStyles, buildSizeStyles, buildTypographyClasses } = require('../shared');
+const { buildSizeStyles, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, extractIconSizes, buildSizeStylesWithText } = require('./helpers');
 
 function generateButton(name, config, meta) {
-  const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
+  // Orthogonal model: variant (treatment) and color are independent axes.
+  // Treatments consume per-color CSS vars (--v-bg/fg/text/border) set by the color axis.
+  const treatments = config.treatments || ['filled', 'outline', 'ghost'];
+  const { colorNames: colorKeys, varClass } = buildColorVars(config.colors || {});
   const sizes = filterSizes(config.sizes);
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
   const iconSizesConfig = filterSizes(config['icon-sizes'] || {});
@@ -21,6 +24,8 @@ function generateButton(name, config, meta) {
 
   const allIconSizes = { ...iconSizes, ...iconOnlyIconSizes };
 
+  // Independent axes: `variant` carries the treatment consumer-classes; `color` sets the
+  // CSS vars they read. CVA concatenates both — color sets --v-*, treatment consumes them.
   return `import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
@@ -31,14 +36,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-${Object.entries(variantStyles).map(([k, v]) => `        ${k}: '${v}',`).join('\n')}
+${treatments.map((k) => `        ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
+      },
+      color: {
+${colorKeys.map((k) => `        ${k}: '${varClass[k]}',`).join('\n')}
       },
       size: {
 ${Object.entries(allSizeEntries).map(([k, v]) => `        '${k}': '${v}',`).join('\n')}
       },
     },
     defaultVariants: {
-      variant: '${dflt.variant || 'default'}',
+      variant: '${dflt.variant || 'filled'}',
+      color: '${dflt.color || 'primary'}',
       size: '${dflt.size || 'md'}',
     },
   }
@@ -70,7 +79,7 @@ const LoadingSpinner = () => (
 );
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
+  ({ variant, color, size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     const resolvedSize = iconOnly ? \`icon-\${size}\` : size;
     const iconCls = buttonIconSize[size];
@@ -80,20 +89,20 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, size: resolvedSize as any }), className)}
+        className={cn(buttonVariants({ variant, color, size: resolvedSize as any }), className)}
         disabled={isDisabled}
         aria-busy={loading || undefined}
         {...props}
       >
         {iconOnly ? (
-          <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>
+          <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>
             {loading ? <LoadingSpinner /> : children}
           </span>
         ) : (
           <>
-            {effectiveLeadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{effectiveLeadingIcon}</span>}
+            {effectiveLeadingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{effectiveLeadingIcon}</span>}
             <Slottable>{children}</Slottable>
-            {trailingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{trailingIcon}</span>}
+            {trailingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{trailingIcon}</span>}
           </>
         )}
       </Comp>

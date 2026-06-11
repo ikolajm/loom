@@ -1,0 +1,31 @@
+{
+  "name": "stepper",
+  "category": "composite",
+  "description": "",
+  "version": "af90f1731f41",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "incomplete",
+    "active",
+    "completed",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

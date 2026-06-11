@@ -1,9 +1,11 @@
 // =============================================================================
 // Card — Frame Pattern Mock
 // =============================================================================
-// 3 visual examples side by side: default, elevated, outline.
-// Demonstrates surface treatment (bg, border, shadow, radius, padding).
-// NOT a component — frame pattern for per-project application.
+// One example per config variant (default, elevated, outline, flush) side by
+// side. Demonstrates surface treatment (bg, border, shadow, radius, padding).
+// Variants are read from config — flush (transparent / no chrome) renders via
+// the transparent-bg + none-border branches below. NOT a component — frame
+// pattern for per-project application.
 // =============================================================================
 
 function buildPatternCard(lookups, defaultMode, page) {
@@ -13,7 +15,7 @@ function buildPatternCard(lookups, defaultMode, page) {
 
   // Section frame (base only — no preview for pattern mocks)
   const frame = createSectionFrame('base.pattern-card', lookups);
-  addHeader(frame, 'Card', 'Frame pattern — surface treatment with bg, border, shadow, radius. 3 variants: default, elevated, outline.');
+  addHeader(frame, 'Card', 'Frame pattern — surface treatment with bg, border, shadow, radius. Variants: default, elevated, outline, flush (transparent / no chrome).');
 
   // Examples container — horizontal row, clipsContent off for shadow visibility
   const examples = figma.createFrame();
@@ -124,5 +126,5 @@ function buildPatternCard(lookups, defaultMode, page) {
   frame.appendChild(examples);
   setDefaultMode(frame, defaultMode);
 
-  return { name: 'Pattern Card', count: 3 };
+  return { name: 'Pattern Card', count: examples.children.length };
 }

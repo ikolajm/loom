@@ -1,124 +1,92 @@
-# Project Design Questionnaire
+# answers.json — Schema Reference (read-only)
 
-Fill this out per project. Answers drive the generated design system config files.
+Loom's generators read one file: **`spec/answers.json`**, which you hand-author.
+This document is the **key reference** — it does not get filled in. Copy the example
+below into `spec/answers.json`, edit the values, then run the pipeline:
 
-Tier 1 (intent) sets the direction. Tier 2 (implementation) is pre-filled from Tier 1 — override any values that don't fit.
+    npm run configs    # reads spec/answers.json → token configs
+    npm run generate   # → React catalog + tokens.css
+    npm run figma      # → Figma paste scripts
+
+## Complete example
+
+Every key, with illustrative values (your tokens will differ — this is an example set,
+not Loom's "look"):
+
+```json
+{
+  "projectName": "acme-dashboard",
+  "productType": "dashboard",
+  "styleDirection": "clean",
+  "defaultMode": "dark",
+  "primary": "#1E90FF",
+  "secondary": "#EE8D2F",
+  "accent": "#F42990",
+  "heading": "Space Grotesk",
+  "body": "Inter",
+  "edges": "sharp",
+  "density": "comfortable",
+  "shadowDepth": "flat",
+  "typeScale": "standard"
+}
+```
+
+## Field reference
+
+| Key | Required | Allowed values | Default if omitted | Drives |
+|-----|----------|----------------|--------------------|--------|
+| `primary` | **yes** | hex `#RRGGBB` | — | brand color ramp; neutral hue |
+| `secondary` | no | hex `#RRGGBB` | complementary of `primary` | secondary ramp |
+| `accent` | no | hex `#RRGGBB` | triadic of `primary` | accent ramp (always generated) |
+| `heading` | no | Google Fonts family name | `Inter` | heading text styles |
+| `body` | no | Google Fonts family name | `Inter` | body/UI text styles |
+| `edges` | no | `none` · `sharp` · `soft` | `sharp` | border-radius scale |
+| `density` | no | `compact` · `comfortable` · `airy` | `comfortable` | spacing scale |
+| `shadowDepth` | no | `flat` · `elevated` | `elevated` | shadow/elevation scale |
+| `typeScale` | no | `compact` · `standard` · `dramatic` | `standard` | type size range |
+| `defaultMode` | no | `dark` · `light` | `dark` | which color mode loads first |
+| `projectName` | no | string | `null` | metadata only |
+| `productType` | no | see list below | `null` | metadata only |
+| `styleDirection` | no | see list below | `null` | metadata only |
+
+Omit any optional key entirely — the generator falls back to the default above.
+A value outside the allowed set fails loudly (e.g. `Unknown edges: "round". Valid: none, sharp, soft`).
+
+## Colors
+
+`primary` is the only required color; `secondary` and `accent` are **always generated** —
+derived from `primary` (complementary and triadic, respectively) when you don't supply them.
+Supply a hex to override the derivation. All three produce a full semantic ramp.
+
+## Fonts — `heading` / `body`
+
+**Use Google Fonts family names.** The generated `layout.tsx` loads fonts via a runtime
+Google Fonts `<link>` (not `next/font`), so an unrecognized name **falls back silently to
+system sans** rather than failing the build. To self-host or use a non-Google font, edit the
+generated `layout.tsx` — it's project-owned.
+
+**Design↔code parity.** Google Fonts and Figma's font set are not 1:1. For guaranteed parity,
+pick from [`parity-safe-fonts.json`](parity-safe-fonts.json). Off-list fonts are allowed:
+`npm run configs` flags them, and the Figma typography paste reports availability and
+**substitutes Inter** for any font this Figma can't render (the build completes, logged once).
+
+## Metadata fields — `productType`, `styleDirection`, `projectName`
+
+These are **stored for downstream context only — the generators do not consume them.** They
+record intent (and travel with the config for provenance); they do not change any token.
+Setting `styleDirection` does **not** pre-fill the implementation values above — choose those explicitly.
+
+**`productType`** — `dashboard` · `marketing` · `e-commerce` · `content` · `admin` ·
+`consumer-mobile` · `portfolio` · `game` · `documentation` · `social` · `other`
+
+**`styleDirection`** — the intended visual philosophy (reference points in parens):
+`clean` (Linear, Notion) · `soft` (Material, Stripe) · `bold` (Spotify, Framer) ·
+`editorial` (Medium, NYT) · `brutalist` (dev/art portfolios) · `corporate` (M365, Salesforce) ·
+`glass` (macOS, Win11) · `retro` (Poolsuite, Teenage Engineering) · `luxury` (Aesop) ·
+`playful` (Duolingo, game UIs)
 
 ---
 
-## Tier 1 — Intent
-
-### 1. Product Type (optional)
-> What kind of product is this? Suggests style direction defaults.
-> See `knowledge/design/product-patterns.md` for full descriptions.
-
-- [ ] **dashboard** — data-dense operational view
-- [ ] **marketing** — conversion-focused landing/sales pages
-- [ ] **e-commerce** — product discovery + checkout
-- [ ] **content** — blog, publication, long-form reading
-- [ ] **admin** — internal tool, CRUD operations
-- [ ] **consumer-mobile** — touch-first app (web)
-- [ ] **portfolio** — showcases work, personality-forward
-- [ ] **game** — immersive, themed UI
-- [ ] **documentation** — reference material, searchable
-- [ ] **social** — user-generated content, feeds, profiles
-- [ ] **other**: ________
-
-### 2. Style Direction
-> The overall visual philosophy. Pre-fills Tier 2 defaults.
-> See `knowledge/design/styles.md` for full descriptions and token implications.
-
-- [ ] **clean** — content-first, quiet surfaces, clear hierarchy (Shadcn, Linear, Notion)
-- [ ] **soft** — approachable, generous rounding, warm (Material Design, Stripe, Duolingo)
-- [ ] **bold** — high energy, strong color, large type (Spotify, Figma, Framer)
-- [ ] **editorial** — typographic sophistication, serif headings, airy (Medium, Apple, NYT)
-- [ ] **brutalist** — anti-polish, monospace, harsh contrast (developer portfolios, art/culture)
-- [ ] **corporate** — conservative, high density, accessibility-first (Microsoft 365, Salesforce)
-- [ ] **glass** — translucent surfaces, blur, layered depth (macOS, Windows 11)
-- [ ] **retro** — references past eras, warm/muted, personality-heavy (Poolsuite, Teenage Engineering)
-- [ ] **luxury** — restrained elegance, space as luxury, muted palette (Aesop, Bottega Veneta)
-- [ ] **playful** — fun and tactile, chunky shapes, bright colors (Duolingo, game UIs)
-
----
-
-## Tier 2 — Implementation
-
-> These are pre-filled based on your style direction. Override any that don't fit the project.
-
-### 3. Primary Color
-> The brand's main color. Everything else can be derived from this.
-> See `knowledge/design/palettes.md` for curated starting points by tone.
-
-```
-primary: #______
-```
-
-### 4. Secondary Color (optional)
-> If not provided, a complementary color will be derived from the primary.
-
-```
-secondary: #______
-```
-
-### 4b. Accent Color (optional — only if project needs a third brand color)
-> Generates a separate `color/accent/*` semantic group. Skip if secondary is sufficient.
-> Not generated by default — only included when explicitly provided.
-
-```
-accent: #______
-```
-
-### 5. Font Pairing
-> Heading and body fonts. Defaults to Inter / Inter if not specified.
-> See `knowledge/design/typography.md` for pairings organized by personality.
-
-```
-heading: ________
-body: ________
-```
-
-### 6. Edge Style
-> How rounded are corners throughout the system?
-
-- [ ] **none** — no border radius, all corners square
-- [ ] **sharp** — minimal radius, clean and modern (benchmark: Shadcn, xl: 12px)
-- [ ] **soft** — generous radius, friendly feel (benchmark: Material Design, xl: 28px)
-
-### 7. Spacing Density
-> How much breathing room between elements?
-
-- [ ] **compact** — tight spacing, good for dashboards and data-dense UIs (benchmark: Shadcn/Figma SDS)
-- [ ] **comfortable** — balanced, works for most projects (benchmark: Material Design)
-- [ ] **airy** — generous whitespace, good for marketing and landing pages (benchmark: Bootstrap)
-
-### 8. Shadow Depth
-> Should the system use shadows for elevation?
-
-- [ ] **flat** — no shadows, relies on borders and color for visual separation
-- [ ] **elevated** — standard shadow progression for depth and layering (tune per project if needed)
-
-### 9. Type Scale
-> How dramatic is the range from body text to display headings?
-
-- [ ] **compact** — small range, efficient use of space (benchmark: Material Design, display: 40px)
-- [ ] **standard** — balanced range (benchmark: Shadcn/Material, display: 48-57px)
-- [ ] **dramatic** — large display sizes, bold headlines (benchmark: Bootstrap/Figma SDS, display: 72-80px)
-
-### 10. Default Theme Mode
-> Which color mode loads first?
-
-- [ ] **dark** (default)
-- [ ] **light**
-
-### 11. Project Name (optional)
-> Name of the downstream project. Stored in answers.json for provenance.
-
-```
-projectName: ________
-```
-
----
-
-All answers are persisted to `answers.json` — both Tier 1 intent (productType, styleDirection, defaultMode, projectName) and Tier 2 implementation values. Tier 1 fields are metadata for downstream context; only Tier 2 fields drive config generation.
-
-All 55 active components ship by default. See `knowledge/design/components.md` for the full catalog with variants and token mappings.
+All 66 atoms are available in the catalog; projects pick the subset they need
+(see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md)). The full pick list is generated to
+[`catalog/atoms.json`](../catalog/atoms.json).

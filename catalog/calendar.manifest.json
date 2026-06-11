@@ -1,0 +1,29 @@
+{
+  "name": "calendar",
+  "category": "form",
+  "description": "",
+  "version": "229b2884dacf",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "lucide-react",
+    "react-day-picker"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "compact",
+    "sm",
+    "md",
+    "lg"
+  ]
+}

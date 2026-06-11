@@ -1,0 +1,24 @@
+{
+  "name": "tree-view",
+  "category": "composite",
+  "description": "",
+  "version": "71b6313bc6bc",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

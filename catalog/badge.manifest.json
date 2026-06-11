@@ -1,0 +1,26 @@
+{
+  "name": "badge",
+  "category": "button",
+  "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
+  "version": "643bcf120798",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "slot",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "form-field",
+  "category": "form",
+  "description": "",
+  "version": "2adc5040d1d9",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none"
+}

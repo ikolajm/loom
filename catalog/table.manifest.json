@@ -1,0 +1,25 @@
+{
+  "name": "table",
+  "category": "layout",
+  "description": "",
+  "version": "7a82addea9e9",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

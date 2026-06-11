@@ -1,0 +1,30 @@
+{
+  "name": "collapsible",
+  "category": "data-display",
+  "description": "",
+  "version": "5440c67e4630",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-collapsible",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "bordered"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

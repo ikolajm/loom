@@ -7,7 +7,7 @@
  *
  * Usage:
  *   node index.js --input answers.json
- *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth subtle --typeScale standard
+ *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth elevated --typeScale standard
  */
 const fs = require('fs');
 const path = require('path');
@@ -47,7 +47,11 @@ function loadAnswers(args) {
   // If --input provided, read from file
   if (args.input) {
     const inputPath = path.resolve(args.input);
-    return JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
+    const answers = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
+    // defaultMode drives the standards.json propagation below; default it here so an
+    // omitted key doesn't write `undefined` into standards. Matches the CLI-flag path.
+    answers.defaultMode = answers.defaultMode || 'dark';
+    return answers;
   }
 
   // Otherwise, build from CLI flags
@@ -70,9 +74,26 @@ function loadAnswers(args) {
     body: args.body || 'Inter',
     edges: args.edges || 'sharp',
     density: args.density || 'comfortable',
-    shadowDepth: args.shadowDepth || 'subtle',
+    shadowDepth: args.shadowDepth || 'elevated',
     typeScale: args.typeScale || 'standard'
   };
+}
+
+// Soft, heuristic parity check (early placement). The authoritative font-availability
+// check runs in Figma at paste time (figma.listAvailableFontsAsync); this just flags a
+// font that's off the recommended Figma-parity shortlist so it isn't a surprise later.
+function warnOffParitySafeFonts(answers) {
+  let safe;
+  try {
+    safe = JSON.parse(fs.readFileSync(path.join(__dirname, '../../spec/parity-safe-fonts.json'), 'utf-8')).families;
+  } catch { return; } // list optional — skip silently if absent
+  const set = new Set(safe);
+  for (const role of ['heading', 'body']) {
+    const fam = answers[role] || 'Inter';
+    if (!set.has(fam)) {
+      console.warn(`  ⚠ ${role} font "${fam}" is off the parity-safe shortlist. Code loads it via Google Fonts <link>; the Figma build will substitute Inter if this Figma can't render it (the typography paste reports which). Pick from spec/parity-safe-fonts.json for guaranteed parity.`);
+    }
+  }
 }
 
 // --- Main ---
@@ -89,6 +110,7 @@ function main() {
   console.log(`Secondary: ${answers.secondary || '(auto-derive)'}`);
   console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
   console.log(`Fonts: ${answers.heading || 'Inter'} / ${answers.body || 'Inter'}`);
+  warnOffParitySafeFonts(answers);
   console.log(`Edges: ${answers.edges}, Density: ${answers.density}`);
   console.log(`Shadow: ${answers.shadowDepth}, Type Scale: ${answers.typeScale}`);
   console.log('');
@@ -96,6 +118,15 @@ function main() {
   // Load dependencies
   const standards = JSON.parse(fs.readFileSync(STANDARDS_PATH, 'utf-8'));
   const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf-8'));
+
+  // Propagate the questionnaire's default-mode into standards.json — the source the
+  // token generator reads. Without this, answers.defaultMode is decorative and the two
+  // can silently disagree. Idempotent: only writes when it actually differs.
+  if (standards.colors['default-mode'] !== answers.defaultMode) {
+    standards.colors['default-mode'] = answers.defaultMode;
+    fs.writeFileSync(STANDARDS_PATH, JSON.stringify(standards, null, 2) + '\n');
+    console.log(`  ✓ standards.json default-mode → ${answers.defaultMode}`);
+  }
 
   // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {

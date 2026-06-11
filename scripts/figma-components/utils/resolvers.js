@@ -63,6 +63,55 @@ function fontStyle(weight, familyName) {
   return 'Regular';
 }
 
+// =============================================================================
+// Font availability — Figma is the authoritative source for what it can render.
+// Google Fonts and Figma's font set are NOT 1:1, so a configured font may be
+// loadable in code (<link>) but absent here. resolveFamily() substitutes Inter
+// (which Figma hosts) for any missing family — logged once — so the build
+// degrades gracefully instead of throwing at loadFontAsync. The code side still
+// loads the original font; only the Figma render falls back.
+// =============================================================================
+let __figmaFonts = null;            // Set of available family names, lazily populated
+const __fontFallback = 'Inter';
+const __fontWarned = new Set();
+
+async function ensureFontIndex() {
+  if (__figmaFonts) return;
+  const list = await figma.listAvailableFontsAsync();
+  __figmaFonts = new Set(list.map(f => f.fontName.family));
+}
+
+function resolveFamily(family) {
+  if (!__figmaFonts || __figmaFonts.has(family)) return family;
+  if (!__fontWarned.has(family)) {
+    console.warn(`⚠ Font "${family}" is not available in this Figma — substituting "${__fontFallback}". Pick a Figma-available font, or upload "${family}" to your org and re-run.`);
+    __fontWarned.add(family);
+  }
+  return __fontFallback;
+}
+
+// Load a font safely: ensures the index, substitutes Inter if missing, returns the
+// family actually loaded (callers must set fontName to the returned value).
+async function safeLoadFont(family, style) {
+  await ensureFontIndex();
+  const fam = resolveFamily(family);
+  await figma.loadFontAsync({ family: fam, style });
+  return fam;
+}
+
+// Authoritative preflight — call once before building typography to surface
+// availability up front (the "Figma-side, paste-time" half of the parity check).
+async function reportFontParity(families) {
+  await ensureFontIndex();
+  console.log('— Font parity check (this Figma) —');
+  for (const role of Object.keys(families)) {
+    const fam = families[role];
+    console.log(__figmaFonts.has(fam)
+      ? `  ✓ ${role}: ${fam}`
+      : `  ⚠ ${role}: ${fam} — not available here, will substitute ${__fontFallback}`);
+  }
+}
+
 /**
  * Parse letter-spacing value ("0.01em", "0") → Figma percent value.
  */

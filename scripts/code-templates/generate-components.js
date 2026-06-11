@@ -1,5 +1,5 @@
 /**
- * Generate React component .tsx files + per-atom manifests into loom/catalog/.
+ * Generate React component .tsx files + per-atom manifests into catalog/.
  *
  * Architecture: Config → CVA (variant management) → Radix/lib primitives (behavior) → tokens (styling)
  *
@@ -9,14 +9,15 @@
  *   lib       — specialized library + CVA styling from config
  *
  * Output (per atom):
- *   loom/catalog/[name].tsx          — component code
- *   loom/catalog/[name].manifest.json — catalog metadata (from $catalog + inference)
+ *   catalog/[name].tsx          — component code
+ *   catalog/[name].manifest.json — catalog metadata (from $catalog + inference)
  *
  * Also emits:
- *   loom/catalog/cn.ts + cn.manifest.json — class-name merger utility (catalog atom)
+ *   catalog/cn.ts + cn.manifest.json — class-name merger utility (catalog atom)
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
@@ -26,6 +27,7 @@ const { generateButton } = require('./components/button');
 const { generateFAB } = require('./components/fab');
 const { generateFabMenu } = require('./components/fab-menu');
 const { generateBadge } = require('./components/badge');
+const { generateDot } = require('./components/dot');
 const { generateTable } = require('./components/table');
 const { generateRadixDialog, generateRadixAlertDialog, generateRadixSheet } = require('./components/radix-dialogs');
 const { generateRadixCheckbox, generateRadixSwitch, generateRadixRadio, generateRadixSlider, generateRadixSelect } = require('./components/radix-form-controls');
@@ -36,12 +38,16 @@ const { generateRadixDropdownMenu, generateRadixContextMenu } = require('./compo
 const { generateRadixToast } = require('./components/radix-toast');
 const { generateRadixNavigationMenu } = require('./components/radix-navigation-menu');
 const { generateRadixScrollArea, generateLib } = require('./components/radix-fallback');
-const { generateBadgeDot } = require('./components/badge-dot');
+const { generateBanner } = require('./components/banner');
 const { generateEmptyState } = require('./components/empty-state');
 const { generateListItem } = require('./components/list-item');
 const { generateStepper } = require('./components/stepper');
 const { generateTreeView } = require('./components/tree-view');
 const { generateCarousel } = require('./components/carousel');
+const { generateReveal } = require('./components/reveal');
+const { generateStagger } = require('./components/stagger');
+const { generateCountUp } = require('./components/count-up');
+const { generateScrollProgress } = require('./components/scroll-progress');
 const { generatePagination } = require('./components/pagination');
 const { generateFileUpload } = require('./components/file-upload');
 const { generateInputOTP } = require('./components/input-otp');
@@ -51,8 +57,16 @@ const { generateCalendar } = require('./components/calendar');
 const { generateDatePicker } = require('./components/date-picker');
 const { generateSkeleton } = require('./components/skeleton');
 const { generateFormField } = require('./components/form-field');
+const { generateHelperText } = require('./components/helper-text');
+const { generateRating } = require('./components/rating');
+const { generateTimePicker } = require('./components/time-picker');
+const { generateSearchBar } = require('./components/search-bar');
+const { generateAvatarGroup } = require('./components/avatar-group');
+const { generateNumber } = require('./components/number');
+const { generateRelativeTime } = require('./components/relative-time');
+const { generateSidebar } = require('./components/sidebar');
 
-// --- Catalog output directory (loom/catalog/) ---
+// --- Catalog output directory (catalog/) ---
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
 
 // ============================================================
@@ -103,8 +117,9 @@ function dispatch(name, config, meta) {
   if (name === 'FAB') return generateFAB(name, config, meta);
   if (name === 'FabMenu') return generateFabMenu(name, config, meta);
   if (name === 'Badge') return generateBadge(name, config, meta);
+  if (name === 'Dot') return generateDot(name, config, meta);
   if (name === 'Table') return generateTable(name, config, meta);
-  if (name === 'BadgeDot') return generateBadgeDot(name, config, meta);
+  if (name === 'Banner') return generateBanner(name, config, meta);
   if (name === 'EmptyState') return generateEmptyState(name, config, meta);
   if (name === 'ListItem') return generateListItem(name, config, meta);
   if (name === 'Stepper') return generateStepper(name, config, meta);
@@ -119,6 +134,18 @@ function dispatch(name, config, meta) {
   if (name === 'DatePicker') return generateDatePicker(name, config, meta);
   if (name === 'Skeleton') return generateSkeleton(name, config, meta);
   if (name === 'FormField') return generateFormField();
+  if (name === 'HelperText') return generateHelperText(name, config, meta);
+  if (name === 'Rating') return generateRating(name, config, meta);
+  if (name === 'TimePicker') return generateTimePicker(name, config, meta);
+  if (name === 'SearchBar') return generateSearchBar(name, config, meta);
+  if (name === 'AvatarGroup') return generateAvatarGroup(name, config, meta);
+  if (name === 'NumberDisplay') return generateNumber(name, config, meta);
+  if (name === 'RelativeTime') return generateRelativeTime(name, config, meta);
+  if (name === 'Sidebar') return generateSidebar(name, config, meta);
+  if (name === 'Reveal') return generateReveal(name, config, meta);
+  if (name === 'Stagger') return generateStagger(name, config, meta);
+  if (name === 'CountUp') return generateCountUp(name, config, meta);
+  if (name === 'ScrollProgress') return generateScrollProgress(name, config, meta);
 
   switch (meta.template) {
     case 'radix': return generateRadix(name, config, meta);
@@ -141,6 +168,7 @@ const CATEGORY_MAP = {
   'Data Display': 'data-display',
   'Navigation': 'navigation',
   'Composite': 'composite',
+  'Motion': 'motion',
 };
 
 function extractAxisKeys(obj) {
@@ -148,7 +176,23 @@ function extractAxisKeys(obj) {
   return Object.keys(obj).filter(k => !k.startsWith('$'));
 }
 
-function buildManifest(def, config, version) {
+// External npm packages a generated atom imports — the consumer install set.
+// Scans `from '<spec>'`; keeps non-relative specifiers, drops react/react-dom (peer deps
+// a React app already has). Scoped pkgs collapse to @scope/name, subpaths to the package root.
+function extractNpmDeps(src) {
+  const deps = new Set();
+  const re = /from\s+['"]([^'"]+)['"]/g;
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    const spec = m[1];
+    if (spec.startsWith('.')) continue;
+    if (spec === 'react' || spec === 'react-dom' || spec.startsWith('react/') || spec.startsWith('react-dom/')) continue;
+    deps.add(spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]);
+  }
+  return [...deps].sort();
+}
+
+function buildManifest(def, config, version, src) {
   const cat = config?.$catalog || {};
 
   // Primary axis: variants if present, else state, else checked, else active, else step-state
@@ -167,9 +211,9 @@ function buildManifest(def, config, version) {
     description: cat.description || '',
     version: cat.version || version,
     dependencies: cat.dependencies || ['cn'],
+    npmDependencies: extractNpmDeps(src || ''),
     tokens: cat.tokens || ['color', 'typography', 'spacing', 'sizing'],
     composition: cat.composition || 'none',
-    stories: `${def.key}.story.ts`,
   };
 
   if (variants.length > 0) manifest.variants = variants;
@@ -183,21 +227,28 @@ function buildManifest(def, config, version) {
 // ============================================================
 
 function generate(registry, outputDir, configs) {
-  // Catalog output: always loom/catalog/ regardless of outputDir.
+  // Catalog output: always catalog/ regardless of outputDir.
   // outputDir is ignored here (kept in signature for orchestrator compatibility).
   fs.mkdirSync(CATALOG_DIR, { recursive: true });
 
-  const version = new Date().toISOString().slice(0, 10);
+  // Per-atom content version: a short hash of the atom's own generated source.
+  // Changes iff the atom's content changes — so regenerating an unchanged catalog
+  // is a no-op (no churn), and the consumer's staleness check fires exactly when
+  // that atom actually moved. Not wall-clock (over-fires) or a hand-bumped constant
+  // (forgotten-bump footgun). A config's $catalog.version still overrides (buildManifest).
+  const contentVersion = (src) => crypto.createHash('sha256').update(src).digest('hex').slice(0, 12);
   let count = 0;
+  const atoms = []; // collected for the pickable-atom index (catalog/atoms.json)
 
   for (const [name, def] of Object.entries(registry)) {
     // Config-free utilities — generated directly
     if (name === 'FormField') {
       const tsx = generateFormField();
-      const manifest = buildManifest(def, null, version);
+      const manifest = buildManifest(def, null, contentVersion(tsx), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
       console.log(`  ${def.key}.tsx + manifest (utility)`);
+      atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
       count++;
       continue;
     }
@@ -210,27 +261,44 @@ function generate(registry, outputDir, configs) {
     }
 
     const tsx = dispatch(name, config, def);
-    const manifest = buildManifest(def, config, version);
+    const manifest = buildManifest(def, config, contentVersion(tsx), tsx);
 
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
     console.log(`  ${def.key}.tsx + manifest (${def.template})`);
+    atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
     count++;
   }
 
   // cn — utility atom (catalog-resident, foundation dependency)
-  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), buildCnUtility(configs));
+  const cnSrc = buildCnUtility(configs);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), cnSrc);
   fs.writeFileSync(path.join(CATALOG_DIR, 'cn.manifest.json'), JSON.stringify({
     name: 'cn',
     category: 'utility',
     description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
-    version,
+    version: contentVersion(cnSrc),
     dependencies: [],
+    npmDependencies: extractNpmDeps(cnSrc),
     tokens: [],
     composition: 'none',
-    stories: '',
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
+
+  // Pickable atoms grouped by catalog group — the menu to grab loom-picks.json names from.
+  // Generated from the catalog so it can't drift from what's actually built.
+  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite', 'motion'];
+  const byGroup = {};
+  for (const a of atoms) (byGroup[a.category] ||= []).push(a.name);
+  const grouped = {};
+  for (const g of [...GROUP_ORDER, ...Object.keys(byGroup)]) {
+    if (byGroup[g] && !grouped[g]) grouped[g] = byGroup[g].sort();
+  }
+  fs.writeFileSync(path.join(CATALOG_DIR, 'atoms.json'), JSON.stringify({
+    $note: 'Pickable atoms by group — copy names into loom-picks.json "picks". setup.sh resolves dependencies automatically. Generated from the catalog; do not hand-edit.',
+    ...grouped,
+  }, null, 2) + '\n');
+  console.log('  atoms.json (pickable atoms by group)');
 
   console.log(`\nCatalog: ${count + 1} atoms → ${CATALOG_DIR}`);
   return count + 1;

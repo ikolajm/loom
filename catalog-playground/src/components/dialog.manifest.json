@@ -1,0 +1,31 @@
+{
+  "name": "dialog",
+  "category": "layout",
+  "description": "",
+  "version": "80511940bb0e",
+  "dependencies": [
+    "cn",
+    "button"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-dialog",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg",
+    "full"
+  ]
+}

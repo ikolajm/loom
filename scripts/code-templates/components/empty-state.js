@@ -1,4 +1,4 @@
-const { buildVariantStyles } = require('../shared');
+const { buildVariantStyles, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 function generateEmptyState(name, config, meta) {
@@ -94,7 +94,7 @@ const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     const s = size || 'md';
     return (
       <div ref={ref} className={cn(emptyStateVariants({ variant, size }), className)} {...props}>
-        {icon && <span className={cn('${iconFg} [&>svg]:size-full', iconSize[s])}>{icon}</span>}
+        {icon && <span className={cn('${iconFg} ${ICON_SLOT_CLASS}', iconSize[s])}>{icon}</span>}
         {heading && <h3 className={cn('${headingWeight} ${headingTracking} ${headingFg}', headingSize[s])}>{heading}</h3>}
         {description && <p className={cn('${descFg}', descriptionSize[s])}>{description}</p>}
         {action}

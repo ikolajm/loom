@@ -1,0 +1,28 @@
+{
+  "name": "textarea",
+  "category": "form",
+  "description": "",
+  "version": "71214df128e4",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

@@ -23,9 +23,10 @@ function generateCombobox(name, config, meta) {
 
 import { forwardRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
-import { Popover, PopoverTrigger, PopoverContent } from './Popover';
+import { Popover, PopoverTrigger, PopoverContent } from './popover';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from './cn';
+import { useFieldError } from './form-field';
 
 const itemSizeMap: Record<string, string> = {
 ${Object.entries(itemEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
@@ -42,19 +43,22 @@ type ComboboxProps = {
   searchPlaceholder?: string;
   emptyMessage?: string;
   disabled?: boolean;
+  error?: boolean;
   className?: string;
 };
 
-const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
-  ({ size = '${defaultSize}', options, value, onValueChange, placeholder = 'Select...', searchPlaceholder = 'Search...', emptyMessage = 'No results found.', disabled, className }, ref) => {
+const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
+  ({ size = '${defaultSize}', options, value, onValueChange, placeholder = 'Select...', searchPlaceholder = 'Search...', emptyMessage = 'No results found.', disabled, error, className }, ref) => {
     const [open, setOpen] = useState(false);
     const selected = options.find((o) => o.value === value);
+    // Error border cascades off FormFieldContext unless an explicit error prop is given.
+    const isError = useFieldError(error);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
-            ref={ref as any}
+            ref={ref}
             type="button"
             role="combobox"
             aria-expanded={open}
@@ -66,6 +70,7 @@ const Combobox = forwardRef<HTMLDivElement, ComboboxProps>(
               'h-ch-5 px-3 text-input-md',
               size === 'sm' && 'h-ch-3 px-2 text-input-sm',
               size === 'lg' && 'h-ch-7 px-4 text-input-lg',
+              isError && 'border-error',
               className,
             )}
           >

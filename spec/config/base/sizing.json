@@ -1,10 +1,10 @@
 {
   "$note": "Semantic sizing mappings only. Primitives live in config/standards.json → sizing. All values reference standard primitive tokens. Component heights are consumed directly from primitives (height/ch-N) — no semantic layer.",
   "border-radius": {
-    "component": "br-2",
-    "card": "br-3",
-    "input": "br-2",
-    "modal": "br-4",
+    "component": "br-4",
+    "card": "br-6",
+    "input": "br-4",
+    "modal": "br-7",
     "pill": "br-999"
   }
 }

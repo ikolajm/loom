@@ -1,0 +1,33 @@
+{
+  "name": "toast",
+  "category": "feedback",
+  "description": "",
+  "version": "a7e0b2898586",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-toast",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "error",
+    "success",
+    "warning",
+    "info"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

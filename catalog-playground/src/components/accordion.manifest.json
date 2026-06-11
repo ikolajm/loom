@@ -1,0 +1,30 @@
+{
+  "name": "accordion",
+  "category": "data-display",
+  "description": "",
+  "version": "f463353a17ed",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-accordion",
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "filled"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

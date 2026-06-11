@@ -5,6 +5,7 @@ node_modules/
 .next/
 out/
 dist/
+*.tsbuildinfo
 
 # Generated on demand (created by scripts/code-templates/orchestrator.js)
 generated/

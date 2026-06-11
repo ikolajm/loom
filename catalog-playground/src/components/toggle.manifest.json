@@ -1,0 +1,29 @@
+{
+  "name": "toggle",
+  "category": "button",
+  "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
+  "version": "582a137d4933",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-toggle",
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "unpressed",
+    "pressed"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

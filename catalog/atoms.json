@@ -1,0 +1,85 @@
+{
+  "$note": "Pickable atoms by group — copy names into loom-picks.json \"picks\". setup.sh resolves dependencies automatically. Generated from the catalog; do not hand-edit.",
+  "button": [
+    "badge",
+    "button",
+    "fab",
+    "fab-menu",
+    "toggle",
+    "toggle-group"
+  ],
+  "form": [
+    "calendar",
+    "checkbox",
+    "combobox",
+    "date-picker",
+    "file-upload",
+    "form-field",
+    "helper-text",
+    "input",
+    "input-otp",
+    "label",
+    "radio",
+    "rating",
+    "search-bar",
+    "select",
+    "slider",
+    "switch",
+    "textarea",
+    "time-picker"
+  ],
+  "layout": [
+    "alert-dialog",
+    "card",
+    "dialog",
+    "separator",
+    "sheet",
+    "table",
+    "toolbar"
+  ],
+  "feedback": [
+    "banner",
+    "context-menu",
+    "dot",
+    "dropdown-menu",
+    "empty-state",
+    "hover-card",
+    "popover",
+    "progress-bar",
+    "skeleton",
+    "spinner",
+    "toast",
+    "tooltip"
+  ],
+  "data-display": [
+    "accordion",
+    "avatar",
+    "avatar-group",
+    "collapsible",
+    "kbd",
+    "list-item",
+    "number",
+    "relative-time"
+  ],
+  "navigation": [
+    "bottom-nav",
+    "breadcrumbs",
+    "command-palette",
+    "navigation-menu",
+    "pagination",
+    "sidebar",
+    "tabs",
+    "top-bar"
+  ],
+  "composite": [
+    "carousel",
+    "stepper",
+    "tree-view"
+  ],
+  "motion": [
+    "count-up",
+    "reveal",
+    "scroll-progress",
+    "stagger"
+  ]
+}

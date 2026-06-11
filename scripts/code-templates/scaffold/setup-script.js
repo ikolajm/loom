@@ -1,128 +1,110 @@
 /**
- * Generates setup.sh — the shell script that copies scaffold files
- * into the downstream Next.js project in the correct locations.
+ * Generates init.sh — the one-time project bootstrap for the Loom app shell + token
+ * substrate. Deliberately atom-agnostic: it installs only what does NOT depend on a
+ * specific atom (ThemeProvider, globals, root layout, tokens.css, core deps).
+ *
+ * Atoms are a separate, repeatable step — the catalog sync at the repo root
+ * (`./setup.sh <project>`), which resolves loom-picks.json. Two commands, two jobs:
+ *   init.sh  → app shell + substrate (once)
+ *   setup.sh → picked atoms + token refresh (repeatable)
  */
 
-function generate(configs, registry) {
-  const defaultMode = configs.standards.colors['default-mode'] || 'dark';
-
-  // Collect unique primitives from registry
-  const primitives = new Set();
-  if (registry) {
-    for (const def of Object.values(registry)) {
-      if (def.primitive && !def.primitive.startsWith('./')) primitives.add(def.primitive);
-    }
-  }
-  // Always-needed deps
+function generate() {
+  // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
+  // tailwind-merge is pinned ^3: the generated cn() registers token scales via v3's
+  // `theme` keys (radius/spacing), which v2 silently ignores — a hard minimum, not a preference.
   const coreDeps = [
     'class-variance-authority',
     'clsx',
-    'tailwind-merge',
     'lucide-react',
-  ];
-  const allDeps = [...coreDeps, ...Array.from(primitives)].sort();
-  const depString = allDeps.join(' ');
+    'tailwind-merge@^3',
+  ].sort();
+  const depString = coreDeps.join(' ');
 
   return `#!/bin/bash
-# setup.sh — Scaffold design system into a Next.js + Tailwind v4 project.
+# init.sh — bootstrap the Loom app shell + token substrate into a Next.js + Tailwind v4 project.
 #
-# Usage: ./scaffold/setup.sh <frontend-dir>
-# Example: ./scaffold/setup.sh ./frontend
+# This is the one-time INIT step: theme mechanism, global stylesheet, root layout,
+# token substrate, and core deps — everything that does NOT depend on a specific atom.
+# Add atoms separately with the catalog sync: from the loom repo, run
+#   ./setup.sh <this-project-dir>
 #
-# Run from the generated/ directory. Each step is idempotent.
+# Usage: ./scaffold/init.sh <frontend-dir>
+# Run from the generated/ directory. Idempotent.
 
 set -euo pipefail
 
-FRONTEND_DIR="\${1:?Usage: setup.sh <frontend-dir>}"
+FRONTEND_DIR="\${1:?Usage: init.sh <frontend-dir>}"
 SRC_DIR="$FRONTEND_DIR/src"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GEN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "=== Design System Setup ==="
-echo "Source:  $GEN_DIR"
-echo "Target:  $FRONTEND_DIR"
+echo "=== Loom init (app shell + substrate) ==="
+echo "Source: $GEN_DIR"
+echo "Target: $FRONTEND_DIR"
 echo ""
 
 # --- Validate ---
-if [ ! -f "$GEN_DIR/tokens.css" ]; then
-  echo "ERROR: tokens.css not found in $GEN_DIR"
-  exit 1
-fi
+[ -f "$GEN_DIR/tokens.css" ] || { echo "ERROR: tokens.css not found in $GEN_DIR — run the orchestrator first."; exit 1; }
+[ -d "$SRC_DIR/app" ]        || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
 
-if [ ! -d "$SRC_DIR/app" ]; then
-  echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"
-  exit 1
-fi
-
-# --- Step 0: Answers receipt ---
-if [ -f "$GEN_DIR/answers.json" ]; then
-  echo "[0/8] Copying answers.json (generation receipt)..."
-  cp "$GEN_DIR/answers.json" "$FRONTEND_DIR/answers.json"
-fi
-
-# --- Step 1: Directory structure ---
-echo "[1/8] Creating directory structure..."
-mkdir -p "$SRC_DIR/components/atoms"
-mkdir -p "$SRC_DIR/components/molecules"
-mkdir -p "$SRC_DIR/components/organisms"
+# --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
+echo "[1/7] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/components/providers"
-mkdir -p "$SRC_DIR/components/playground"
-mkdir -p "$SRC_DIR/stories"
-mkdir -p "$SRC_DIR/app/design-system"
-mkdir -p "$SRC_DIR/config/base"
 
-# --- Step 1b: Config files (for ColorsView/TypographyView runtime imports) ---
-SPEC_DIR="$(cd "$GEN_DIR/../spec" && pwd)"
-cp "$SPEC_DIR/config/base/colors.json" "$SRC_DIR/config/base/colors.json"
-cp "$SPEC_DIR/config/base/typography.json" "$SRC_DIR/config/base/typography.json"
-cp "$SPEC_DIR/config/standards.json" "$SRC_DIR/config/standards.json"
-
-# --- Step 2: Tokens ---
-echo "[2/8] Copying tokens.css..."
+# --- Step 2: Token substrate ---
+echo "[2/7] Copying tokens.css..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 
 # --- Step 3: globals.css ---
-echo "[3/8] Writing globals.css..."
+echo "[3/7] Writing globals.css..."
 cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
-# --- Step 4: Theme provider + toggle ---
-echo "[4/8] Writing theme provider..."
+# --- Step 4: Theme mechanism + root layout (atom-independent) ---
+echo "[4/7] Writing ThemeProvider + layout..."
 cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/components/providers/ThemeProvider.tsx"
-cp "$SCRIPT_DIR/ThemeToggle.tsx" "$SRC_DIR/components/providers/ThemeToggle.tsx"
-
-# --- Step 5: Layout ---
-echo "[5/8] Writing layout.tsx..."
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
 
-# --- Step 6: Components, stories, playground ---
-echo "[6/8] Copying components, stories, playground..."
-cp "$GEN_DIR/components/"*.tsx "$SRC_DIR/components/atoms/" 2>/dev/null || true
-cp "$GEN_DIR/components/"*.ts "$SRC_DIR/components/atoms/" 2>/dev/null || true
-echo "  components -> atoms/"
-cp "$GEN_DIR/stories/"* "$SRC_DIR/stories/" 2>/dev/null || true
-echo "  stories -> stories/"
-cp "$GEN_DIR/playground/"* "$SRC_DIR/components/playground/" 2>/dev/null || true
-cp "$SCRIPT_DIR/ColorsView.tsx" "$SRC_DIR/components/playground/ColorsView.tsx"
-cp "$SCRIPT_DIR/TypographyView.tsx" "$SRC_DIR/components/playground/TypographyView.tsx"
-echo "  playground -> components/playground/"
+# --- Step 5: Foundation preview route (one-time, consumer-owned) ---
+# A /preview route rendering the token substrate (colors, type, spacing, radius)
+# so the consumer can confirm their brand landed. Atom-agnostic. Never overwrites.
+echo "[5/7] Writing /preview route..."
+if [ ! -f "$SRC_DIR/app/preview/page.tsx" ]; then
+  mkdir -p "$SRC_DIR/app/preview"
+  cp "$SCRIPT_DIR/preview-page.tsx" "$SRC_DIR/app/preview/page.tsx"
+  echo "  created src/app/preview/page.tsx (visit /preview to verify tokens; delete when done)"
+else
+  echo "  src/app/preview/page.tsx already exists — left as-is"
+fi
 
-# --- Step 7: Design system route ---
-echo "[7/8] Writing /design-system route..."
-cp "$SCRIPT_DIR/design-system-page.tsx" "$SRC_DIR/app/design-system/page.tsx"
+# --- Step 6: Core dependencies (atom-agnostic) ---
+# --prefix installs into the target without changing cwd, so every path in this
+# script stays relative to the loom repo — no ordering landmine around a cd.
+echo "[6/7] Installing core dependencies..."
+npm install --prefix "$FRONTEND_DIR" ${depString}
+echo "  ${coreDeps.length} core packages installed"
 
-# --- Step 8: Install dependencies ---
-echo "[8/8] Installing dependencies..."
-cd "$FRONTEND_DIR"
-npm install ${depString}
-echo "  ${allDeps.length} packages installed"
+# --- Step 7: Starter loom-picks.json (the input setup.sh reads) ---
+echo "[7/7] Writing starter loom-picks.json..."
+if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
+  cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
+{
+  "$schema": "Loom picker — list the atom names you want; setup.sh resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
+  "loom": {
+    "picks": ["button", "card"]
+  }
+}
+PICKS
+  echo "  created loom-picks.json (edit the picks, then run setup.sh)"
+else
+  echo "  loom-picks.json already exists — left as-is"
+fi
 
 echo ""
-echo "=== Done ==="
+echo "=== App shell ready ==="
 echo ""
-echo "Next steps:"
-echo "  cd $FRONTEND_DIR"
-echo "  npm run dev"
-echo "  -> visit /design-system"
+echo "Next — edit loom-picks.json to pick your atoms, then sync (from the loom repo):"
+echo "  ./setup.sh $FRONTEND_DIR"
 `;
 }
 

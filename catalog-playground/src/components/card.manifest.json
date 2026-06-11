@@ -1,0 +1,30 @@
+{
+  "name": "card",
+  "category": "layout",
+  "description": "",
+  "version": "0dcdcd69ca9e",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "elevated",
+    "outline",
+    "flush"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

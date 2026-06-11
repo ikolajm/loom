@@ -28,8 +28,8 @@ const spacing = load('base/spacing.json');
 const sizing = load('base/sizing.json');
 const typography = load('base/typography.json');
 const effects = load('base/effects.json');
-const layout = load('figma/layout.json');
-const templates = load('figma/templates.json');
+const layout = load('presentation/layout.json');
+const templates = load('presentation/templates.json');
 const colorPalette = load('figma/color-palette.json');
 const buttonConfig = load('components/button.json');
 const formConfig = load('components/form.json');
@@ -91,6 +91,15 @@ function buildSharedUtils() {
   // Alias with swapped arg order: text-styles calls weightToStyleName(familyName, weight),
   // resolvers defines fontStyle(weight, familyName).
   combined += `\n\nfunction weightToStyleName(familyName, weight) { return fontStyle(weight, familyName); }`;
+
+  // Make the bundle re-runnable in a persistent console. The Figma plugin
+  // console keeps scope across pastes, so a second paste of 00 (e.g. after a
+  // utils edit mid-iteration) throws "redeclaration of const X" on the first
+  // top-level const — and silently halts, so every later definition (and any
+  // fix in it) never loads. Rewriting top-level (column-0) const/let to var
+  // lets a re-paste redefine cleanly. Function-internal declarations are
+  // indented, so they're untouched and stay block-scoped.
+  combined = combined.replace(/^(const|let)\b/gm, 'var');
 
   // Deduplicate: buildLookup and bLookup are the same function.
   // The component utils use bLookup, semantic/style/layout use buildLookup.
@@ -281,6 +290,13 @@ if (require.main === module) {
 
   // Build and write
   fs.mkdirSync(outputDir, { recursive: true });
+
+  // Sweep stale outputs first — this dir is fully owned + regenerated, so a rename
+  // or renumber must not leave orphans behind (the pre-numbering forms_*.js were
+  // exactly that). Clear all .js, then write fresh.
+  for (const f of fs.readdirSync(outputDir)) {
+    if (f.endsWith('.js')) fs.unlinkSync(path.join(outputDir, f));
+  }
 
   const sharedUtils = buildSharedUtils();
   const sharedPath = path.join(outputDir, '00_shared-utils.js');

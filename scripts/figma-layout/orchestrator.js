@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const LAYOUT = JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, 'figma/layout.json'), 'utf-8'));
+const LAYOUT = JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, 'presentation/layout.json'), 'utf-8'));
 
 const COLLECTIONS = {
   'layout': {

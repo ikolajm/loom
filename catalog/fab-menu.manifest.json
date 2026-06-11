@@ -1,0 +1,24 @@
+{
+  "name": "fab-menu",
+  "category": "button",
+  "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed in Sprint 1; expand animation wraps via motion library in Sprint 2.",
+  "version": "a39a9b0faba1",
+  "dependencies": [
+    "fab",
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing",
+    "effects"
+  ],
+  "composition": "slot",
+  "variants": [
+    "default"
+  ]
+}

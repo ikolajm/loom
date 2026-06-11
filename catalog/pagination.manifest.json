@@ -1,0 +1,27 @@
+{
+  "name": "pagination",
+  "category": "navigation",
+  "description": "",
+  "version": "5d4652bbe2af",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

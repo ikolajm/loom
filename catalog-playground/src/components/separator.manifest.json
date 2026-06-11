@@ -1,0 +1,19 @@
+{
+  "name": "separator",
+  "category": "layout",
+  "description": "",
+  "version": "d58f82cef587",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "@radix-ui/react-separator"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none"
+}

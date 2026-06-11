@@ -1,0 +1,28 @@
+{
+  "name": "file-upload",
+  "category": "form",
+  "description": "",
+  "version": "f6706bd3aecd",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

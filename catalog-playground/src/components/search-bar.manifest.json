@@ -1,0 +1,24 @@
+{
+  "name": "search-bar",
+  "category": "form",
+  "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
+  "version": "68cb1a21055a",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

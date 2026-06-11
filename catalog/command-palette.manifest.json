@@ -1,0 +1,28 @@
+{
+  "name": "command-palette",
+  "category": "navigation",
+  "description": "",
+  "version": "2ba76574d902",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "cmdk",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

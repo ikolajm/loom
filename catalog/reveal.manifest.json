@@ -1,0 +1,22 @@
+{
+  "name": "reveal",
+  "category": "motion",
+  "description": "",
+  "version": "771bffcfc8ff",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "spacing"
+  ],
+  "composition": "none",
+  "variants": [
+    "fade",
+    "fade-up",
+    "fade-down",
+    "fade-left",
+    "fade-right",
+    "scale"
+  ]
+}

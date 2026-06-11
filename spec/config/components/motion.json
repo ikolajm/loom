@@ -1,0 +1,36 @@
+{
+  "reveal": {
+    "$catalog": { "category": "motion", "composition": "none", "tokens": ["spacing"] },
+    "$note": "Scroll-reveal envelope on a hand-rolled IntersectionObserver — zero runtime dep. Holds children hidden (motion-safe: opacity 0 + a small transform per variant) and transitions them to the resting state when scrolled into view. prefers-reduced-motion is handled in pure CSS via the motion-safe: prefix on the from-state classes: under reduce, nothing hides and content renders instantly. `stagger` composes this. Sprint-1 base; richer variants are Sprint 2. The transform offset (translate-*-4 = {scale.4}) and rootMargin are frozen-but-editable in the installed copy.",
+    "variants": {
+      "fade":       { "from": "motion-safe:opacity-0" },
+      "fade-up":    { "from": "motion-safe:opacity-0 motion-safe:translate-y-4" },
+      "fade-down":  { "from": "motion-safe:opacity-0 motion-safe:-translate-y-4" },
+      "fade-left":  { "from": "motion-safe:opacity-0 motion-safe:translate-x-4" },
+      "fade-right": { "from": "motion-safe:opacity-0 motion-safe:-translate-x-4" },
+      "scale":      { "from": "motion-safe:opacity-0 motion-safe:scale-95" }
+    },
+    "default": { "variant": "fade-up", "easing": "decelerate", "duration": "slow", "threshold": 0, "once": true }
+  },
+
+  "stagger": {
+    "$catalog": { "category": "motion", "composition": "none", "tokens": ["spacing"], "dependencies": ["cn", "reveal"] },
+    "$note": "Cascade envelope — reveals its children one-by-one with an incremental delay. Composes Reveal: each child is wrapped in a Reveal at delay = base + index*step, so the whole machinery (IO, reduced-motion, will-change) is reused and the only added behaviour is the per-child stagger. The Stagger div is itself the layout container (e.g. className='flex gap-4'). variant/easing/duration/threshold/once forward to every child. Caveat: per-child IO means children spread across a viewport-taller container reveal on their own visibility — clean for grouped rows/lists; a single-container-trigger refinement is a Sprint-2 option.",
+    "variants": {
+      "fade": {}, "fade-up": {}, "fade-down": {}, "fade-left": {}, "fade-right": {}, "scale": {}
+    },
+    "default": { "step": 80, "delay": 0, "variant": "fade-up", "easing": "decelerate", "duration": "slow", "threshold": 0, "once": true }
+  },
+
+  "count-up": {
+    "$catalog": { "category": "motion", "composition": "none", "tokens": [], "dependencies": ["cn", "number"] },
+    "$note": "Leaf motion atom — animates a number from `from` to `value` when scrolled into view (own IntersectionObserver, requestAnimationFrame, easeOutCubic). Composes NumberDisplay for all Intl formatting (separators / decimals / currency / compact notation), so it adds only the value animation. NO spring/overshoot axis — numeric overshoot reads as a data error. Reduced-motion: a matchMedia check snaps to the target (leaf JS atoms can't use the pure-CSS motion-safe gate). duration is numeric ms (content-dependent, unlike the micro-interaction --transition-* tokens). decimals defaults to the target's own precision.",
+    "default": { "from": 0, "duration": 1200, "easing": "ease-out", "threshold": 0, "once": true }
+  },
+
+  "scroll-progress": {
+    "$catalog": { "category": "motion", "composition": "none", "tokens": ["color"], "dependencies": ["cn"] },
+    "$note": "Scroll-linked progress bar (reading indicator). Unlike the other motion atoms it is NOT visibility-triggered — it binds continuously to scroll position. A passive, rAF-throttled scroll listener writes progress straight to a CSS var (`--progress`) driving transform: scaleX(); NO per-frame setState (a 60fps re-render storm is the wrong move). Tracks the page by default, or a scroll container via `target`. position: top/bottom fixes it to the viewport, inline lets the consumer place it. prefers-reduced-motion is intentionally NOT handled — the bar is direct manipulation (reflects actual scroll), not autonomous motion; suppressing it would just break the indicator. Thickness (~3px) and color (primary) are frozen-but-editable via className.",
+    "default": { "position": "top", "showTrack": false }
+  }
+}

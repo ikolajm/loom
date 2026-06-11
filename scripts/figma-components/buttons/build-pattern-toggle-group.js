@@ -9,7 +9,9 @@ function buildPatternToggleGroup(lookups, defaultMode, page) {
   const { semColors, semRadius, primSpacing, primHeight, layoutVars } = lookups;
   const config = CONFIG.components['toggle-group'];
   const toggleConfig = CONFIG.components['toggle'];
-  const colors = config.variants.default;
+  // v2 toggle-group exposes segmented/spaced variants (no `default`). The mock
+  // shows the default (segmented) — shared borders, outer radius only.
+  const colors = config.variants[config.default.variant];
 
   const frame = createSectionFrame('base.pattern-toggle-group', lookups);
   addHeader(frame, 'Toggle Group', 'Frame pattern — row of toggle buttons sharing borders. Segmented control. Shown at sm / md / lg.');

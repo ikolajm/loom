@@ -1,0 +1,134 @@
+{
+  "$schema": "Template block schemas for Figma design system generation. Each template defines structure, style assignments, and spacing. All values reference config paths — no hardcoded pixel values except where noted.",
+
+  "header": {
+    "description": "Reusable header block. SM variant for sections, LG variant for frame titles. Optional divider (composes standalone divider component).",
+    "variants": {
+      "lg": {
+        "title-style": "figma.layout.typography.frame-title",
+        "description-style": "figma.layout.typography.section-description"
+      },
+      "sm": {
+        "title-style": "figma.layout.typography.section-label",
+        "description-style": "figma.layout.typography.section-description"
+      }
+    },
+    "colors": {
+      "title": "layout/page-foreground",
+      "description": "layout/page-foreground-muted"
+    },
+    "spacing": {
+      "description-gap": "figma.layout.spacing.description-gap"
+    },
+    "properties": {
+      "title": { "type": "TEXT", "required": true },
+      "description": { "type": "TEXT", "required": false },
+      "showDescription": { "type": "BOOLEAN", "default": true, "$note": "Hides description text AND collapses its spacing. Never leave description empty — toggle this off instead." },
+      "divider": { "type": "BOOLEAN", "default": false },
+      "size": { "type": "VARIANT", "options": ["sm", "lg"], "default": "sm" }
+    }
+  },
+
+  "interactive-preview": {
+    "description": "Elevated container for interactive component testing. Contains a 'Try Me!' button and a component instance. Padding is hardcoded — specific to preview layout needs, not a design system spacing decision.",
+    "container": {
+      "background": "layout/surface-1",
+      "border": "color/primary/primary",
+      "border-style": "dashed",
+      "border-dash": 8,
+      "border-width": "border-width/bw-2",
+      "radius": "radius/component",
+      "$exception": "Preview padding is hardcoded — specific to preview layout needs, not a design system spacing decision. Bottom padding includes 44px clearance for the absolute-positioned Try Me button.",
+      "x-padding": "40px",
+      "y-padding-top": "24px",
+      "y-padding-bottom": "68px"
+    },
+    "try-me-button": {
+      "$note": "Uses the project primary (color/primary/primary), so the preview reads as the consumer's own. Absolutely positioned bottom-right of interactive preview.",
+      "$icon-rule": "Icon color matches foreground (color/primary/on-primary).",
+      "label": "figma.layout.typography.defaults.try-me-label",
+      "background": "color/primary/primary",
+      "foreground": "color/primary/on-primary",
+      "icon": "icon/mouse-pointer-click",
+      "shadow": "effects/shadow-2",
+      "height": "height/ch-3",
+      "x-padding": "{scale.3}",
+      "y-padding": "{scale.1}",
+      "gap": "{scale.1}",
+      "radius": "radius/component",
+      "typography": {
+        "font-family": "body",
+        "font-weight": 500,
+        "font-size": "12px",
+        "line-height": "16px"
+      }
+    }
+  },
+
+  "alert-banner": {
+    "description": "Status-colored notice banner with contextual icon. Container fill + primary border + on-container text and icon color.",
+    "container": {
+      "radius": "radius/component",
+      "x-padding": "figma.layout.spacing.component-gap",
+      "y-padding": "{scale.2}",
+      "gap": "{scale.1}"
+    },
+    "states": {
+      "success": {
+        "background": "color/success/success-container",
+        "border": "color/success/success",
+        "text-color": "color/success/on-success-container",
+        "icon": "icon/check-circle"
+      },
+      "warning": {
+        "background": "color/warning/warning-container",
+        "border": "color/warning/warning",
+        "text-color": "color/warning/on-warning-container",
+        "icon": "icon/alert-triangle"
+      },
+      "error": {
+        "background": "color/error/error-container",
+        "border": "color/error/error",
+        "text-color": "color/error/on-error-container",
+        "icon": "icon/x-circle"
+      },
+      "info": {
+        "background": "color/info/info-container",
+        "border": "color/info/info",
+        "text-color": "color/info/on-info-container",
+        "icon": "icon/info"
+      }
+    },
+    "border-width": "border-width/bw-2",
+    "text-style": "figma.layout.typography.spec-label",
+    "$icon-rule": "Icon color matches text-color. Icons inherit the text color of their parent context unless specifically overridden.",
+    "properties": {
+      "text": { "type": "TEXT", "required": true },
+      "state": { "type": "VARIANT", "options": ["success", "warning", "error", "info"], "default": "warning" }
+    }
+  },
+
+  "divider": {
+    "description": "Horizontal separator line. Composed into header when divider toggle is true.",
+    "color": "layout/outline",
+    "height": "border-width/bw-1"
+  },
+
+  "variant-section": {
+    "description": "A labeled group of component variant instances.",
+    "styles": {
+      "title-style": "figma.layout.typography.section-label",
+      "title-color": "layout/page-foreground"
+    },
+    "spacing": {
+      "label-gap": "figma.layout.spacing.label-gap",
+      "component-gap": "figma.layout.spacing.component-gap"
+    },
+    "row-alignment": "center"
+  },
+
+  "swatch-block": {
+    "description": "Color swatch with info row. Defined in config/figma/color-palette.json.",
+    "$ref": "figma.color-palette.swatch"
+  }
+}

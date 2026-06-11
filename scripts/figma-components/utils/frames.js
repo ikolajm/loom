@@ -81,9 +81,9 @@ function addHeader(frame, title, description) {
  * @returns {FrameNode} The interactive preview frame
  */
 function createInteractivePreview(componentInstance, lookups) {
-  const { layoutVars, semRadius, primBW } = lookups;
+  const { layoutVars, semColors, semRadius, primBW } = lookups;
   const surface1Var = layoutVars["layout/surface-1"];
-  const accentVar = layoutVars["layout/accent"];
+  const primaryVar = semColors["color/primary/primary"];
   const radComp = semRadius["radius/component"];
   const bw2 = primBW["border-width/2"];
   const tryMeComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "template/try-me-button");
@@ -104,8 +104,8 @@ function createInteractivePreview(componentInstance, lookups) {
   if (surface1Var) ip.fills = [figma.variables.setBoundVariableForPaint(
     { type: "SOLID", color: { r: 0.93, g: 0.93, b: 0.93 } }, "color", surface1Var
   )];
-  if (accentVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
-    { type: "SOLID", color: { r: 0.91, g: 0.12, b: 0.55 } }, "color", accentVar
+  if (primaryVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.627, g: 0.384, b: 0.918 } }, "color", primaryVar
   )];
   if (bw2) ip.setBoundVariable("strokeWeight", bw2);
   ip.dashPattern = [8, 8];
@@ -181,18 +181,15 @@ function createBaseFrame(componentName, description, componentSet, lookups, defa
  * @param {string} propName - Boolean property name ("showLeadingIcon" or "showTrailingIcon")
  * @returns {InstanceNode} The icon instance (already appended to comp)
  */
-function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
-  const placeholderIcon = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
-  if (!placeholderIcon) throw new Error("icon/placeholder not found");
-
-  const inst = placeholderIcon.createInstance();
-  inst.name = slotName;
-
+// Style an icon instance in place: bind size, and recolor its vectors to a
+// foreground variable. Catalog icons are stroked vectors (Lucide-style), so
+// color binds to strokes with fills cleared. Single source of truth for icon
+// recoloring — every builder that places an icon goes through here.
+function styleIconInstance(inst, fgVar, iconSizeVar) {
   if (iconSizeVar) {
     inst.setBoundVariable("width", iconSizeVar);
     inst.setBoundVariable("height", iconSizeVar);
   }
-
   if (fgVar) {
     const vecs = inst.findAll(n => n.type === "VECTOR" || n.type === "BOOLEAN_OPERATION" || n.type === "LINE" || n.type === "ELLIPSE" || n.type === "RECTANGLE");
     const paint = [figma.variables.setBoundVariableForPaint(
@@ -200,7 +197,24 @@ function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
     )];
     for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
   }
+  return inst;
+}
 
+// Create a sized, colored icon instance by component name, falling back to
+// icon/placeholder. Returns null if no icon component exists in the file.
+function makeIcon(iconName, fgVar, iconSizeVar) {
+  let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === iconName);
+  if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!iconComp) return null;
+  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar);
+}
+
+function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
+  const placeholderIcon = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
+  if (!placeholderIcon) throw new Error("icon/placeholder not found");
+
+  const inst = styleIconInstance(placeholderIcon.createInstance(), fgVar, iconSizeVar);
+  inst.name = slotName;
   inst.visible = false;
   comp.appendChild(inst);
 
@@ -208,5 +222,14 @@ function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
   const propKey = comp.addComponentProperty(propName, "BOOLEAN", false);
   inst.componentPropertyReferences = { "visible": propKey };
 
+  return inst;
+}
+
+// Close (X) affordance for overlay mocks (dialog, sheet) — the built-in close
+// behind `showClose` (default true) in v2. Returns a sized, colored icon/x
+// instance for the caller to append; null if no icon component is present.
+function createCloseIcon(fgVar, iconSizeVar) {
+  const inst = makeIcon("icon/x", fgVar, iconSizeVar);
+  if (inst) inst.name = "close";
   return inst;
 }

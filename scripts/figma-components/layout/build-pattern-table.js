@@ -1,12 +1,14 @@
 // =============================================================================
 // Table — Frame Pattern Mock
 // =============================================================================
-// Header row (surface-3, Medium weight) + alternating data rows.
-// Rounded corners via clipsContent on container. outline-subtle border.
+// Modern content-first treatment: no header fill, no zebra striping, no outer
+// grid. Muted header (on-surface-variant, Medium weight) + light per-row bottom
+// borders (outline-subtle) as the only structuring device. NOT a component —
+// frame pattern for per-project application.
 // =============================================================================
 
 function buildPatternTable(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing } = lookups;
+  const { semColors, primSpacing } = lookups;
   const tableConfig = CONFIG.components.table;
   const colors = tableConfig.variants.default;
   const md = tableConfig.sizes.md;
@@ -29,25 +31,11 @@ function buildPatternTable(lookups, defaultMode, page) {
   table.resize(500, table.height);
   table.itemSpacing = 0;
   table.fills = [];
-  table.clipsContent = true;
+  table.clipsContent = false;
 
-  // Radius
-  const radVar = semRadius['radius/component'];
-  if (radVar) {
-    table.setBoundVariable('topLeftRadius', radVar);
-    table.setBoundVariable('topRightRadius', radVar);
-    table.setBoundVariable('bottomLeftRadius', radVar);
-    table.setBoundVariable('bottomRightRadius', radVar);
-  }
-
-  // Border
+  // Content-first: no outer grid (no container border/radius). Structure comes
+  // from light per-row bottom borders, not an enclosing box.
   const borderVar = semColors[colors.border];
-  if (borderVar) {
-    table.strokes = [figma.variables.setBoundVariableForPaint(
-      { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', borderVar
-    )];
-    table.strokeWeight = 1;
-  }
 
   // Column definitions and data
   const columns = ['Name', 'Status', 'Amount'];
@@ -57,20 +45,28 @@ function buildPatternTable(lookups, defaultMode, page) {
     ['Initech', 'Active', '$2,100']
   ];
 
-  // Helper: create a table row
-  function createRow(cells, bgVarRef, fgVarRef, weight) {
+  // Helper: create a content-first table row — transparent bg, light bottom
+  // border for row separation (the only structuring device).
+  function createRow(cells, fgVarRef, weight) {
     const row = figma.createFrame();
     row.name = 'row';
     row.layoutMode = 'HORIZONTAL';
     row.primaryAxisSizingMode = 'AUTO';
     row.counterAxisSizingMode = 'AUTO';
     row.counterAxisAlignItems = 'CENTER';
+    row.fills = [];
 
-    // Background
-    const bg = semColors[bgVarRef];
-    if (bg) row.fills = [figma.variables.setBoundVariableForPaint(
-      { type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }, 'color', bg
-    )];
+    // Light bottom border only — no fill, no outer grid.
+    if (borderVar) {
+      row.strokes = [figma.variables.setBoundVariableForPaint(
+        { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', borderVar
+      )];
+      row.strokeAlign = 'INSIDE';
+      row.strokeTopWeight = 0;
+      row.strokeBottomWeight = 1;
+      row.strokeLeftWeight = 0;
+      row.strokeRightWeight = 0;
+    }
 
     // Padding
     const xpPath = resolveScale(md['x-padding']);
@@ -111,16 +107,15 @@ function buildPatternTable(lookups, defaultMode, page) {
     return row;
   }
 
-  // Header row
-  const headerRow = createRow(columns, colors['header-bg'], colors['header-fg'], headerTypo['font-weight']);
+  // Header row — muted (on-surface-variant), medium weight, bottom border.
+  const headerRow = createRow(columns, colors['header-fg'], headerTypo['font-weight']);
   headerRow.name = 'header-row';
   table.appendChild(headerRow);
   headerRow.layoutSizingHorizontal = 'FILL';
 
-  // Data rows — alternating backgrounds
+  // Data rows — no zebra; light bottom border separates each.
   for (let i = 0; i < rows.length; i++) {
-    const bgRef = i % 2 === 0 ? colors['row-bg'] : colors['alt-row-bg'];
-    const dataRow = createRow(rows[i], bgRef, colors['row-fg'], cellTypo['font-weight']);
+    const dataRow = createRow(rows[i], colors['row-fg'], cellTypo['font-weight']);
     dataRow.name = `item-row`;
     table.appendChild(dataRow);
     dataRow.layoutSizingHorizontal = 'FILL';

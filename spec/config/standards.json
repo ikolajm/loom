@@ -68,7 +68,16 @@
       "normal": "200ms",
       "slow": "400ms"
     },
-    "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "easing": {
+      "$note": "Standard easing set + spring presets. standard/decelerate/accelerate/emphasized are M3-style bezier curves; spring-* are linear() approximations sampled from a damped harmonic oscillator (overshoot: smooth 0% / snappy 8% / bounce 20%). Emitted as --easing-{key}; --easing aliases --easing-standard for back-compat. Code-only, universal — do not override per-project.",
+      "standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "decelerate": "cubic-bezier(0, 0, 0.2, 1)",
+      "accelerate": "cubic-bezier(0.4, 0, 1, 1)",
+      "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
+      "spring-smooth": "linear(0, 0.142 7.1%, 0.381 14.3%, 0.589 21.4%, 0.741 28.6%, 0.842 35.7%, 0.906 42.9%, 0.945 50%, 0.968 57.1%, 0.982 64.3%, 0.99 71.4%, 0.994 78.6%, 0.997 85.7%, 0.998 92.9%, 1)",
+      "spring-snappy": "linear(0, 0.218 7.1%, 0.593 14.3%, 0.887 21.4%, 1.041 28.6%, 1.083 35.7%, 1.068 42.9%, 1.037 50%, 1.011 57.1%, 0.997 64.3%, 0.993 71.4%, 0.994 78.6%, 0.997 85.7%, 0.999 92.9%, 1)",
+      "spring-bounce": "linear(0, 0.411 7.1%, 0.975 14.3%, 1.201 21.4%, 1.143 28.6%, 1.022 35.7%, 0.961 42.9%, 0.966 50%, 0.992 57.1%, 1.007 64.3%, 1.008 71.4%, 1.003 78.6%, 0.999 85.7%, 0.998 92.9%, 1)"
+    },
     "focus-ring": {
       "width": "2px",
       "offset": "2px",

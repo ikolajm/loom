@@ -1,6 +1,29 @@
 const { buildVariantStyles, buildSizeStyles } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
+/**
+ * Built-in close affordance, shared by Dialog and Sheet (both wrap @radix-ui/react-dialog).
+ * `alias` is the imported primitive namespace (DialogPrimitive / SheetPrimitive); `pad` is the
+ * leading indent for the block. Single source for the close-button markup + styling.
+ */
+function closeButton(alias, pad) {
+  // Compose the iconOnly Button (house dismiss pattern, color="inherit" takes the surface
+  // foreground). The wrapper div carries the absolute position — Button's `.interactive`
+  // utility hard-sets position:relative, so positioning Button directly via className loses
+  // the cascade (same footgun as the carousel arrows).
+  return [
+    `${pad}{showClose && (`,
+    `${pad}  <div className="absolute right-4 top-4">`,
+    `${pad}    <${alias}.Close asChild>`,
+    `${pad}      <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">`,
+    `${pad}        <X />`,
+    `${pad}      </Button>`,
+    `${pad}    </${alias}.Close>`,
+    `${pad}  </div>`,
+    `${pad})}`,
+  ].join('\n');
+}
+
 function generateRadixDialog(name, config, meta) {
   const sizes = filterSizes(config.sizes);
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
@@ -12,8 +35,8 @@ import { forwardRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import { Button } from './button';
 import { cn } from './cn';
-import { Button } from './Button';
 
 const dialogContentVariants = cva(
   'fixed left-1/2 top-1/2 z-[var(--z-modal)] w-full -translate-x-1/2 -translate-y-1/2 flex flex-col ${variantStyles.default || 'bg-surface-1 text-on-surface shadow-[var(--shadow-3)]'}',
@@ -46,8 +69,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & VariantProps<typeof dialogContentVariants>
->(({ size, className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & VariantProps<typeof dialogContentVariants> & { showClose?: boolean }
+>(({ size, showClose = true, className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -56,6 +79,7 @@ const DialogContent = forwardRef<
       {...props}
     >
       {children}
+${closeButton('DialogPrimitive', '      ')}
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
@@ -195,8 +219,8 @@ import { forwardRef } from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import { Button } from './button';
 import { cn } from './cn';
-import { Button } from './Button';
 
 const sheetSideVariants = cva(
   'fixed z-[var(--z-modal)] flex flex-col bg-surface-1 text-on-surface shadow-[var(--shadow-3)] transition-transform',
@@ -239,10 +263,10 @@ SheetOverlay.displayName = 'SheetOverlay';
 
 type SheetContentProps = React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>
   & VariantProps<typeof sheetSideVariants>
-  & { size?: 'sm' | 'md' | 'lg' };
+  & { size?: 'sm' | 'md' | 'lg'; showClose?: boolean };
 
 const SheetContent = forwardRef<React.ComponentRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  ({ side = 'right', size = 'md', className, children, ...props }, ref) => {
+  ({ side = 'right', size = 'md', showClose = true, className, children, ...props }, ref) => {
     const s = sheetSizeMap[size];
     const isHorizontal = side === 'left' || side === 'right';
     return (
@@ -254,6 +278,7 @@ const SheetContent = forwardRef<React.ComponentRef<typeof SheetPrimitive.Content
           {...props}
         >
           {children}
+${closeButton('SheetPrimitive', '          ')}
         </SheetPrimitive.Content>
       </SheetPortal>
     );

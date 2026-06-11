@@ -1,13 +1,13 @@
 // =============================================================================
 // Try Me Button — Template Component
 // =============================================================================
-// Agency-branded button using layout/accent color.
+// Uses the project primary color, so the preview reads as the consumer's own.
 // Absolutely positioned in interactive previews.
 // Appended directly to page — no base/preview framing.
 // =============================================================================
 
 function buildTryMeButton(lookups, defaultMode, page) {
-  const { layoutVars, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
 
   const comp = figma.createComponent();
   comp.name = 'template/try-me-button';
@@ -30,16 +30,16 @@ function buildTryMeButton(lookups, defaultMode, page) {
   const rad = semRadius['radius/component'];
   if (rad) { comp.setBoundVariable('topLeftRadius', rad); comp.setBoundVariable('topRightRadius', rad); comp.setBoundVariable('bottomLeftRadius', rad); comp.setBoundVariable('bottomRightRadius', rad); }
 
-  const accentVar = layoutVars['layout/accent'];
-  if (accentVar) comp.fills = [figma.variables.setBoundVariableForPaint(
-    { type: 'SOLID', color: { r: 0.91, g: 0.12, b: 0.55 } }, 'color', accentVar
+  const primaryVar = semColors['color/primary/primary'];
+  if (primaryVar) comp.fills = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.627, g: 0.384, b: 0.918 } }, 'color', primaryVar
   )];
 
   const effectStyles = figma.getLocalEffectStyles();
   const shadow2 = effectStyles.find(s => s.name === 'shadow/2');
   if (shadow2) comp.effectStyleId = shadow2.id;
 
-  const onAccentVar = layoutVars['layout/on-accent'];
+  const onPrimaryVar = semColors['color/primary/on-primary'];
 
   const mouseIcon = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/mouse-pointer-click');
   if (mouseIcon) {
@@ -47,10 +47,10 @@ function buildTryMeButton(lookups, defaultMode, page) {
     iconInst.name = 'icon';
     const iconSz = primIconSize['icon/1'];
     if (iconSz) { iconInst.setBoundVariable('width', iconSz); iconInst.setBoundVariable('height', iconSz); }
-    if (onAccentVar) {
+    if (onPrimaryVar) {
       const vecs = iconInst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
       const paint = [figma.variables.setBoundVariableForPaint(
-        { type: 'SOLID', color: { r: 1, g: 1, b: 1 } }, 'color', onAccentVar
+        { type: 'SOLID', color: { r: 0.141, g: 0.059, b: 0.243 } }, 'color', onPrimaryVar
       )];
       for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
     }
@@ -61,8 +61,8 @@ function buildTryMeButton(lookups, defaultMode, page) {
   label.name = 'label';
   label.characters = 'Try Me!';
   applyTextStyle(label, 'action', 'sm');
-  if (onAccentVar) label.fills = [figma.variables.setBoundVariableForPaint(
-    { type: 'SOLID', color: { r: 1, g: 1, b: 1 } }, 'color', onAccentVar
+  if (onPrimaryVar) label.fills = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.141, g: 0.059, b: 0.243 } }, 'color', onPrimaryVar
   )];
   comp.appendChild(label);
 

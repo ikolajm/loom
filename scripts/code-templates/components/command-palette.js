@@ -41,10 +41,12 @@ function generateCommandPalette(name, config, meta) {
     if (sz['item-line-height']) tClasses.push(`leading-[${sz['item-line-height']}]`);
     itemEntries[tier] = tClasses.join(' ');
 
-    // Group label
+    // Group label — prefix the cmdk-group-heading selector at GENERATION time so the
+    // class strings are statically scannable by Tailwind. (Interpolating the prefix at
+    // runtime produces classes the scanner never sees → the sizing silently no-ops.)
     const gClasses = [];
-    if (sz['group-font-size']) gClasses.push(`text-[${sz['group-font-size']}]`);
-    if (sz['group-line-height']) gClasses.push(`leading-[${sz['group-line-height']}]`);
+    if (sz['group-font-size']) gClasses.push(`[&_[cmdk-group-heading]]:text-[${sz['group-font-size']}]`);
+    if (sz['group-line-height']) gClasses.push(`[&_[cmdk-group-heading]]:leading-[${sz['group-line-height']}]`);
     groupLabelEntries[tier] = gClasses.join(' ');
 
     // Icon
@@ -141,7 +143,7 @@ const CommandPaletteGroup = forwardRef<
     ref={ref}
     className={cn(
       'overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-on-surface-variant [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.02em]',
-      groupLabelSizeMap[size] && \`[&_[cmdk-group-heading]]:\${groupLabelSizeMap[size].split(' ').join(' [&_[cmdk-group-heading]]:')} \`,
+      groupLabelSizeMap[size],
       className,
     )}
     {...props}

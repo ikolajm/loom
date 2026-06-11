@@ -1,0 +1,31 @@
+{
+  "name": "date-picker",
+  "category": "form",
+  "description": "",
+  "version": "02a9de70122f",
+  "dependencies": [
+    "cn",
+    "popover",
+    "calendar",
+    "form-field"
+  ],
+  "npmDependencies": [
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

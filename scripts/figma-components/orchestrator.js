@@ -40,8 +40,8 @@ const spacing = loadConfig('base/spacing.json');
 const sizing = loadConfig('base/sizing.json');
 const typography = loadConfig('base/typography.json');
 const effects = loadConfig('base/effects.json');
-const layout = loadConfig('figma/layout.json');
-const templates = loadConfig('figma/templates.json');
+const layout = loadConfig('presentation/layout.json');
+const templates = loadConfig('presentation/templates.json');
 const colorPalette = loadConfig('figma/color-palette.json');
 const buttonConfig = loadConfig('components/button.json');
 const formConfig = loadConfig('components/form.json');
@@ -148,26 +148,26 @@ const BUILDERS = {
     template: 'build-core-page.js'
   },
   'buttons': {
-    description: 'Buttons page (button, icon-button, fab, badge, chip, toggle, toggle-group)',
+    description: 'Buttons page (button, badge, dot, fab, fab-menu, toggle, toggle-group)',
     pageName: 'Buttons',
     config: { components: buttonConfig, layout },
     batches: [
       {
         name: 'standard',
-        description: 'Button, Badge, Chip, Toggle (standard builder)',
+        description: 'Button, Badge, Toggle (standard builder)',
         components: [
           require('./buttons/build-button'),
           require('./buttons/build-badge'),
-          require('./buttons/build-chip'),
           require('./buttons/build-toggle')
         ]
       },
       {
         name: 'custom',
-        description: 'Icon Button, FAB, Toggle Group (custom builders)',
+        description: 'Dot, FAB, FAB Menu, Toggle Group (custom builders)',
         customScripts: [
-          'buttons/build-icon-button.js',
+          'buttons/build-dot.js',
           'buttons/build-fab.js',
+          'buttons/build-fab-menu.js',
           'buttons/build-pattern-toggle-group.js'
         ]
       }
@@ -201,12 +201,15 @@ const BUILDERS = {
       },
       {
         name: 'extended',
-        description: 'Extended input components (slider, input-otp, combobox, file-upload)',
+        description: 'Extended input components (slider, input-otp, combobox, file-upload, rating, time-picker, search-bar)',
         customScripts: [
           'forms/build-slider.js',
           'forms/build-input-otp.js',
           'forms/build-pattern-combobox.js',
-          'forms/build-pattern-file-upload.js'
+          'forms/build-pattern-file-upload.js',
+          'forms/build-pattern-rating.js',
+          'forms/build-pattern-time-picker.js',
+          'forms/build-pattern-search-bar.js'
         ]
       },
       {
@@ -221,12 +224,13 @@ const BUILDERS = {
     ]
   },
   'layout-page': {
-    description: 'Layout page (separator, card, dialog, alert-dialog, sheet, table pattern mocks)',
+    description: 'Layout page (separator, card, toolbar, dialog, alert-dialog, sheet, table pattern mocks)',
     pageName: 'Layout',
     config: { components: layoutConfig, layout },
     customScripts: [
       'layout/build-separator.js',
       'layout/build-pattern-card.js',
+      'layout/build-toolbar.js',
       'layout/build-pattern-table.js',
       'layout/build-pattern-dialog.js',
       'layout/build-pattern-sheet.js',
@@ -234,20 +238,19 @@ const BUILDERS = {
     ]
   },
   'feedback': {
-    description: 'Feedback page (toast, alert, progress-bar, badge-dot, empty-state + pattern mocks)',
+    description: 'Feedback page (toast, banner, progress-bar, empty-state + pattern mocks)',
     pageName: 'Feedback',
     config: { components: feedbackConfig, layout },
     batches: [
       {
         name: 'components',
-        description: 'Toast, Alert (standard builder) + Progress Bar, Badge Dot (custom)',
+        description: 'Toast, Banner (standard builder) + Progress Bar (custom)',
         components: [
           require('./feedback/build-toast'),
-          require('./feedback/build-alert')
+          require('./feedback/build-banner')
         ],
         customScripts: [
-          'feedback/build-progress-bar.js',
-          'feedback/build-badge-dot.js'
+          'feedback/build-progress-bar.js'
         ]
       },
       {
@@ -266,7 +269,7 @@ const BUILDERS = {
     ]
   },
   'data-display': {
-    description: 'Data Display page (avatar, kbd + list-item/accordion pattern mocks)',
+    description: 'Data Display page (avatar, kbd + list-item/accordion/collapsible/avatar-group/number/relative-time pattern mocks)',
     pageName: 'Data Display',
     config: { components: dataDisplayConfig, layout },
     components: [
@@ -276,7 +279,10 @@ const BUILDERS = {
       'data-display/build-avatar.js',
       'data-display/build-pattern-list-item.js',
       'data-display/build-pattern-accordion.js',
-      'data-display/build-pattern-collapsible.js'
+      'data-display/build-pattern-collapsible.js',
+      'data-display/build-pattern-avatar-group.js',
+      'data-display/build-pattern-number.js',
+      'data-display/build-pattern-relative-time.js'
     ]
   },
   'navigation': {
@@ -470,12 +476,13 @@ function assembleBatch(def, batch, isFirst, isLast, fullOrder) {
   for (const family of fontFamilies) {
     for (const w of allWeights) {
       const style = resolveStyle(family, w);
-      fontLoadSet.add(`await figma.loadFontAsync({ family: "${family}", style: "${style}" });`);
+      fontLoadSet.add(`await safeLoadFont("${family}", "${style}");`);
     }
   }
-  // Ensure Regular weight is loaded for all project fonts (fallback text nodes)
+  // Ensure Regular weight is loaded for all project fonts (fallback text nodes).
+  // safeLoadFont substitutes Inter for any family this Figma can't render.
   for (const family of fontFamilies) {
-    fontLoadSet.add(`await figma.loadFontAsync({ family: "${family}", style: "Regular" });`);
+    fontLoadSet.add(`await safeLoadFont("${family}", "Regular");`);
   }
   // Always load Inter Regular — Figma's default font for new text nodes.
   // createText() nodes start as Inter Regular, and .characters assignment

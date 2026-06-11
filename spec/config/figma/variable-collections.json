@@ -181,9 +181,9 @@
 
   "figma-collections": {
     "figma.layout": {
-      "description": "Documentation-specific layout values. Hue-neutral, mode-independent. COLOR values are direct hex (not semantic aliases). FLOAT spacing values alias primitives.spacing. Includes surface elevations, outline levels, and agency accent.",
+      "description": "Documentation-specific layout values. Hue-neutral, mode-independent. COLOR values are direct hex (not semantic aliases). FLOAT spacing values alias primitives.spacing. Includes surface elevations and outline levels.",
       "type": "FLOAT + COLOR",
-      "source": "config/figma/layout.json",
+      "source": "config/presentation/layout.json",
       "modes": ["default"],
       "naming": "layout/{property}",
       "scopes": {
@@ -199,9 +199,7 @@
           "layout/surface-1 → #EDEDED (direct)",
           "layout/surface-2 → #E5E5E5 (direct)",
           "layout/outline → #E0E0E0 (direct)",
-          "layout/outline-subtle → #EBEBEB (direct)",
-          "layout/accent → #E91E8C (direct, agency color)",
-          "layout/on-accent → #FFFFFF (direct)"
+          "layout/outline-subtle → #EBEBEB (direct)"
         ],
         "spacing": [
           "layout/spacing/frame-group-gap → aliases primitives.spacing/16",

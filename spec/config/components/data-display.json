@@ -96,5 +96,21 @@
       "lg": { "trigger-height": "height/ch-9", "trigger-x-padding": "{scale.6}", "trigger-gap": "{scale.4}", "content-padding": "{scale.6}", "trigger-font-size": "18px", "trigger-line-height": "28px", "indicator": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
+  },
+
+  "avatar-group": {
+    "$note": "Stacked avatars with overlap + a +N overflow counter. Composition over `avatar` — size forwards to children; overlap (negative margin) and the surface-colored ring are structural/frozen.",
+    "$catalog": { "dependencies": ["cn", "avatar"], "tokens": ["color", "spacing", "sizing"] },
+    "default": { "size": "md", "spacing": "normal" }
+  },
+
+  "number": {
+    "$note": "Formatted number primitive via Intl.NumberFormat. RSC-safe (no hooks). tabular-nums so digits don't jitter on update. Sprint 2 CountUp motion atom wraps it.",
+    "$catalog": { "dependencies": ["cn"], "tokens": ["typography"] }
+  },
+
+  "relative-time": {
+    "$note": "Relative timestamp ('2 hours ago') via Intl.RelativeTimeFormat. Client component — renders <time dateTime> with an SSR-stable date fallback, swaps to the relative string after mount (avoids server-now != client-now hydration mismatch). Optional `live` interval keeps it fresh.",
+    "$catalog": { "dependencies": ["cn"], "tokens": ["typography"] }
   }
 }

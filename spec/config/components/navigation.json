@@ -22,9 +22,10 @@
   },
 
   "sidebar": {
-    "$note": "Vertical navigation panel. Permanent (desktop), collapsible, or rail (icons only). Items use list-item structure with leading icon + label. Active item highlighted with primary color. Rail variant hides labels and narrows to icon column.",
+    "$note": "Vertical navigation panel. Permanent (desktop), collapsible, or rail (icons only). Items use list-item structure with leading icon + label. Active item highlighted with primary color. Rail variant hides labels and narrows to icon column — same surface as default; the generated atom selects width vs rail-width per variant via a CSS var, so rail stays one variant (no compound × size). SidebarItem labels auto-collapse in rail via the parent's group marker.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" },
+      "rail": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" }
     },
     "item": {
       "state": {

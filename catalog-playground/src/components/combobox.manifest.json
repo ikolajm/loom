@@ -1,0 +1,31 @@
+{
+  "name": "combobox",
+  "category": "form",
+  "description": "",
+  "version": "2d16e7d28753",
+  "dependencies": [
+    "cn",
+    "popover",
+    "form-field"
+  ],
+  "npmDependencies": [
+    "cmdk",
+    "lucide-react"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "error"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

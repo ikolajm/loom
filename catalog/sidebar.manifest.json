@@ -1,0 +1,28 @@
+{
+  "name": "sidebar",
+  "category": "navigation",
+  "description": "",
+  "version": "b53b51818ccc",
+  "dependencies": [
+    "cn"
+  ],
+  "npmDependencies": [
+    "class-variance-authority"
+  ],
+  "tokens": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing"
+  ],
+  "composition": "none",
+  "variants": [
+    "default",
+    "rail"
+  ],
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

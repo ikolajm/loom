@@ -104,7 +104,27 @@ const NavigationMenuContent = forwardRef<
 ));
 NavigationMenuContent.displayName = 'NavigationMenuContent';
 
-const NavigationMenuLink = NavigationMenuPrimitive.Link;
+// Default hover/focus affordance so panel links indicate pointer + keyboard position
+// without the consumer hand-styling each one. Links sit ON the panel (surface-1), so the
+// hovered/focused step goes UP to surface-2 — same precedent as CommandPaletteItem. (The
+// trigger uses surface-1 because it sits on the page surface, a level below.) Block +
+// padding suits the common dropdown-panel list; override via className for bar-level links.
+const NavigationMenuLink = forwardRef<
+  React.ComponentRef<typeof NavigationMenuPrimitive.Link>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Link>
+>(({ className, ...props }, ref) => (
+  <NavigationMenuPrimitive.Link
+    ref={ref}
+    className={cn(
+      'block select-none rounded-component px-3 py-2 text-on-surface no-underline transition-colors cursor-pointer',
+      'hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'data-[active]:bg-surface-2 data-[active]:font-medium',
+      className,
+    )}
+    {...props}
+  />
+));
+NavigationMenuLink.displayName = 'NavigationMenuLink';
 
 const NavigationMenuViewport = forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.Viewport>,
