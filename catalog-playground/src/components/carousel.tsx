@@ -9,10 +9,16 @@ import { cn } from './cn';
 type EmblaApi = NonNullable<UseEmblaCarouselType[1]>;
 type EmblaOptions = NonNullable<Parameters<typeof useEmblaCarousel>[0]>;
 
-const gapSize: Record<string, string> = {
-  sm: 'gap-3',
-  md: 'gap-4',
-  lg: 'gap-6',
+const slidePad: Record<string, string> = {
+  sm: 'pl-3',
+  md: 'pl-4',
+  lg: 'pl-6',
+};
+
+const trackOffset: Record<string, string> = {
+  sm: '-ml-3',
+  md: '-ml-4',
+  lg: '-ml-6',
 };
 
 const arrowLeft: Record<string, string> = {
@@ -74,9 +80,9 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
       >
         <div className="relative">
           <div ref={emblaRef} className="overflow-hidden rounded-card">
-            <div className={cn('flex', gapSize[size])}>
+            <div className={cn('flex', trackOffset[size])}>
               {Children.map(children, (child) => (
-                <div className="min-w-0 shrink-0 basis-full" role="group" aria-roledescription="slide">
+                <div className={cn('min-w-0 shrink-0 basis-full', slidePad[size])} role="group" aria-roledescription="slide">
                   {child}
                 </div>
               ))}

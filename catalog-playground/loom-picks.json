@@ -1,7 +1,6 @@
 {
   "$schema": "Loom per-project picker. setup.sh reads `picks`, resolves each atom's manifest `dependencies` transitively, and copies only the resulting set (+ cn) into src/components/. Re-run setup.sh to resync.",
   "loom": {
-    "version": "2026-06-04",
     "picks": [
       "button",
       "badge",
@@ -46,7 +45,6 @@
       "avatar-group",
       "number",
       "relative-time",
-      "video-player",
       "top-bar",
       "tabs",
       "bottom-nav",

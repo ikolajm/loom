@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "accordion.story.ts",
   "variants": [
     "default",
     "filled"

@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "list-item.story.ts",
   "variants": [
     "default",
     "bordered"

@@ -1,15 +1,15 @@
 {
-  "projectName": "loom-default",
   "productType": "dashboard",
   "styleDirection": "clean",
-  "defaultMode": "dark",
-  "primary": "#1E90FF",
-  "secondary": "#ee8d2f",
-  "accent": "#f42990",
+  "primary": "#731DD8",
+  "secondary": "#48A9A6",
+  "accent": "#C0DA74",
   "heading": "Finlandica",
   "body": "Finlandica",
   "edges": "soft",
   "density": "comfortable",
   "shadowDepth": "flat",
-  "typeScale": "standard"
+  "typeScale": "standard",
+  "defaultMode": "dark",
+  "projectName": "loom-test"
 }

@@ -7,12 +7,19 @@ const { filterSizes, buildSizeStylesWithText } = require('./helpers');
  * leading indent for the block. Single source for the close-button markup + styling.
  */
 function closeButton(alias, pad) {
+  // Compose the iconOnly Button (house dismiss pattern, color="inherit" takes the surface
+  // foreground). The wrapper div carries the absolute position — Button's `.interactive`
+  // utility hard-sets position:relative, so positioning Button directly via className loses
+  // the cascade (same footgun as the carousel arrows).
   return [
     `${pad}{showClose && (`,
-    `${pad}  <${alias}.Close className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none">`,
-    `${pad}    <X className="size-4" />`,
-    `${pad}    <span className="sr-only">Close</span>`,
-    `${pad}  </${alias}.Close>`,
+    `${pad}  <div className="absolute right-4 top-4">`,
+    `${pad}    <${alias}.Close asChild>`,
+    `${pad}      <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">`,
+    `${pad}        <X />`,
+    `${pad}      </Button>`,
+    `${pad}    </${alias}.Close>`,
+    `${pad}  </div>`,
     `${pad})}`,
   ].join('\n');
 }
@@ -28,6 +35,7 @@ import { forwardRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import { Button } from './button';
 import { cn } from './cn';
 
 const dialogContentVariants = cva(
@@ -211,6 +219,7 @@ import { forwardRef } from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import { Button } from './button';
 import { cn } from './cn';
 
 const sheetSideVariants = cva(

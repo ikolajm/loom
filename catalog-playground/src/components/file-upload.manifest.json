@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "file-upload.story.ts",
   "variants": [
     "default"
   ],

@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "sidebar.story.ts",
   "variants": [
     "default",
     "rail"

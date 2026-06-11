@@ -42,7 +42,6 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 import { Kbd } from '@/components/kbd';
 import { NumberDisplay } from '@/components/number';
 import { RelativeTime } from '@/components/relative-time';
-import { VideoPlayer } from '@/components/video-player';
 import { TopBar } from '@/components/top-bar';
 import { Sidebar, SidebarItem } from '@/components/sidebar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/tabs';
@@ -704,15 +703,6 @@ export const STORIES: GalleryStory[] = [
       { label: 'future', content: <RelativeTime date="2026-06-10T12:00:00Z" /> },
       { label: 'weeks ago', content: <RelativeTime date="2026-05-20T12:00:00Z" /> },
       { label: 'numeric=always', content: <RelativeTime date="2026-06-08T08:30:00Z" numeric="always" /> },
-    ],
-  },
-  {
-    name: 'VideoPlayer',
-    category: 'Data Display',
-    description: 'Styled native container — browser owns the controls; Loom owns the box (rounded clip, aspect-ratio, object-fit). No JS state, no deps. Shown empty so the container chrome reads.',
-    sections: [
-      { label: 'aspect ratios', content: (['16/9', '4/3', '1/1'] as const).map((ar) => <div key={ar} className="w-56"><VideoPlayer aspectRatio={ar} /></div>) },
-      { label: 'auto (intrinsic)', content: <div className="w-56"><VideoPlayer aspectRatio="auto" /></div> },
     ],
   },
   {

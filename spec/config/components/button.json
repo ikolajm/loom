@@ -72,8 +72,8 @@
     },
     "sizes": {
       "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at 10px font size.", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-1" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon": "icon/icon-2" }
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon": "icon/icon-1" }
     },
     "default": { "variant": "filled", "state": "default", "size": "md" }
   },

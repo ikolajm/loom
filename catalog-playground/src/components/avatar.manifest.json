@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "avatar.story.ts",
   "variants": [
     "default"
   ],

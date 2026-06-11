@@ -64,7 +64,6 @@ const { generateSearchBar } = require('./components/search-bar');
 const { generateAvatarGroup } = require('./components/avatar-group');
 const { generateNumber } = require('./components/number');
 const { generateRelativeTime } = require('./components/relative-time');
-const { generateVideoPlayer } = require('./components/video-player');
 const { generateSidebar } = require('./components/sidebar');
 
 // --- Catalog output directory (catalog/) ---
@@ -142,7 +141,6 @@ function dispatch(name, config, meta) {
   if (name === 'AvatarGroup') return generateAvatarGroup(name, config, meta);
   if (name === 'NumberDisplay') return generateNumber(name, config, meta);
   if (name === 'RelativeTime') return generateRelativeTime(name, config, meta);
-  if (name === 'VideoPlayer') return generateVideoPlayer(name, config, meta);
   if (name === 'Sidebar') return generateSidebar(name, config, meta);
   if (name === 'Reveal') return generateReveal(name, config, meta);
   if (name === 'Stagger') return generateStagger(name, config, meta);
@@ -240,6 +238,7 @@ function generate(registry, outputDir, configs) {
   // (forgotten-bump footgun). A config's $catalog.version still overrides (buildManifest).
   const contentVersion = (src) => crypto.createHash('sha256').update(src).digest('hex').slice(0, 12);
   let count = 0;
+  const atoms = []; // collected for the pickable-atom index (catalog/atoms.json)
 
   for (const [name, def] of Object.entries(registry)) {
     // Config-free utilities — generated directly
@@ -249,6 +248,7 @@ function generate(registry, outputDir, configs) {
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
       console.log(`  ${def.key}.tsx + manifest (utility)`);
+      atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
       count++;
       continue;
     }
@@ -266,6 +266,7 @@ function generate(registry, outputDir, configs) {
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
     console.log(`  ${def.key}.tsx + manifest (${def.template})`);
+    atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
     count++;
   }
 
@@ -283,6 +284,21 @@ function generate(registry, outputDir, configs) {
     composition: 'none',
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
+
+  // Pickable atoms grouped by catalog group — the menu to grab loom-picks.json names from.
+  // Generated from the catalog so it can't drift from what's actually built.
+  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite', 'motion'];
+  const byGroup = {};
+  for (const a of atoms) (byGroup[a.category] ||= []).push(a.name);
+  const grouped = {};
+  for (const g of [...GROUP_ORDER, ...Object.keys(byGroup)]) {
+    if (byGroup[g] && !grouped[g]) grouped[g] = byGroup[g].sort();
+  }
+  fs.writeFileSync(path.join(CATALOG_DIR, 'atoms.json'), JSON.stringify({
+    $note: 'Pickable atoms by group — copy names into loom-picks.json "picks". setup.sh resolves dependencies automatically. Generated from the catalog; do not hand-edit.',
+    ...grouped,
+  }, null, 2) + '\n');
+  console.log('  atoms.json (pickable atoms by group)');
 
   console.log(`\nCatalog: ${count + 1} atoms → ${CATALOG_DIR}`);
   return count + 1;

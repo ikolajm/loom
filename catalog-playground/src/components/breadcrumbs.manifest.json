@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "breadcrumbs.story.ts",
   "variants": [
     "default"
   ],

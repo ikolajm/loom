@@ -7,7 +7,7 @@
  *
  * Usage:
  *   node index.js --input answers.json
- *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth subtle --typeScale standard
+ *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth elevated --typeScale standard
  */
 const fs = require('fs');
 const path = require('path');
@@ -47,7 +47,11 @@ function loadAnswers(args) {
   // If --input provided, read from file
   if (args.input) {
     const inputPath = path.resolve(args.input);
-    return JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
+    const answers = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
+    // defaultMode drives the standards.json propagation below; default it here so an
+    // omitted key doesn't write `undefined` into standards. Matches the CLI-flag path.
+    answers.defaultMode = answers.defaultMode || 'dark';
+    return answers;
   }
 
   // Otherwise, build from CLI flags
@@ -70,7 +74,7 @@ function loadAnswers(args) {
     body: args.body || 'Inter',
     edges: args.edges || 'sharp',
     density: args.density || 'comfortable',
-    shadowDepth: args.shadowDepth || 'subtle',
+    shadowDepth: args.shadowDepth || 'elevated',
     typeScale: args.typeScale || 'standard'
   };
 }

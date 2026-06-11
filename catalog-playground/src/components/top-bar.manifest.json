@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "top-bar.story.ts",
   "variants": [
     "default",
     "elevated"

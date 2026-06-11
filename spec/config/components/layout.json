@@ -14,6 +14,7 @@
     "default": { "variant": "default", "size": "md" }
   },
   "dialog": {
+    "$catalog": { "dependencies": ["cn", "button"] },
     "variants": {
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
     },
@@ -52,6 +53,7 @@
     "default": { "variant": "default", "size": "md" }
   },
   "sheet": {
+    "$catalog": { "dependencies": ["cn", "button"] },
     "$note": "Overlay panel that slides in from an edge. Bottom sheet (modal with drag handle) and side drawer (left/right). Shares dialog's overlay/scrim model. Dismiss via scrim click, escape, or drag-down (bottom). Top corners rounded for bottom sheet, no radius for side drawers (edge-to-edge).",
     "variants": {
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }

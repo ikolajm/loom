@@ -2,9 +2,10 @@
   "name": "sheet",
   "category": "layout",
   "description": "",
-  "version": "64ba19aa01e6",
+  "version": "5ed1e088b64f",
   "dependencies": [
-    "cn"
+    "cn",
+    "button"
   ],
   "npmDependencies": [
     "@radix-ui/react-dialog",

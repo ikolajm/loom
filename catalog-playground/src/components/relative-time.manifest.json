@@ -10,6 +10,5 @@
   "tokens": [
     "typography"
   ],
-  "composition": "none",
-  "stories": "relative-time.story.ts"
+  "composition": "none"
 }

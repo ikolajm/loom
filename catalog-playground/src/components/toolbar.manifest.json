@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "toolbar.story.ts",
   "variants": [
     "default"
   ],

@@ -13,6 +13,5 @@
     "spacing",
     "sizing"
   ],
-  "composition": "none",
-  "stories": "form-field.story.ts"
+  "composition": "none"
 }

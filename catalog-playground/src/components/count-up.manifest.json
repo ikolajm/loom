@@ -9,6 +9,5 @@
   ],
   "npmDependencies": [],
   "tokens": [],
-  "composition": "none",
-  "stories": "count-up.story.ts"
+  "composition": "none"
 }

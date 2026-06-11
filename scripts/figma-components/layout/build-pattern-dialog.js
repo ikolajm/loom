@@ -122,9 +122,10 @@ function buildPatternDialog(lookups, defaultMode, page) {
   headerRow.appendChild(title);
   title.layoutSizingHorizontal = 'FILL';
 
-  const closeIconSizeVar = primIconSize[resolveIcon('icon/icon-2')];
-  const closeMutedVar = semColors['color/surface/on-surface-variant'];
-  const closeX = createCloseIcon(closeMutedVar, closeIconSizeVar);
+  // Mirrors the code close: an iconOnly ghost Button (size="sm" → icon-1 16px,
+  // color="inherit" → on-surface foreground). See radix-dialogs.js closeButton().
+  const closeIconSizeVar = primIconSize[resolveIcon('icon/icon-1')];
+  const closeX = createCloseIcon(fgVar, closeIconSizeVar);
   if (closeX) headerRow.appendChild(closeX);
 
   dialogBox.appendChild(headerRow);

@@ -2,9 +2,10 @@
   "name": "dialog",
   "category": "layout",
   "description": "",
-  "version": "272f584e0280",
+  "version": "80511940bb0e",
   "dependencies": [
-    "cn"
+    "cn",
+    "button"
   ],
   "npmDependencies": [
     "@radix-ui/react-dialog",
@@ -18,7 +19,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "dialog.story.ts",
   "variants": [
     "default"
   ],

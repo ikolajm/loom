@@ -4,6 +4,7 @@ import { forwardRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import { Button } from './button';
 import { cn } from './cn';
 
 const dialogContentVariants = cva(
@@ -51,10 +52,13 @@ const DialogContent = forwardRef<
     >
       {children}
       {showClose && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none">
-          <X className="size-4" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        <div className="absolute right-4 top-4">
+          <DialogPrimitive.Close asChild>
+            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">
+              <X />
+            </Button>
+          </DialogPrimitive.Close>
+        </div>
       )}
     </DialogPrimitive.Content>
   </DialogPortal>

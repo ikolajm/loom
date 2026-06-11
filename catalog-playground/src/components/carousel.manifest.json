@@ -2,7 +2,7 @@
   "name": "carousel",
   "category": "composite",
   "description": "",
-  "version": "b6d03a3e09ae",
+  "version": "f7f641a313a6",
   "dependencies": [
     "cn",
     "button"
@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "carousel.story.ts",
   "variants": [
     "default"
   ],

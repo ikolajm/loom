@@ -15,6 +15,5 @@
     "spacing",
     "sizing"
   ],
-  "composition": "none",
-  "stories": "separator.story.ts"
+  "composition": "none"
 }

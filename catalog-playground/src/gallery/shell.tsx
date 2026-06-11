@@ -85,6 +85,9 @@ export function Gallery({ stories }: { stories: GalleryStory[] }) {
       <Sidebar className="shrink-0 sticky top-0 h-screen overflow-y-auto py-6 gap-6">
         <div className="px-2 flex flex-col gap-3">
           <div className="text-sm font-semibold text-on-surface">Loom Catalog</div>
+          <p className="text-label-sm text-on-surface-variant leading-snug">
+            Rendering the example token set — your brand&apos;s tokens will differ.
+          </p>
           {/* Doc-mode toggle — a real ToggleGroup; swaps the whole gallery via the root data-theme. */}
           <ToggleGroup
             type="single"

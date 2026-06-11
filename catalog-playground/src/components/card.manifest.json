@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "card.story.ts",
   "variants": [
     "default",
     "elevated",

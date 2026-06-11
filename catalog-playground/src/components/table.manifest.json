@@ -14,7 +14,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "table.story.ts",
   "variants": [
     "default"
   ],

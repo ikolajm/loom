@@ -36,8 +36,8 @@ const badgeVariants = cva(
 
 const badgeIconSize: Record<string, string> = {
   sm: 'size-icon-0',
-  md: 'size-icon-1',
-  lg: 'size-icon-2',
+  md: 'size-icon-0',
+  lg: 'size-icon-1',
 };
 
 const badgeSegmentPad: Record<string, string> = {

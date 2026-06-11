@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "slottable",
-  "stories": "button.story.ts",
   "sizes": [
     "sm",
     "md",

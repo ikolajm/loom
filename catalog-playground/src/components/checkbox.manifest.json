@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "checkbox.story.ts",
   "variants": [
     "false",
     "true"

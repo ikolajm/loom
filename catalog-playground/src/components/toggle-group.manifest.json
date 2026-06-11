@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "toggle-group.story.ts",
   "variants": [
     "segmented",
     "spaced"

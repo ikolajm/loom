@@ -16,7 +16,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "bottom-nav.story.ts",
   "variants": [
     "default"
   ],

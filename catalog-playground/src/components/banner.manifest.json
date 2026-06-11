@@ -18,7 +18,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "banner.story.ts",
   "variants": [
     "info",
     "success",

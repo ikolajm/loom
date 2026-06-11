@@ -13,12 +13,17 @@ function generateCarousel(name, config, meta) {
   const defaultSize = config.default?.size || 'md';
   const sizeUnion = Object.keys(sizes).map((k) => `'${k}'`).join(' | ') || "'sm' | 'md' | 'lg'";
 
-  const gapEntries = {};
+  const slidePadEntries = {};
+  const trackOffsetEntries = {};
   const leftEntries = {};
   const rightEntries = {};
   for (const [tier, sz] of Object.entries(sizes)) {
     const gap = sz.gap?.match(/\{scale\.(\d+)\}/);
-    gapEntries[tier] = gap ? `gap-${gap[1]}` : 'gap-4';
+    const gapN = gap ? gap[1] : '4';
+    // Inter-slide spacing rides on each slide (pl) with the track offset (-ml) cancelling
+    // the leading slide's pad — so the gap survives embla's loop wrap (CSS `gap` does not).
+    slidePadEntries[tier] = `pl-${gapN}`;
+    trackOffsetEntries[tier] = `-ml-${gapN}`;
     const off = sz['arrow-offset']?.match(/\{scale\.(\d+)\}/);
     const n = off ? off[1] : '3';
     leftEntries[tier] = `left-${n}`;
@@ -36,8 +41,12 @@ import { cn } from './cn';
 type EmblaApi = NonNullable<UseEmblaCarouselType[1]>;
 type EmblaOptions = NonNullable<Parameters<typeof useEmblaCarousel>[0]>;
 
-const gapSize: Record<string, string> = {
-${Object.entries(gapEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
+const slidePad: Record<string, string> = {
+${Object.entries(slidePadEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
+};
+
+const trackOffset: Record<string, string> = {
+${Object.entries(trackOffsetEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
 };
 
 const arrowLeft: Record<string, string> = {
@@ -95,9 +104,9 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
       >
         <div className="relative">
           <div ref={emblaRef} className="overflow-hidden rounded-card">
-            <div className={cn('flex', gapSize[size])}>
+            <div className={cn('flex', trackOffset[size])}>
               {Children.map(children, (child) => (
-                <div className="min-w-0 shrink-0 basis-full" role="group" aria-roledescription="slide">
+                <div className={cn('min-w-0 shrink-0 basis-full', slidePad[size])} role="group" aria-roledescription="slide">
                   {child}
                 </div>
               ))}

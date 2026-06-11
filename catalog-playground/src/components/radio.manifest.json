@@ -17,7 +17,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "radio.story.ts",
   "variants": [
     "false",
     "true"

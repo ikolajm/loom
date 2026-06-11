@@ -15,7 +15,6 @@
     "sizing"
   ],
   "composition": "none",
-  "stories": "time-picker.story.ts",
   "sizes": [
     "sm",
     "md",

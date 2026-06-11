@@ -13,6 +13,5 @@
     "spacing",
     "sizing"
   ],
-  "composition": "none",
-  "stories": "avatar-group.story.ts"
+  "composition": "none"
 }

@@ -3,7 +3,7 @@
 // Holds children in an initial hidden state (motion-safe: opacity 0 + a small transform) and
 // transitions them to the resting state when the element scrolls into view. The interesting
 // half — observing viewport intersection — is ~15 lines of standard IO; pulling `motion` for it
-// wouldn't earn its place (see CATALOG_AUDIT Motion: the lib threshold is the wider families).
+// wouldn't earn its place — the library threshold is the wider motion families.
 //
 // prefers-reduced-motion is handled PURELY in CSS: the from-state classes carry a `motion-safe:`
 // prefix, so under reduce they never apply — content renders instantly, no JS branch needed.

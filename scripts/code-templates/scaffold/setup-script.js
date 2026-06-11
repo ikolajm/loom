@@ -11,11 +11,13 @@
 
 function generate() {
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
+  // tailwind-merge is pinned ^3: the generated cn() registers token scales via v3's
+  // `theme` keys (radius/spacing), which v2 silently ignores — a hard minimum, not a preference.
   const coreDeps = [
     'class-variance-authority',
     'clsx',
     'lucide-react',
-    'tailwind-merge',
+    'tailwind-merge@^3',
   ].sort();
   const depString = coreDeps.join(' ');
 
@@ -47,33 +49,49 @@ echo ""
 [ -d "$SRC_DIR/app" ]        || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
 
 # --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
-echo "[1/5] Creating app-shell directories..."
+echo "[1/6] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/components/providers"
 
 # --- Step 2: Token substrate ---
-echo "[2/5] Copying tokens.css..."
+echo "[2/6] Copying tokens.css..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 
 # --- Step 3: globals.css ---
-echo "[3/5] Writing globals.css..."
+echo "[3/6] Writing globals.css..."
 cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
 # --- Step 4: Theme mechanism + root layout (atom-independent) ---
-echo "[4/5] Writing ThemeProvider + layout..."
+echo "[4/6] Writing ThemeProvider + layout..."
 cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/components/providers/ThemeProvider.tsx"
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
 
 # --- Step 5: Core dependencies (atom-agnostic) ---
-echo "[5/5] Installing core dependencies..."
+echo "[5/6] Installing core dependencies..."
 cd "$FRONTEND_DIR"
 npm install ${depString}
 echo "  ${coreDeps.length} core packages installed"
 
+# --- Step 6: Starter loom-picks.json (the input setup.sh reads) ---
+echo "[6/6] Writing starter loom-picks.json..."
+if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
+  cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
+{
+  "$schema": "Loom picker — list the atom names you want; setup.sh resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
+  "loom": {
+    "picks": ["button", "card"]
+  }
+}
+PICKS
+  echo "  created loom-picks.json (edit the picks, then run setup.sh)"
+else
+  echo "  loom-picks.json already exists — left as-is"
+fi
+
 echo ""
 echo "=== App shell ready ==="
 echo ""
-echo "Next — add atoms (from the loom repo):"
-echo "  ./setup.sh $FRONTEND_DIR   # loom-picks.json -> picked atoms + token refresh"
+echo "Next — edit loom-picks.json to pick your atoms, then sync (from the loom repo):"
+echo "  ./setup.sh $FRONTEND_DIR"
 `;
 }
 
