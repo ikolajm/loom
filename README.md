@@ -91,8 +91,10 @@ Consumption is shadcn-style — declare what you want, copy it in. You need a Ne
 ```bash
 npx create-next-app@latest my-loom-app \
   --ts --tailwind --app --src-dir --eslint \
-  --import-alias "@/*" --use-npm --no-turbopack
+  --import-alias "@/*" --use-npm --no-turbopack --no-agents-md
 ```
+
+`--no-agents-md` skips the generic `AGENTS.md` / `CLAUDE.md` agent-rules files create-next-app would otherwise drop in — your project starts clean.
 
 Already made one (or have one)? The next two commands run **from the Loom repo**, pointing at your project by path:
 
