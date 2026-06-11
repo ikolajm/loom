@@ -106,6 +106,11 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 
 # 3. From the Loom repo, sync the picked atoms in (re-run anytime to resync):
 ./setup.sh ../my-loom-app
+
+# 4. Run your app and open /preview to confirm your brand landed:
+#    cd ../my-loom-app && npm run dev   → http://localhost:3000/preview
+#    init.sh scaffolds that route (token swatches, type, spacing, radius);
+#    delete src/app/preview/ once you've confirmed.
 ```
 
 `init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated `tokens.css` substrate. It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
@@ -119,6 +124,22 @@ Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Go
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
 3. Paste the step scripts **`01` → `29` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
+
+**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`14`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
+
+```js
+// Clear variable collections
+const collections = figma.variables.getLocalVariableCollections();
+for (const col of collections) { try { col.remove(); } catch(e) {} }
+// Clear styles
+for (const s of figma.getLocalTextStyles()) { try { s.remove(); } catch(e) {} }
+for (const s of figma.getLocalEffectStyles()) { try { s.remove(); } catch(e) {} }
+// Clear pages — remove children first, then extra pages
+for (const page of figma.root.children) {
+  while (page.children.length > 0) { try { page.children[0].remove(); } catch(e) { break; } }
+}
+while (figma.root.children.length > 1) { try { figma.root.children[figma.root.children.length - 1].remove(); } catch(e) { break; } }
+```
 
 Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/gotchas.md`](docs/gotchas.md)).
 

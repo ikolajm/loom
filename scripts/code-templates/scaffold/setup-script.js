@@ -49,30 +49,43 @@ echo ""
 [ -d "$SRC_DIR/app" ]        || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
 
 # --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
-echo "[1/6] Creating app-shell directories..."
+echo "[1/7] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/components/providers"
 
 # --- Step 2: Token substrate ---
-echo "[2/6] Copying tokens.css..."
+echo "[2/7] Copying tokens.css..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 
 # --- Step 3: globals.css ---
-echo "[3/6] Writing globals.css..."
+echo "[3/7] Writing globals.css..."
 cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
 # --- Step 4: Theme mechanism + root layout (atom-independent) ---
-echo "[4/6] Writing ThemeProvider + layout..."
+echo "[4/7] Writing ThemeProvider + layout..."
 cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/components/providers/ThemeProvider.tsx"
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
 
-# --- Step 5: Core dependencies (atom-agnostic) ---
-echo "[5/6] Installing core dependencies..."
-cd "$FRONTEND_DIR"
-npm install ${depString}
+# --- Step 5: Foundation preview route (one-time, consumer-owned) ---
+# A /preview route rendering the token substrate (colors, type, spacing, radius)
+# so the consumer can confirm their brand landed. Atom-agnostic. Never overwrites.
+echo "[5/7] Writing /preview route..."
+if [ ! -f "$SRC_DIR/app/preview/page.tsx" ]; then
+  mkdir -p "$SRC_DIR/app/preview"
+  cp "$SCRIPT_DIR/preview-page.tsx" "$SRC_DIR/app/preview/page.tsx"
+  echo "  created src/app/preview/page.tsx (visit /preview to verify tokens; delete when done)"
+else
+  echo "  src/app/preview/page.tsx already exists — left as-is"
+fi
+
+# --- Step 6: Core dependencies (atom-agnostic) ---
+# --prefix installs into the target without changing cwd, so every path in this
+# script stays relative to the loom repo — no ordering landmine around a cd.
+echo "[6/7] Installing core dependencies..."
+npm install --prefix "$FRONTEND_DIR" ${depString}
 echo "  ${coreDeps.length} core packages installed"
 
-# --- Step 6: Starter loom-picks.json (the input setup.sh reads) ---
-echo "[6/6] Writing starter loom-picks.json..."
+# --- Step 7: Starter loom-picks.json (the input setup.sh reads) ---
+echo "[7/7] Writing starter loom-picks.json..."
 if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
   cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
 {

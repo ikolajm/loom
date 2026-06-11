@@ -111,6 +111,18 @@ Operational reference for the Figma Plugin API — data formats, gotchas, valida
 
 ---
 
+## Figma — master components resolve variables at the collection's *default* mode
+
+**Symptom.** The same component looked different in two places: the master `template/try-me-button` on the Core page rendered with dark text on a darker purple, while every instance of it inside the doc-page preview frames rendered with light text on a lighter purple. Same component, two appearances — looks like a build bug.
+
+**Root cause.** A node's mode-dependent variables resolve against whatever mode is set on the **frame/page that contains it**, via `setExplicitVariableModeForCollection`. The doc preview frames each call `setDefaultMode(frame, defaultMode)` (the doc layer's `light` mode), so instances inside them resolve `color/primary/on-primary` → the light-mode value. The **master** sat in the "System Components" frame, which never set a mode — so it fell back to the `semantic.color` collection's *own* default mode (`dark`), resolving the same token to a different value. This is invisible as long as the component only uses **mode-independent** paints (a direct hex, or a `layout/*` variable with one mode). It only surfaced when the try-me button was switched from `layout/on-accent` (direct hex, one value everywhere) to `color/primary/on-primary` (a two-mode semantic alias).
+
+**Fix.** Apply the documentation default-mode to *every* frame that holds components — including the masters' container, not just the per-atom preview frames. `build-system-frame.js` now calls `setDefaultMode(sysFrame, defaultMode)` so masters resolve identically to their instances.
+
+**The rule:** any frame that contains components bound to mode-dependent variables must declare its mode explicitly. Don't rely on the collection default — a master in an unmoded frame will silently drift from its instances the moment it uses a multi-mode token.
+
+---
+
 ## Fonts — two pipelines, one family name
 
 Fonts are the one token where the two surfaces have **different capabilities**, so they get explicit handling instead of a straight pass-through. The questionnaire takes one family name per role (`heading` / `body`); both pipelines consume it, but they can render different sets:

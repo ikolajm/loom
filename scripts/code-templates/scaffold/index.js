@@ -13,6 +13,10 @@ const themeProvider = require('./theme-provider');
 const layout = require('./layout');
 const setupScript = require('./setup-script');
 
+// preview-page.tsx is a static asset (no config interpolation) — copied verbatim
+// into generated/scaffold/, then placed at src/app/preview/page.tsx by init.sh.
+const previewPage = fs.readFileSync(path.join(__dirname, 'preview-page.tsx'), 'utf8');
+
 function generate(configs, outputDir) {
   const scaffoldDir = path.join(outputDir, 'scaffold');
   fs.mkdirSync(scaffoldDir, { recursive: true });
@@ -21,6 +25,7 @@ function generate(configs, outputDir) {
     { name: 'globals.css', content: globalsCss.generate(configs) },
     { name: 'ThemeProvider.tsx', content: themeProvider.generate(configs) },
     { name: 'layout.tsx', content: layout.generate(configs) },
+    { name: 'preview-page.tsx', content: previewPage },
     { name: 'init.sh', content: setupScript.generate(), executable: true },
   ];
 

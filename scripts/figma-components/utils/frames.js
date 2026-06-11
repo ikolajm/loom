@@ -81,9 +81,9 @@ function addHeader(frame, title, description) {
  * @returns {FrameNode} The interactive preview frame
  */
 function createInteractivePreview(componentInstance, lookups) {
-  const { layoutVars, semRadius, primBW } = lookups;
+  const { layoutVars, semColors, semRadius, primBW } = lookups;
   const surface1Var = layoutVars["layout/surface-1"];
-  const accentVar = layoutVars["layout/accent"];
+  const primaryVar = semColors["color/primary/primary"];
   const radComp = semRadius["radius/component"];
   const bw2 = primBW["border-width/2"];
   const tryMeComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "template/try-me-button");
@@ -104,8 +104,8 @@ function createInteractivePreview(componentInstance, lookups) {
   if (surface1Var) ip.fills = [figma.variables.setBoundVariableForPaint(
     { type: "SOLID", color: { r: 0.93, g: 0.93, b: 0.93 } }, "color", surface1Var
   )];
-  if (accentVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
-    { type: "SOLID", color: { r: 0.91, g: 0.12, b: 0.55 } }, "color", accentVar
+  if (primaryVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.627, g: 0.384, b: 0.918 } }, "color", primaryVar
   )];
   if (bw2) ip.setBoundVariable("strokeWeight", bw2);
   ip.dashPattern = [8, 8];

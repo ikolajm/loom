@@ -61,14 +61,6 @@ if (CONFIG.outline) {
   }
 }
 
-// Accent
-if (CONFIG.accent) {
-  for (const [key, hex] of Object.entries(CONFIG.accent)) {
-    if (key.startsWith("$")) continue;
-    directColors[`layout/${key === "color" ? "accent" : `on-accent`}`] = hex;
-  }
-}
-
 for (const [name, hex] of Object.entries(directColors)) {
   const v = figma.variables.createVariable(name, collection, "COLOR");
   v.setValueForMode(modeId, hexToFigmaColor(hex));

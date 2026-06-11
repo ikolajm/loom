@@ -46,12 +46,6 @@
     }
   },
 
-  "accent": {
-    "$note": "Accent for the Figma documentation sphere (Loom's own catalog presentation color). The generated code scaffold's doc layer instead binds to the consumer's --primary, so every scaffold reads as entirely theirs — no separate accent to set.",
-    "color": "#E91E8C",
-    "on-accent": "#FFFFFF"
-  },
-
   "spacing": {
     "$note": "Nesting hierarchy: frame-group-gap (between frames on canvas) > section-gap (between sections within a frame) > component-group-gap (between groups of related components) > component-gap (between individual components in a row) > label-gap (between a label and its content) > description-gap (between title and description text).",
     "frame-group-gap": "{scale.16}",

@@ -44,5 +44,12 @@ function buildSystemFrame(lookups, defaultMode, page) {
 
   page.appendChild(sysFrame);
 
+  // Resolve semantic colors at the documentation default mode — like every other
+  // doc frame — so master components (try-me, alert-banner) render the same as
+  // their instances on the doc pages. Without this the frame falls back to the
+  // semantic.color collection's default mode and the masters drift (e.g. dark
+  // on-primary text instead of the doc's light-mode white).
+  setDefaultMode(sysFrame, defaultMode);
+
   return { name: 'System Frame', count: 1 };
 }
