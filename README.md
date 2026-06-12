@@ -181,10 +181,6 @@ A note on generated code: some atoms with not-yet-wired Radix primitives carry a
 
 ---
 
-## Status
-
-Solo project, v2, catalog content-complete. The Figma pipeline runs by pasting assembled scripts into the Figma plugin console (there's no published plugin). Deferred: wider motion families (behind an animation-library adoption decision) and motion-in-Figma.
-
 ## License
 
 [MIT](LICENSE) © 2026 Jacob Ikola
