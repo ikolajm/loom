@@ -32,6 +32,14 @@ const GENERATORS = {
       console.log('  tokens.css');
     },
   },
+  'tokens-json': {
+    description: 'tokens.json (neutral token data for non-web consumers — RN/NativeWind, native configs)',
+    run: (outputDir) => {
+      const { generate } = require('./generate-tokens-json');
+      fs.writeFileSync(path.join(outputDir, 'tokens.json'), JSON.stringify(generate(), null, 2) + '\n');
+      console.log('  tokens.json');
+    },
+  },
   'doc-layout': {
     description: 'doc-layout.css (gallery presentation layer — derived from presentation/layout.json)',
     run: (outputDir) => {

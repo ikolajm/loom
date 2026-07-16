@@ -82,11 +82,13 @@ See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference.
 
 ```bash
 npm run configs      # spec/answers.json → base token configs
-npm run generate     # → React catalog (catalog/) + tokens.css
+npm run generate     # → React catalog (catalog/) + tokens.css + tokens.json
 npm run figma        # → Figma plugin scripts (paste into the Figma console)
 ```
 
-Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+
+Alongside the web `tokens.css`, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 
 ### Use Loom in a project
 
@@ -174,6 +176,7 @@ scripts/               The two codegen pipelines
 
 catalog/               Generated output — per-atom .tsx + .manifest.json + story
 catalog-playground/    Next.js app that browses the whole catalog
+native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)
 ```
 
