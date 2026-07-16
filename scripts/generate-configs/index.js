@@ -47,6 +47,17 @@ function loadAnswers(args) {
   // If --input provided, read from file
   if (args.input) {
     const inputPath = path.resolve(args.input);
+    if (!fs.existsSync(inputPath)) {
+      // answers.json is git-ignored (it holds your brand, not Loom's) — a fresh
+      // clone has only the committed template. Point the user at the copy step
+      // instead of a raw ENOENT.
+      console.error(
+        `Error: ${args.input} not found.\n` +
+          `  Copy the template first:  cp spec/answers.example.json spec/answers.json\n` +
+          `  then edit its values and re-run.`
+      );
+      process.exit(1);
+    }
     const answers = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
     // defaultMode drives the standards.json propagation below; default it here so an
     // omitted key doesn't write `undefined` into standards. Matches the CLI-flag path.

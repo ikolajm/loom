@@ -72,7 +72,13 @@ npm run dev          # → http://localhost:3000
 
 ### Configure and generate
 
-Loom generates from one hand-authored file, **`spec/answers.json`** — your brand colors, fonts, and token choices. See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference (copy its example to start). Then run the three pipelines:
+Loom generates from one hand-authored file, **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
+
+```bash
+cp spec/answers.example.json spec/answers.json
+```
+
+See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference. Then run the three pipelines:
 
 ```bash
 npm run configs      # spec/answers.json → base token configs
@@ -157,7 +163,7 @@ spec/                  Single source of truth
     figma/             ← Figma variable-collection definitions
     presentation/      ← Figma documentation chrome (layout, templates)
   questionnaire.md     ← the tiered intake that drives base/ tokens
-  answers.json         ← a worked example answer set
+  answers.example.json ← committed template — copy to answers.json (git-ignored) and edit
 
 scripts/               The two codegen pipelines
   code-templates/      ← React catalog + tokens.css + scaffold

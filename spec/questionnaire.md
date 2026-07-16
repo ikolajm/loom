@@ -1,8 +1,13 @@
 # answers.json — Schema Reference (read-only)
 
 Loom's generators read one file: **`spec/answers.json`**, which you hand-author.
-This document is the **key reference** — it does not get filled in. Copy the example
-below into `spec/answers.json`, edit the values, then run the pipeline:
+It is **git-ignored** — it holds your brand, not Loom's — so start by copying the
+committed template:
+
+    cp spec/answers.example.json spec/answers.json
+
+This document is the **key reference** — it does not get filled in. Edit the copied
+`spec/answers.json` (the block below shows every key), then run the pipeline:
 
     npm run configs    # reads spec/answers.json → token configs
     npm run generate   # → React catalog + tokens.css

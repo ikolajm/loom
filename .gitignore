@@ -10,6 +10,11 @@ dist/
 # Generated on demand (created by scripts/code-templates/orchestrator.js)
 generated/
 
+# Your brand answers — hand-authored, project-specific, not Loom's look.
+# Copy spec/answers.example.json → spec/answers.json and edit. Keeping it out of
+# the repo means generating your brand never dirties the Loom working tree.
+spec/answers.json
+
 # Logs / env / OS
 *.log
 .env*
