@@ -1,0 +1,80 @@
+# Deferred engineering (post-v2-ship)
+
+Known engineering debt in the generator. Five items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+
+---
+
+## 1. `setup.sh` overwrite-protection (content-hash-driven)
+
+**Problem.** `setup.sh` re-copies picked atoms with a plain `cp` (no diff, no backup, no warning), so re-running it **silently overwrites a consumer's local edits** to an atom file (`src/components/*.tsx`), plus `cn.ts` and `tokens.css`. A system that markets "atoms are project-owned, edit freely" silently clobbering those edits on resync is a footgun. (shadcn's CLI prompts before overwriting modified files; ours does not.)
+
+**Why it's not a blocker.** The intended override path is the **call site** — `className`/prop/variant, or a wrapper in the consumer's own app — which lives *outside* the atom file and survives every resync by construction. The silent overwrite only bites a consumer who forks an atom *file* and then resyncs that atom.
+
+**That case is no longer hypothetical.** A consuming project had to patch `badge.tsx` for the dead-import defect, and two later `setup.sh` runs — adding `select`, then `form-field` — silently reverted it both times. Each reverted a fix for a defect Loom shipped, so the consumer re-broke on a resync they ran to fix a *different* Loom defect.
+
+**The compounding case is now closed at the source, which is why this dropped to last.** The three defects that gave a consumer a reason to hand-patch a generated file all shipped fixes on 2026-08-04 (see the closing note). This item is now about the general footgun, not about that specific trap.
+
+**Fix direction.** Use the per-atom **content hash** that manifests already carry (it changes iff the atom's generated source changes). On resync, compare the consumer's local copy against the version `setup.sh` last delivered; if it was modified locally, **warn / skip / back up** before overwriting (`badge.tsx` was edited — overwrite? [y/N]). This is the concrete *job* for the per-atom version mechanism (the top-level `loom-picks` version stamp was cut for being an unenforced duplicate of this finer hash).
+
+---
+
+## 2. Centralize atom registration + derive catalog counts
+
+**Problem (shotgun surgery).** Adding or cutting a single atom requires edits across ~15 sites: the generator import + dispatch `switch` (`scripts/code-templates/generate-components.js`), the `shared.js` registry, the figma orchestrator's page list, the component config, **and the hardcoded "N atoms" counts** across README / CATALOG_SPEC / questionnaire. Atom identity is scattered, and the counts are hand-maintained — which is why they drift.
+
+**Evidence.** Cutting `video-player` touched every one of those sites; the doc counts (67→66) had to be hand-edited across several files. Count drift has recurred before. (`catalog/atoms.json` is now generated as the authoritative pick list — the next step is deriving the README table + counts *from* it.)
+
+**The counts are correct as of 2026-08-04** — 67 manifests less `cn` is 66, which is what README, CATALOG_SPEC and the questionnaire all say. The drift risk is real; the drift is not present. Only the registration-scatter half is live, and item 4 would retire the counts half without this refactor.
+
+**Fix direction.** Centralize atom registration into **one source** that the import, dispatch, and figma page-list derive from; **derive the doc counts from the catalog** (one generated number) instead of hardcoding them per file.
+
+**Why it's not a blocker.** The current pipeline is correct and ships; this is friction + drift-risk reduction for future atom adds/cuts.
+
+---
+
+## 3. Four atoms declare a dependency they never import
+
+**Problem.** `fab-menu` declares `fab`, `toggle-group` declares `toggle`, and `stagger` and `count-up` each declare `cn` — none of the four is a static import in the generated source. `fab-menu` and `toggle-group` are the real ones: they copy a file the consumer does not need. The two `cn` entries have never done anything, since `resolve-picks.js` skips `cn` on the walk and `setup.sh` copies it unconditionally.
+
+**Evidence.** Surfaced by the `declared but not imported` warning added in `aacc481` (2026-08-04), which fires on every `npm run generate` until they are resolved.
+
+**Fix direction.** Decide per atom whether the declaration is intentional composition or stale, then strip the stale ones from `$catalog.dependencies` in `spec/config/components/`. Four config edits, one judgment call each — deliberately not folded into the bug-fix commit that surfaced them.
+
+---
+
+## 4. No generation-time invariant check over emitted output
+
+**Problem.** The generator has no verification of its own output. Two defect classes shipped to a real consumer undetected — manifests that under-declared their imports, and an atom carrying an unused import that fails any `noUnusedLocals` build. Both were found by throwaway scripts of about twenty lines, and both were invisible to `npm run generate`, which reports success either way.
+
+**Why it earns a place.** Two instances of the same failure mode reaching a consumer is the signal, not one. The checks are cheap and the generator already holds everything they need at emit time.
+
+**Fix direction.** Run the invariants as part of `generate`: every local import is declared in the manifest, no atom carries an unused import, and the doc counts match the catalog. The third retires the counts half of item 2 without doing that refactor.
+
+---
+
+## 5. Picks are not validated before `setup.sh` starts mutating the project
+
+**Problem.** A single mistyped pick id leaves the consumer's project broken. `setup.sh` copies atoms one at a time with no pre-flight, so an unknown name is not caught until `cp` fails on it — after some atoms have already landed and before the rest, `cn.ts`, and the token substrate have. The script exits 1 mid-loop, never prints its `npm install` line, and the error names no valid pick.
+
+**Reproduction** (cold consumer run, 2026-08-04). Picks `["button", "card", "text-input", "select", "dialog", "toast"]`, where `text-input` is a plausible wrong guess for `input`:
+
+```
+WARN: no manifest for picked/dep atom "text-input" — skipping its deps
+  + button
+  + card
+cp: cannot stat '.../catalog/text-input.tsx': No such file or directory
+```
+
+`button` and `card` are copied; `input`, `select`, `dialog`, `toast` are not; `cn.ts` is not. The project no longer compiles — `button.tsx` imports `./cn`, which is absent. Re-running with the name corrected repairs it, but only for a consumer who works out what happened.
+
+**Mechanism.** `scripts/resolve-picks.js` `visit()` adds a name to the resolved set *before* checking that its manifest exists, so an unknown id survives into the list `setup.sh` then copies from. The `WARN` is advisory and execution continues; `set -euo pipefail` then aborts on the first failed `cp`.
+
+**This is also the discoverability gap.** A proposal from 2026-06-11 asked for an in-file `available` menu in `loom-picks.json` so valid ids are visible at the point of use. The scaffolded file now carries a `$schema` pointer to `catalog/atoms.json`, which narrows that gap to one hop — you leave your project to read the list. Validation is the better half of the same problem: a menu helps a consumer type it right, an error that names the valid ids helps the one who did not.
+
+**Fix direction.** Validate every pick against the generated catalog **before copying anything**; on an unknown id, fail with the valid ids (or near matches) and leave the project untouched. Shares a root with item 1 — `setup.sh` mutates as it goes, with no pre-flight and no rollback — but this is the cheap half and does not depend on the content-hash work.
+
+---
+
+*Three items closed 2026-08-04 as three commits — `e36c0f6` (the `tailwind-merge` pin now resolves through one map, `scripts/code-templates/npm-pins.js`, that both `init.sh` and `setup.sh`'s printed line derive from), `59eaf62` (`badge.tsx`'s unused `VariantProps` import dropped at the template), and `aacc481` (manifest `dependencies` derived from the source's relative imports instead of hand-declared, with config-declared deps unioned in and a warning on any declared-but-not-imported). **Two corrections the entries had wrong.** The manifest under-declaration was filed against `select` alone; it was five atoms — `input`, `textarea`, `select`, `helper-text`, `file-upload` — all missing `form-field`, and `input` is among the most-picked atoms in the catalog. The badge entry asked whether the dead-import shape was worth a catalog-wide sweep; it was run, and badge was the only instance. Verified against a scratch consumer: `setup.sh` install typechecks clean under `strict` + `noUnusedLocals`, and removing `form-field.tsx` reproduces `TS2307` across seven files.*
+
+*An earlier item — emit a neutral (non-CSS) token artifact for non-web consumers — **shipped 2026-07-16** as `tokens.json` plus the NativeWind preset in [`../native/`](../native/README.md). The one piece still open is consumer-side: a native project migrating off its hand-mirrored token copy onto `tokens.json`, tracked in that project's own backlog. A shipped item kept in a file named "deferred" is the false signal this file exists to avoid.*

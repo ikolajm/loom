@@ -184,7 +184,7 @@ docs/                  Design-system engineering docs (see below)
 
 ## How it's built
 
-The full catalog model — surfaces, picker, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
+The full catalog model — surfaces, picker, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md). Known engineering debt, with fix directions, is in [`docs/DEFERRED.md`](docs/DEFERRED.md).
 
 A note on generated code: when an atom's Radix primitive has no template wired, the generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`. That marker is a deliberate fallback signal, not unfinished work. No atom in the current catalog carries one.
 
