@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { Slot } from '@radix-ui/react-slot';
 import { X } from 'lucide-react';
 import { cn } from './cn';
