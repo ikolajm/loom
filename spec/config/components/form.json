@@ -56,7 +56,7 @@
   "date-picker": {
     "$catalog": { "dependencies": ["cn", "popover", "calendar", "form-field"] },
     "$base": "text-field",
-    "$note": "Text-field variant with a persistent calendar trailing icon. The calendar panel component is deferred.",
+    "$note": "Text-field variant with a persistent calendar trailing icon that opens a Calendar in a Popover. The panel was deferred at authoring time and has since shipped — the atom composes popover + calendar.",
     "icon-slots": {
       "trailing": { "default-visible": true, "default-icon": "icon/calendar", "persistent": true }
     },
