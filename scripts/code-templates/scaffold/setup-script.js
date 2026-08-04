@@ -9,16 +9,18 @@
  *   setup.sh → picked atoms + token refresh (repeatable)
  */
 
+const { applyPins } = require('../npm-pins');
+
 function generate() {
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
-  // tailwind-merge is pinned ^3: the generated cn() registers token scales via v3's
-  // `theme` keys (radius/spacing), which v2 silently ignores — a hard minimum, not a preference.
-  const coreDeps = [
+  // Pins come from npm-pins.js, the same map setup.sh's printed line resolves through;
+  // the two install surfaces disagreed on tailwind-merge while each held its own literal.
+  const coreDeps = applyPins([
     'class-variance-authority',
     'clsx',
     'lucide-react',
-    'tailwind-merge@^3',
-  ].sort();
+    'tailwind-merge',
+  ]);
   const depString = coreDeps.join(' ');
 
   return `#!/bin/bash

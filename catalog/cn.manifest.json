@@ -6,7 +6,7 @@
   "dependencies": [],
   "npmDependencies": [
     "clsx",
-    "tailwind-merge"
+    "tailwind-merge@^3"
   ],
   "tokens": [],
   "composition": "none"

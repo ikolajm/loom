@@ -21,6 +21,7 @@ const crypto = require('crypto');
 
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
+const { applyPins } = require('./npm-pins');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
 const { generateButton } = require('./components/button');
@@ -179,6 +180,7 @@ function extractAxisKeys(obj) {
 // External npm packages a generated atom imports — the consumer install set.
 // Scans `from '<spec>'`; keeps non-relative specifiers, drops react/react-dom (peer deps
 // a React app already has). Scoped pkgs collapse to @scope/name, subpaths to the package root.
+// Pinned packages carry their range (see npm-pins.js) — setup.sh prints this list verbatim.
 function extractNpmDeps(src) {
   const deps = new Set();
   const re = /from\s+['"]([^'"]+)['"]/g;
@@ -189,7 +191,7 @@ function extractNpmDeps(src) {
     if (spec === 'react' || spec === 'react-dom' || spec.startsWith('react/') || spec.startsWith('react-dom/')) continue;
     deps.add(spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]);
   }
-  return [...deps].sort();
+  return applyPins(deps);
 }
 
 function buildManifest(def, config, version, src) {
