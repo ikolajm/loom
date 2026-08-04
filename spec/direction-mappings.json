@@ -2,7 +2,7 @@
   "$schema": "Maps questionnaire answers to concrete design token values. Used by the generation skill.",
 
   "product-type": {
-    "$note": "Tier 1 — product type suggests a style direction and component manifest. Suggestions only — user overrides anything. style-suggestions are ordered by likelihood (first = most common for this type). components use config key names.",
+    "$note": "Tier 1 — product type suggests a style direction and component manifest. Suggestions only — user overrides anything. style-suggestions are ordered by likelihood (first = most common for this type). components are catalog atom names and must match catalog/atoms.json exactly — nothing validates them today, and four of them (icon-button, chip, text-input, alert) went stale through the v2 consolidation before anyone noticed.",
 
     "dashboard": {
       "style-suggestions": ["clean", "corporate"],
@@ -10,10 +10,10 @@
       "type-scale": "compact",
       "shadow-depth": "flat",
       "components": [
-        "button", "icon-button", "badge", "chip",
-        "text-input", "select", "combobox", "date-picker", "checkbox", "switch",
+        "button", "badge",
+        "input", "select", "combobox", "date-picker", "checkbox", "switch",
         "card", "dialog", "table", "separator",
-        "toast", "alert", "tooltip", "popover", "dropdown-menu", "skeleton", "progress-bar", "empty-state",
+        "toast", "banner", "tooltip", "popover", "dropdown-menu", "skeleton", "progress-bar", "empty-state",
         "avatar", "accordion",
         "top-bar", "sidebar", "tabs", "pagination", "command-palette"
       ]
@@ -25,7 +25,7 @@
       "type-scale": "dramatic",
       "shadow-depth": "elevated",
       "components": [
-        "button", "icon-button", "badge",
+        "button", "badge",
         "card", "separator",
         "toast", "accordion", "empty-state",
         "avatar",
@@ -39,8 +39,8 @@
       "type-scale": "standard",
       "shadow-depth": "elevated",
       "components": [
-        "button", "icon-button", "badge", "chip",
-        "text-input", "select", "checkbox", "radio",
+        "button", "badge",
+        "input", "select", "checkbox", "radio",
         "card", "dialog", "separator",
         "toast", "skeleton", "dropdown-menu",
         "avatar",
@@ -55,7 +55,7 @@
       "type-scale": "dramatic",
       "shadow-depth": "flat",
       "components": [
-        "button", "icon-button", "badge",
+        "button", "badge",
         "card", "table", "separator",
         "tooltip", "accordion",
         "avatar",
@@ -69,10 +69,10 @@
       "type-scale": "compact",
       "shadow-depth": "flat",
       "components": [
-        "button", "icon-button", "badge",
-        "text-input", "textarea", "select", "combobox", "date-picker", "checkbox", "radio", "switch", "file-upload",
+        "button", "badge",
+        "input", "textarea", "select", "combobox", "date-picker", "checkbox", "radio", "switch", "file-upload",
         "card", "dialog", "table", "separator",
-        "toast", "alert", "dropdown-menu", "skeleton", "empty-state",
+        "toast", "banner", "dropdown-menu", "skeleton", "empty-state",
         "avatar",
         "top-bar", "sidebar", "tabs", "pagination", "command-palette"
       ]
@@ -84,8 +84,8 @@
       "type-scale": "standard",
       "shadow-depth": "elevated",
       "components": [
-        "button", "icon-button", "fab", "badge", "chip",
-        "text-input", "select", "checkbox", "switch",
+        "button", "fab", "badge",
+        "input", "select", "checkbox", "switch",
         "card", "dialog", "sheet",
         "toast", "skeleton", "progress-bar",
         "avatar",
@@ -100,7 +100,7 @@
       "type-scale": "dramatic",
       "shadow-depth": "flat",
       "components": [
-        "button", "icon-button", "badge",
+        "button", "badge",
         "card", "dialog", "separator",
         "tooltip",
         "top-bar", "tabs",
@@ -114,7 +114,7 @@
       "type-scale": "dramatic",
       "shadow-depth": "elevated",
       "components": [
-        "button", "icon-button", "badge",
+        "button", "badge",
         "slider", "switch",
         "card", "dialog",
         "toast", "tooltip", "progress-bar",
@@ -129,7 +129,7 @@
       "type-scale": "standard",
       "shadow-depth": "flat",
       "components": [
-        "button", "icon-button", "badge",
+        "button", "badge",
         "card", "table", "separator",
         "tooltip", "accordion",
         "kbd",
@@ -143,8 +143,8 @@
       "type-scale": "standard",
       "shadow-depth": "elevated",
       "components": [
-        "button", "icon-button", "badge", "chip",
-        "text-input", "textarea", "switch", "file-upload",
+        "button", "badge",
+        "input", "textarea", "switch", "file-upload",
         "card", "dialog",
         "toast", "popover", "dropdown-menu", "skeleton", "empty-state",
         "avatar",
