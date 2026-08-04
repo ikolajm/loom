@@ -4,7 +4,8 @@
   "description": "",
   "version": "71214df128e4",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "class-variance-authority"

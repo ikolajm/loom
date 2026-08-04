@@ -4,7 +4,8 @@
   "description": "",
   "version": "f00ff88ff0a3",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "@radix-ui/react-select",

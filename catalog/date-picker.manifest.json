@@ -4,10 +4,10 @@
   "description": "",
   "version": "02a9de70122f",
   "dependencies": [
-    "cn",
-    "popover",
     "calendar",
-    "form-field"
+    "cn",
+    "form-field",
+    "popover"
   ],
   "npmDependencies": [
     "lucide-react"

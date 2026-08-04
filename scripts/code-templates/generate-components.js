@@ -194,6 +194,19 @@ function extractNpmDeps(src) {
   return applyPins(deps);
 }
 
+// Sibling catalog atoms a generated atom imports — the transitive copy set setup.sh walks.
+// Derived, not declared: a hand-authored list under-declared `form-field` on five atoms,
+// each of which then copied into a project unable to compile. Config-declared deps are
+// unioned in rather than replaced, so a composition dep that isn't a static import still
+// has a home; buildManifest warns when one shows up, since that is usually just stale.
+function extractLocalDeps(src) {
+  const deps = new Set();
+  const re = /from\s+['"]\.\/([\w-]+)['"]/g;
+  let m;
+  while ((m = re.exec(src)) !== null) deps.add(m[1]);
+  return [...deps].sort();
+}
+
 function buildManifest(def, config, version, src) {
   const cat = config?.$catalog || {};
 
@@ -207,12 +220,19 @@ function buildManifest(def, config, version, src) {
   const variants = axisKey ? extractAxisKeys(config[axisKey]) : [];
   const sizes = extractAxisKeys(config?.sizes);
 
+  const imported = extractLocalDeps(src || '');
+  const declared = cat.dependencies || [];
+  const phantom = declared.filter(d => !imported.includes(d));
+  if (phantom.length) {
+    console.warn(`  ${def.key}: declared but not imported — ${phantom.join(', ')} (intentional composition, or stale?)`);
+  }
+
   const manifest = {
     name: def.key,
     category: cat.category || CATEGORY_MAP[def.category] || 'misc',
     description: cat.description || '',
     version: cat.version || version,
-    dependencies: cat.dependencies || ['cn'],
+    dependencies: [...new Set([...imported, ...declared])].sort(),
     npmDependencies: extractNpmDeps(src || ''),
     tokens: cat.tokens || ['color', 'typography', 'spacing', 'sizing'],
     composition: cat.composition || 'none',
