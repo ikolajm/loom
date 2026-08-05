@@ -24,132 +24,53 @@ const { resolveConfig } = require('./components/helpers');
 const { applyPins } = require('./npm-pins');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
-const { generateButton } = require('./components/button');
-const { generateFAB } = require('./components/fab');
-const { generateFabMenu } = require('./components/fab-menu');
-const { generateBadge } = require('./components/badge');
-const { generateDot } = require('./components/dot');
-const { generateTable } = require('./components/table');
-const { generateRadixDialog, generateRadixAlertDialog, generateRadixSheet } = require('./components/radix-dialogs');
-const { generateRadixCheckbox, generateRadixSwitch, generateRadixRadio, generateRadixSlider, generateRadixSelect } = require('./components/radix-form-controls');
-const { generateRadixToggle, generateRadixToggleGroup } = require('./components/radix-toggle');
-const { generateRadixTabs, generateRadixAccordion, generateRadixCollapsible } = require('./components/radix-navigation');
-const { generateRadixTooltip, generateRadixPopover, generateRadixSeparator, generateRadixAvatar, generateRadixProgress, generateRadixHoverCard } = require('./components/radix-feedback');
-const { generateRadixDropdownMenu, generateRadixContextMenu } = require('./components/radix-menus');
-const { generateRadixToast } = require('./components/radix-toast');
-const { generateRadixNavigationMenu } = require('./components/radix-navigation-menu');
-const { generateRadixScrollArea, generateLib } = require('./components/radix-fallback');
-const { generateBanner } = require('./components/banner');
-const { generateEmptyState } = require('./components/empty-state');
-const { generateListItem } = require('./components/list-item');
-const { generateStepper } = require('./components/stepper');
-const { generateTreeView } = require('./components/tree-view');
-const { generateCarousel } = require('./components/carousel');
-const { generateReveal } = require('./components/reveal');
-const { generateStagger } = require('./components/stagger');
-const { generateCountUp } = require('./components/count-up');
-const { generateScrollProgress } = require('./components/scroll-progress');
-const { generatePagination } = require('./components/pagination');
-const { generateFileUpload } = require('./components/file-upload');
-const { generateInputOTP } = require('./components/input-otp');
-const { generateCommandPalette } = require('./components/command-palette');
-const { generateCombobox } = require('./components/combobox');
-const { generateCalendar } = require('./components/calendar');
-const { generateDatePicker } = require('./components/date-picker');
-const { generateSkeleton } = require('./components/skeleton');
-const { generateFormField } = require('./components/form-field');
-const { generateHelperText } = require('./components/helper-text');
-const { generateRating } = require('./components/rating');
-const { generateTimePicker } = require('./components/time-picker');
-const { generateSearchBar } = require('./components/search-bar');
-const { generateAvatarGroup } = require('./components/avatar-group');
-const { generateNumber } = require('./components/number');
-const { generateRelativeTime } = require('./components/relative-time');
-const { generateSidebar } = require('./components/sidebar');
+const { generateLib } = require('./components/radix-fallback');
+
+// Every other template module is reached through the registry's `generator` field
+// ('module#export', resolved below) rather than a hand-written import here. Adding an
+// atom used to mean editing three places in lockstep — the registry entry, an import
+// line, and a dispatch line — and the two here were pure restatement of the first.
 
 // --- Catalog output directory (catalog/) ---
 const CATALOG_DIR = path.resolve(__dirname, '../../catalog');
 
 // ============================================================
-// === RADIX ROUTER
-// ============================================================
-
-function generateRadix(name, config, meta) {
-  const generators = {
-    'Dialog': generateRadixDialog,
-    'AlertDialog': generateRadixAlertDialog,
-    'Sheet': generateRadixSheet,
-    'Tabs': generateRadixTabs,
-    'Accordion': generateRadixAccordion,
-    'Collapsible': generateRadixCollapsible,
-    'Checkbox': generateRadixCheckbox,
-    'Switch': generateRadixSwitch,
-    'Radio': generateRadixRadio,
-    'Slider': generateRadixSlider,
-    'Toggle': generateRadixToggle,
-    'ToggleGroup': generateRadixToggleGroup,
-    'Tooltip': generateRadixTooltip,
-    'Popover': generateRadixPopover,
-    'Separator': generateRadixSeparator,
-    'Avatar': generateRadixAvatar,
-    'ProgressBar': generateRadixProgress,
-    'Select': generateRadixSelect,
-    'DropdownMenu': generateRadixDropdownMenu,
-    'ContextMenu': generateRadixContextMenu,
-    'HoverCard': generateRadixHoverCard,
-    'ScrollArea': generateRadixScrollArea,
-    'Toast': generateRadixToast,
-    'NavigationMenu': generateRadixNavigationMenu,
-  };
-
-  const gen = generators[name];
-  if (gen) return gen(name, config, meta);
-
-  console.warn(`  ${name}: Radix template not yet implemented, using cva-only fallback`);
-  return `// TODO: Add Radix primitive template for ${name} (${meta.primitive})\n` + generateCvaOnly(name, config, meta);
-}
-
-// ============================================================
 // === DISPATCH
 // ============================================================
 
+// `generator` on a registry entry is 'module#export', relative to ./components/.
+// Required lazily so a broken or renamed template fails on the atom that names it,
+// with that atom's name in the error — not at load time for the whole run.
+const generatorCache = new Map();
+
+function resolveGenerator(name, spec) {
+  if (generatorCache.has(spec)) return generatorCache.get(spec);
+  const [mod, exp] = spec.split('#');
+  if (!mod || !exp) {
+    throw new Error(`${name}: generator "${spec}" is not in module#export form`);
+  }
+  let fn;
+  try {
+    fn = require(`./components/${mod}`)[exp];
+  } catch (err) {
+    throw new Error(`${name}: generator module ./components/${mod} failed to load — ${err.message}`);
+  }
+  if (typeof fn !== 'function') {
+    throw new Error(`${name}: ./components/${mod} exports no "${exp}"`);
+  }
+  generatorCache.set(spec, fn);
+  return fn;
+}
+
 function dispatch(name, config, meta) {
-  if (name === 'Button') return generateButton(name, config, meta);
-  if (name === 'FAB') return generateFAB(name, config, meta);
-  if (name === 'FabMenu') return generateFabMenu(name, config, meta);
-  if (name === 'Badge') return generateBadge(name, config, meta);
-  if (name === 'Dot') return generateDot(name, config, meta);
-  if (name === 'Table') return generateTable(name, config, meta);
-  if (name === 'Banner') return generateBanner(name, config, meta);
-  if (name === 'EmptyState') return generateEmptyState(name, config, meta);
-  if (name === 'ListItem') return generateListItem(name, config, meta);
-  if (name === 'Stepper') return generateStepper(name, config, meta);
-  if (name === 'TreeView') return generateTreeView(name, config, meta);
-  if (name === 'Carousel') return generateCarousel(name, config, meta);
-  if (name === 'Pagination') return generatePagination(name, config, meta);
-  if (name === 'FileUpload') return generateFileUpload(name, config, meta);
-  if (name === 'InputOTP') return generateInputOTP(name, config, meta);
-  if (name === 'CommandPalette') return generateCommandPalette(name, config, meta);
-  if (name === 'Combobox') return generateCombobox(name, config, meta);
-  if (name === 'Calendar') return generateCalendar(name, config, meta);
-  if (name === 'DatePicker') return generateDatePicker(name, config, meta);
-  if (name === 'Skeleton') return generateSkeleton(name, config, meta);
-  if (name === 'FormField') return generateFormField();
-  if (name === 'HelperText') return generateHelperText(name, config, meta);
-  if (name === 'Rating') return generateRating(name, config, meta);
-  if (name === 'TimePicker') return generateTimePicker(name, config, meta);
-  if (name === 'SearchBar') return generateSearchBar(name, config, meta);
-  if (name === 'AvatarGroup') return generateAvatarGroup(name, config, meta);
-  if (name === 'NumberDisplay') return generateNumber(name, config, meta);
-  if (name === 'RelativeTime') return generateRelativeTime(name, config, meta);
-  if (name === 'Sidebar') return generateSidebar(name, config, meta);
-  if (name === 'Reveal') return generateReveal(name, config, meta);
-  if (name === 'Stagger') return generateStagger(name, config, meta);
-  if (name === 'CountUp') return generateCountUp(name, config, meta);
-  if (name === 'ScrollProgress') return generateScrollProgress(name, config, meta);
+  if (meta.generator) return resolveGenerator(name, meta.generator)(name, config, meta);
 
   switch (meta.template) {
-    case 'radix': return generateRadix(name, config, meta);
+    case 'radix':
+      // A registry entry claiming a Radix primitive with no generator to build it. Was a
+      // silent cva-only fallback inside the old router; still falls back, still says so.
+      console.warn(`  ${name}: no generator for Radix primitive ${meta.primitive}, using cva-only`);
+      return `// TODO: Add Radix primitive template for ${name} (${meta.primitive})\n` + generateCvaOnly(name, config, meta);
     case 'lib': return generateLib(name, config, meta);
     case 'cva-only':
     default: return generateCvaOnly(name, config, meta);
@@ -263,9 +184,12 @@ function generate(registry, outputDir, configs) {
   const atoms = []; // collected for the pickable-atom index (catalog/atoms.json)
 
   for (const [name, def] of Object.entries(registry)) {
-    // Config-free utilities — generated directly
+    // Config-free utilities. The branch is about the MANIFEST — buildManifest takes a
+    // null config — not about the generator, which resolves through the registry like
+    // every other atom's. It used to call its template directly, which made it a fourth
+    // place an atom's generator could be named.
     if (name === 'FormField') {
-      const tsx = generateFormField();
+      const tsx = dispatch(name, null, def);
       const manifest = buildManifest(def, null, contentVersion(tsx), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');

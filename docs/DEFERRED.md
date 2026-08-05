@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Six items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Five items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ## What's next
 
@@ -11,7 +11,6 @@ Known engineering debt in the generator, plus one presentation pass that is Jaco
 | 12 | Figma has no `semantic.component-height` collection, so the paste lost a layer code now has | Medium. Needs a Figma paste to verify — belongs with item 10 |
 | 8 | Install has two tiers by accident and names neither | A decision, not code. Blocks nothing |
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
-| 2 | Atom registration is scattered across ~15 sites | Medium. Friction and drift-risk, no defect today |
 
 Ordered by what a consumer feels, not by number. Numbers are stable ids, so the gaps are closed items — see *Closed* at the bottom. Each entry below carries the reasoning; read it before re-deriving the problem.
 
@@ -75,24 +74,11 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 2. Centralize atom registration + derive catalog counts
-
-**Problem (shotgun surgery).** Adding or cutting a single atom requires edits across ~15 sites: the generator import + dispatch `switch` (`scripts/code-templates/generate-components.js`), the `shared.js` registry, the figma orchestrator's page list, the component config, **and the hardcoded "N atoms" counts** across README / CATALOG_SPEC / questionnaire. Atom identity is scattered, and the counts are hand-maintained — which is why they drift.
-
-**Evidence.** Cutting `video-player` touched every one of those sites; the doc counts (67→66) had to be hand-edited across several files. Count drift has recurred before. (`catalog/atoms.json` is now generated as the authoritative pick list — the next step is deriving the README table + counts *from* it.)
-
-**The counts are correct as of 2026-08-04** — 67 manifests less `cn` is 66, which is what README, CATALOG_SPEC and the questionnaire all say. The drift risk is real; the drift is not present. Only the registration-scatter half is live — the counts half was retired 2026-08-04 by the `doc-counts` check in `scripts/code-templates/verify.js`, which fails the build if a hand-written count stops matching the catalog.
-
-**Fix direction.** Centralize atom registration into **one source** that the import, dispatch, and figma page-list derive from; **derive the doc counts from the catalog** (one generated number) instead of hardcoding them per file.
-
-**Why it's not a blocker.** The current pipeline is correct and ships; this is friction + drift-risk reduction for future atom adds/cuts.
-
----
-
 ## Closed
 
 One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
 
+- **Atom registration was scattered across the generator** *(2026-08-05)* — each registry entry in `shared.js` now carries `generator: 'module#export'`, resolved lazily in `generate-components.js`, which deleted 45 hand-written imports and both dispatch sites (the 33-line `if` chain and the 24-entry Radix router) for a net 329 → 253 lines. A fourth site turned up mid-refactor: the generate loop called `generateFormField()` directly, so that atom's generator was named in four places, not three; its branch is about `buildManifest` taking a null config and now routes through `dispatch` like everything else. The broken-spec paths were verified by injecting a bad module name, a bad export name and a malformed spec — each fails naming the atom, rather than at load time for the whole run. **The filed count was wrong**: "~15 sites" counted the hardcoded doc counts, automated away by the `doc-counts` check on 2026-08-04. Adding an atom touched five sites before this and touches three now — its config, its registry entry, and its template. **`ScrollArea` was found dead**: the Radix router mapped it, `radix-fallback.js` exports it, and no registry entry has ever dispatched to it. Dropped from the map; the unreferenced export in `radix-fallback.js` is left for a sweep. **The Figma half is deliberately not done** — `figma-components/orchestrator.js` groups builders into pasted *pages*, which is a presentation decision that should not be driven by the code registry. Adding a Figma component is still two sites, and that is the right coupling.
 - **`setup.sh` silently overwrote a consumer's edited atoms** *(2026-08-05)* — a resync now skips any atom you have edited, names it, and prints the diff command; `--force` takes the catalog version. The detector needed no new state: every atom's installed `manifest.json` already records `version`, the sha256 of the source that was delivered, so re-hashing the installed file answers "did the consumer change this" with nothing to keep in sync. Skipping rather than prompting is deliberate — `setup.sh` runs unattended in the playground resync, and a `[y/N]` there hangs the build. Two cases beyond the obvious one: a file with no manifest is skipped as unrecorded rather than assumed clean, **unless** it is byte-identical to the catalog, which both proves it unedited and bootstraps the check for everything installed before manifests shipped alongside — without that, `cn` was permanently unrecorded, skipped, and therefore never given the manifest that would fix it. Verified against the `badge.tsx` case from this entry: the patch survives the resync that used to revert it, and `button` still updates in the same run.
 - **`calendar` declared a `cell-size` nothing read** *(2026-08-05)* — four tiers of `height/ch-*` in `spec/config/components/form.json` that `calendar.js` never consumed; day cells size from `flex-1` and `aspect-square`, as the template's own line-24 comment said. Cut rather than wired: making the day grid token-driven means giving up `flex-1`, which is a design change, not a defect fix. Regenerating after the cut produced a zero-byte diff on `catalog/calendar.tsx`, which is what proved the key dead. Found while closing item 7, where the `compact` tier's 28px cell looked like a sub-minimum tap target and was not a tap target at all.
 - **Generating a brand dirtied the Loom working tree** *(2026-08-05)* — `npm run configs` now writes the git-ignored `spec/config/local/base/`, and every generator reads through `scripts/config-paths.js`, which prefers the local set and falls back to the committed `spec/config/base/`. A fresh clone builds Loom's own look with no answers file; a local brand never touches a tracked path. The second write site went away entirely: `colors.default-mode` moved out of `standards.json` into the generated `colors.json`, because `standards.json` declares itself locked across all projects and `index.js` was writing a per-project questionnaire answer into it — the file's own header was false. `--default-set` is the maintainer-only way to regenerate the committed set, and `base-config-provenance` reads that set by explicit path so it cannot be fooled by a local one. **A third write site in the same class survived** and is filed as item 15.
