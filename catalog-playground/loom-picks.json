@@ -58,7 +58,16 @@
       "reveal",
       "stagger",
       "count-up",
-      "scroll-progress"
+      "scroll-progress",
+      "context-menu",
+      "dropdown-menu",
+      "empty-state",
+      "hover-card",
+      "progress-bar",
+      "skeleton",
+      "spinner",
+      "toast",
+      "tooltip"
     ]
   }
 }

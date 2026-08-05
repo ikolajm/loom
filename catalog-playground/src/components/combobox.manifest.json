@@ -5,8 +5,8 @@
   "version": "2d16e7d28753",
   "dependencies": [
     "cn",
-    "popover",
-    "form-field"
+    "form-field",
+    "popover"
   ],
   "npmDependencies": [
     "cmdk",

@@ -1,13 +1,13 @@
 {
-  "name": "textarea",
-  "category": "form",
+  "name": "progress-bar",
+  "category": "feedback",
   "description": "",
-  "version": "71214df128e4",
+  "version": "2804a21f95f7",
   "dependencies": [
-    "cn",
-    "form-field"
+    "cn"
   ],
   "npmDependencies": [
+    "@radix-ui/react-progress",
     "class-variance-authority"
   ],
   "tokens": [
@@ -19,6 +19,8 @@
   "composition": "none",
   "variants": [
     "default",
+    "success",
+    "warning",
     "error"
   ],
   "sizes": [

@@ -76,6 +76,14 @@ const GENERATORS = {
       generate(configs, registry, outputDir);
     },
   },
+  // Not a generator — writes nothing. Runs last so a full `npm run generate` cannot
+  // report success over broken output; exits non-zero on any failed invariant.
+  'verify': {
+    description: 'invariant checks over the emitted catalog (writes nothing; fails the run)',
+    run: () => {
+      require('./verify').verify();
+    },
+  },
 };
 
 // --- CLI ---

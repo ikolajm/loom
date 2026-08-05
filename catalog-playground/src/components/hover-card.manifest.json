@@ -1,13 +1,13 @@
 {
-  "name": "textarea",
-  "category": "form",
+  "name": "hover-card",
+  "category": "feedback",
   "description": "",
-  "version": "71214df128e4",
+  "version": "f58e5bbf5852",
   "dependencies": [
-    "cn",
-    "form-field"
+    "cn"
   ],
   "npmDependencies": [
+    "@radix-ui/react-hover-card",
     "class-variance-authority"
   ],
   "tokens": [
@@ -18,8 +18,7 @@
   ],
   "composition": "none",
   "variants": [
-    "default",
-    "error"
+    "default"
   ],
   "sizes": [
     "sm",

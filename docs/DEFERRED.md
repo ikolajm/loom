@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator. Four items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator. Three items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ---
 
@@ -24,7 +24,7 @@ Known engineering debt in the generator. Four items, none a ship-blocker — the
 
 **Evidence.** Cutting `video-player` touched every one of those sites; the doc counts (67→66) had to be hand-edited across several files. Count drift has recurred before. (`catalog/atoms.json` is now generated as the authoritative pick list — the next step is deriving the README table + counts *from* it.)
 
-**The counts are correct as of 2026-08-04** — 67 manifests less `cn` is 66, which is what README, CATALOG_SPEC and the questionnaire all say. The drift risk is real; the drift is not present. Only the registration-scatter half is live, and item 4 would retire the counts half without this refactor.
+**The counts are correct as of 2026-08-04** — 67 manifests less `cn` is 66, which is what README, CATALOG_SPEC and the questionnaire all say. The drift risk is real; the drift is not present. Only the registration-scatter half is live — the counts half was retired 2026-08-04 by the `doc-counts` check in `scripts/code-templates/verify.js`, which fails the build if a hand-written count stops matching the catalog.
 
 **Fix direction.** Centralize atom registration into **one source** that the import, dispatch, and figma page-list derive from; **derive the doc counts from the catalog** (one generated number) instead of hardcoding them per file.
 
@@ -42,13 +42,13 @@ Known engineering debt in the generator. Four items, none a ship-blocker — the
 
 ---
 
-## 4. No generation-time invariant check over emitted output
+---
 
-**Problem.** The generator has no verification of its own output. Two defect classes shipped to a real consumer undetected — manifests that under-declared their imports, and an atom carrying an unused import that fails any `noUnusedLocals` build. Both were found by throwaway scripts of about twenty lines, and both were invisible to `npm run generate`, which reports success either way.
+*Brand-leak provenance closed 2026-08-05, and it started as a wrong diagnosis worth recording. A playground resync produced a 194-line `tokens.css` diff; it was read as a local brand overwriting the committed one, and reverted. The direction was backwards. `tokens.css` derives from `spec/config/base/`, not from `answers.json` — and `spec/config/base/` is itself a **generated artifact that is committed**, produced by `npm run configs` from the git-ignored `spec/answers.json`. Commit `e935de3` ("Repair stale archetype pick names", whose real work was 36 lines in `direction-mappings.json`) had swept a local dashboard's brand into it: primary `#731DD8` → `#FF5714`, fonts Finlandica → Space Mono, 208 lines in `colors.json`. The playground's tokens were not stale — they were the last artifact still carrying Loom's brand. The leak was live on `master` for a day, so every consumer who ran `setup.sh` in that window got the wrong brand. The brand half of `e935de3` is reverted; its `direction-mappings.json` work is kept. This was the second occurrence — an Availo brand-gen diff was left dirty on master 2026-07-16 — and that session's fix git-ignored the **input**, which is why the **output** kept drifting. `base-config-provenance` now regenerates all five base configs in memory from the committed `answers.example.json` and compares, plus checks `standards.json`'s default-mode; the generators are pure, so it needs no temp files and no prose parsing. Verified by restoring `e935de3`'s configs, which fails the check by name on both files.*
 
-**Why it earns a place.** Two instances of the same failure mode reaching a consumer is the signal, not one. The checks are cheap and the generator already holds everything they need at emit time.
+---
 
-**Fix direction.** Run the invariants as part of `generate`: every local import is declared in the manifest, no atom carries an unused import, and the doc counts match the catalog. The third retires the counts half of item 2 without doing that refactor.
+*The invariant gate closed 2026-08-05. The generator had no verification of its own output, and two defect classes reached a consumer undetected. The fix was mostly wiring what already existed: `catalog-playground` compiles the catalog with the real TypeScript compiler, but ran `strict` without `noUnusedLocals`, picked only 57 of 66 atoms, and had silently drifted from the catalog — so it was verifying a stale, partial catalog. It now enables `noUnusedLocals` + `noUnusedParameters`, picks all 66 (a synced atom is typechecked whether or not it has a gallery story), and `scripts/code-templates/verify.js` runs last in `npm run generate`, failing the run on three invariants a compiler cannot see: hand-written counts matching the catalog, the playground's synced copies matching what the generator emits, and every relative import being declared. The playground is checked, never auto-synced — copying into it from here would make it a hand-maintained mirror, which is the failure mode item 2 describes. Each check reports its denominator, because a check whose scope silently shrank reads identically to one that passed. Verified by injecting each defect in turn: a reintroduced unused import fails the run on parity and then the compiler catches it by name, a hand-edited count fails with file and line, an under-declared manifest fails on two checks at once, and a dropped atom fails on coverage.*
 
 ---
 

@@ -1,14 +1,15 @@
 {
-  "name": "textarea",
-  "category": "form",
+  "name": "dropdown-menu",
+  "category": "feedback",
   "description": "",
-  "version": "71214df128e4",
+  "version": "ad43a2fb2f2c",
   "dependencies": [
-    "cn",
-    "form-field"
+    "cn"
   ],
   "npmDependencies": [
-    "class-variance-authority"
+    "@radix-ui/react-dropdown-menu",
+    "class-variance-authority",
+    "lucide-react"
   ],
   "tokens": [
     "color",
@@ -18,8 +19,7 @@
   ],
   "composition": "none",
   "variants": [
-    "default",
-    "error"
+    "default"
   ],
   "sizes": [
     "sm",

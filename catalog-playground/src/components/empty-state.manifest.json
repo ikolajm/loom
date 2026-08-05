@@ -1,11 +1,10 @@
 {
-  "name": "textarea",
-  "category": "form",
+  "name": "empty-state",
+  "category": "feedback",
   "description": "",
-  "version": "71214df128e4",
+  "version": "70a1fabd6df0",
   "dependencies": [
-    "cn",
-    "form-field"
+    "cn"
   ],
   "npmDependencies": [
     "class-variance-authority"
@@ -18,8 +17,7 @@
   ],
   "composition": "none",
   "variants": [
-    "default",
-    "error"
+    "default"
   ],
   "sizes": [
     "sm",

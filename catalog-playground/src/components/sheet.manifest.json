@@ -4,8 +4,8 @@
   "description": "",
   "version": "5ed1e088b64f",
   "dependencies": [
-    "cn",
-    "button"
+    "button",
+    "cn"
   ],
   "npmDependencies": [
     "@radix-ui/react-dialog",
