@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Seven items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Six items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ## What's next
 
@@ -12,7 +12,6 @@ Known engineering debt in the generator, plus one presentation pass that is Jaco
 | 8 | Install has two tiers by accident and names neither | A decision, not code. Blocks nothing |
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
 | 2 | Atom registration is scattered across ~15 sites | Medium. Friction and drift-risk, no defect today |
-| 1 | `setup.sh` overwrites a consumer's local atom edits with no warning | Medium. Needs the per-atom content hash the manifests already carry |
 
 Ordered by what a consumer feels, not by number. Numbers are stable ids, so the gaps are closed items — see *Closed* at the bottom. Each entry below carries the reasoning; read it before re-deriving the problem.
 
@@ -90,24 +89,11 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 1. `setup.sh` overwrite-protection (content-hash-driven)
-
-**Problem.** `setup.sh` re-copies picked atoms with a plain `cp` (no diff, no backup, no warning), so re-running it **silently overwrites a consumer's local edits** to an atom file (`src/components/*.tsx`), plus `cn.ts` and `tokens.css`. A system that markets "atoms are project-owned, edit freely" silently clobbering those edits on resync is a footgun. (shadcn's CLI prompts before overwriting modified files; ours does not.)
-
-**Why it's not a blocker.** The intended override path is the **call site** — `className`/prop/variant, or a wrapper in the consumer's own app — which lives *outside* the atom file and survives every resync by construction. The silent overwrite only bites a consumer who forks an atom *file* and then resyncs that atom.
-
-**That case is no longer hypothetical.** A consuming project had to patch `badge.tsx` for the dead-import defect, and two later `setup.sh` runs — adding `select`, then `form-field` — silently reverted it both times. Each reverted a fix for a defect Loom shipped, so the consumer re-broke on a resync they ran to fix a *different* Loom defect.
-
-**The compounding case is now closed at the source, which is why this dropped to last.** The three defects that gave a consumer a reason to hand-patch a generated file all shipped fixes on 2026-08-04 (see the closing note). This item is now about the general footgun, not about that specific trap.
-
-**Fix direction.** Use the per-atom **content hash** that manifests already carry (it changes iff the atom's generated source changes). On resync, compare the consumer's local copy against the version `setup.sh` last delivered; if it was modified locally, **warn / skip / back up** before overwriting (`badge.tsx` was edited — overwrite? [y/N]). This is the concrete *job* for the per-atom version mechanism (the top-level `loom-picks` version stamp was cut for being an unenforced duplicate of this finer hash).
-
----
-
 ## Closed
 
 One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
 
+- **`setup.sh` silently overwrote a consumer's edited atoms** *(2026-08-05)* — a resync now skips any atom you have edited, names it, and prints the diff command; `--force` takes the catalog version. The detector needed no new state: every atom's installed `manifest.json` already records `version`, the sha256 of the source that was delivered, so re-hashing the installed file answers "did the consumer change this" with nothing to keep in sync. Skipping rather than prompting is deliberate — `setup.sh` runs unattended in the playground resync, and a `[y/N]` there hangs the build. Two cases beyond the obvious one: a file with no manifest is skipped as unrecorded rather than assumed clean, **unless** it is byte-identical to the catalog, which both proves it unedited and bootstraps the check for everything installed before manifests shipped alongside — without that, `cn` was permanently unrecorded, skipped, and therefore never given the manifest that would fix it. Verified against the `badge.tsx` case from this entry: the patch survives the resync that used to revert it, and `button` still updates in the same run.
 - **`calendar` declared a `cell-size` nothing read** *(2026-08-05)* — four tiers of `height/ch-*` in `spec/config/components/form.json` that `calendar.js` never consumed; day cells size from `flex-1` and `aspect-square`, as the template's own line-24 comment said. Cut rather than wired: making the day grid token-driven means giving up `flex-1`, which is a design change, not a defect fix. Regenerating after the cut produced a zero-byte diff on `catalog/calendar.tsx`, which is what proved the key dead. Found while closing item 7, where the `compact` tier's 28px cell looked like a sub-minimum tap target and was not a tap target at all.
 - **Generating a brand dirtied the Loom working tree** *(2026-08-05)* — `npm run configs` now writes the git-ignored `spec/config/local/base/`, and every generator reads through `scripts/config-paths.js`, which prefers the local set and falls back to the committed `spec/config/base/`. A fresh clone builds Loom's own look with no answers file; a local brand never touches a tracked path. The second write site went away entirely: `colors.default-mode` moved out of `standards.json` into the generated `colors.json`, because `standards.json` declares itself locked across all projects and `index.js` was writing a per-project questionnaire answer into it — the file's own header was false. `--default-set` is the maintainer-only way to regenerate the committed set, and `base-config-provenance` reads that set by explicit path so it cannot be fooled by a local one. **A third write site in the same class survived** and is filed as item 15.
 - **Control heights were hardcoded and `--touch-min` was decorative** *(2026-08-05)* — a `controlHeight` Tier 2 key (`compact` / `standard` / `touch`) selects a seven-role ladder in `direction-mappings.json`; `generate-sizing.js` emits it, atoms write `h-control-md`, and the `touch-target` check in `verify.js` fails the build if any tier of the `touch` ladder drops under the 44px minimum or if a mobile archetype stops resolving to it. `consumer-mobile` and `social` resolve to `touch`, `dashboard` and `admin` to `compact`. **The filed size measured the generated catalog, not the source** — 102 refs across 26 `catalog/*.tsx` files, which `npm run generate` rewrites; the source was 88 declarations across six `spec/config/components/*.json` files, organised as 29 ladders, plus 8 refs hardcoded in JS templates. `styleDirection` deliberately does not supply this key. Avatar portraits and stepper indicators stayed on `ch-*` primitives — they are not controls. `input-otp`'s square cell took `control` on Jacob's call, which is the pass's one deliberate value change: its cells were on a ch-5/7/9 ladder that matched `row` by coincidence rather than by meaning, and they shrink to 32/40/48px so that the role set names what a thing *is*. Under `touch` they land at 44/48/56px, which is the point.
