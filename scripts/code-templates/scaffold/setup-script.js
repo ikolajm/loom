@@ -41,24 +41,70 @@ function generate(picks = null) {
 # Add atoms separately with the catalog sync: from the loom repo, run
 #   ./setup.sh <this-project-dir>
 #
-# Usage: ./scaffold/init.sh <frontend-dir>
+# Usage: ./scaffold/init.sh <frontend-dir> [--tokens]
+#   (default)  catalog tier — app shell + substrate + core deps + starter picker
+#   --tokens   tokens tier  — tokens.css + tokens.json and nothing else
 # Run from the generated/ directory. Idempotent.
 
 set -euo pipefail
 
-FRONTEND_DIR="\${1:?Usage: init.sh <frontend-dir>}"
+FRONTEND_DIR=""
+TIER="catalog"
+for arg in "$@"; do
+  case "$arg" in
+    --tokens) TIER="tokens" ;;
+    *) [ -z "$FRONTEND_DIR" ] && FRONTEND_DIR="$arg" ;;
+  esac
+done
+: "\${FRONTEND_DIR:?Usage: init.sh <frontend-dir> [--tokens]}"
 SRC_DIR="$FRONTEND_DIR/src"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GEN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "=== Loom init (app shell + substrate) ==="
+if [ "$TIER" = "tokens" ]; then
+  echo "=== Loom init — tokens tier ==="
+else
+  echo "=== Loom init — catalog tier (app shell + substrate) ==="
+fi
 echo "Source: $GEN_DIR"
 echo "Target: $FRONTEND_DIR"
 echo ""
 
 # --- Validate ---
+# The tokens tier writes two files into src/ and touches nothing else, so it does not
+# require src/app/ — it does not assume Next.js, or a React app at all.
 [ -f "$GEN_DIR/tokens.css" ] || { echo "ERROR: tokens.css not found in $GEN_DIR — run the orchestrator first."; exit 1; }
-[ -d "$SRC_DIR/app" ]        || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
+if [ "$TIER" = "tokens" ]; then
+  [ -d "$SRC_DIR" ] || { echo "ERROR: $SRC_DIR not found — expected a project with a src/ directory."; exit 1; }
+else
+  [ -d "$SRC_DIR/app" ] || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
+fi
+
+# --- Tokens tier: the substrate, and stop ---------------------------------
+# Everything below this block is the catalog tier: it writes a stylesheet, a layout, a
+# provider and a route, and installs four packages. A consumer who wants Loom's design
+# decisions as values and owns their own components should get none of that.
+if [ "$TIER" = "tokens" ]; then
+  echo "[1/2] Copying tokens.css..."
+  cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
+
+  echo "[2/2] Copying tokens.json..."
+  if [ -f "$GEN_DIR/tokens.json" ]; then
+    cp "$GEN_DIR/tokens.json" "$SRC_DIR/tokens.json"
+  else
+    echo "  tokens.json not found in $GEN_DIR — skipped (run the orchestrator to emit it)"
+  fi
+
+  echo ""
+  echo "=== Tokens ready ==="
+  echo ""
+  echo "Wire the stylesheet into your global CSS, after the tailwindcss import:"
+  echo "  @import \\"../tokens.css\\";   /* needs Tailwind v4 */"
+  echo ""
+  echo "tokens.json is the same data with no CSS runtime — for a native or non-web consumer."
+  echo "No atoms were installed. To take them too, re-run without --tokens."
+  exit 0
+fi
 
 # --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
 # src/providers/ is deliberately OUTSIDE src/components/. The two installs own disjoint

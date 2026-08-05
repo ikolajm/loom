@@ -101,7 +101,14 @@ Alongside the web `tokens.css`, `generate` emits **`tokens.json`** — the same 
 
 The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
 
-Only the tokens tier is currently a first-class path on native. On web, take the catalog tier and delete what you don't want — a `--tokens` flag for `init.sh` is filed in [`docs/DEFERRED.md`](docs/DEFERRED.md).
+Both tiers are first-class on web:
+
+```bash
+./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes src/tokens.css + src/tokens.json, nothing else
+./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
+```
+
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` into your global stylesheet after the `tailwindcss` import and use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
