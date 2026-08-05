@@ -11,9 +11,9 @@ const listItemVariants = cva(
         bordered: 'bg-transparent border-outline-subtle border',
       },
       size: {
-        sm: 'h-ch-5 px-3 gap-2',
-        md: 'h-ch-7 px-4 gap-3',
-        lg: 'h-ch-9 px-6 gap-4',
+        sm: 'h-row-sm px-3 gap-2',
+        md: 'h-row-md px-4 gap-3',
+        lg: 'h-row-lg px-6 gap-4',
       },
     },
     defaultVariants: {

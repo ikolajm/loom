@@ -130,11 +130,20 @@ function buildSection5_Sizing() {
     lines.push(`--${token}: ${val};`);
   }
 
-  // Component height
+  // Component height primitives
   lines.push('');
-  lines.push('/* === Component Height === */');
+  lines.push('/* === Component Height Primitives === */');
   for (const [token, val] of Object.entries(standards.sizing['component-height'])) {
     lines.push(`--${token}: ${val};`);
+  }
+
+  // Component height semantic — role → ladder, picked by the archetype's controlHeight.
+  lines.push('');
+  lines.push('/* === Component Height Semantic === */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const [tier, token] of Object.entries(tiers)) {
+      lines.push(`--height-${role}-${tier}: var(--${token});`);
+    }
   }
 
   // Touch target
@@ -418,11 +427,32 @@ function buildSection12_TailwindTheme() {
     lines.push(`  --height-${token}: var(--${token});`);
   }
 
+  // Semantic heights — enables h-control-md, h-bar-sm, etc. The block is `@theme inline`,
+  // so this substitutes textually into the utility rather than redefining the :root var;
+  // the same self-reference is how semantic radius reaches `rounded-component`.
+  lines.push('');
+  lines.push('  /* Component Heights (semantic) */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const tier of Object.keys(tiers)) {
+      lines.push(`  --height-${role}-${tier}: var(--height-${role}-${tier});`);
+    }
+  }
+
   // Component Sizes (square) — enables size-ch-0 through size-ch-9 (for icon-only buttons etc.)
   lines.push('');
   lines.push('  /* Component Sizes (square) */');
   for (const token of Object.keys(standards.sizing['component-height'])) {
     lines.push(`  --size-${token}: var(--${token});`);
+  }
+
+  // Square semantic — a square control (icon button, fab, pagination cell) takes its edge
+  // from the same role ladder, so size-control-md and h-control-md can never disagree.
+  lines.push('');
+  lines.push('  /* Component Sizes (square, semantic) */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const tier of Object.keys(tiers)) {
+      lines.push(`  --size-${role}-${tier}: var(--height-${role}-${tier});`);
+    }
   }
 
   // Icon Sizes — enables w-icon-0 through w-icon-4, h-icon-0 through h-icon-4

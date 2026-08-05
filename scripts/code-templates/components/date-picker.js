@@ -11,9 +11,9 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const triggerSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 px-2 text-input-sm',
-  md: 'h-ch-5 px-3 text-input-md',
-  lg: 'h-ch-7 px-4 text-input-lg',
+  sm: 'h-control-sm px-2 text-input-sm',
+  md: 'h-control-md px-3 text-input-md',
+  lg: 'h-control-lg px-4 text-input-lg',
 };
 
 const iconSizeMap: Record<string, string> = {

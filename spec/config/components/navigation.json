@@ -14,9 +14,9 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/ch-7", "x-padding": "{scale.3}", "gap": "{scale.2}", "title-font-size": "16px", "title-line-height": "24px", "icon-size": "icon/icon-2" },
-      "md": { "height": "height/ch-8", "x-padding": "{scale.4}", "gap": "{scale.3}", "title-font-size": "18px", "title-line-height": "28px", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.4}", "title-font-size": "20px", "title-line-height": "28px", "icon-size": "icon/icon-3" }
+      "sm": { "height": "height/bar-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "title-font-size": "16px", "title-line-height": "24px", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/bar-md", "x-padding": "{scale.4}", "gap": "{scale.3}", "title-font-size": "18px", "title-line-height": "28px", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/bar-lg", "x-padding": "{scale.6}", "gap": "{scale.4}", "title-font-size": "20px", "title-line-height": "28px", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -41,9 +41,9 @@
       }
     },
     "sizes": {
-      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/ch-5", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/ch-7", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/ch-8", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -66,9 +66,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/ch-8", "x-padding": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "height": "height/nav-item-sm", "x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/nav-item-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/nav-item-lg", "x-padding": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -91,8 +91,8 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/ch-8", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "icon-size": "icon/icon-2" },
-      "md": { "height": "height/ch-9", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-2" },
+      "sm": { "height": "height/bottom-bar-sm", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/bottom-bar-md", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-2" },
       "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
@@ -140,9 +140,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "item-size": "height/ch-3", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "item-size": "height/ch-5", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "item-size": "height/ch-7", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "item-size": "height/control-sm", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
+      "md": { "item-size": "height/control-md", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
+      "lg": { "item-size": "height/control-lg", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -170,9 +170,9 @@
       "radius": "radius/card"
     },
     "sizes": {
-      "sm": { "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "14px", "line-height": "20px" },
-      "md": { "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "lg": { "item-height": "height/ch-8", "item-x-padding": "{scale.6}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+      "sm": { "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "14px", "line-height": "20px" },
+      "md": { "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+      "lg": { "item-height": "height/nav-item-lg", "item-x-padding": "{scale.6}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -213,9 +213,9 @@
       "text-transform": "uppercase"
     },
     "sizes": {
-      "sm": { "max-width": "480px", "radius": "radius/modal", "input-font-size": "16px", "input-line-height": "24px", "input-x-padding": "{scale.3}", "input-height": "height/ch-7", "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "10px", "group-line-height": "14px", "icon-size": "icon/icon-1" },
-      "md": { "max-width": "560px", "radius": "radius/modal", "input-font-size": "18px", "input-line-height": "28px", "input-x-padding": "{scale.4}", "input-height": "height/ch-8", "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" },
-      "lg": { "max-width": "640px", "radius": "radius/modal", "input-font-size": "20px", "input-line-height": "28px", "input-x-padding": "{scale.6}", "input-height": "height/ch-9", "item-height": "height/ch-8", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "16px", "item-line-height": "24px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" }
+      "sm": { "max-width": "480px", "radius": "radius/modal", "input-font-size": "16px", "input-line-height": "24px", "input-x-padding": "{scale.3}", "input-height": "height/bar-sm", "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "10px", "group-line-height": "14px", "icon-size": "icon/icon-1" },
+      "md": { "max-width": "560px", "radius": "radius/modal", "input-font-size": "18px", "input-line-height": "28px", "input-x-padding": "{scale.4}", "input-height": "height/bar-md", "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" },
+      "lg": { "max-width": "640px", "radius": "radius/modal", "input-font-size": "20px", "input-line-height": "28px", "input-x-padding": "{scale.6}", "input-height": "height/bar-lg", "item-height": "height/nav-item-lg", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "16px", "item-line-height": "24px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   }

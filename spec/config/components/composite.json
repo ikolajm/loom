@@ -75,9 +75,9 @@
       "width": "border-width/bw-1"
     },
     "sizes": {
-      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "indent": "{scale.4}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1", "expand-icon": "icon/icon-1" },
-      "md": { "item-height": "height/ch-5", "x-padding": "{scale.3}", "indent": "{scale.5}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-1" },
-      "lg": { "item-height": "height/ch-7", "x-padding": "{scale.4}", "indent": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-2" }
+      "sm": { "item-height": "height/control-sm", "x-padding": "{scale.2}", "indent": "{scale.4}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1", "expand-icon": "icon/icon-1" },
+      "md": { "item-height": "height/control-md", "x-padding": "{scale.3}", "indent": "{scale.5}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-1" },
+      "lg": { "item-height": "height/control-lg", "x-padding": "{scale.4}", "indent": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2", "expand-icon": "icon/icon-2" }
     },
     "default": { "size": "md" }
   }

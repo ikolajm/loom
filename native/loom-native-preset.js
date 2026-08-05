@@ -54,7 +54,13 @@ function loomNativePreset(tokens, opts = {}) {
   }
 
   // Component heights keep their full ch-N name (→ h-ch-6); add the touch floor.
-  const height = { ...tokens.componentHeight, touch: tokens.touchTarget };
+  // Semantic roles flatten to <role>-<tier> (→ h-control-md), matching the web utility
+  // names exactly — that shared vocabulary is the point of the values-port boundary,
+  // and it means a screen ported from web keeps its height classes verbatim.
+  const height = { ...tokens.componentHeight.primitive, touch: tokens.touchTarget };
+  for (const [role, tiers] of Object.entries(tokens.componentHeight.semantic)) {
+    for (const [tier, val] of Object.entries(tiers)) height[`${role}-${tier}`] = val;
+  }
 
   // Icons are square — expose on width AND height so w-icon-2 / h-icon-2 both resolve
   // (the web output emits both via --size-icon-*).

@@ -5,9 +5,9 @@ import { Search, X } from 'lucide-react';
 import { cn } from './cn';
 
 const sizeMap: Record<string, string> = {
-  sm: 'h-ch-3 text-input-sm',
-  md: 'h-ch-5 text-input-md',
-  lg: 'h-ch-7 text-input-lg',
+  sm: 'h-control-sm text-input-sm',
+  md: 'h-control-md text-input-md',
+  lg: 'h-control-lg text-input-lg',
 };
 
 const iconSizeMap: Record<string, string> = {

@@ -2,7 +2,7 @@
   "name": "top-bar",
   "category": "navigation",
   "description": "",
-  "version": "9a0696f49e84",
+  "version": "6b43fc8b0298",
   "dependencies": [
     "cn"
   ],

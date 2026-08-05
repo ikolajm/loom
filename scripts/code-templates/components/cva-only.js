@@ -195,7 +195,7 @@ function generateCompoundSubs(name, config, meta) {
       { sub: 'TableHeader', el: 'thead', classes: '' },
       { sub: 'TableBody', el: 'tbody', classes: '' },
       { sub: 'TableRow', el: 'tr', classes: 'border-b border-outline-subtle transition-colors hover:bg-surface-1' },
-      { sub: 'TableHead', el: 'th', classes: 'h-ch-5 px-4 text-left align-middle font-medium text-on-surface-variant' },
+      { sub: 'TableHead', el: 'th', classes: 'h-row-sm px-4 text-left align-middle font-medium text-on-surface-variant' },
       { sub: 'TableCell', el: 'td', classes: 'px-4 py-2 align-middle' },
     ],
     'BottomNav': [

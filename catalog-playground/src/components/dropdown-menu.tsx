@@ -21,15 +21,15 @@ const dropdownMenuContentVariants = cva(
 );
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 text-body-sm px-2',
-  md: 'h-ch-4 text-body-md px-3',
-  lg: 'h-ch-5 text-body-lg px-4',
+  sm: 'h-menu-item-sm text-body-sm px-2',
+  md: 'h-menu-item-md text-body-md px-3',
+  lg: 'h-menu-item-lg text-body-lg px-4',
 };
 
 const insetItemSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 text-body-sm pl-8 pr-2',
-  md: 'h-ch-4 text-body-md pl-8 pr-3',
-  lg: 'h-ch-5 text-body-lg pl-8 pr-4',
+  sm: 'h-menu-item-sm text-body-sm pl-8 pr-2',
+  md: 'h-menu-item-md text-body-md pl-8 pr-3',
+  lg: 'h-menu-item-lg text-body-lg pl-8 pr-4',
 };
 
 type SizeProps = { size?: 'sm' | 'md' | 'lg' };

@@ -2,7 +2,7 @@
   "name": "select",
   "category": "form",
   "description": "",
-  "version": "f00ff88ff0a3",
+  "version": "d890d842d81b",
   "dependencies": [
     "cn",
     "form-field"

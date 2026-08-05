@@ -16,9 +16,9 @@ const selectTriggerVariants = cva(
         error: 'bg-surface text-on-surface border-error border',
       },
       size: {
-        sm: 'h-ch-3 px-3 py-1 gap-2 rounded-input text-input-sm',
-        md: 'h-ch-5 px-4 py-2 gap-2 rounded-input text-input-md',
-        lg: 'h-ch-7 px-4 py-3 gap-2 rounded-input text-input-lg',
+        sm: 'h-control-sm px-3 py-1 gap-2 rounded-input text-input-sm',
+        md: 'h-control-md px-4 py-2 gap-2 rounded-input text-input-md',
+        lg: 'h-control-lg px-4 py-3 gap-2 rounded-input text-input-lg',
       },
     },
     defaultVariants: {

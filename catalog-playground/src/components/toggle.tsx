@@ -10,9 +10,9 @@ const toggleVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-ch-3 px-2 py-1 gap-1 rounded-component text-action-sm',
-        md: 'h-ch-5 px-3 py-2 gap-2 rounded-component text-action-md',
-        lg: 'h-ch-7 px-4 py-2 gap-2 rounded-component text-action-lg',
+        sm: 'h-control-sm px-2 py-1 gap-1 rounded-component text-action-sm',
+        md: 'h-control-md px-3 py-2 gap-2 rounded-component text-action-md',
+        lg: 'h-control-lg px-4 py-2 gap-2 rounded-component text-action-lg',
       },
     },
     defaultVariants: { size: 'md' },

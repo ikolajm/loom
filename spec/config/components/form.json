@@ -17,9 +17,9 @@
     },
     "width": "280px",
     "sizes": {
-      "sm": { "height": "height/ch-3", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input", "icon-size": "icon/icon-3" }
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input", "icon-size": "icon/icon-3" }
     }
   },
 
@@ -120,9 +120,9 @@
     },
     "item": {
       "sizes": {
-        "sm": { "height": "height/ch-3", "x-padding": "{scale.2}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px" },
-        "md": { "height": "height/ch-4", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-        "lg": { "height": "height/ch-5", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" }
+        "sm": { "height": "height/menu-item-sm", "x-padding": "{scale.2}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px" },
+        "md": { "height": "height/menu-item-md", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
+        "lg": { "height": "height/menu-item-lg", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" }
       }
     },
     "empty": {
@@ -181,9 +181,9 @@
     },
     "$exception": "OTP cells are square — width equals height. Monospace-like letter-spacing ensures centered digits. Cell sizes are hardcoded to maintain square proportions.",
     "sizes": {
-      "sm": { "cell-size": "height/ch-5", "gap": "{scale.2}", "radius": "radius/input", "font-size": "16px", "line-height": "24px", "border-width": "border-width/bw-1" },
-      "md": { "cell-size": "height/ch-7", "gap": "{scale.2}", "radius": "radius/input", "font-size": "20px", "line-height": "28px", "border-width": "border-width/bw-1" },
-      "lg": { "cell-size": "height/ch-9", "gap": "{scale.3}", "radius": "radius/input", "font-size": "24px", "line-height": "32px", "border-width": "border-width/bw-2" }
+      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "radius": "radius/input", "font-size": "16px", "line-height": "24px", "border-width": "border-width/bw-1" },
+      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "radius": "radius/input", "font-size": "20px", "line-height": "28px", "border-width": "border-width/bw-1" },
+      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "radius": "radius/input", "font-size": "24px", "line-height": "32px", "border-width": "border-width/bw-2" }
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -306,9 +306,9 @@
     },
     "$note": "Static input shell (search icon + clear X); a live-results dropdown is deferred. Controlled (`value`) or uncontrolled.",
     "sizes": {
-      "sm": { "height": "height/ch-3" },
-      "md": { "height": "height/ch-5" },
-      "lg": { "height": "height/ch-7" }
+      "sm": { "height": "height/control-sm" },
+      "md": { "height": "height/control-md" },
+      "lg": { "height": "height/control-lg" }
     },
     "default": { "size": "md" }
   }

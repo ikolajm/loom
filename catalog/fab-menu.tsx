@@ -10,9 +10,9 @@ const fabMenuTriggerVariants = cva(
         default: 'bg-primary-container text-on-primary-container',
       },
       size: {
-        sm: 'size-ch-4 rounded-card shadow-[var(--shadow-2)]',
-        md: 'size-ch-6 rounded-card shadow-[var(--shadow-3)]',
-        lg: 'size-ch-8 rounded-card shadow-[var(--shadow-3)]',
+        sm: 'size-fab-sm rounded-card shadow-[var(--shadow-2)]',
+        md: 'size-fab-md rounded-card shadow-[var(--shadow-3)]',
+        lg: 'size-fab-lg rounded-card shadow-[var(--shadow-3)]',
       },
     },
     defaultVariants: {
@@ -30,9 +30,9 @@ const fabMenuActionVariants = cva(
         default: 'bg-primary-container text-on-primary-container',
       },
       size: {
-        sm: 'size-ch-3 rounded-card shadow-[var(--shadow-1)]',
-        md: 'size-ch-5 rounded-card shadow-[var(--shadow-2)]',
-        lg: 'size-ch-7 rounded-card shadow-[var(--shadow-2)]',
+        sm: 'size-control-sm rounded-card shadow-[var(--shadow-1)]',
+        md: 'size-control-md rounded-card shadow-[var(--shadow-2)]',
+        lg: 'size-control-lg rounded-card shadow-[var(--shadow-2)]',
       },
     },
     defaultVariants: {

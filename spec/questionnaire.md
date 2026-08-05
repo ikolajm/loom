@@ -47,7 +47,8 @@ not Loom's "look"):
   "edges": "sharp",
   "density": "comfortable",
   "shadowDepth": "flat",
-  "typeScale": "standard"
+  "typeScale": "standard",
+  "controlHeight": "standard"
 }
 ```
 
@@ -64,6 +65,7 @@ not Loom's "look"):
 | `density` | no | `compact` · `comfortable` · `airy` | `comfortable` | spacing scale |
 | `shadowDepth` | no | `flat` · `elevated` | `elevated` | shadow/elevation scale |
 | `typeScale` | no | `compact` · `standard` · `dramatic` | `standard` | type size range |
+| `controlHeight` | no | `compact` · `standard` · `touch` | `standard` | height of buttons, inputs, rows, bars |
 | `defaultMode` | no | `dark` · `light` | `dark` | which color mode loads first |
 | `projectName` | no | string | `null` | metadata only |
 | `productType` | no | see list below | `null` | Tier 2 defaults + starter atom picks |
@@ -91,10 +93,10 @@ pick from [`parity-safe-fonts.json`](parity-safe-fonts.json). Off-list fonts are
 `npm run configs` flags them, and the Figma typography paste reports availability and
 **substitutes Inter** for any font this Figma can't render (the build completes, logged once).
 
-## The four look-and-feel answers, in plain terms
+## The five look-and-feel answers, in plain terms
 
 These are the ones that need taste. Each is a word, not a number — Loom turns it into the
-actual scale. **You can skip all four** and let `productType` / `styleDirection` supply
+actual scale. **You can skip all five** and let `productType` / `styleDirection` supply
 them (next section).
 
 - **`edges`** — how rounded corners are. `none` is square, `sharp` is a slight round,
@@ -107,8 +109,15 @@ them (next section).
 - **`typeScale`** — the size gap between your biggest heading and body text. `compact` keeps
   headings close to body size, `dramatic` makes them large, `standard` is a normal
   editorial ramp.
+- **`controlHeight`** — how tall the things you click are: buttons, inputs, list rows, menu
+  items, nav bars. `compact` is for dense pointer-driven screens, `standard` is the desktop
+  norm, and `touch` holds every one of them at or above the 44px minimum a finger needs.
+  **Answer `touch` if the product ships to a phone** — nothing else in the questionnaire
+  enforces that floor.
 
 If you are not sure, answer `productType` instead and let the archetype pick these for you.
+`controlHeight` is the one field `styleDirection` does **not** supply: height is ergonomics,
+not style, so it comes from `productType` or from you.
 
 ## Intent fields — `productType`, `styleDirection`
 
@@ -122,8 +131,8 @@ that need taste and a mockup (`density`, `typeScale`) and answer one that anyone
     productType  <  styleDirection  <  the value you write
 
 A value you write is **never** overridden. Omit `edges` / `density` / `shadowDepth` /
-`typeScale` to let intent supply them; the built-in defaults apply only when nothing else
-does. This matters because the two blocks genuinely conflict: `dashboard` sets
+`typeScale` / `controlHeight` to let intent supply them; the built-in defaults apply only
+when nothing else does. This matters because the two blocks genuinely conflict: `dashboard` sets
 `type-scale: compact` while its own first style-suggestion `clean` sets `standard`, so
 `clean` wins. `npm run configs` prints each resolved value with the layer that supplied it.
 

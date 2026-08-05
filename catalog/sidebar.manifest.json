@@ -2,7 +2,7 @@
   "name": "sidebar",
   "category": "navigation",
   "description": "",
-  "version": "b53b51818ccc",
+  "version": "5502345ca0c8",
   "dependencies": [
     "cn"
   ],

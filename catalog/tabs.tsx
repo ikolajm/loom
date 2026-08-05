@@ -10,9 +10,9 @@ const tabsListVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-ch-5 text-[12px] leading-[16px]',
-        md: 'h-ch-7 text-[14px] leading-[20px]',
-        lg: 'h-ch-8 text-[16px] leading-[24px]',
+        sm: 'h-nav-item-sm text-[12px] leading-[16px]',
+        md: 'h-nav-item-md text-[14px] leading-[20px]',
+        lg: 'h-nav-item-lg text-[16px] leading-[24px]',
       },
     },
     defaultVariants: { size: 'md' },

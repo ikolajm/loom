@@ -10,12 +10,12 @@ const fabVariants = cva(
         default: 'bg-primary-container text-on-primary-container',
       },
       size: {
-        'sm': 'size-ch-4 rounded-card shadow-[var(--shadow-2)]',
-        'md': 'size-ch-6 rounded-card shadow-[var(--shadow-3)]',
-        'lg': 'size-ch-8 rounded-card shadow-[var(--shadow-3)]',
-        'ext-sm': 'h-ch-4 px-3 gap-2 rounded-card shadow-[var(--shadow-2)] text-[12px] leading-[16px]',
-        'ext-md': 'h-ch-6 px-4 gap-2 rounded-card shadow-[var(--shadow-3)] text-[14px] leading-[20px]',
-        'ext-lg': 'h-ch-8 px-5 gap-3 rounded-card shadow-[var(--shadow-3)] text-[16px] leading-[24px]',
+        'sm': 'size-fab-sm rounded-card shadow-[var(--shadow-2)]',
+        'md': 'size-fab-md rounded-card shadow-[var(--shadow-3)]',
+        'lg': 'size-fab-lg rounded-card shadow-[var(--shadow-3)]',
+        'ext-sm': 'h-fab-sm px-3 gap-2 rounded-card shadow-[var(--shadow-2)] text-[12px] leading-[16px]',
+        'ext-md': 'h-fab-md px-4 gap-2 rounded-card shadow-[var(--shadow-3)] text-[14px] leading-[20px]',
+        'ext-lg': 'h-fab-lg px-5 gap-3 rounded-card shadow-[var(--shadow-3)] text-[16px] leading-[24px]',
       },
     },
     defaultVariants: {

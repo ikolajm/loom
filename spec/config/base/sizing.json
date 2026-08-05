@@ -1,10 +1,46 @@
 {
-  "$note": "Semantic sizing mappings only. Primitives live in config/standards.json → sizing. All values reference standard primitive tokens. Component heights are consumed directly from primitives (height/ch-N) — no semantic layer.",
+  "$note": "Semantic sizing mappings only. Primitives live in config/standards.json → sizing. All values reference standard primitive tokens. Component heights resolve through semantic roles (component-height/<role>/<tier>) — atoms name a role, the archetype picks the ladder.",
   "border-radius": {
     "component": "br-4",
     "card": "br-6",
     "input": "br-4",
     "modal": "br-7",
     "pill": "br-999"
+  },
+  "component-height": {
+    "control": {
+      "sm": "ch-3",
+      "md": "ch-5",
+      "lg": "ch-7"
+    },
+    "row": {
+      "sm": "ch-5",
+      "md": "ch-7",
+      "lg": "ch-9"
+    },
+    "nav-item": {
+      "sm": "ch-5",
+      "md": "ch-7",
+      "lg": "ch-8"
+    },
+    "menu-item": {
+      "sm": "ch-3",
+      "md": "ch-4",
+      "lg": "ch-5"
+    },
+    "bar": {
+      "sm": "ch-7",
+      "md": "ch-8",
+      "lg": "ch-9"
+    },
+    "bottom-bar": {
+      "sm": "ch-8",
+      "md": "ch-9"
+    },
+    "fab": {
+      "sm": "ch-4",
+      "md": "ch-6",
+      "lg": "ch-8"
+    }
   }
 }

@@ -15,6 +15,7 @@
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   archetype-picks   — every archetype's curated pick-list names a real atom
+ *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
  * is not — a check whose scope silently shrank reads identically to one that passed.
@@ -173,6 +174,52 @@ function checkBaseConfigProvenance() {
   return { failures, note: `${generators.length} configs + standards` };
 }
 
+// --- touch-target ----------------------------------------------------------
+// `standards.json` has declared touch-target.min: 44px since v2 and nothing consumed it:
+// it reached tokens.css, tokens.json and the NativeWind preset as a value no atom read,
+// while the default button shipped at 40px. The semantic height ladder is what makes it
+// reachable, and this is what makes it binding — every tier of every role in the `touch`
+// ladder must sit at or above the minimum, checked against direction-mappings rather than
+// against the one resolved config, so a ladder edit cannot quietly drop below it.
+//
+// Only `touch` is checked. `compact` is deliberately below the minimum — it is for
+// pointer-driven dashboards — so asserting the floor everywhere would be asserting that
+// every product is a phone.
+function checkTouchTarget() {
+  const standards = readJson('spec/config/standards.json');
+  const mappings = readJson('spec/direction-mappings.json');
+  const min = parseFloat(standards.sizing['touch-target'].min);
+  const primitives = standards.sizing['component-height'];
+
+  const failures = [];
+  let checked = 0;
+
+  const ladder = mappings['control-height'].touch['semantic-height'];
+  for (const [role, tiers] of Object.entries(ladder)) {
+    for (const [tier, token] of Object.entries(tiers)) {
+      checked++;
+      const px = parseFloat(primitives[token]);
+      if (Number.isNaN(px)) {
+        failures.push(`control-height.touch.${role}.${tier} — "${token}" is not a component-height primitive`);
+      } else if (px < min) {
+        failures.push(`control-height.touch.${role}.${tier} — ${token} is ${px}px, under the ${min}px touch minimum`);
+      }
+    }
+  }
+
+  // The archetypes that promise a touch surface must actually resolve to that ladder;
+  // a mobile archetype pointing at `standard` would pass every check above and still
+  // ship 40px controls, which is the exact defect this item was filed for.
+  for (const name of ['consumer-mobile', 'social']) {
+    const archetype = mappings['product-type'][name];
+    if (archetype && archetype['control-height'] !== 'touch') {
+      failures.push(`product-type.${name} — resolves control-height "${archetype['control-height']}", not "touch"`);
+    }
+  }
+
+  return { failures, note: `${checked} touch-ladder tiers against ${min}px` };
+}
+
 // --- archetype-picks -------------------------------------------------------
 // Each `product-type` archetype in direction-mappings.json curates an atom pick-list,
 // which now seeds a consumer's starter loom-picks.json. The names are hand-written
@@ -206,6 +253,7 @@ function verify() {
     ['manifest-deps', checkManifestDeps(atoms)],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['archetype-picks', checkArchetypePicks(atoms)],
+    ['touch-target', checkTouchTarget()],
   ];
 
   let failed = 0;

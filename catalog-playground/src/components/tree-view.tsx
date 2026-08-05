@@ -5,9 +5,9 @@ import { ChevronRight, File, Folder } from 'lucide-react';
 import { cn } from './cn';
 
 const itemSize: Record<string, string> = {
-  sm: 'h-ch-3 px-2 gap-1 text-[12px] leading-[16px]',
-  md: 'h-ch-5 px-3 gap-2 text-[14px] leading-[20px]',
-  lg: 'h-ch-7 px-4 gap-2 text-[16px] leading-[24px]',
+  sm: 'h-control-sm px-2 gap-1 text-[12px] leading-[16px]',
+  md: 'h-control-md px-3 gap-2 text-[14px] leading-[20px]',
+  lg: 'h-control-lg px-4 gap-2 text-[16px] leading-[24px]',
 };
 
 const indentSize: Record<string, number> = {

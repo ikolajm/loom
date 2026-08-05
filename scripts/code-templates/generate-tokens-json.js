@@ -104,6 +104,20 @@ function buildSemanticRadius() {
   return out;
 }
 
+// Resolved to px, same as semantic radius: a native consumer reads values, not the
+// ch-* names, which are a web-utility concern. The role names DO cross — they are the
+// vocabulary half of the values-port boundary.
+function buildSemanticHeight() {
+  const out = {};
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    out[role] = {};
+    for (const [tier, token] of Object.entries(tiers)) {
+      out[role][tier] = standards.sizing['component-height'][token] || token;
+    }
+  }
+  return out;
+}
+
 function buildEffects() {
   const focus = standards.effects['focus-ring'];
   const easing = {};
@@ -145,7 +159,10 @@ function generate() {
     },
     borderWidth: standards.sizing['border-width'],
     iconSize: standards.sizing['icon-size'],
-    componentHeight: standards.sizing['component-height'],
+    componentHeight: {
+      primitive: standards.sizing['component-height'],
+      semantic: buildSemanticHeight(),
+    },
     touchTarget: standards.sizing['touch-target'].min,
     effects: buildEffects(),
   };

@@ -12,15 +12,15 @@ const containerSizeMap: Record<string, string> = {
 };
 
 const inputSizeMap: Record<string, string> = {
-  sm: 'h-ch-7 px-3 text-[16px] leading-[24px]',
-  md: 'h-ch-8 px-4 text-[18px] leading-[28px]',
-  lg: 'h-ch-9 px-6 text-[20px] leading-[28px]',
+  sm: 'h-bar-sm px-3 text-[16px] leading-[24px]',
+  md: 'h-bar-md px-4 text-[18px] leading-[28px]',
+  lg: 'h-bar-lg px-6 text-[20px] leading-[28px]',
 };
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-ch-5 px-3 gap-2 text-[14px] leading-[20px]',
-  md: 'h-ch-7 px-4 gap-3 text-[14px] leading-[20px]',
-  lg: 'h-ch-8 px-4 gap-3 text-[16px] leading-[24px]',
+  sm: 'h-nav-item-sm px-3 gap-2 text-[14px] leading-[20px]',
+  md: 'h-nav-item-md px-4 gap-3 text-[14px] leading-[20px]',
+  lg: 'h-nav-item-lg px-4 gap-3 text-[16px] leading-[24px]',
 };
 
 const groupLabelSizeMap: Record<string, string> = {

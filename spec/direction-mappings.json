@@ -9,6 +9,7 @@
       "density": "compact",
       "type-scale": "compact",
       "shadow-depth": "flat",
+      "control-height": "compact",
       "components": [
         "button", "badge",
         "input", "select", "combobox", "date-picker", "checkbox", "switch",
@@ -24,6 +25,7 @@
       "density": "airy",
       "type-scale": "dramatic",
       "shadow-depth": "elevated",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "card", "separator",
@@ -38,6 +40,7 @@
       "density": "comfortable",
       "type-scale": "standard",
       "shadow-depth": "elevated",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "input", "select", "checkbox", "radio",
@@ -54,6 +57,7 @@
       "density": "airy",
       "type-scale": "dramatic",
       "shadow-depth": "flat",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "card", "table", "separator",
@@ -68,6 +72,7 @@
       "density": "compact",
       "type-scale": "compact",
       "shadow-depth": "flat",
+      "control-height": "compact",
       "components": [
         "button", "badge",
         "input", "textarea", "select", "combobox", "date-picker", "checkbox", "radio", "switch", "file-upload",
@@ -83,6 +88,7 @@
       "density": "comfortable",
       "type-scale": "standard",
       "shadow-depth": "elevated",
+      "control-height": "touch",
       "components": [
         "button", "fab", "badge",
         "input", "select", "checkbox", "switch",
@@ -99,6 +105,7 @@
       "density": "airy",
       "type-scale": "dramatic",
       "shadow-depth": "flat",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "card", "dialog", "separator",
@@ -113,6 +120,7 @@
       "density": "comfortable",
       "type-scale": "dramatic",
       "shadow-depth": "elevated",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "slider", "switch",
@@ -128,6 +136,7 @@
       "density": "comfortable",
       "type-scale": "standard",
       "shadow-depth": "flat",
+      "control-height": "standard",
       "components": [
         "button", "badge",
         "card", "table", "separator",
@@ -142,6 +151,7 @@
       "density": "comfortable",
       "type-scale": "standard",
       "shadow-depth": "elevated",
+      "control-height": "touch",
       "components": [
         "button", "badge",
         "input", "textarea", "switch", "file-upload",
@@ -196,6 +206,49 @@
         "pill": "br-999"
       },
       "source": "Material Design"
+    }
+  },
+
+  "control-height": {
+    "$note": "Tier 2 — the height ladder atoms resolve against. Seven roles, grouped by what a control IS rather than by the numbers it happens to carry today; an atom picks its role once and inherits every ladder. Not supplied by style-direction: height is ergonomics, not style, and a brutalist dashboard and a brutalist phone app owe different tap targets. Roles are consumed as `height/<role>-<tier>` in config/components/*.json and emitted as --height-<role>-<tier>. Non-controls (avatar portraits, stepper indicators) stay on ch-* primitives and are deliberately absent here.",
+
+    "compact": {
+      "$note": "Information-dense surfaces read by a pointer. Below the 44px touch minimum by design — do not resolve this for a product that ships to a phone.",
+      "semantic-height": {
+        "control": { "sm": "ch-2", "md": "ch-3", "lg": "ch-5" },
+        "row": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
+        "nav-item": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
+        "menu-item": { "sm": "ch-2", "md": "ch-3", "lg": "ch-4" },
+        "bar": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
+        "bottom-bar": { "sm": "ch-7", "md": "ch-8" },
+        "fab": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" }
+      }
+    },
+
+    "standard": {
+      "$note": "The values every atom carried before this ladder existed, preserved exactly. This is the default, so converting the catalog to semantic names changes no emitted class.",
+      "semantic-height": {
+        "control": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
+        "row": { "sm": "ch-5", "md": "ch-7", "lg": "ch-9" },
+        "nav-item": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
+        "menu-item": { "sm": "ch-3", "md": "ch-4", "lg": "ch-5" },
+        "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
+        "bottom-bar": { "sm": "ch-8", "md": "ch-9" },
+        "fab": { "sm": "ch-4", "md": "ch-6", "lg": "ch-8" }
+      }
+    },
+
+    "touch": {
+      "$note": "Every tier of every role sits at or above sizing.touch-target.min (44px / ch-6), enforced by the touch-target check in scripts/code-templates/verify.js. This compresses the sm/md/lg spread — sm and md differ by one step, not two — because a `sm` control on a touch surface is still a finger target. That compression is the constraint doing its job, not a ladder that needs widening.",
+      "semantic-height": {
+        "control": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
+        "row": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" },
+        "nav-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
+        "menu-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
+        "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
+        "bottom-bar": { "sm": "ch-8", "md": "ch-9" },
+        "fab": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" }
+      }
     }
   },
 

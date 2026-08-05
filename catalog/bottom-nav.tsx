@@ -10,8 +10,8 @@ const bottomNavVariants = cva(
         default: 'bg-surface border-outline-subtle border-t',
       },
       size: {
-        sm: 'h-ch-8 gap-1 text-label-sm',
-        md: 'h-ch-9 gap-1 text-label-md',
+        sm: 'h-bottom-bar-sm gap-1 text-label-sm',
+        md: 'h-bottom-bar-md gap-1 text-label-md',
         lg: 'h-[72px] gap-1 text-label-lg',
       },
     },

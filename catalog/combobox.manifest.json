@@ -2,7 +2,7 @@
   "name": "combobox",
   "category": "form",
   "description": "",
-  "version": "2d16e7d28753",
+  "version": "c037e2e84dd1",
   "dependencies": [
     "cn",
     "form-field",

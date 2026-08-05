@@ -24,11 +24,17 @@
 // Tier 2 keys this resolves, in answers-file casing, mapped to their key in the
 // mapping blocks (which are kebab). Anything outside this set — colors, fonts,
 // defaultMode — is not archetype-derivable and passes through untouched.
+//
+// `controlHeight` is supplied by product-type only; the style-direction block carries
+// no `control-height` key, so its layer contributes nothing and the archetype's value
+// survives to the generator. That asymmetry is deliberate — height is ergonomics, and
+// a brutalist dashboard and a brutalist phone app owe different tap targets.
 const TIER2_KEYS = {
   edges: 'edges',
   density: 'density',
   shadowDepth: 'shadow-depth',
   typeScale: 'type-scale',
+  controlHeight: 'control-height',
 };
 
 // The fallback layer, applied last and recorded as such. These were previously
@@ -39,6 +45,7 @@ const DEFAULTS = {
   density: 'comfortable',
   shadowDepth: 'elevated',
   typeScale: 'standard',
+  controlHeight: 'standard',
 };
 
 // A valid answer that maps to no archetype: the questionnaire offers it for products
