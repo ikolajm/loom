@@ -254,10 +254,10 @@
       "text-transform": "none"
     },
     "sizes": {
-      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-2", "header-font-size": "12px", "header-line-height": "16px", "day-font-size": "11px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-3", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "12px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "cell-size": "height/ch-5", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "14px", "day-line-height": "20px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
-      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "cell-size": "height/ch-7", "header-font-size": "16px", "header-line-height": "24px", "day-font-size": "16px", "day-line-height": "24px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
+      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "12px", "header-line-height": "16px", "day-font-size": "11px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
+      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "12px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
+      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "14px", "day-line-height": "20px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
+      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "header-font-size": "16px", "header-line-height": "24px", "day-font-size": "16px", "day-line-height": "24px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },

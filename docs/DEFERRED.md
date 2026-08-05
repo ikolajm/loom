@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Eight items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Seven items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ## What's next
 
@@ -13,7 +13,6 @@ Known engineering debt in the generator, plus one presentation pass that is Jaco
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
 | 2 | Atom registration is scattered across ~15 sites | Medium. Friction and drift-risk, no defect today |
 | 1 | `setup.sh` overwrites a consumer's local atom edits with no warning | Medium. Needs the per-atom content hash the manifests already carry |
-| 11 | `calendar` declares a `cell-size` no template reads | Small. Dead config, found closing item 7 |
 
 Ordered by what a consumer feels, not by number. Numbers are stable ids, so the gaps are closed items — see *Closed* at the bottom. Each entry below carries the reasoning; read it before re-deriving the problem.
 
@@ -105,20 +104,11 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 11. `calendar` declares a `cell-size` that no template reads
-
-**Problem.** `spec/config/components/form.json` gives `calendar` a four-tier `cell-size` ladder (`height/ch-2` through `height/ch-7`), and `scripts/code-templates/components/calendar.js` never reads the key. Day cells take their width from `flex-1` across seven columns of a fixed-width container and their height from `aspect-square`, so the declaration has never affected a rendered pixel. The template says so at line 24 — *"font + radius only, sizing handled by flex"* — which is why the key survived: the comment documents the behaviour and nobody re-read the config against it.
-
-**Found closing item 7**, and it is the same shape as the item that found it: a declared value with no consumer, sitting one layer away from a comment that quietly explains why. The `compact` tier declares a 28px cell, so a reader sizing up a touch archetype would have concluded calendar ships a sub-minimum tap target. It does not ship one either way.
-
-**Fix direction.** Decide which the calendar wants and make the config say it: either wire `cell-size` into `calendar.js` so the day grid is token-driven and the role ladder reaches it, or cut the key from all four tiers. Wiring it is the larger change — the grid's flex layout would have to give up `flex-1` — and is what a touch archetype would want, since a phone calendar is fourteen tap targets in a row. Left undecided on purpose; it is a design call, not a defect fix.
-
----
-
 ## Closed
 
 One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
 
+- **`calendar` declared a `cell-size` nothing read** *(2026-08-05)* — four tiers of `height/ch-*` in `spec/config/components/form.json` that `calendar.js` never consumed; day cells size from `flex-1` and `aspect-square`, as the template's own line-24 comment said. Cut rather than wired: making the day grid token-driven means giving up `flex-1`, which is a design change, not a defect fix. Regenerating after the cut produced a zero-byte diff on `catalog/calendar.tsx`, which is what proved the key dead. Found while closing item 7, where the `compact` tier's 28px cell looked like a sub-minimum tap target and was not a tap target at all.
 - **Generating a brand dirtied the Loom working tree** *(2026-08-05)* — `npm run configs` now writes the git-ignored `spec/config/local/base/`, and every generator reads through `scripts/config-paths.js`, which prefers the local set and falls back to the committed `spec/config/base/`. A fresh clone builds Loom's own look with no answers file; a local brand never touches a tracked path. The second write site went away entirely: `colors.default-mode` moved out of `standards.json` into the generated `colors.json`, because `standards.json` declares itself locked across all projects and `index.js` was writing a per-project questionnaire answer into it — the file's own header was false. `--default-set` is the maintainer-only way to regenerate the committed set, and `base-config-provenance` reads that set by explicit path so it cannot be fooled by a local one. **A third write site in the same class survived** and is filed as item 15.
 - **Control heights were hardcoded and `--touch-min` was decorative** *(2026-08-05)* — a `controlHeight` Tier 2 key (`compact` / `standard` / `touch`) selects a seven-role ladder in `direction-mappings.json`; `generate-sizing.js` emits it, atoms write `h-control-md`, and the `touch-target` check in `verify.js` fails the build if any tier of the `touch` ladder drops under the 44px minimum or if a mobile archetype stops resolving to it. `consumer-mobile` and `social` resolve to `touch`, `dashboard` and `admin` to `compact`. **The filed size measured the generated catalog, not the source** — 102 refs across 26 `catalog/*.tsx` files, which `npm run generate` rewrites; the source was 88 declarations across six `spec/config/components/*.json` files, organised as 29 ladders, plus 8 refs hardcoded in JS templates. `styleDirection` deliberately does not supply this key. Avatar portraits and stepper indicators stayed on `ch-*` primitives — they are not controls. `input-otp`'s square cell took `control` on Jacob's call, which is the pass's one deliberate value change: its cells were on a ch-5/7/9 ladder that matched `row` by coincidence rather than by meaning, and they shrink to 32/40/48px so that the role set names what a thing *is*. Under `touch` they land at 44/48/56px, which is the point.
 - **Tier 1 intent never reached the generators** *(2026-08-05)* — `scripts/generate-configs/resolve-intent.js` fills the Tier 2 keys an answers file leaves absent, precedence `productType` → `styleDirection` → hand-written. Both intent fields wired; `productType` also seeds the starter `loom-picks.json`. Why the resolver is a shared module rather than a step inside `npm run configs` is commented in `verify.js`.
