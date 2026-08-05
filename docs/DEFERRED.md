@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator. Five items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator. Four items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ---
 
@@ -52,26 +52,7 @@ Known engineering debt in the generator. Five items, none a ship-blocker — the
 
 ---
 
-## 5. Picks are not validated before `setup.sh` starts mutating the project
-
-**Problem.** A single mistyped pick id leaves the consumer's project broken. `setup.sh` copies atoms one at a time with no pre-flight, so an unknown name is not caught until `cp` fails on it — after some atoms have already landed and before the rest, `cn.ts`, and the token substrate have. The script exits 1 mid-loop, never prints its `npm install` line, and the error names no valid pick.
-
-**Reproduction** (cold consumer run, 2026-08-04). Picks `["button", "card", "text-input", "select", "dialog", "toast"]`, where `text-input` is a plausible wrong guess for `input`:
-
-```
-WARN: no manifest for picked/dep atom "text-input" — skipping its deps
-  + button
-  + card
-cp: cannot stat '.../catalog/text-input.tsx': No such file or directory
-```
-
-`button` and `card` are copied; `input`, `select`, `dialog`, `toast` are not; `cn.ts` is not. The project no longer compiles — `button.tsx` imports `./cn`, which is absent. Re-running with the name corrected repairs it, but only for a consumer who works out what happened.
-
-**Mechanism.** `scripts/resolve-picks.js` `visit()` adds a name to the resolved set *before* checking that its manifest exists, so an unknown id survives into the list `setup.sh` then copies from. The `WARN` is advisory and execution continues; `set -euo pipefail` then aborts on the first failed `cp`.
-
-**This is also the discoverability gap.** A proposal from 2026-06-11 asked for an in-file `available` menu in `loom-picks.json` so valid ids are visible at the point of use. The scaffolded file now carries a `$schema` pointer to `catalog/atoms.json`, which narrows that gap to one hop — you leave your project to read the list. Validation is the better half of the same problem: a menu helps a consumer type it right, an error that names the valid ids helps the one who did not.
-
-**Fix direction.** Validate every pick against the generated catalog **before copying anything**; on an unknown id, fail with the valid ids (or near matches) and leave the project untouched. Shares a root with item 1 — `setup.sh` mutates as it goes, with no pre-flight and no rollback — but this is the cheap half and does not depend on the content-hash work.
+*Pick validation closed 2026-08-04, filed and fixed the same day. Running the consumer path cold — fresh `create-next-app`, `init.sh`, hand-edited picks, `setup.sh` — showed that one mistyped pick id (`text-input` for `input`) aborted the sync mid-copy on a raw `cp: cannot stat`, leaving the project with some atoms, no `cn.ts`, and no compile. `scripts/resolve-picks.js` now validates the whole resolved set against the catalog before anything is copied, reports every unknown id at once with near-match suggestions and the atom that declared it, and fails clean; `setup.sh` needed no change, because it resolves before it copies and `set -e` does the rest. The 2026-06-11 proposal for an in-file `available` menu is closed into this: the error names the valid ids at the moment the consumer is wrong, which is where that gap actually bit. Verified end-to-end — a bad pick now leaves a real project byte-identical, and the corrected picks still install and build clean.*
 
 ---
 
