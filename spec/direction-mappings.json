@@ -2,7 +2,7 @@
   "$schema": "Maps questionnaire answers to concrete design token values. Used by the generation skill.",
 
   "product-type": {
-    "$note": "Tier 1 — product type suggests a style direction and component manifest. Suggestions only — user overrides anything. style-suggestions are ordered by likelihood (first = most common for this type). components are catalog atom names and must match catalog/atoms.json exactly — nothing validates them today, and four of them (icon-button, chip, text-input, alert) went stale through the v2 consolidation before anyone noticed.",
+    "$note": "Tier 1 — product type supplies Tier 2 defaults and a starter component manifest, both overridden by anything more specific (styleDirection, then a hand-written answer). style-suggestions are ordered by likelihood (first = most common for this type) and are read by humans, not by the resolver. components are catalog atom names, seed a consumer's starter loom-picks.json, and must match catalog/atoms.json exactly — the archetype-picks check in scripts/code-templates/verify.js fails the build if one does not, added after four of them (icon-button, chip, text-input, alert) went stale through the v2 consolidation before anyone noticed.",
 
     "dashboard": {
       "style-suggestions": ["clean", "corporate"],
@@ -154,7 +154,7 @@
   },
 
   "style-direction": {
-    "$note": "Tier 1 intent → Tier 2 defaults. Each style maps to default values for edges, density, shadow-depth, and type-scale. User can override any Tier 2 value.",
+    "$note": "Tier 1 intent → Tier 2 defaults, resolved by scripts/generate-configs/resolve-intent.js. Each style maps to default values for edges, density, shadow-depth, and type-scale. More specific than product-type, so it wins where the two conflict; a hand-written Tier 2 answer overrides both.",
     "clean":     { "edges": "sharp",  "density": "compact",     "shadow-depth": "flat",     "type-scale": "standard" },
     "soft":      { "edges": "soft",   "density": "comfortable", "shadow-depth": "elevated", "type-scale": "standard" },
     "bold":      { "edges": "sharp",  "density": "comfortable", "shadow-depth": "elevated", "type-scale": "dramatic" },

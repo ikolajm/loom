@@ -17,6 +17,7 @@ const { generate: generateSpacing } = require('./generate-spacing');
 const { generate: generateSizing } = require('./generate-sizing');
 const { generate: generateTypography } = require('./generate-typography');
 const { generate: generateEffects } = require('./generate-effects');
+const { resolveIntent, TIER2_KEYS } = require('./resolve-intent');
 
 // --- Paths ---
 const PIPELINE_ROOT = path.resolve(__dirname, '../../');
@@ -72,7 +73,7 @@ function loadAnswers(args) {
   }
 
   return {
-    // Tier 1 — intent (metadata, not consumed by generators)
+    // Tier 1 — intent; resolveIntent() turns these into Tier 2 values below
     projectName: args.projectName || null,
     productType: args.productType || null,
     styleDirection: args.styleDirection || null,
@@ -83,10 +84,14 @@ function loadAnswers(args) {
     accent: args.accent || null,
     heading: args.heading || 'Inter',
     body: args.body || 'Inter',
-    edges: args.edges || 'sharp',
-    density: args.density || 'comfortable',
-    shadowDepth: args.shadowDepth || 'elevated',
-    typeScale: args.typeScale || 'standard'
+    // The four archetype-derivable keys are deliberately left absent when no flag was
+    // passed. Defaulting them here (`args.edges || 'sharp'`) made every flagless run
+    // look like an explicit answer, so the archetype could never win. The fallback is
+    // the last layer of resolveIntent(), which produces the same values it used to.
+    ...(args.edges ? { edges: args.edges } : {}),
+    ...(args.density ? { density: args.density } : {}),
+    ...(args.shadowDepth ? { shadowDepth: args.shadowDepth } : {}),
+    ...(args.typeScale ? { typeScale: args.typeScale } : {})
   };
 }
 
@@ -110,7 +115,20 @@ function warnOffParitySafeFonts(answers) {
 // --- Main ---
 function main() {
   const args = parseArgs(process.argv);
-  const answers = loadAnswers(args);
+  const raw = loadAnswers(args);
+
+  // Load dependencies
+  const standards = JSON.parse(fs.readFileSync(STANDARDS_PATH, 'utf-8'));
+  const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf-8'));
+
+  // Tier 1 → Tier 2. Must run before any generator sees the answers.
+  let answers, sources;
+  try {
+    ({ answers, sources } = resolveIntent(raw, mappings));
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
 
   console.log('=== Design System Config Generator ===');
   if (answers.projectName) console.log(`Project: ${answers.projectName}`);
@@ -122,13 +140,12 @@ function main() {
   console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
   console.log(`Fonts: ${answers.heading || 'Inter'} / ${answers.body || 'Inter'}`);
   warnOffParitySafeFonts(answers);
-  console.log(`Edges: ${answers.edges}, Density: ${answers.density}`);
-  console.log(`Shadow: ${answers.shadowDepth}, Type Scale: ${answers.typeScale}`);
+  // Each Tier 2 value with the layer that supplied it — an archetype-derived value and
+  // a hand-written one are indistinguishable in the output, so the run log says which.
+  for (const key of Object.keys(TIER2_KEYS)) {
+    console.log(`${key}: ${answers[key]}  (from ${sources[key]})`);
+  }
   console.log('');
-
-  // Load dependencies
-  const standards = JSON.parse(fs.readFileSync(STANDARDS_PATH, 'utf-8'));
-  const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf-8'));
 
   // Propagate the questionnaire's default-mode into standards.json — the source the
   // token generator reads. Without this, answers.defaultMode is decorative and the two

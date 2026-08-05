@@ -11,7 +11,17 @@
 
 const { applyPins } = require('../npm-pins');
 
-function generate() {
+// The pick-list written when the answers file named no productType. Two atoms, enough
+// to prove the sync works; the consumer edits from there.
+const FALLBACK_PICKS = ['button', 'card'];
+
+function generate(picks = null) {
+  const starterPicks = picks?.length ? picks : FALLBACK_PICKS;
+  const picksBlock = starterPicks.map((p) => `      "${p}"`).join(',\n');
+  const picksNote = picks?.length
+    ? `Seeded from your productType archetype — ${starterPicks.length} atoms. Cut what you do not need.`
+    : 'A starter pair. Add the atoms you need.';
+
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
   // Pins come from npm-pins.js, the same map setup.sh's printed line resolves through;
   // the two install surfaces disagreed on tailwind-merge while each held its own literal.
@@ -92,12 +102,15 @@ if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
   cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
 {
   "$schema": "Loom picker — list the atom names you want; setup.sh resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
+  "$picks": "${picksNote}",
   "loom": {
-    "picks": ["button", "card"]
+    "picks": [
+${picksBlock}
+    ]
   }
 }
 PICKS
-  echo "  created loom-picks.json (edit the picks, then run setup.sh)"
+  echo "  created loom-picks.json (${starterPicks.length} starter picks — edit, then run setup.sh)"
 else
   echo "  loom-picks.json already exists — left as-is"
 fi

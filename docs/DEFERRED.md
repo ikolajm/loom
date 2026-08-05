@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator. Seven items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator. Six items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ---
 
@@ -42,25 +42,11 @@ Known engineering debt in the generator. Seven items, none a ship-blocker — th
 
 ---
 
-## 6. Tier 1 intent never reaches the generators
-
-**Problem.** `spec/direction-mappings.json` carries a complete two-tier design — a `product-type` block with ten archetypes (each supplying `density`, `type-scale`, `shadow-depth`, `style-suggestions`, and a curated atom pick-list) and a `style-direction` block with ten styles supplying `edges`, `density`, `shadow-depth`, `type-scale`. Nothing consumes either. `scripts/generate-configs/index.js:75` marks them `// Tier 1 — intent (metadata, not consumed by generators)` and only prints them; `spec/questionnaire.md` documents all three intent fields as `metadata only`. The data layer was authored and the resolver between it and the generators was never written.
-
-**Why it matters.** Answering `productType: "dashboard"` today changes no token. The two questions the archetype would answer — `density` and `typeScale` — are the two in the questionnaire that need taste and a mockup, while `productType` is answerable by anyone. The answer set does not shrink (thirteen fields to twelve); the hard questions get replaced by an easy one, which was the actual goal.
-
-**Precedence, decided 2026-08-04.** General to specific, more specific wins: `productType` → `styleDirection` → the value written by hand. An explicitly written value is never overridden. This matters because the two Tier 1 blocks genuinely conflict — `dashboard` sets `type-scale: compact` while its own first style-suggestion `clean` sets `type-scale: standard`, and nothing currently says which applies.
-
-**Fix direction.** A `resolveIntent()` pass between `loadAnswers()` and the generator loop, filling only keys the answers file left absent — which means the CLI-flag path must stop defaulting Tier 2 keys inline (`args.edges || 'sharp'`), or every run looks like an explicit answer and the archetype can never win. Print each resolved value with the source that supplied it. Seed `scaffold/init.sh`'s starter `loom-picks.json` from the archetype's pick-list in place of the hardcoded `["button", "card"]` — noting `init.sh` is generated from `scripts/code-templates/scaffold/setup-script.js`, whose `generate()` takes no arguments today, and that `loadAllConfigs()` does not carry the answers, so the archetype needs a channel into the second pipeline.
-
-**Validate the pick-lists at generation time.** All ten archetypes named four atoms the catalog does not have (`icon-button`, `chip`, `text-input`, `alert`) — repaired 2026-08-04 against the manifests that absorbed them (`button` gained `iconOnly`, `badge` "consolidates prior chip / tag-chip", `banner` "consolidates the old alert", `input`). They had drifted since the v2 consolidation and would have written unresolvable picks into every consumer's `loom-picks.json`. Same shape as item 2 and the hand-maintained-mirror failure: fail the run on an unknown name rather than re-checking by hand.
-
----
-
 ## 7. Control heights are hardcoded, and `--touch-min` is decorative
 
 **Problem.** `standards.json` declares `touch-target.min: 44px`, and it is emitted into `tokens.css` (`--touch-min`), `tokens.json`, and the NativeWind preset. **No atom in the catalog consumes it.** `button.tsx:25-27` hardcodes `h-ch-3 / h-ch-5 / h-ch-7` — 32 / 40 / 48px — so the default `md` button is 40px, under the minimum the repo itself declares.
 
-**Why it matters.** It blocks a real `consumer-mobile` archetype. That archetype already exists in `direction-mappings.json` with `fab`, `bottom-nav` and `sheet` in its picks, but it can only reach `typeScale` and `density` — so a "mobile" design system would ship sub-44px controls and enforce nothing.
+**Why it matters.** It blocks a real `consumer-mobile` archetype. That archetype is live since item 6 — it supplies `density`, `typeScale` and `shadowDepth`, and seeds a starter pick-list carrying `fab`, `bottom-nav` and `sheet` — but height is not among the keys it can reach, so a "mobile" design system still ships sub-44px controls and enforces nothing. Item 6 makes this the *only* thing `consumer-mobile` cannot say.
 
 **Fix direction.** The pattern already ships for radii: `edges` → `generate-sizing.js` → `semantic-radius` → atoms write `rounded-component` rather than `br-4`. Apply it to heights — the archetype selects a ladder (`dashboard`: sm/md/lg → ch-3/ch-5/ch-7; `consumer-mobile`: ch-5/ch-6/ch-8), the generator emits semantic names into `@theme`, and atoms write `h-control-md`. Keep the names literal; Tailwind v4 scans source for literal class strings.
 
@@ -72,7 +58,7 @@ Known engineering debt in the generator. Seven items, none a ship-blocker — th
 
 ## 8. Install has two tiers by accident and names neither
 
-**Not yet decided — recorded so the shape is not re-derived.** `native/` is effectively a tokens-only install (`tokens.json` + `loom-native-preset.js`, no atoms, no scaffold), while `init.sh` is a full install (substrate, `globals.css`, `ThemeProvider`, `layout.tsx`, `/preview` route, four core deps, starter picker). Standard React has no tokens-only path, though it would be one flag. Making the tiers explicit would also settle where the generated `/preview` route belongs — it is 174 lines, imports no atoms, never overwrites, and its own header calls it "a token-landing check, not a component gallery," which is the only thing that catches a silently failed Tailwind v4 `@theme` wiring. Gate it to the full tier rather than cutting it. Separately, `styleDirection` stays `metadata only` after item 6 lands unless it is wired too — leaving one inert intent field beside a live one is how the next reader concludes it must matter.
+**Not yet decided — recorded so the shape is not re-derived.** `native/` is effectively a tokens-only install (`tokens.json` + `loom-native-preset.js`, no atoms, no scaffold), while `init.sh` is a full install (substrate, `globals.css`, `ThemeProvider`, `layout.tsx`, `/preview` route, four core deps, starter picker). Standard React has no tokens-only path, though it would be one flag. Making the tiers explicit would also settle where the generated `/preview` route belongs — it is 174 lines, imports no atoms, never overwrites, and its own header calls it "a token-landing check, not a component gallery," which is the only thing that catches a silently failed Tailwind v4 `@theme` wiring. Gate it to the full tier rather than cutting it. Separately, `styleDirection` was wired alongside `productType` when item 6 landed, for the reason recorded here: leaving one inert intent field beside a live one is how the next reader concludes it must matter.
 
 ---
 
@@ -91,6 +77,10 @@ Known engineering debt in the generator. Seven items, none a ship-blocker — th
 **A detector now exists, and is not the fix.** `base-config-provenance` in `scripts/code-templates/verify.js` (2026-08-05) fails `npm run generate` when the committed base configs stop matching what `answers.example.json` generates. It catches the leak after it happens; this item is to stop it happening.
 
 **`standards.json` needs separate thought.** It is hand-authored and `index.js:138` mutates one key inside it, so it cannot simply be redirected. Either `defaultMode` reaches the token generator by another route, or the file splits into a static part and a generated part.
+
+---
+
+*Tier 1 reaches the generators as of 2026-08-05, closing item 6. `scripts/generate-configs/resolve-intent.js` fills only the Tier 2 keys an answers file leaves absent, precedence `productType` → `styleDirection` → hand-written, and `npm run configs` prints each value with the layer that supplied it. Both intent fields were wired, not just `productType` — item 8 records why leaving one inert beside a live one is worse than wiring both. **Two constraints the entry did not have.** First, the resolver could not live inside the `configs` entry point: `verify.js`'s `base-config-provenance` check calls the five generators directly with the parsed `answers.example.json`, so a resolver on only one path would make the two disagree the moment the example omitted a key — and report the difference as a brand leak. It is a shared module both call. Second, the archetype needed no new channel into the second pipeline: `orchestrator.js` already resolves `spec/answers.json` to copy it into `generated/` as a receipt, so seeding the starter `loom-picks.json` from the archetype's pick-list was a parameter on `setupScript.generate()`, which took none. `answers.example.json` deliberately keeps all four Tier 2 keys explicit — letting the archetype drive it would shift Loom's own committed look (`edges` soft → sharp, `density` comfortable → compact), which is a design call and not this change. The `archetype-picks` check now fails the build on a pick-list name the catalog does not have; all ten lists were clean on arrival, so it is a regression guard on the 2026-08-04 repair, not a fix. Verified: regenerating from the committed example leaves `spec/config/base/` byte-identical; the seeded 27-atom dashboard list resolves to 29 files through `resolve-picks.js`; a flagless CLI run still lands on the exact defaults the removed inline `||` fallbacks produced; and each new check fails on its injected defect — a stale pick name by archetype and atom, a leaked brand value by file.*
 
 ---
 

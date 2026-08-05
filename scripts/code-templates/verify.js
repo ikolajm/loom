@@ -1,7 +1,9 @@
 /**
  * Invariant checks over the emitted catalog. Runs last in the orchestrator and fails
  * the run — `npm run generate` reporting success on broken output is what this exists
- * to stop. See docs/DEFERRED.md #4 for the defects that motivated it.
+ * to stop. Two defect classes reached a consumer undetected before it existed: a dead
+ * import that shipped in a generated atom, and manifests that under-declared a
+ * dependency, so an install typechecked here and failed there.
  *
  * Scope: things the TypeScript compiler cannot see. Compile-level invariants (unused
  * imports, type errors) belong to catalog-playground, which picks every atom and runs
@@ -11,6 +13,8 @@
  *   doc-counts        — hand-written "N atoms" claims match the catalog
  *   playground-parity — the playground's synced copies match what the generator emits
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
+ *   base-config-provenance — the committed base configs are what answers.example generates
+ *   archetype-picks   — every archetype's curated pick-list names a real atom
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
  * is not — a check whose scope silently shrank reads identically to one that passed.
@@ -18,7 +22,10 @@
 const fs = require('fs');
 const path = require('path');
 
+const { resolveIntent } = require('../generate-configs/resolve-intent');
+
 const ROOT = path.resolve(__dirname, '../..');
+const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
 const CATALOG = path.join(ROOT, 'catalog');
 const PLAYGROUND = path.join(ROOT, 'catalog-playground/src/components');
 
@@ -129,10 +136,12 @@ function checkManifestDeps(atoms) {
 // generators are pure (answers, standards, mappings) → object, so this regenerates
 // in memory and compares — no temp files, no prose parsing, no side effects.
 function checkBaseConfigProvenance() {
-  const read = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
-  const example = read('spec/answers.example.json');
-  const standards = read('spec/config/standards.json');
-  const mappings = read('spec/direction-mappings.json');
+  const standards = readJson('spec/config/standards.json');
+  const mappings = readJson('spec/direction-mappings.json');
+  // Resolve Tier 1 exactly as `npm run configs` does. Regenerating from the raw example
+  // would diverge the moment it leaves a Tier 2 key absent, and report the difference as
+  // a brand leak.
+  const example = resolveIntent(readJson('spec/answers.example.json'), mappings).answers;
 
   const generators = [
     ['colors.json', require('../generate-configs/generate-colors').generate],
@@ -164,6 +173,31 @@ function checkBaseConfigProvenance() {
   return { failures, note: `${generators.length} configs + standards` };
 }
 
+// --- archetype-picks -------------------------------------------------------
+// Each `product-type` archetype in direction-mappings.json curates an atom pick-list,
+// which now seeds a consumer's starter loom-picks.json. The names are hand-written
+// against the catalog and drifted once already: all ten listed `icon-button`, `chip`,
+// `text-input` and `alert`, absent since the v2 consolidation, and every one would have
+// written an unresolvable pick into a consumer's project. Same failure as the
+// hand-maintained mirror two checks up — fail the run rather than re-check by hand.
+function checkArchetypePicks(atoms) {
+  const known = new Set(atoms);
+  const mappings = readJson('spec/direction-mappings.json');
+  const archetypes = Object.entries(mappings['product-type']).filter(([name]) => !name.startsWith('$'));
+
+  const failures = [];
+  let picks = 0;
+  for (const [name, cfg] of archetypes) {
+    for (const pick of cfg.components || []) {
+      picks++;
+      if (!known.has(pick)) {
+        failures.push(`product-type.${name} — picks "${pick}", which is not in the catalog`);
+      }
+    }
+  }
+  return { failures, note: `${picks} picks across ${archetypes.length} archetypes` };
+}
+
 function verify() {
   const atoms = atomNames();
   const checks = [
@@ -171,6 +205,7 @@ function verify() {
     ['playground-parity', checkPlaygroundParity(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['base-config-provenance', checkBaseConfigProvenance()],
+    ['archetype-picks', checkArchetypePicks(atoms)],
   ];
 
   let failed = 0;

@@ -17,7 +17,10 @@ const setupScript = require('./setup-script');
 // into generated/scaffold/, then placed at src/app/preview/page.tsx by init.sh.
 const previewPage = fs.readFileSync(path.join(__dirname, 'preview-page.tsx'), 'utf8');
 
-function generate(configs, outputDir) {
+// `picks` is the archetype's curated atom list when the answers file named a
+// productType, and null otherwise — see the orchestrator, which owns that resolution
+// because `configs` (loadAllConfigs) carries token data, not answers.
+function generate(configs, outputDir, picks = null) {
   const scaffoldDir = path.join(outputDir, 'scaffold');
   fs.mkdirSync(scaffoldDir, { recursive: true });
 
@@ -26,7 +29,7 @@ function generate(configs, outputDir) {
     { name: 'ThemeProvider.tsx', content: themeProvider.generate(configs) },
     { name: 'layout.tsx', content: layout.generate(configs) },
     { name: 'preview-page.tsx', content: previewPage },
-    { name: 'init.sh', content: setupScript.generate(), executable: true },
+    { name: 'init.sh', content: setupScript.generate(picks), executable: true },
   ];
 
   for (const file of files) {

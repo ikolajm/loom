@@ -16,10 +16,34 @@
 const fs = require('fs');
 const path = require('path');
 const { loadAllConfigs, getComponentRegistry } = require('./shared');
+const { archetypePicks } = require('../generate-configs/resolve-intent');
 
 // --- Load config once ---
 const configs = loadAllConfigs();
 const registry = getComponentRegistry(configs);
+
+// --- Archetype pick-list for the starter loom-picks.json ---
+// loadAllConfigs() reads token configs, not answers, so the archetype needs its own
+// channel into this pipeline. spec/answers.json is git-ignored and absent in a fresh
+// clone — no answers file means the scaffold falls back to its two-atom starter pair,
+// which is what shipped before.
+const ANSWERS_PATH = path.resolve(__dirname, '../../spec/answers.json');
+const MAPPINGS_PATH = path.resolve(__dirname, '../../spec/direction-mappings.json');
+
+function loadArchetypePicks() {
+  if (!fs.existsSync(ANSWERS_PATH)) return null;
+  const answers = JSON.parse(fs.readFileSync(ANSWERS_PATH, 'utf8'));
+  const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf8'));
+  try {
+    return archetypePicks(answers, mappings);
+  } catch (err) {
+    // Same bad answers file that `npm run configs` rejects with one line. Without this
+    // it surfaces here as a stack trace, so one defect gets two presentations and the
+    // uglier one lands in the pipeline consumers run more often.
+    console.error(`Error in spec/answers.json: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 // --- Generator modules ---
 const GENERATORS = {
@@ -66,7 +90,7 @@ const GENERATORS = {
     description: 'scaffold/ (init.sh, globals.css, ThemeProvider, layout)',
     run: (outputDir) => {
       const { generate } = require('./scaffold');
-      generate(configs, outputDir);
+      generate(configs, outputDir, loadArchetypePicks());
     },
   },
   'handoff': {

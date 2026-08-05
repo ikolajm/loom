@@ -1,17 +1,32 @@
-# answers.json — Schema Reference (read-only)
+# Describing your design system — `answers.json`
 
-Loom's generators read one file: **`spec/answers.json`**, which you hand-author.
-It is **git-ignored** — it holds your brand, not Loom's — so start by copying the
-committed template:
+**This is where you tell Loom what your product should look like.** You answer up to
+thirteen questions in one small file, and Loom generates the rest: a color system in
+light and dark, a type ramp, spacing, radii, shadows, a React component catalog, and a
+matching Figma file.
 
-    cp spec/answers.example.json spec/answers.json
+**Only one answer is required** — your `primary` brand color. Everything else has a
+sensible default or is derived from what you did answer, so the shortest useful answers
+file is three lines.
 
-This document is the **key reference** — it does not get filled in. Edit the copied
-`spec/answers.json` (the block below shows every key), then run the pipeline:
+## Start here
 
-    npm run configs    # reads spec/answers.json → token configs
-    npm run generate   # → React catalog + tokens.css
-    npm run figma      # → Figma paste scripts
+Copy the template, edit it, run three commands:
+
+    cp spec/answers.example.json spec/answers.json    # 1. your copy, git-ignored
+
+Open `spec/answers.json` in any text editor and change the values (the reference below
+explains each one). Then:
+
+    npm run configs     # 2. turn your answers into token configs
+    npm run generate    # 3. build the React catalog + tokens.css
+    npm run figma       # 4. build the Figma paste scripts
+
+Re-run those three any time you change an answer. **This document is a reference, not a
+worksheet** — you never fill in this file, you fill in your copy of the template.
+
+Your `answers.json` is git-ignored on purpose: it holds *your* brand, not Loom's, so it
+never rides along in a commit to this repo.
 
 ## Complete example
 
@@ -51,10 +66,11 @@ not Loom's "look"):
 | `typeScale` | no | `compact` · `standard` · `dramatic` | `standard` | type size range |
 | `defaultMode` | no | `dark` · `light` | `dark` | which color mode loads first |
 | `projectName` | no | string | `null` | metadata only |
-| `productType` | no | see list below | `null` | metadata only |
-| `styleDirection` | no | see list below | `null` | metadata only |
+| `productType` | no | see list below | `null` | Tier 2 defaults + starter atom picks |
+| `styleDirection` | no | see list below | `null` | Tier 2 defaults |
 
-Omit any optional key entirely — the generator falls back to the default above.
+Omit any optional key entirely — the generator falls back to the default above,
+**unless `productType` or `styleDirection` supplies one first** (see the section below).
 A value outside the allowed set fails loudly (e.g. `Unknown edges: "round". Valid: none, sharp, soft`).
 
 ## Colors
@@ -75,14 +91,52 @@ pick from [`parity-safe-fonts.json`](parity-safe-fonts.json). Off-list fonts are
 `npm run configs` flags them, and the Figma typography paste reports availability and
 **substitutes Inter** for any font this Figma can't render (the build completes, logged once).
 
-## Metadata fields — `productType`, `styleDirection`, `projectName`
+## The four look-and-feel answers, in plain terms
 
-These are **stored for downstream context only — the generators do not consume them.** They
-record intent (and travel with the config for provenance); they do not change any token.
-Setting `styleDirection` does **not** pre-fill the implementation values above — choose those explicitly.
+These are the ones that need taste. Each is a word, not a number — Loom turns it into the
+actual scale. **You can skip all four** and let `productType` / `styleDirection` supply
+them (next section).
+
+- **`edges`** — how rounded corners are. `none` is square, `sharp` is a slight round,
+  `soft` is generous. Applies to buttons, cards, inputs, everything.
+- **`density`** — how much breathing room between and inside elements. `compact` fits more
+  on screen (dashboards, admin tools), `airy` gives things space (marketing, portfolios),
+  `comfortable` sits between.
+- **`shadowDepth`** — whether surfaces lift off the page. `flat` separates with borders and
+  color only; `elevated` uses real shadows.
+- **`typeScale`** — the size gap between your biggest heading and body text. `compact` keeps
+  headings close to body size, `dramatic` makes them large, `standard` is a normal
+  editorial ramp.
+
+If you are not sure, answer `productType` instead and let the archetype pick these for you.
+
+## Intent fields — `productType`, `styleDirection`
+
+These answer the four implementation questions above **for you**, so you can skip the two
+that need taste and a mockup (`density`, `typeScale`) and answer one that anyone can
+(`productType`). Each maps to Tier 2 values in
+[`direction-mappings.json`](direction-mappings.json).
+
+**Precedence — general to specific, more specific wins:**
+
+    productType  <  styleDirection  <  the value you write
+
+A value you write is **never** overridden. Omit `edges` / `density` / `shadowDepth` /
+`typeScale` to let intent supply them; the built-in defaults apply only when nothing else
+does. This matters because the two blocks genuinely conflict: `dashboard` sets
+`type-scale: compact` while its own first style-suggestion `clean` sets `standard`, so
+`clean` wins. `npm run configs` prints each resolved value with the layer that supplied it.
+
+`productType` also seeds the starter `loom-picks.json` that `init.sh` writes, from the
+archetype's curated pick-list — a starting point to cut down, not a fixed set.
 
 **`productType`** — `dashboard` · `marketing` · `e-commerce` · `content` · `admin` ·
 `consumer-mobile` · `portfolio` · `game` · `documentation` · `social` · `other`
+
+`other` is valid and maps to no archetype — it supplies nothing, and the fields it would
+have filled fall through to `styleDirection` or the defaults. Any name outside these lists
+fails loudly. `projectName` remains metadata only: it travels with the config for
+provenance and changes no token.
 
 **`styleDirection`** — the intended visual philosophy (reference points in parens):
 `clean` (Linear, Notion) · `soft` (Material, Stripe) · `bold` (Spotify, Framer) ·
