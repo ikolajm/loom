@@ -4,7 +4,6 @@
   "description": "",
   "version": "0d29c7a7d1ae",
   "dependencies": [
-    "cn",
     "reveal"
   ],
   "npmDependencies": [],

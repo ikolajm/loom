@@ -1,7 +1,7 @@
 const { filterSizes } = require('./helpers');
 
 // In-body search input shell — leading search icon + clearable input. Distinct from
-// command-palette (which is an overlay). Sprint 1 = the static shell; live-results dropdown deferred.
+// command-palette (which is an overlay). The static shell only — a live-results dropdown is deferred.
 function generateSearchBar(name, config, meta) {
   const sizes = filterSizes(config.sizes);
   const heightEntries = {};

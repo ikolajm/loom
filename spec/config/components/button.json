@@ -135,8 +135,8 @@
   "fab-menu": {
     "$catalog": {
       "category": "button",
-      "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed in Sprint 1; expand animation wraps via motion library in Sprint 2.",
-      "dependencies": ["fab", "cn"],
+      "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed — the expand animation wraps via the motion library and is gated on that adoption decision.",
+      "dependencies": ["cn"],
       "tokens": ["color", "typography", "spacing", "sizing", "effects"],
       "composition": "slot"
     },
@@ -213,7 +213,7 @@
     "$catalog": {
       "category": "button",
       "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
-      "dependencies": ["toggle", "cn"],
+      "dependencies": ["cn"],
       "tokens": ["color", "spacing", "sizing"],
       "composition": "none"
     },

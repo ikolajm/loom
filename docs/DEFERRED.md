@@ -1,6 +1,19 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator. Six items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Six items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+
+## What's next
+
+| # | Item | Size |
+|---|------|------|
+| 7 | Control heights are hardcoded and `--touch-min` is decorative — blocks a real `consumer-mobile` archetype | Large. The only item that edits atom source, across 26 files; widens the Paperboy gap |
+| 9 | `npm run configs` writes tracked paths, so generating a brand dirties the working tree | Medium. Structural; a detector exists, the fix does not |
+| 2 | Atom registration is scattered across ~15 sites | Medium. Friction and drift-risk, no defect today |
+| 1 | `setup.sh` overwrites a consumer's local atom edits with no warning | Medium. Needs the per-atom content hash the manifests already carry |
+| 8 | Install has two tiers by accident and names neither | A decision, not code. Blocks nothing |
+| 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
+
+Ordered by what a consumer feels, not by number. Numbers are stable ids, so the gaps are closed items — see *Closed* at the bottom. Each entry below carries the reasoning; read it before re-deriving the problem.
 
 ---
 
@@ -32,21 +45,11 @@ Known engineering debt in the generator. Six items, none a ship-blocker — the 
 
 ---
 
-## 3. Four atoms declare a dependency they never import
-
-**Problem.** `fab-menu` declares `fab`, `toggle-group` declares `toggle`, and `stagger` and `count-up` each declare `cn` — none of the four is a static import in the generated source. `fab-menu` and `toggle-group` are the real ones: they copy a file the consumer does not need. The two `cn` entries have never done anything, since `resolve-picks.js` skips `cn` on the walk and `setup.sh` copies it unconditionally.
-
-**Evidence.** Surfaced by the `declared but not imported` warning added in `aacc481` (2026-08-04), which fires on every `npm run generate` until they are resolved.
-
-**Fix direction.** Decide per atom whether the declaration is intentional composition or stale, then strip the stale ones from `$catalog.dependencies` in `spec/config/components/`. Four config edits, one judgment call each — deliberately not folded into the bug-fix commit that surfaced them.
-
----
-
 ## 7. Control heights are hardcoded, and `--touch-min` is decorative
 
 **Problem.** `standards.json` declares `touch-target.min: 44px`, and it is emitted into `tokens.css` (`--touch-min`), `tokens.json`, and the NativeWind preset. **No atom in the catalog consumes it.** `button.tsx:25-27` hardcodes `h-ch-3 / h-ch-5 / h-ch-7` — 32 / 40 / 48px — so the default `md` button is 40px, under the minimum the repo itself declares.
 
-**Why it matters.** It blocks a real `consumer-mobile` archetype. That archetype is live since item 6 — it supplies `density`, `typeScale` and `shadowDepth`, and seeds a starter pick-list carrying `fab`, `bottom-nav` and `sheet` — but height is not among the keys it can reach, so a "mobile" design system still ships sub-44px controls and enforces nothing. Item 6 makes this the *only* thing `consumer-mobile` cannot say.
+**Why it matters.** It blocks a real `consumer-mobile` archetype. That archetype is live since Tier 1 resolution shipped — it supplies `density`, `typeScale` and `shadowDepth`, and seeds a starter pick-list carrying `fab`, `bottom-nav` and `sheet` — but height is not among the keys it can reach, so a "mobile" design system still ships sub-44px controls and enforces nothing. Tier 1 resolution makes this the *only* thing `consumer-mobile` cannot say.
 
 **Fix direction.** The pattern already ships for radii: `edges` → `generate-sizing.js` → `semantic-radius` → atoms write `rounded-component` rather than `br-4`. Apply it to heights — the archetype selects a ladder (`dashboard`: sm/md/lg → ch-3/ch-5/ch-7; `consumer-mobile`: ch-5/ch-6/ch-8), the generator emits semantic names into `@theme`, and atoms write `h-control-md`. Keep the names literal; Tailwind v4 scans source for literal class strings.
 
@@ -58,7 +61,7 @@ Known engineering debt in the generator. Six items, none a ship-blocker — the 
 
 ## 8. Install has two tiers by accident and names neither
 
-**Not yet decided — recorded so the shape is not re-derived.** `native/` is effectively a tokens-only install (`tokens.json` + `loom-native-preset.js`, no atoms, no scaffold), while `init.sh` is a full install (substrate, `globals.css`, `ThemeProvider`, `layout.tsx`, `/preview` route, four core deps, starter picker). Standard React has no tokens-only path, though it would be one flag. Making the tiers explicit would also settle where the generated `/preview` route belongs — it is 174 lines, imports no atoms, never overwrites, and its own header calls it "a token-landing check, not a component gallery," which is the only thing that catches a silently failed Tailwind v4 `@theme` wiring. Gate it to the full tier rather than cutting it. Separately, `styleDirection` was wired alongside `productType` when item 6 landed, for the reason recorded here: leaving one inert intent field beside a live one is how the next reader concludes it must matter.
+**Not yet decided — recorded so the shape is not re-derived.** `native/` is effectively a tokens-only install (`tokens.json` + `loom-native-preset.js`, no atoms, no scaffold), while `init.sh` is a full install (substrate, `globals.css`, `ThemeProvider`, `layout.tsx`, `/preview` route, four core deps, starter picker). Standard React has no tokens-only path, though it would be one flag. Making the tiers explicit would also settle where the generated `/preview` route belongs — it is 174 lines, imports no atoms, never overwrites, and its own header calls it "a token-landing check, not a component gallery," which is the only thing that catches a silently failed Tailwind v4 `@theme` wiring. Gate it to the full tier rather than cutting it. Separately, `styleDirection` was wired alongside `productType` when Tier 1 resolution shipped, for the reason recorded here: leaving one inert intent field beside a live one is how the next reader concludes it must matter.
 
 ---
 
@@ -80,26 +83,27 @@ Known engineering debt in the generator. Six items, none a ship-blocker — the 
 
 ---
 
-*Tier 1 reaches the generators as of 2026-08-05, closing item 6. `scripts/generate-configs/resolve-intent.js` fills only the Tier 2 keys an answers file leaves absent, precedence `productType` → `styleDirection` → hand-written, and `npm run configs` prints each value with the layer that supplied it. Both intent fields were wired, not just `productType` — item 8 records why leaving one inert beside a live one is worse than wiring both. **Two constraints the entry did not have.** First, the resolver could not live inside the `configs` entry point: `verify.js`'s `base-config-provenance` check calls the five generators directly with the parsed `answers.example.json`, so a resolver on only one path would make the two disagree the moment the example omitted a key — and report the difference as a brand leak. It is a shared module both call. Second, the archetype needed no new channel into the second pipeline: `orchestrator.js` already resolves `spec/answers.json` to copy it into `generated/` as a receipt, so seeding the starter `loom-picks.json` from the archetype's pick-list was a parameter on `setupScript.generate()`, which took none. `answers.example.json` deliberately keeps all four Tier 2 keys explicit — letting the archetype drive it would shift Loom's own committed look (`edges` soft → sharp, `density` comfortable → compact), which is a design call and not this change. The `archetype-picks` check now fails the build on a pick-list name the catalog does not have; all ten lists were clean on arrival, so it is a regression guard on the 2026-08-04 repair, not a fix. Verified: regenerating from the committed example leaves `spec/config/base/` byte-identical; the seeded 27-atom dashboard list resolves to 29 files through `resolve-picks.js`; a flagless CLI run still lands on the exact defaults the removed inline `||` fallbacks produced; and each new check fails on its injected defect — a stale pick name by archetype and atom, a leaked brand value by file.*
+## 10. Figma and playground presentation — the pass only Jacob can run
+
+**Not engineering debt, and filed here anyway** because it is the last thing standing between this arc and "done," and the *What's next* table is where that gets read.
+
+**The gap.** Both delivered surfaces are correct and neither has had a pass for legibility by someone who did not build them. The generated Figma file is assembled by `scripts/figma-components/**` and pasted in one run; `catalog-playground/` is the browse surface. A consumer's first real impression of Loom is one of these two, not the README — and everything shipped so far has optimized for the pipeline being right, not for the file being pleasant to open.
+
+**Why it is not mine to do.** It needs a designer's eye on a rendered artifact and a comparison against a template file that exists only in Jacob's Figma account. Neither is checkable from this repo, and taste on a rendered surface is exactly what a generator cannot verify.
+
+**The open question, unresearched.** Whether a token-management service — Tokens Studio was named as the candidate — earns a place in the pipeline. **Nobody has read its primary source yet**, so nothing here should be treated as a description of what it does. What has to be established before any adoption call: what it actually consumes and emits, whether that overlaps or replaces `tokens.json` and the Figma paste path, what it costs, and whether it survives the standing dependency gate (runtime first, then stability, then version-compat). The bar is the one this repo already holds tools to: concrete current friction, not theoretical future utility.
+
+**Inputs only Jacob has.** The template Figma file in his account, and the specific changes he wants to the scaffolded playground and Figma output for visual clarity.
 
 ---
 
-*A third item — emit a neutral (non-CSS) token artifact for non-web consumers — **shipped 2026-07-16** and its entry was cut 2026-08-01. It had three homes by then: the lesson at the hand-maintained-mirror failure, the gate-jump decision in the project record, and the one piece still open (Taulu migrating onto it) in that project's own tracker at `~/jmi-projects/taulu/backlog/taulu/todo.md` §8. A shipped item kept in a file named "deferred" is the false signal this folder exists to avoid.*
+## Closed
 
----
+One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
 
-*The brand leak was reverted and a detector added 2026-08-05 — **the structural fix is item 9 and stays open.** It started as a wrong diagnosis worth recording. A playground resync produced a 194-line `tokens.css` diff; it was read as a local brand overwriting the committed one, and reverted. The direction was backwards. `tokens.css` derives from `spec/config/base/`, not from `answers.json` — and `spec/config/base/` is itself a **generated artifact that is committed**, produced by `npm run configs` from the git-ignored `spec/answers.json`. Commit `e935de3` ("Repair stale archetype pick names", whose real work was 36 lines in `direction-mappings.json`) had swept a local dashboard's brand into it: primary `#731DD8` → `#FF5714`, fonts Finlandica → Space Mono, 208 lines in `colors.json`. The playground's tokens were not stale — they were the last artifact still carrying Loom's brand. The leak was live on `master` for a day, so every consumer who ran `setup.sh` in that window got the wrong brand. The brand half of `e935de3` is reverted; its `direction-mappings.json` work is kept. This was the second occurrence — an Availo brand-gen diff was left dirty on master 2026-07-16 — and that session's fix git-ignored the **input**, which is why the **output** kept drifting. `base-config-provenance` now regenerates all five base configs in memory from the committed `answers.example.json` and compares, plus checks `standards.json`'s default-mode; the generators are pure, so it needs no temp files and no prose parsing. Verified by restoring `e935de3`'s configs, which fails the check by name on both files. **This detects; it does not prevent.** Item 9 — already filed 2026-08-04, a day before this rediscovery — is the fix: stop `npm run configs` writing a tracked path at all. Rediscovering a filed item cost most of a session and is its own lesson.*
-
----
-
-*The invariant gate closed 2026-08-05. The generator had no verification of its own output, and two defect classes reached a consumer undetected. The fix was mostly wiring what already existed: `catalog-playground` compiles the catalog with the real TypeScript compiler, but ran `strict` without `noUnusedLocals`, picked only 57 of 66 atoms, and had silently drifted from the catalog — so it was verifying a stale, partial catalog. It now enables `noUnusedLocals` + `noUnusedParameters`, picks all 66 (a synced atom is typechecked whether or not it has a gallery story), and `scripts/code-templates/verify.js` runs last in `npm run generate`, failing the run on three invariants a compiler cannot see: hand-written counts matching the catalog, the playground's synced copies matching what the generator emits, and every relative import being declared. The playground is checked, never auto-synced — copying into it from here would make it a hand-maintained mirror, which is the failure mode item 2 describes. Each check reports its denominator, because a check whose scope silently shrank reads identically to one that passed. Verified by injecting each defect in turn: a reintroduced unused import fails the run on parity and then the compiler catches it by name, a hand-edited count fails with file and line, an under-declared manifest fails on two checks at once, and a dropped atom fails on coverage.*
-
----
-
-*Pick validation closed 2026-08-04, filed and fixed the same day. Running the consumer path cold — fresh `create-next-app`, `init.sh`, hand-edited picks, `setup.sh` — showed that one mistyped pick id (`text-input` for `input`) aborted the sync mid-copy on a raw `cp: cannot stat`, leaving the project with some atoms, no `cn.ts`, and no compile. `scripts/resolve-picks.js` now validates the whole resolved set against the catalog before anything is copied, reports every unknown id at once with near-match suggestions and the atom that declared it, and fails clean; `setup.sh` needed no change, because it resolves before it copies and `set -e` does the rest. The 2026-06-11 proposal for an in-file `available` menu is closed into this: the error names the valid ids at the moment the consumer is wrong, which is where that gap actually bit. Verified end-to-end — a bad pick now leaves a real project byte-identical, and the corrected picks still install and build clean.*
-
----
-
-*Three items closed 2026-08-04 as three commits — `e36c0f6` (the `tailwind-merge` pin now resolves through one map, `scripts/code-templates/npm-pins.js`, that both `init.sh` and `setup.sh`'s printed line derive from), `59eaf62` (`badge.tsx`'s unused `VariantProps` import dropped at the template), and `aacc481` (manifest `dependencies` derived from the source's relative imports instead of hand-declared, with config-declared deps unioned in and a warning on any declared-but-not-imported). **Two corrections the entries had wrong.** The manifest under-declaration was filed against `select` alone; it was five atoms — `input`, `textarea`, `select`, `helper-text`, `file-upload` — all missing `form-field`, and `input` is among the most-picked atoms in the catalog. The badge entry asked whether the dead-import shape was worth a catalog-wide sweep; it was run, and badge was the only instance. Verified against a scratch consumer: `setup.sh` install typechecks clean under `strict` + `noUnusedLocals`, and removing `form-field.tsx` reproduces `TS2307` across seven files.*
-
-*An earlier item — emit a neutral (non-CSS) token artifact for non-web consumers — **shipped 2026-07-16** as `tokens.json` plus the NativeWind preset in [`../native/`](../native/README.md). The one piece still open is consumer-side: a native project migrating off its hand-mirrored token copy onto `tokens.json`, tracked in that project's own backlog. A shipped item kept in a file named "deferred" is the false signal this file exists to avoid.*
+- **Tier 1 intent never reached the generators** *(2026-08-05)* — `scripts/generate-configs/resolve-intent.js` fills the Tier 2 keys an answers file leaves absent, precedence `productType` → `styleDirection` → hand-written. Both intent fields wired; `productType` also seeds the starter `loom-picks.json`. Why the resolver is a shared module rather than a step inside `npm run configs` is commented in `verify.js`.
+- **Four atoms declared a dependency they never import** *(2026-08-05)* — `fab-menu`/`fab` and `toggle-group`/`toggle` were copying a file the consumer never uses; `stagger`/`cn` and `count-up`/`cn` were inert. All four stripped from `spec/config/components/`.
+- **The generator had no verification of its own output** *(2026-08-05, `e89f772`)* — `verify.js` now fails `npm run generate` on doc-count, playground-parity, manifest-dep, base-config-provenance and archetype-pick invariants; `catalog-playground` runs `noUnusedLocals` over every atom as the compile gate. The same commit reverted the brand half of `e935de3`, which had shipped a local dashboard's colors and fonts to `master` for a day.
+- **A mistyped pick id aborted `setup.sh` mid-copy** *(2026-08-04, `512d891`)* — `resolve-picks.js` validates the whole resolved set against the catalog before anything is copied, naming every unknown id with near-match suggestions. Closed the 2026-06-11 proposal for an in-file `available` menu.
+- **Three generator defects** *(2026-08-04)* — the `tailwind-merge` pin resolves through one map both install surfaces derive from (`e36c0f6`); `badge.tsx`'s dead `VariantProps` import dropped (`59eaf62`); manifest `dependencies` derived from source imports instead of hand-declared (`aacc481`), which had under-declared `form-field` across five atoms including `input`.
+- **No neutral token artifact for non-web consumers** *(2026-07-16, `01665da`)* — `tokens.json` plus the NativeWind preset in [`../native/`](../native/README.md). The one open piece is consumer-side, tracked in that project's own backlog.

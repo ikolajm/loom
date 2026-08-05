@@ -1,6 +1,6 @@
 // Formatted number primitive via Intl.NumberFormat. RSC-safe — no hooks, deterministic,
 // renders a <span>. tabular-nums keeps digit width fixed so updates don't reflow. The raw
-// `options` escape hatch spreads last, overriding the convenience props. Sprint 2 CountUp
+// `options` escape hatch spreads last, overriding the convenience props. The count-up atom
 // wraps this for animated counts.
 function generateNumber(name, config, meta) {
   return `import { forwardRef } from 'react';

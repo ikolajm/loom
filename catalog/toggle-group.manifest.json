@@ -4,8 +4,7 @@
   "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
   "version": "d5ed42045629",
   "dependencies": [
-    "cn",
-    "toggle"
+    "cn"
   ],
   "npmDependencies": [
     "@radix-ui/react-toggle-group"

@@ -9,7 +9,9 @@
  *
  * Unknown atom ids are a hard error. setup.sh resolves before it copies, and a non-zero exit
  * there aborts it under `set -e` — so a typo'd pick leaves the consumer's project untouched
- * instead of half-synced. This script is the only pre-flight the sync has; see docs/DEFERRED.md #5.
+ * instead of half-synced. This script is the only pre-flight the sync has: before it existed,
+ * one mistyped id aborted setup.sh mid-copy on a raw `cp: cannot stat`, leaving a project with
+ * some atoms, no cn.ts, and no compile.
  *
  * Usage: node resolve-picks.js <loom-picks.json> <catalog-dir> [--npm]
  */

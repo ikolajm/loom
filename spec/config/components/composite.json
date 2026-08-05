@@ -29,7 +29,7 @@
 
   "carousel": {
     "$catalog": { "dependencies": ["cn", "button"] },
-    "$note": "Sliding content container on an embla-carousel-react base. Touch/drag + keyboard (arrow keys) + dot/arrow navigation. Image gallery, card carousel, testimonial slider. Sprint 1 = base structure; autoplay (embla-carousel-autoplay plugin) + motion variants (coverflow/parallax/lightbox/thumbnail) are Sprint 2. Arrows compose the ghost icon-button.",
+    "$note": "Sliding content container on an embla-carousel-react base. Touch/drag + keyboard (arrow keys) + dot/arrow navigation. Image gallery, card carousel, testimonial slider. Base structure only. Autoplay (the embla-carousel-autoplay plugin) is deferred; the motion variants (coverflow/parallax/lightbox/thumbnail) are gated on the motion-library adoption decision (CATALOG_SPEC.md § Scope). Arrows compose the ghost icon-button.",
     "variants": {
       "default": { "bg": "transparent" }
     },

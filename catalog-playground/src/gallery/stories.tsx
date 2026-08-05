@@ -685,7 +685,7 @@ export const STORIES: GalleryStory[] = [
   {
     name: 'NumberDisplay',
     category: 'Data Display',
-    description: 'Intl.NumberFormat primitive. RSC-safe, tabular-nums. Sprint 2 CountUp wraps it. options spreads last as an escape hatch.',
+    description: 'Intl.NumberFormat primitive. RSC-safe, tabular-nums. The count-up atom wraps it. options spreads last as an escape hatch.',
     sections: [
       { label: 'decimal', content: <NumberDisplay value={1234567.89} /> },
       { label: 'currency', content: [<NumberDisplay key="1" value={1299.99} format="currency" currency="USD" />, <NumberDisplay key="2" value={1299.99} format="currency" currency="EUR" locale="de-DE" />] },
@@ -965,7 +965,7 @@ export const STORIES: GalleryStory[] = [
   {
     name: 'Carousel',
     category: 'Composite',
-    description: 'Sliding content on an embla base — drag/swipe, arrow keys, dots + arrow nav. Arrows disable at the ends (loop=false) or wrap (loop). Sprint-1 base structure; motion variants are Sprint 2.',
+    description: 'Sliding content on an embla base — drag/swipe, arrow keys, dots + arrow nav. Arrows disable at the ends (loop=false) or wrap (loop). Base structure only; motion variants are gated on the motion-library adoption decision.',
     sections: [
       { label: 'default (drag / arrows / dots)', content: (
         <div className="w-[360px]">

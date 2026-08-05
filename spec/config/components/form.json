@@ -304,7 +304,7 @@
       "tokens": ["color", "typography", "spacing", "sizing"],
       "composition": "none"
     },
-    "$note": "Sprint 1 = static input shell (search icon + clear X). Live-results dropdown deferred to a later pass. Controlled (`value`) or uncontrolled.",
+    "$note": "Static input shell (search icon + clear X); a live-results dropdown is deferred. Controlled (`value`) or uncontrolled.",
     "sizes": {
       "sm": { "height": "height/ch-3" },
       "md": { "height": "height/ch-5" },
