@@ -61,8 +61,13 @@ echo ""
 [ -d "$SRC_DIR/app" ]        || { echo "ERROR: $SRC_DIR/app not found — is this a Next.js project with src/?"; exit 1; }
 
 # --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
+# src/providers/ is deliberately OUTSIDE src/components/. The two installs own disjoint
+# paths so that clearing src/components/ — the obvious way to reset atoms and re-run
+# setup.sh — cannot take the app shell with it. It used to, and the resulting build
+# failure named a missing provider, which reads like a code defect rather than the
+# consequence of the reset.
 echo "[1/7] Creating app-shell directories..."
-mkdir -p "$SRC_DIR/components/providers"
+mkdir -p "$SRC_DIR/providers"
 
 # --- Step 2: Token substrate ---
 echo "[2/7] Copying tokens.css..."
@@ -74,8 +79,17 @@ cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
 # --- Step 4: Theme mechanism + root layout (atom-independent) ---
 echo "[4/7] Writing ThemeProvider + layout..."
-cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/components/providers/ThemeProvider.tsx"
+cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/providers/ThemeProvider.tsx"
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
+
+# Projects scaffolded before the move carry a copy at the old path. The layout this
+# script just wrote imports the new one, so the old file is dead — and a dead
+# ThemeProvider next to a live one is how the next reader picks the wrong import.
+if [ -f "$SRC_DIR/components/providers/ThemeProvider.tsx" ]; then
+  rm -f "$SRC_DIR/components/providers/ThemeProvider.tsx"
+  rmdir "$SRC_DIR/components/providers" 2>/dev/null || true
+  echo "  removed the superseded copy at src/components/providers/ThemeProvider.tsx"
+fi
 
 # --- Step 5: Foundation preview route (one-time, consumer-owned) ---
 # A /preview route rendering the token substrate (colors, type, spacing, radius)

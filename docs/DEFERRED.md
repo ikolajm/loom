@@ -1,13 +1,12 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Five items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Four items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ## What's next
 
 | # | Item | Size |
 |---|------|------|
 | 15 | `setup.sh catalog-playground` writes a local brand into the tracked playground `tokens.css` | Small. The last leak path of item 9's class, found by testing for it |
-| 14 | The generated app shell and the atom catalog share one directory, so resetting atoms deletes the shell | Small. One path change; found by breaking it |
 | 12 | Figma has no `semantic.component-height` collection, so the paste lost a layer code now has | Medium. Needs a Figma paste to verify — belongs with item 10 |
 | 8 | Install has two tiers by accident and names neither | A decision, not code. Blocks nothing |
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
@@ -52,18 +51,6 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 14. The app shell and the atom catalog share one directory
-
-**Problem.** `setup.sh:17` copies atoms into `$SRC/components`, and the generated init script writes the theme provider to `$SRC_DIR/components/providers/ThemeProvider.tsx` (`scripts/code-templates/scaffold/setup-script.js:65,77`). The scaffold and the catalog therefore own the same directory. Clearing `src/components/` — the obvious way to reset a project's atoms and re-run `setup.sh` — takes the app shell with it, and the resulting build failure names a missing provider rather than a missing atom, which reads like a code defect rather than the consequence of the reset.
-
-**How it was found.** By doing it: a scratch project's `src/components/` was `rm -rf`'d to test a clean install on 2026-08-05, and the resulting failure was diagnosed as a defect in the generated code before it was recognised as an artifact of the test. Never filed at the time.
-
-**Why it is not urgent.** No consumer has hit it in normal use — `setup.sh` is additive, so nothing forces a reset. It bites exactly the person doing what this repo asks a maintainer to do, which is run the consumer path cold.
-
-**Fix direction.** Move the scaffold's provider out of the catalog's directory — `src/providers/` or `src/app/providers/` — so the two installs own disjoint paths and `src/components/` means "atoms, all of them project-owned" with no exception. That is a one-path change in `setup-script.js` plus the import it writes into `layout.tsx`. Worth pairing with item 8, which is the same question asked about the whole install rather than one file.
-
----
-
 ## 12. Figma has no `semantic.component-height` collection
 
 **Problem.** Code and Figma both carry a primitives layer (`primitives.component-height`, `ch-0`..`ch-9`) and both carry a semantic radius layer (`semantic.radius`). Item 7 added a semantic height layer to code — `--height-control-md` and the role ladder behind it — with no Figma counterpart, so the pasted file states heights as raw `ch-N` primitives while the code states them as roles. A designer reading the Figma file cannot see that `button/md` and `text-field/md` are the same decision.
@@ -78,6 +65,7 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
 
+- **The app shell and the atom catalog shared one directory** *(2026-08-05)* — the scaffold wrote `ThemeProvider.tsx` into `src/components/providers/`, the same directory `setup.sh` fills with atoms, so clearing `src/components/` to reset atoms took the app shell with it and the resulting failure named a missing provider rather than the reset. The shell moved to `src/providers/`, disjoint from the catalog's path; `init.sh` removes a superseded copy at the old location, since a dead ThemeProvider beside a live one is how the next reader picks the wrong import. Two live consumers carried the old path and pick up the move on their next `init.sh` run. Verified on a project scaffolded the old way: init migrates it, then `rm -rf src/components` followed by a resync leaves the shell untouched and the atoms restored.
 - **Atom registration was scattered across the generator** *(2026-08-05)* — each registry entry in `shared.js` now carries `generator: 'module#export'`, resolved lazily in `generate-components.js`, which deleted 45 hand-written imports and both dispatch sites (the 33-line `if` chain and the 24-entry Radix router) for a net 329 → 253 lines. A fourth site turned up mid-refactor: the generate loop called `generateFormField()` directly, so that atom's generator was named in four places, not three; its branch is about `buildManifest` taking a null config and now routes through `dispatch` like everything else. The broken-spec paths were verified by injecting a bad module name, a bad export name and a malformed spec — each fails naming the atom, rather than at load time for the whole run. **The filed count was wrong**: "~15 sites" counted the hardcoded doc counts, automated away by the `doc-counts` check on 2026-08-04. Adding an atom touched five sites before this and touches three now — its config, its registry entry, and its template. **`ScrollArea` was found dead**: the Radix router mapped it, `radix-fallback.js` exports it, and no registry entry has ever dispatched to it. Dropped from the map; the unreferenced export in `radix-fallback.js` is left for a sweep. **The Figma half is deliberately not done** — `figma-components/orchestrator.js` groups builders into pasted *pages*, which is a presentation decision that should not be driven by the code registry. Adding a Figma component is still two sites, and that is the right coupling.
 - **`setup.sh` silently overwrote a consumer's edited atoms** *(2026-08-05)* — a resync now skips any atom you have edited, names it, and prints the diff command; `--force` takes the catalog version. The detector needed no new state: every atom's installed `manifest.json` already records `version`, the sha256 of the source that was delivered, so re-hashing the installed file answers "did the consumer change this" with nothing to keep in sync. Skipping rather than prompting is deliberate — `setup.sh` runs unattended in the playground resync, and a `[y/N]` there hangs the build. Two cases beyond the obvious one: a file with no manifest is skipped as unrecorded rather than assumed clean, **unless** it is byte-identical to the catalog, which both proves it unedited and bootstraps the check for everything installed before manifests shipped alongside — without that, `cn` was permanently unrecorded, skipped, and therefore never given the manifest that would fix it. Verified against the `badge.tsx` case from this entry: the patch survives the resync that used to revert it, and `button` still updates in the same run.
 - **`calendar` declared a `cell-size` nothing read** *(2026-08-05)* — four tiers of `height/ch-*` in `spec/config/components/form.json` that `calendar.js` never consumed; day cells size from `flex-1` and `aspect-square`, as the template's own line-24 comment said. Cut rather than wired: making the day grid token-driven means giving up `flex-1`, which is a design change, not a defect fix. Regenerating after the cut produced a zero-byte diff on `catalog/calendar.tsx`, which is what proved the key dead. Found while closing item 7, where the `compact` tier's 28px cell looked like a sub-minimum tap target and was not a tap target at all.

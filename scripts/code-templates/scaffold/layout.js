@@ -15,7 +15,7 @@ function generate(configs) {
     .join('&');
 
   return `import type { Metadata } from 'next';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import './globals.css';
 
 export const metadata: Metadata = {

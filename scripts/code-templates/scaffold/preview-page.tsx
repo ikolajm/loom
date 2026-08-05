@@ -16,7 +16,7 @@
  * your brand landed. init.sh scaffolds it once and never overwrites it.
  */
 
-import { useTheme } from '@/components/providers/ThemeProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const COLOR_GROUPS: { label: string; roles: { name: string; className: string }[] }[] = [
   {
