@@ -92,6 +92,17 @@ Alongside the web `tokens.css`, `generate` emits **`tokens.json`** — the same 
 
 ### Use Loom in a project
 
+**Two install tiers.** Pick before you start; the difference is what Loom is allowed to put in your project.
+
+| Tier | You get | Use when |
+|------|---------|----------|
+| **tokens** | `tokens.css` + `tokens.json`, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values. This is the only tier a non-web runtime can take: [`native/`](native/README.md) is this tier, consumed through the NativeWind preset |
+| **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`, a `/preview` route), the core dependencies, and the atoms you pick | You want the components too. This is what the quickstart below installs |
+
+The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
+
+Only the tokens tier is currently a first-class path on native. On web, take the catalog tier and delete what you don't want — a `--tokens` flag for `init.sh` is filed in [`docs/DEFERRED.md`](docs/DEFERRED.md).
+
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
 **Don't have one?** From your workspace (not inside the Loom repo), this spins up a correctly-configured project — Next.js + Tailwind v4 + TypeScript + `src/app/`, no prompts:
