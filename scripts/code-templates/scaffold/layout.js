@@ -4,7 +4,7 @@
  */
 
 function generate(configs) {
-  const defaultMode = configs.standards.colors['default-mode'] || 'dark';
+  const defaultMode = configs.colors['default-mode'] || 'dark';
   const headingFont = configs.typography.families.heading;
   const bodyFont = configs.typography.families.body;
 

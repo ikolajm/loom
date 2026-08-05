@@ -1,5 +1,6 @@
 {
   "$note": "Generated from primary: #731DD8, secondary: #48A9A6, accent: #C0DA74. Neutral tinted from primary hue (268°). Questionnaire is the override mechanism — change inputs and regenerate.",
+  "default-mode": "dark",
   "palette": {
     "primary": {
       "50": "#f2edf7",

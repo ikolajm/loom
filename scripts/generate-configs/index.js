@@ -3,11 +3,12 @@
  * Design System Config Generator — Orchestrator
  *
  * Reads questionnaire answers (JSON) + direction-mappings.json + standards.json,
- * runs all 5 generators, and writes output to spec/config/base/.
+ * runs all 5 generators, and writes output to the git-ignored spec/config/local/base/.
  *
  * Usage:
  *   node index.js --input answers.json
  *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth elevated --typeScale standard
+ *   node index.js --input ../../spec/answers.example.json --default-set   (maintainers only)
  */
 const fs = require('fs');
 const path = require('path');
@@ -20,11 +21,23 @@ const { generate: generateEffects } = require('./generate-effects');
 const { resolveIntent, TIER2_KEYS } = require('./resolve-intent');
 
 // --- Paths ---
+// Output goes to the git-ignored local set, never to the committed one. Writing into
+// spec/config/base/ is what let a local brand ride into two commits; see
+// scripts/config-paths.js for the full account and the fallback rule.
+const { COMMITTED_ROOT: CONFIG_ROOT, LOCAL_ROOT } = require('../config-paths');
 const PIPELINE_ROOT = path.resolve(__dirname, '../../');
-const CONFIG_ROOT = path.join(PIPELINE_ROOT, 'spec/config');
 const STANDARDS_PATH = path.join(CONFIG_ROOT, 'standards.json');
 const MAPPINGS_PATH = path.join(PIPELINE_ROOT, 'spec/direction-mappings.json');
-const OUTPUT_DIR = path.join(CONFIG_ROOT, 'base');
+
+// `--default-set` is the one way to write the COMMITTED spec/config/base/, and it is a
+// maintainer action: it regenerates Loom's own look from answers.example.json. Without
+// it the redirect would make the committed set unreachable, since the ordinary command
+// now writes only to the ignored local set — and an artifact nothing can regenerate
+// drifts from its source by construction. `base-config-provenance` in verify.js is what
+// notices if it does; this is the repair the failure message names.
+function outputDir(args) {
+  return args['default-set'] ? path.join(CONFIG_ROOT, 'base') : path.join(LOCAL_ROOT, 'base');
+}
 
 // --- Parse CLI args ---
 function parseArgs(argv) {
@@ -60,8 +73,8 @@ function loadAnswers(args) {
       process.exit(1);
     }
     const answers = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
-    // defaultMode drives the standards.json propagation below; default it here so an
-    // omitted key doesn't write `undefined` into standards. Matches the CLI-flag path.
+    // defaultMode lands in the generated colors.json; default it here so an omitted key
+    // doesn't emit `undefined`. Matches the CLI-flag path.
     answers.defaultMode = answers.defaultMode || 'dark';
     return answers;
   }
@@ -147,16 +160,13 @@ function main() {
   }
   console.log('');
 
-  // Propagate the questionnaire's default-mode into standards.json — the source the
-  // token generator reads. Without this, answers.defaultMode is decorative and the two
-  // can silently disagree. Idempotent: only writes when it actually differs.
-  if (standards.colors['default-mode'] !== answers.defaultMode) {
-    standards.colors['default-mode'] = answers.defaultMode;
-    fs.writeFileSync(STANDARDS_PATH, JSON.stringify(standards, null, 2) + '\n');
-    console.log(`  ✓ standards.json default-mode → ${answers.defaultMode}`);
-  }
+  // defaultMode used to be propagated into standards.json here. It now rides in
+  // generate-colors.js's output instead: standards.json is locked across projects and
+  // this is a per-project answer, so writing it there made the file's own header false
+  // and put a second generator write on a tracked path. One write target now, below.
 
   // Ensure output directory exists
+  const OUTPUT_DIR = outputDir(args);
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
@@ -184,6 +194,11 @@ function main() {
 
   console.log('');
   console.log(`Output written to: ${OUTPUT_DIR}`);
+  console.log(
+    args['default-set']
+      ? '  (the COMMITTED default set — this is Loom\'s own look and it is tracked; commit it deliberately)'
+      : '  (git-ignored — the committed spec/config/base/ is untouched and stays Loom\'s own look)'
+  );
   console.log('Done.');
 }
 

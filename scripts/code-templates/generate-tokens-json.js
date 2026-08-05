@@ -24,8 +24,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('../config-paths');
 
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -134,7 +134,7 @@ function buildEffects() {
 }
 
 function generate() {
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   return {
     $meta: {
       artifact: 'tokens.json',

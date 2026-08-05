@@ -21,7 +21,8 @@ const CONFIG_ROOT = path.join(ROOT, 'spec/config');
 const SCRIPTS_DIR = __dirname;
 
 // --- Load configs ---
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('./config-paths');
 const standards = load('standards.json');
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -159,7 +160,7 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_semantics_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  semStep(9, 'color', { defaultMode: standards.colors['default-mode'], modes: standards.colors.modes }, 'color.js');
+  semStep(9, 'color', { defaultMode: colors['default-mode'], modes: standards.colors.modes }, 'color.js');
   semStep(10, 'spacing', spacing.categories, 'spacing.js');
   semStep(11, 'radius', sizing['border-radius'], 'radius.js');
 

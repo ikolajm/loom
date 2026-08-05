@@ -6,8 +6,9 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Config loading ---
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ (your brand, git-ignored) over the committed default set.
+// See scripts/config-paths.js for why the generator no longer writes a tracked path.
+const { loadConfig: load } = require('../config-paths');
 
 function loadAllConfigs() {
   return {

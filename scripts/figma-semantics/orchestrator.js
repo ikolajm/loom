@@ -14,15 +14,18 @@ const path = require('path');
 
 // --- Paths ---
 const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const STANDARDS = JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, 'standards.json'), 'utf-8'));
-const SPACING = JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, 'base/spacing.json'), 'utf-8'));
-const SIZING = JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, 'base/sizing.json'), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig } = require('../config-paths');
+const STANDARDS = loadConfig('standards.json');
+const COLORS = loadConfig('base/colors.json');
+const SPACING = loadConfig('base/spacing.json');
+const SIZING = loadConfig('base/sizing.json');
 
 // --- Collection definitions ---
 const COLLECTIONS = {
   'color': {
     config: {
-      defaultMode: STANDARDS.colors['default-mode'],
+      defaultMode: COLORS['default-mode'],
       modes: STANDARDS.colors.modes
     },
     template: 'color.js'

@@ -125,17 +125,20 @@ function checkManifestDeps(atoms) {
 }
 
 // --- base-config-provenance -----------------------------------------------
-// spec/config/base/ is a generated artifact that is COMMITTED, produced from
-// spec/answers.json — which is git-ignored and machine-local. So `npm run configs`
-// run with a local brand rewrites the repo's committed brand, and the diff rides
+// spec/config/base/ is a generated artifact that is COMMITTED — it is Loom's own look
+// and the fallback a fresh clone builds from. It used to be the generator's write
+// target too, so `npm run configs` with a local brand rewrote it and the diff rode
 // along in the next commit. That happened twice: an Availo brand-gen diff left dirty
 // on master (2026-07-16, caught) and a dashboard's orange swept into e935de3
 // (2026-08-04, shipped to master and live for a day).
 //
-// The 07-16 fix git-ignored the input. This guards the output: the committed base
-// configs must be exactly what the committed answers.example.json generates. The
-// generators are pure (answers, standards, mappings) → object, so this regenerates
-// in memory and compares — no temp files, no prose parsing, no side effects.
+// The 07-16 fix git-ignored the input, the 08-05 fix redirected the output to the
+// ignored spec/config/local/, and this is the check that neither has quietly come
+// undone: the committed base configs must be exactly what the committed
+// answers.example.json generates. It reads spec/config/base/ by explicit path rather
+// than through config-paths.js — a provenance check that reads whatever is local
+// checks nothing. The generators are pure (answers, standards, mappings) → object, so
+// this regenerates in memory and compares — no temp files, no side effects.
 function checkBaseConfigProvenance() {
   const standards = readJson('spec/config/standards.json');
   const mappings = readJson('spec/direction-mappings.json');
@@ -161,15 +164,19 @@ function checkBaseConfigProvenance() {
     }
   }
 
-  // `npm run configs` also writes answers.defaultMode into standards.json.
-  if (standards.colors['default-mode'] !== example.defaultMode) {
+  // standards.json is no longer a generator write target — defaultMode rides in
+  // colors.json, which the loop above already compares. What is worth checking is that
+  // it has not drifted back: a key the generator sets must not reappear in the file the
+  // generator must never touch, or the two disagree silently and the locked-across-
+  // projects header is false again.
+  if (standards.colors['default-mode'] !== undefined) {
     failures.push(
-      `spec/config/standards.json — default-mode is "${standards.colors['default-mode']}", answers.example.json says "${example.defaultMode}"`
+      `spec/config/standards.json — carries a "default-mode" key; it is a per-project answer and belongs in the generated base/colors.json`
     );
   }
 
   if (failures.length) {
-    failures.push('  → a local brand leaked in. Restore with: npm run configs -- --input spec/answers.example.json');
+    failures.push('  → a local brand leaked in. Restore with: npm run configs -- --input spec/answers.example.json --default-set');
   }
   return { failures, note: `${generators.length} configs + standards` };
 }

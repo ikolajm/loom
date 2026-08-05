@@ -70,6 +70,12 @@ function generate(answers, standards) {
 
   return {
     $note: `Generated from primary: ${primary}, secondary: ${secondary}, accent: ${accent}. Neutral tinted from primary hue (${Math.round(primaryHsl.h)}°). Questionnaire is the override mechanism — change inputs and regenerate.`,
+    // Which mode loads first. Lives here, with the generated colors, because it is a
+    // per-project answer: standards.json declares itself "values locked across all
+    // projects, do not override per-project" and `npm run configs` used to write this
+    // one key into it anyway, which is both a false header and the second of the two
+    // tracked-path writes that dirtied the working tree.
+    'default-mode': answers.defaultMode || 'dark',
     palette,
     roles
   };

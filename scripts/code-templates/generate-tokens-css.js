@@ -22,8 +22,8 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Config loading ---
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('../config-paths');
 
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -385,7 +385,7 @@ function buildSection12_TailwindTheme() {
 
   // Colors — from semantic roles
   lines.push('  /* Colors */');
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   const defaultRoles = colors.roles[defaultMode];
   if (defaultRoles) {
     for (const [group, roleMap] of Object.entries(defaultRoles)) {
@@ -489,7 +489,7 @@ function buildSection12_TailwindTheme() {
 
 // --- Assembly ---
 function generate() {
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   const altMode = defaultMode === 'dark' ? 'light' : 'dark';
 
   // Sections 1-8 in :root

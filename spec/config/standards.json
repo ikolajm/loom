@@ -89,8 +89,7 @@
   },
 
   "colors": {
-    "default-mode": "dark",
-    "$note": "Both light and dark are equal mapping schemes. default-mode determines which loads first. Fixed variants reference the same palette stops in both modes — explicitly modeled in each.",
+    "$note": "Both light and dark are equal mapping schemes. Which one loads first is a per-project answer and lives in the generated config/base/colors.json → default-mode, not here — this file is locked across projects and must not carry a value the questionnaire sets. Fixed variants reference the same palette stops in both modes — explicitly modeled in each.",
 
     "modes": {
       "light": {
