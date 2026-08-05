@@ -134,9 +134,15 @@ if (require.main === module) {
 
   console.log(`\n=== Generating → ${outputDir} ===\n`);
 
-  // Copy answers.json as a receipt — the DNA of this generation
+  // Copy answers.json as a receipt — the DNA of this generation. Only for a FULL run:
+  // answers.json holds the brand and the project name, and a partial run is how it
+  // reaches somewhere it should not be. `--only tokens --output <consumer>/src` is a
+  // real invocation — setup.sh and the playground's prebuild hook both use it — and it
+  // was dropping a private answers file into a consumer's source tree, where nothing
+  // was ignoring it. A receipt belongs with the artifact set it documents, not beside
+  // one file pulled out of it.
   const answersPath = path.resolve(__dirname, '../../spec/answers.json');
-  if (fs.existsSync(answersPath)) {
+  if (!only && fs.existsSync(answersPath)) {
     fs.copyFileSync(answersPath, path.join(outputDir, 'answers.json'));
     console.log('[answers]\n  answers.json\n');
   }

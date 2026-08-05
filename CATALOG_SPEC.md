@@ -180,6 +180,8 @@ Motion tokens land with the substrate bundle — easings (`standard` / `decelera
 
 The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom: its `loom-picks.json` lists the full catalog, and `setup.sh` populates `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
 
+**Its `src/tokens.css` is git-ignored and regenerated on every `npm run dev` / `npm run build`** by a `predev` / `prebuild` hook. That makes the playground a live reflection of whichever config set is active: run it holding your own brand in `spec/config/local/` and the ramps, type and control sizing are yours, so token-source edits can be checked against the whole catalog in one place. A fresh clone with no local set renders Loom's own look. Committing that file would force it to be both canonical enough to review in a diff and local enough to be useful, and it cannot be both — so it is generated, never tracked. Build with `npm run build` rather than `npx next build`; the latter bypasses the hook and fails on a missing import if the file was never generated.
+
 Structure:
 
 ```
