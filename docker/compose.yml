@@ -1,0 +1,34 @@
+# Build context is the repo root, not this folder — the images copy the whole
+# working tree, filtered by the root .dockerignore.
+name: loom-harness
+
+services:
+  # docker compose run --rm sweep
+  sweep:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sweep
+      args:
+        NODE_VERSION: ${NODE_VERSION:-22}
+    environment:
+      KEEP: ${KEEP:-0}
+
+  # Same image, but keeps the generated variants so a failure can be read rather
+  # than only counted. Writes into generated/, which is already gitignored.
+  #   docker compose run --rm sweep-keep
+  sweep-keep:
+    extends: sweep
+    environment:
+      KEEP: 1
+    volumes:
+      - ../generated/docker:/loom/generated/docker
+
+  # docker compose run --rm install
+  install:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.install
+      args:
+        NODE_VERSION: ${NODE_VERSION:-22}
+    environment:
+      PICKS: ${PICKS:-archetype}

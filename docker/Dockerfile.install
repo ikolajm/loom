@@ -1,0 +1,25 @@
+# End-to-end consumer install on a machine that has never seen Loom.
+# See docker/README.md — this is the only thing in the repo that runs init.sh.
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-slim
+
+# create-next-app shells out to git to initialise the consumer repo, so git is a
+# real dependency here even though the sweep image does not need it.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /loom
+COPY . /loom
+RUN chmod +x docker/install.sh setup.sh
+
+# Runs as a non-root user: create-next-app and npm behave differently under root
+# (npm drops privileges for lifecycle scripts), and a consumer is not root.
+RUN mkdir -p /app && chown -R node:node /app /loom
+USER node
+
+ENV LOOM_ROOT=/loom \
+    APP_DIR=/app/consumer \
+    PICKS=archetype
+
+ENTRYPOINT ["docker/install.sh"]
