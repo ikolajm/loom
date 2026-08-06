@@ -62,7 +62,7 @@ const CommandPaletteInput = forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex w-full bg-transparent outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-50',
+        'flex w-full bg-transparent outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled)',
         inputSizeMap[size],
         className,
       )}
@@ -113,7 +113,7 @@ const CommandPaletteItem = forwardRef<
     className={cn(
       'relative flex items-center select-none interactive cursor-pointer',
       'data-[selected=true]:bg-surface-2',
-      'data-[disabled=true]:opacity-50 data-[disabled=true]:cursor-not-allowed',
+      'data-[disabled=true]:opacity-(--opacity-disabled) data-[disabled=true]:cursor-not-allowed',
       itemSizeMap[size],
       className,
     )}

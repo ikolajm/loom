@@ -2,7 +2,7 @@
   "name": "textarea",
   "category": "form",
   "description": "",
-  "version": "71214df128e4",
+  "version": "e1883ee841da",
   "dependencies": [
     "cn",
     "form-field"

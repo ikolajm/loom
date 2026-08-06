@@ -2,7 +2,7 @@
   "name": "toggle",
   "category": "button",
   "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
-  "version": "c5f45a5429bc",
+  "version": "89cbcf121bc0",
   "dependencies": [
     "cn"
   ],

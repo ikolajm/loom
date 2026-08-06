@@ -113,7 +113,7 @@ type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
   };
 
 const INTERACTIVE_CLASSES = 'interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
-const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 opacity-70 hover:opacity-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
 const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {

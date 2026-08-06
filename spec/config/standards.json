@@ -83,6 +83,11 @@
       "offset": "2px",
       "color": "primary"
     },
+    "opacity": {
+      "$note": "State opacities. Universal and code-only, like transition and easing — they describe what a disabled or de-emphasised control looks like, not which brand it belongs to. Emitted as --opacity-{role}; atoms write opacity-(--opacity-disabled) rather than opacity-disabled, because Tailwind v4 has no --opacity-* theme namespace and @theme therefore cannot generate an opacity-{name} utility. Reaching for @theme appears to work: the variable is emitted and the utility silently never is. `muted` carries a direction as well as a value — a secondary control rests at muted and returns to full on hover, never the reverse. Two of the four sibling dismiss controls did the opposite before this was settled, which is how the role came to mean two things.",
+      "disabled": 0.5,
+      "muted": 0.7
+    },
     "shadow": {
       "$note": "Shadow levels generated in config/base/effects.json. shadow-0 (none) through shadow-N."
     }

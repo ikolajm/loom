@@ -178,6 +178,16 @@ function buildSection6_Effects() {
   lines.push(`--focus-ring-color: var(--${standards.effects['focus-ring'].color});`);
   lines.push(`--ring: var(--${standards.effects['focus-ring'].color});`);
 
+  // Plain custom properties, deliberately not inside @theme: Tailwind v4 has no
+  // --opacity-* namespace, so @theme would emit the variable and never generate the
+  // matching utility. Atoms consume these as opacity-(--opacity-disabled).
+  lines.push('');
+  lines.push('/* === State Opacity === */');
+  for (const [name, val] of Object.entries(standards.effects.opacity)) {
+    if (name.startsWith('$')) continue;
+    lines.push(`--opacity-${name}: ${val};`);
+  }
+
   return lines;
 }
 

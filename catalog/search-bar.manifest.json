@@ -2,7 +2,7 @@
   "name": "search-bar",
   "category": "form",
   "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
-  "version": "a6be0564f903",
+  "version": "60e8d3063c8a",
   "dependencies": [
     "cn"
   ],

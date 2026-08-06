@@ -35,7 +35,7 @@ import { Check } from 'lucide-react';
 import { cn } from './cn';
 
 const checkboxVariants = cva(
-  'peer shrink-0 cursor-pointer ${radius} border border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary',
+  'peer shrink-0 cursor-pointer ${radius} border border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary',
   {
     variants: {
       size: {
@@ -101,7 +101,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const switchVariants = cva(
-  'peer inline-flex shrink-0 cursor-pointer items-center rounded-pill transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-1',
+  'peer inline-flex shrink-0 cursor-pointer items-center rounded-pill transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-1',
   {
     variants: {
       size: {
@@ -169,7 +169,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const radioItemVariants = cva(
-  'aspect-square rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary',
+  'aspect-square rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:border-primary',
   {
     variants: {
       size: {
@@ -254,7 +254,7 @@ const Slider = forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, Slide
     return (
       <SliderPrimitive.Root
         ref={ref}
-        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-50 data-[disabled]:pointer-events-none', className)}
+        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none', className)}
         {...props}
       >
         <SliderPrimitive.Track className={cn('relative w-full grow overflow-hidden rounded-pill bg-surface-1', s.track)}>
@@ -287,7 +287,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const selectTriggerVariants = cva(
-  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
+  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
   {
     variants: {
       state: {
@@ -360,7 +360,7 @@ const SelectItem = forwardRef<
     className={cn(
       'relative flex w-full items-center rounded-component px-3 py-2 pr-8 text-action-sm cursor-pointer select-none',
       'focus:bg-surface-2 focus:text-on-surface focus:outline-none',
-      'data-[disabled]:opacity-50 data-[disabled]:pointer-events-none',
+      'data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none',
       className,
     )}
     {...props}

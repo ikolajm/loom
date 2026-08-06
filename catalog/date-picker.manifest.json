@@ -2,7 +2,7 @@
   "name": "date-picker",
   "category": "form",
   "description": "",
-  "version": "00a05449d485",
+  "version": "b385a3968dfd",
   "dependencies": [
     "calendar",
     "cn",

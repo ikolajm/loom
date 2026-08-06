@@ -20,7 +20,7 @@ const Slider = forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, Slide
     return (
       <SliderPrimitive.Root
         ref={ref}
-        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-50 data-[disabled]:pointer-events-none', className)}
+        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none', className)}
         {...props}
       >
         <SliderPrimitive.Track className={cn('relative w-full grow overflow-hidden rounded-pill bg-surface-1', s.track)}>

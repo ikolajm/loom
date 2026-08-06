@@ -125,11 +125,17 @@ function buildEffects() {
     if (name.startsWith('$')) continue;
     easing[name] = val;
   }
+  const opacity = {};
+  for (const [name, val] of Object.entries(standards.effects.opacity)) {
+    if (name.startsWith('$')) continue;
+    opacity[name] = val;
+  }
   return {
     shadow: effects.shadow,
     transition: standards.effects.transition,
     easing,
     focusRing: { width: focus.width, offset: focus.offset, color: focus.color },
+    opacity,
   };
 }
 

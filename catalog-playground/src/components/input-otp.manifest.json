@@ -2,7 +2,7 @@
   "name": "input-otp",
   "category": "form",
   "description": "",
-  "version": "74a31f091c51",
+  "version": "1eb367f40b46",
   "dependencies": [
     "cn"
   ],

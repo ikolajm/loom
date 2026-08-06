@@ -2,7 +2,7 @@
   "name": "file-upload",
   "category": "form",
   "description": "",
-  "version": "f6706bd3aecd",
+  "version": "413a1dd4a86c",
   "dependencies": [
     "cn",
     "form-field"

@@ -106,7 +106,7 @@ const InputOTP = forwardRef<HTMLDivElement, InputOTPProps>(
             className={cn(
               'text-center font-semibold tracking-[0.1em] bg-surface text-on-surface outline-none transition-colors',
               borderColor, focusBorder,
-              disabled && 'opacity-50 cursor-not-allowed',
+              disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
               cellSizeMap[size],
             )}
           />

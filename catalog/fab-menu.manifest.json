@@ -2,7 +2,7 @@
   "name": "fab-menu",
   "category": "button",
   "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed — the expand animation wraps via the motion library and is gated on that adoption decision.",
-  "version": "479ece99f699",
+  "version": "053835f4c88e",
   "dependencies": [
     "cn"
   ],

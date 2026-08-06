@@ -66,7 +66,7 @@ const ContextMenuItem = forwardRef<
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed',
+      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       itemSizeMap[size],
       inset && 'pl-8',
       className,
@@ -85,7 +85,7 @@ const ContextMenuCheckboxItem = forwardRef<
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed',
+      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       insetItemSizeMap[size],
       className,
     )}
@@ -109,7 +109,7 @@ const ContextMenuRadioItem = forwardRef<
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed',
+      'data-[highlighted]:bg-surface-2 data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       insetItemSizeMap[size],
       className,
     )}

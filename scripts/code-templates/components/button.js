@@ -32,7 +32,7 @@ import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center ${typo} interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center ${typo} interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {

@@ -17,7 +17,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const toggleVariants = cva(
-  'inline-flex items-center justify-center ${typo} interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${prefixClasses('data-[state=off]', stateStyles.unpressed || 'bg-transparent text-on-surface-variant border border-outline-subtle')} ${prefixClasses('data-[state=on]', stateStyles.pressed || 'bg-primary-container text-on-primary-container')}',
+  'inline-flex items-center justify-center ${typo} interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed ${prefixClasses('data-[state=off]', stateStyles.unpressed || 'bg-transparent text-on-surface-variant border border-outline-subtle')} ${prefixClasses('data-[state=on]', stateStyles.pressed || 'bg-primary-container text-on-primary-container')}',
   {
     variants: {
       size: {

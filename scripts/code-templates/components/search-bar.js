@@ -66,7 +66,7 @@ const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
             'pr-9 interactive cursor-text placeholder:text-on-surface-variant',
             hasIcon ? 'pl-9' : 'pl-3',
             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
             '[&::-webkit-search-cancel-button]:appearance-none',
             sizeMap[size],
           )}
@@ -77,7 +77,7 @@ const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
             type="button"
             onClick={clear}
             aria-label="Clear search"
-            className={cn('absolute right-3 inline-flex items-center justify-center text-on-surface-variant transition-opacity hover:opacity-70 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', iconSize)}
+            className={cn('absolute right-3 inline-flex items-center justify-center text-on-surface-variant transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', iconSize)}
           >
             <X className="size-full" />
           </button>

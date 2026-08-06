@@ -153,7 +153,7 @@ const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
           fileUploadVariants({ size }),
           isDragover && '${dragoverColors}',
           isError && 'border-error',
-          disabled && 'opacity-50 cursor-not-allowed',
+          disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
           className,
         )}
         onDragOver={handleDragOver}
@@ -220,7 +220,7 @@ const FileUploadItem = forwardRef<HTMLDivElement, FileUploadItemProps>(
               type="button"
               onClick={onRemove}
               aria-label={\`Remove \${name}\`}
-              className="inline-flex items-center justify-center rounded-component text-on-surface-variant transition-opacity hover:opacity-70 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="inline-flex items-center justify-center rounded-component text-on-surface-variant transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               <X className="size-icon-1" />
             </button>
