@@ -147,13 +147,13 @@ Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Go
 
 ### Apply the Figma scripts
 
-`npm run figma` writes 30 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`29` step scripts (each a self-contained async IIFE). To build the Figma file:
+`npm run figma` writes 31 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`30` step scripts (each a self-contained async IIFE). To build the Figma file:
 
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
-3. Paste the step scripts **`01` → `29` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
+3. Paste the step scripts **`01` → `30` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
 
-**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`14`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
+**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`15`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
 
 ```js
 // Clear variable collections

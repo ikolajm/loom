@@ -22,6 +22,10 @@ const SPACING = loadConfig('base/spacing.json');
 const SIZING = loadConfig('base/sizing.json');
 
 // --- Collection definitions ---
+function omitNotes(o) {
+  return Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith('$')));
+}
+
 const COLLECTIONS = {
   'color': {
     config: {
@@ -37,6 +41,10 @@ const COLLECTIONS = {
   'radius': {
     config: SIZING['border-radius'],
     template: 'radius.js'
+  },
+  'opacity': {
+    config: omitNotes(STANDARDS.effects.opacity),
+    template: 'opacity.js'
   },
 };
 

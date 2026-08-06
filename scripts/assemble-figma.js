@@ -125,6 +125,10 @@ function jsonLine(varName, data) {
   return `const ${varName} = ${JSON.stringify(data)};`;
 }
 
+function omitNotes(o) {
+  return Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith('$')));
+}
+
 // --- Step Definitions ---
 
 function buildAllSteps() {
@@ -160,9 +164,12 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_semantics_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  semStep(9, 'color', { defaultMode: colors['default-mode'], modes: standards.colors.modes }, 'color.js');
-  semStep(10, 'spacing', spacing.categories, 'spacing.js');
-  semStep(11, 'radius', sizing['border-radius'], 'radius.js');
+  // Opacity leads the semantics because it is the only one that aliases nothing —
+  // it has no primitive layer to be pasted after.
+  semStep(9, 'opacity', omitNotes(standards.effects.opacity), 'opacity.js');
+  semStep(10, 'color', { defaultMode: colors['default-mode'], modes: standards.colors.modes }, 'color.js');
+  semStep(11, 'spacing', spacing.categories, 'spacing.js');
+  semStep(12, 'radius', sizing['border-radius'], 'radius.js');
 
   // --- Styles ---
   const stylesDir = path.join(SCRIPTS_DIR, 'figma-styles');
@@ -174,8 +181,8 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_styles_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  styleStep(12, 'text-styles', { families: typography.families, textStyles: typography.textStyles }, 'text-styles.js');
-  styleStep(13, 'effect-styles', { shadow: effects.shadow, properties: effects['shadow-properties'] }, 'effect-styles.js');
+  styleStep(13, 'text-styles', { families: typography.families, textStyles: typography.textStyles }, 'text-styles.js');
+  styleStep(14, 'effect-styles', { shadow: effects.shadow, properties: effects['shadow-properties'] }, 'effect-styles.js');
 
   // --- Layout ---
   const layoutDir = path.join(SCRIPTS_DIR, 'figma-layout');
@@ -183,7 +190,7 @@ function buildAllSteps() {
     let template = fs.readFileSync(path.join(layoutDir, 'layout.js'), 'utf-8');
     const pipelineMarker = template.indexOf('// --- Pipeline ---');
     if (pipelineMarker !== -1) template = template.slice(pipelineMarker);
-    steps.push(slim('14_layout', `${jsonLine('CONFIG', layout)}\n${template}`));
+    steps.push(slim('15_layout', `${jsonLine('CONFIG', layout)}\n${template}`));
   }
 
   // --- Templates + Core Page ---
@@ -206,7 +213,7 @@ function buildAllSteps() {
           code = code.slice(0, utilsStart) + code.slice(pageStart);
         }
       }
-      steps.push(slim('15_templates', code.trim()));
+      steps.push(slim('16_templates', code.trim()));
     }
   }
 
@@ -221,13 +228,13 @@ function buildAllSteps() {
       if (utilsStart !== -1 && buildStart !== -1) {
         code = code.slice(0, utilsStart) + code.slice(buildStart);
       }
-      steps.push(slim('16_core-page', code.trim()));
+      steps.push(slim('17_core-page', code.trim()));
     }
   }
 
   // --- Component Pages ---
   const componentPages = [
-    { name: 'buttons', num: 17 },
+    { name: 'buttons', num: 18 },
     { name: 'forms', num: null },
     { name: 'layout-page', num: null },
     { name: 'feedback', num: null },
@@ -236,7 +243,7 @@ function buildAllSteps() {
     { name: 'composite', num: null },
   ];
 
-  let stepNum = 17;
+  let stepNum = 18;
   for (const page of componentPages) {
     const scripts = compOrch.assembleScript(page.name);
     for (const s of scripts) {

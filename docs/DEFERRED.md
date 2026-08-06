@@ -6,7 +6,7 @@ Known engineering debt in the generator, plus one presentation pass that is Jaco
 
 | # | Item | Size |
 |---|------|------|
-| 17 | No opacity token — 33 hardcoded uses, and the disabled state is untunable | Small. Buildable now; the Figma half needs a paste |
+| 17 | Opacity: code and Figma both built, neither Figma half pasted yet | Verification only. Paste `09` and look — belongs with item 10 |
 | 18 | Figma variable steps create but never update, so a re-paste duplicates collections | Medium. Verifiable only by pasting twice — belongs with item 10 |
 | 12 | Figma has no `semantic.component-height` collection, so the paste lost a layer code now has | Medium. Needs a Figma paste to verify — belongs with item 10 |
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
@@ -39,9 +39,23 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 17. No opacity token, and the disabled state is untunable
+## 17. Opacity — code half shipped, Figma counterpart outstanding
 
-**Problem.** Opacity is the one visual property with no token layer. `spec/config/standards.json` carries `effects.transition`, `easing`, `focus-ring` and `shadow`; opacity is absent from it and from every file in `spec/config/base/`. The atom templates hardcode it 33 times — 24 `opacity-50`, three `opacity-70`, three `opacity-100`, and one each of `opacity-90`, `opacity-60`, `opacity-0`.
+**Shipped.** `standards.json` now carries `effects.opacity` with two roles, `disabled: 0.5` and `muted: 0.7`, emitted into `tokens.css` as `--opacity-disabled` / `--opacity-muted` and into `tokens.json` under `effects.opacity`. Twenty-eight literals across fifteen templates were converted, and 21 atoms now resolve their state opacity through a token. **One deliberate value change:** the toast close button rested at `opacity-60` where its three siblings rested at `70`; it moved to `muted`. Reverse it by giving toast its own role rather than by editing the shared one.
+
+**Settled — the hover direction.** The four sibling dismiss controls had disagreed on more than the value: `badge` and `toast` rested dimmed and brightened on hover, while `file-upload`'s remove and `search-bar`'s clear rested at full and dimmed. All four now rest at `muted` and return to full, on Jacob's call. The direction is recorded in `standards.json`'s `effects.opacity` note, because a role that carries a value but not a direction is how this drifted in the first place.
+
+**Still open — `radix-toast.js:85`'s `opacity-90`** on the toast description. Deliberately not converted: it is de-emphasised text and belongs on the existing `text-on-surface-variant` colour role, since opacity on text cannot be tuned per mode and multiplies against whatever sits behind it. Converting it is a visual change, not a defect fix.
+
+**Built but unverified — the Figma counterpart.** `semantic.opacity`, not `primitives.opacity` as this entry first proposed. Every other primitive collection is a scale (`radius/0..N`, `ch-0..9`); opacity has none, so `disabled` and `muted` are role names with nothing beneath them. It is therefore the first `semantic.*` collection that resolves to literals rather than aliasing a primitive layer — a deliberate convention break, taken because the alternative was calling two role names "primitives" and teaching the next reader that the layer names carry no information.
+
+Generator at `scripts/figma-semantics/opacity.js`, scoped `OPACITY`, code syntax `var(--opacity-{role})`. **It leads the semantics as step `09`**, because it is the only semantic collection with no primitive to be pasted after; everything downstream shifted by one and the paste is now `01`–`30`. Nobody has pasted it — that is item 10's pass.
+
+---
+
+### The original problem, kept for the reasoning
+
+**Problem.** Opacity was the one visual property with no token layer. `spec/config/standards.json` carries `effects.transition`, `easing`, `focus-ring` and `shadow`; opacity is absent from it and from every file in `spec/config/base/`. The atom templates hardcode it 33 times — 24 `opacity-50`, three `opacity-70`, three `opacity-100`, and one each of `opacity-90`, `opacity-60`, `opacity-0`.
 
 About 21 of those are the **disabled state** (`disabled:opacity-50`, `data-[disabled]:opacity-50`, `data-[disabled=true]:opacity-50`, and a bare `disabled && 'opacity-50'`). Disabled contrast is an accessibility-facing decision that varies by brand and by background: 50 percent over a light neutral is marginal, and a product with a high-contrast requirement wants a higher value plus a non-opacity cue. Today a consumer retunes it by editing 24 files.
 
@@ -49,18 +63,13 @@ About 21 of those are the **disabled state** (`disabled:opacity-50`, `data-[disa
 
 **The obvious fix direction is wrong, which is why this entry exists.** Tailwind v4 has **no `--opacity-*` theme namespace**. The namespace list is `--color-*`, `--font-*`, `--text-*`, `--font-weight-*`, `--tracking-*`, `--leading-*`, `--tab-size-*`, `--breakpoint-*`, `--container-*`, `--spacing-*`, `--radius-*`, `--shadow-*`, `--inset-shadow-*`, `--drop-shadow-*`, `--blur-*`, `--perspective-*`, `--zoom-*`, `--aspect-*`, `--ease-*`, `--animate-*` — and that is all of it. So `@theme` cannot generate an `opacity-disabled` utility the way it generates `rounded-card` or `h-control-md`, and **item 7's role-ladder pattern does not transfer.** The supported form is Tailwind v4's custom-property syntax: emit `--opacity-disabled: 0.5` into `tokens.css` and have atoms write `opacity-(--opacity-disabled)`. Reach for `@theme` first and it will appear to work — the variable is emitted, the utility never generated.
 
-**Scope is two roles, not four.** `disabled` and one secondary-control role. The other two clusters are not opacity tokens and should not become them:
-
-- `radix-toast.js:85`'s `opacity-90` on the toast description is de-emphasised text, and belongs on the existing `text-on-surface-variant` colour role. Opacity on text cannot be tuned per mode and multiplies against whatever sits behind it, so it is a worse tool than a colour role for the same job.
-- `combobox.js:109`'s `opacity-100` / `opacity-0` on the checkmark is a visibility toggle, not a design decision.
-
-**Figma counterpart.** A `primitives.opacity` collection (FLOAT), mirroring the other primitive layers. That half carries the same paste-and-look gate as items 10 and 12; the code half does not and can ship first.
+**Two clusters were deliberately left as literals**, and remain so: `combobox.js:109`'s `opacity-100` / `opacity-0` on the checkmark is a visibility toggle rather than a design decision, and `motion.json`'s `motion-safe:opacity-0` reveal from-states are animation. Neither is a state opacity and neither should acquire a role.
 
 ---
 
 ## 18. Figma variable steps create but never update
 
-**Problem.** Paste steps `01`–`14` only ever create. Re-pasting them onto a file that already holds Loom variables produces duplicate collections, so [`../README.md`](../README.md) tells you to build into a fresh file or paste a reset snippet first.
+**Problem.** Paste steps `01`–`15` only ever create. Re-pasting them onto a file that already holds Loom variables produces duplicate collections, so [`../README.md`](../README.md) tells you to build into a fresh file or paste a reset snippet first.
 
 That costs nothing while nobody has built on the file, and turns destructive the moment somebody has: clearing the file to rebuild unbinds every component a designer bound to a Loom variable. **The cost arrives exactly when item 10's pass produces a file worth working in**, which is why this is filed now rather than after.
 
