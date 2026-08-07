@@ -13,6 +13,6 @@
 
 # Shell scripts, called out separately because the failure is unrecognisable: a CRLF
 # shebang makes the kernel look for an interpreter literally named "bash\r" and
-# report "not found", naming the interpreter rather than the line ending. docker/
-# executes these.
+# report "not found", naming the interpreter rather than the line ending. init.sh and
+# setup.sh are the ones a consumer runs.
 *.sh text eol=lf

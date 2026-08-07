@@ -157,52 +157,6 @@ A scroll-progress bar frozen "to respect reduced-motion" would just be broken �
 
 ---
 
-## Tailwind v4 — there is no `--opacity-*` theme namespace
-
-**Symptom.** You add `--opacity-disabled: 0.5` to `@theme` expecting an `opacity-disabled` utility, the way `--radius-card` gives you `rounded-card`. The variable is emitted. The utility never generates. Nothing errors.
-
-**Root cause.** v4's namespace list is closed, and opacity isn't in it: `--color-*`, `--font-*`, `--text-*`, `--font-weight-*`, `--tracking-*`, `--leading-*`, `--tab-size-*`, `--breakpoint-*`, `--container-*`, `--spacing-*`, `--radius-*`, `--shadow-*`, `--inset-shadow-*`, `--drop-shadow-*`, `--blur-*`, `--perspective-*`, `--zoom-*`, `--aspect-*`, `--ease-*`, `--animate-*`. That's the whole set. Reach for `@theme` here and it *appears* to work — which is the trap.
-
-**Fix.** Emit the variable into `tokens.css` and use v4's custom-property syntax at the call site:
-
-```jsx
-<button className="disabled:opacity-(--opacity-disabled)" />
-```
-
-The role-ladder pattern that works for `h-control-md` and `rounded-card` **does not transfer** to opacity. Verified against a real v4.3.3 build before any code was written.
-
----
-
-## Opacity cannot preserve a contrast threshold
-
-**Symptom.** A border token measured at 3.2:1 renders at 1.80:1. The token is compliant; a gate reading it passes; the rendered pixel fails.
-
-**Root cause.** `opacity` composites the element toward whatever sits behind it. A compliant colour at `opacity: 0.5` is, on screen, the midpoint between that colour and its background — and contrast is a property of the rendered pixel, not the declared token.
-
-**Consequences for gates.** A contrast check that reads token values is blind to every opacity role an atom applies. Loom's `composited-contrast` check exists for exactly this: it re-composites each `on-X`/`X` pair at the `muted` role and measures the result. Two things follow:
-
-- **Never soften a compliant border with opacity.** It silently drops below the threshold the token was chosen to clear. Pick a lighter token instead.
-- **`disabled` is deliberately not gated.** WCAG 1.4.3 exempts inactive components, and dimming is the point.
-
----
-
-## Line endings — a pristine Windows clone fails the build
-
-**Symptom.** `npm run generate` fails 2 of its checks on a *fresh clone with no local changes*, and `setup.sh` skips every atom as "locally edited". Both on a tree nobody has touched.
-
-**Root cause.** The repo carried no `.gitattributes`, so git's Windows default (`core.autocrlf=true`) checks out CRLF while the generator emits LF. Every byte comparison then differs. Concretely: **0 of 67 manifest hashes matched** — and all 67 matched once LF-normalised.
-
-**Fix.** `* text=auto eol=lf` in `.gitattributes`, plus a worktree refresh. The refresh matters and is easy to get wrong: `git add --renormalize .` stages **nothing**, because the index is already LF — it's the *worktree* that's wrong. Use:
-
-```bash
-git rm --cached -r .
-git reset --hard
-```
-
-**The general shape:** any check that compares bytes rather than parsed content is a line-endings check too, whether you meant it to be or not.
-
----
-
 ## Config resolution — a stale local set silently outranks a fresh committed one
 
 **Symptom.** You change a value in `spec/direction-mappings.json`, regenerate the committed base, confirm the new value in `spec/config/base/`, and the emitted `tokens.css` still carries the old one. Everything reports success.
