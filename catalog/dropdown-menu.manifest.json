@@ -1,5 +1,6 @@
 {
   "name": "dropdown-menu",
+  "kind": "pattern",
   "category": "feedback",
   "description": "",
   "version": "15ad27607344",

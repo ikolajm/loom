@@ -1,8 +1,9 @@
 {
   "name": "select",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "a6826edf7c51",
+  "version": "d7e65d66e4b0",
   "dependencies": [
     "cn",
     "form-field"

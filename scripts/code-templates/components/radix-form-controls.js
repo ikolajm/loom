@@ -169,7 +169,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const radioItemVariants = cva(
-  'aspect-square rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:border-primary',
+  'aspect-square cursor-pointer rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:border-primary',
   {
     variants: {
       size: {
@@ -257,10 +257,10 @@ const Slider = forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, Slide
         className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none', className)}
         {...props}
       >
-        <SliderPrimitive.Track className={cn('relative w-full grow overflow-hidden rounded-pill bg-surface-1', s.track)}>
+        <SliderPrimitive.Track className={cn('relative w-full grow cursor-pointer overflow-hidden rounded-pill bg-surface-1', s.track)}>
           <SliderPrimitive.Range className="absolute h-full bg-primary" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className={cn('block rounded-full bg-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', s.thumb)} />
+        <SliderPrimitive.Thumb className={cn('block cursor-pointer rounded-full bg-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', s.thumb)} />
       </SliderPrimitive.Root>
     );
   }

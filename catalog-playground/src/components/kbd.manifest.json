@@ -1,8 +1,9 @@
 {
   "name": "kbd",
+  "kind": "atom",
   "category": "data-display",
   "description": "",
-  "version": "7baccb04d4b2",
+  "version": "1aab4c746f58",
   "dependencies": [
     "cn"
   ],

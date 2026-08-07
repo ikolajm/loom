@@ -1,5 +1,51 @@
 {
-  "$note": "Generated from primary: #731DD8, secondary: #48A9A6, accent: #C0DA74. Neutral tinted from primary hue (268°). Questionnaire is the override mechanism — change inputs and regenerate.",
+  "$note": "Generated from primary: #731DD8 (chosen). secondary: #48A9A6 (chosen). accent: #C0DA74 (chosen). Neutral tinted from primary hue (268°). A derived family generates a full ramp and role set identical in structure to a chosen one, so this note is the only thing recording which is which. Questionnaire is the override mechanism — change inputs and regenerate.",
+  "$derived": {
+    "secondary": false,
+    "accent": false
+  },
+  "$fillShades": {
+    "light": {
+      "primary": "primary.600",
+      "primary-container": "primary.100",
+      "primary-fixed": "primary.200",
+      "secondary": "secondary.600",
+      "secondary-container": "secondary.100",
+      "secondary-fixed": "secondary.200",
+      "neutral": "neutral.40",
+      "neutral-container": "neutral.90",
+      "surface": "neutral.95",
+      "surface-inverse": "neutral.20",
+      "error": "error.600",
+      "error-container": "error.100",
+      "success": "success.700",
+      "success-container": "success.100",
+      "warning": "warning.700",
+      "warning-container": "warning.100",
+      "info": "info.600",
+      "info-container": "info.100"
+    },
+    "dark": {
+      "primary": "primary.200",
+      "primary-container": "primary.800",
+      "primary-fixed": "primary.200",
+      "secondary": "secondary.300",
+      "secondary-container": "secondary.800",
+      "secondary-fixed": "secondary.200",
+      "neutral": "neutral.80",
+      "neutral-container": "neutral.25",
+      "surface": "neutral.10",
+      "surface-inverse": "neutral.90",
+      "error": "error.300",
+      "error-container": "error.800",
+      "success": "success.400",
+      "success-container": "success.800",
+      "warning": "warning.400",
+      "warning-container": "warning.800",
+      "info": "info.300",
+      "info-container": "info.800"
+    }
+  },
   "default-mode": "dark",
   "palette": {
     "primary": {
@@ -126,7 +172,7 @@
         "on-secondary-fixed-variant": "#2b6462"
       },
       "neutral": {
-        "neutral": "#9892a0",
+        "neutral": "#655f6d",
         "on-neutral": "#FFFFFF",
         "neutral-container": "#e5e4e7",
         "on-neutral-container": "#19181b"
@@ -154,13 +200,13 @@
         "on-error-container": "#3d0f0f"
       },
       "success": {
-        "success": "#179c4e",
+        "success": "#127d3f",
         "on-success": "#FFFFFF",
         "success-container": "#dcefe4",
         "on-success-container": "#0f3d23"
       },
       "warning": {
-        "warning": "#9c7017",
+        "warning": "#7d5912",
         "on-warning": "#FFFFFF",
         "warning-container": "#efe9dc",
         "on-warning-container": "#3d2e0f"
@@ -177,7 +223,7 @@
     },
     "dark": {
       "primary": {
-        "primary": "#a062ea",
+        "primary": "#cab1e7",
         "on-primary": "#240f3e",
         "primary-container": "#350d63",
         "on-primary-container": "#e5dcef",
@@ -206,7 +252,7 @@
         "surface": "#19181b",
         "surface-1": "#262429",
         "surface-2": "#3f3b44",
-        "surface-3": "#655f6d",
+        "surface-3": "#4c4752",
         "on-surface": "#e5e4e7",
         "on-surface-variant": "#ccc8d0",
         "surface-inverse": "#e5e4e7",
@@ -219,7 +265,7 @@
         "outline-subtle": "#4c4752"
       },
       "error": {
-        "error": "#df2020",
+        "error": "#e86363",
         "on-error": "#3d0f0f",
         "error-container": "#620e0e",
         "on-error-container": "#efdcdc"
@@ -237,7 +283,7 @@
         "on-warning-container": "#efe9dc"
       },
       "info": {
-        "info": "#207fdf",
+        "info": "#63a6e8",
         "on-info": "#0f263d",
         "info-container": "#0e3862",
         "on-info-container": "#dce6ef"

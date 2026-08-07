@@ -7,12 +7,12 @@ const kbdVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface-1 text-on-surface border-outline-subtle border',
+        default: 'bg-surface-1 text-on-surface border-outline border',
       },
       size: {
-        sm: 'px-1 py-[2px] rounded-component border text-label-sm',
-        md: 'px-1 py-1 rounded-component border text-label-md',
-        lg: 'px-2 py-1 rounded-component border text-label-lg',
+        sm: 'min-w-[20px] px-1 py-[2px] rounded-component border text-label-sm',
+        md: 'min-w-[26px] px-1 py-1 rounded-component border text-label-md',
+        lg: 'min-w-[30px] px-2 py-1 rounded-component border text-label-lg',
       },
     },
     defaultVariants: {

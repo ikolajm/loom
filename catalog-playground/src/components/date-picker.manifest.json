@@ -1,5 +1,6 @@
 {
   "name": "date-picker",
+  "kind": "pattern",
   "category": "form",
   "description": "",
   "version": "b385a3968dfd",

@@ -28,7 +28,7 @@ collection.renameMode(modeId, "default");
 let count = 0;
 for (const [token, px] of Object.entries(CONFIG)) {
   const step = token.replace("ch-", "");
-  createVar(collection, `height/${step}`, "FLOAT", pxToNumber(px), modeId, SCOPES, `var(--height-${step})`);
+  createVar(collection, `height/${step}`, "FLOAT", pxToNumber(px), modeId, SCOPES, `var(--${token})`);
   count++;
 }
 

@@ -1,5 +1,6 @@
 {
   "name": "fab",
+  "kind": "atom",
   "category": "button",
   "description": "Floating action button — primary screen action. Single variant by design. Extended mode adds a text label next to the icon. Positioning is consumer responsibility.",
   "version": "acf0cf3b29c9",

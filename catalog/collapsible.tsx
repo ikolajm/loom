@@ -10,7 +10,7 @@ const collapsibleVariants = cva('flex flex-col', {
   variants: {
     variant: {
       default: 'bg-transparent border-0',
-      bordered: 'bg-transparent border-outline-subtle border rounded-component',
+      bordered: 'bg-transparent border-outline border rounded-component',
     },
   },
   defaultVariants: { variant: 'default' },

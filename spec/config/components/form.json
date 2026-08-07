@@ -2,7 +2,7 @@
   "text-field": {
     "$note": "Shared visual foundation for all text-input-style components (input, select, textarea, date-picker). Components reference this base — changing it changes all text fields uniformly.",
     "state": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "placeholder": "color/surface/on-surface-variant" },
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline", "placeholder": "color/surface/on-surface-variant" },
       "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error", "placeholder": "color/surface/on-surface-variant" }
     },
     "typography": {
@@ -149,7 +149,7 @@
   "file-upload": {
     "$note": "Dropzone — dashed-border drag-and-drop / click-to-browse area. Single-variant (the dropzone IS the atom; a button trigger is just a button). The dropzone is stateless — it fires onFilesSelected and owns no file array; the FileUploadItem subcomponent renders the selected-files list the consumer maps over. `dragover` is an internal runtime state (drag highlight), NOT a consumer-facing variant. `uploading` is code-only.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "icon-fg": "color/surface/on-surface-variant" }
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline", "icon-fg": "color/surface/on-surface-variant" }
     },
     "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" },
     "typography": {
@@ -169,7 +169,7 @@
   "input-otp": {
     "$note": "One-time password input. Row of individual character cells. Auto-advance on digit entry, paste support required. Separated boxes variant — each cell is a standalone input box.",
     "state": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" },
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline" },
       "focused": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/primary/primary" },
       "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error" }
     },
@@ -229,7 +229,7 @@
   "calendar": {
     "$note": "Calendar grid panel for date selection. Used standalone (scheduling views) or as the dropdown panel inside date-picker. Day cells are buttons semantically (interactive, trigger selection). Full keyboard navigation (arrow keys between days, page up/down for months).",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-2" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-2" }
     },
     "day": {
       "state": {

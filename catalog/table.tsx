@@ -50,7 +50,7 @@ TableBody.displayName = 'TableBody';
 
 const TableRow = forwardRef<HTMLTableRowElement, React.ComponentPropsWithoutRef<'tr'>>(
   ({ className, ...props }, ref) => (
-    <tr ref={ref} className={cn('border-b border-outline-subtle', className)} {...props} />
+    <tr ref={ref} className={cn('border-b border-outline', className)} {...props} />
   )
 );
 TableRow.displayName = 'TableRow';

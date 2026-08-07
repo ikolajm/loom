@@ -1,8 +1,9 @@
 {
   "name": "toggle",
+  "kind": "atom",
   "category": "button",
   "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
-  "version": "89cbcf121bc0",
+  "version": "6b48eb8b8df1",
   "dependencies": [
     "cn"
   ],

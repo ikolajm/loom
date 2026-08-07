@@ -57,8 +57,8 @@ not Loom's "look"):
 | Key | Required | Allowed values | Default if omitted | Drives |
 |-----|----------|----------------|--------------------|--------|
 | `primary` | **yes** | hex `#RRGGBB` | — | brand color ramp; neutral hue |
-| `secondary` | no | hex `#RRGGBB` | complementary of `primary` | secondary ramp |
-| `accent` | no | hex `#RRGGBB` | triadic of `primary` | accent ramp (always generated) |
+| `secondary` | no | hex `#RRGGBB` | analogous +30° from `primary`, marked derived | secondary ramp |
+| `accent` | no | hex `#RRGGBB` | analogous +60° from `primary`, marked derived | accent ramp (always generated) |
 | `heading` | no | Google Fonts family name | `Inter` | heading text styles |
 | `body` | no | Google Fonts family name | `Inter` | body/UI text styles |
 | `edges` | no | `none` · `sharp` · `soft` | `sharp` | border-radius scale |
@@ -78,8 +78,16 @@ A value outside the allowed set fails loudly (e.g. `Unknown edges: "round". Vali
 ## Colors
 
 `primary` is the only required color; `secondary` and `accent` are **always generated** —
-derived from `primary` (complementary and triadic, respectively) when you don't supply them.
-Supply a hex to override the derivation. All three produce a full semantic ramp.
+derived from `primary` by a small hue rotation (analogous, +30° and +60°) when you don't
+supply them. Supply a hex to override the derivation. All three produce a full semantic ramp.
+
+**A derived color is a placeholder, not a decision.** The generated ramp is structurally
+identical to a chosen one, so nothing downstream can tell them apart — which is why the
+generated `colors.json` records which is which in its `$note` and `$derived` fields, and
+every derived variable in Figma carries a description saying so. The rotation is deliberately
+small: complementary and triadic derivations are correct color theory and the wrong default,
+because a teal primary produced a fire-engine red secondary that shipped into the tokens
+looking exactly as intentional as the primary. Supply your own the moment you have one.
 
 ## Fonts — `heading` / `body`
 
@@ -155,6 +163,6 @@ provenance and changes no token.
 
 ---
 
-All 66 atoms are available in the catalog; projects pick the subset they need
+All 66 components are available in the catalog; projects pick the subset they need
 (see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md)). The full pick list is generated to
 [`catalog/atoms.json`](../catalog/atoms.json).

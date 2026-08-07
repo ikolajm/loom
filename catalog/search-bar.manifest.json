@@ -1,5 +1,6 @@
 {
   "name": "search-bar",
+  "kind": "pattern",
   "category": "form",
   "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
   "version": "60e8d3063c8a",

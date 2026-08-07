@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternSidebar(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components.sidebar;
   const md = config.sizes.md;
   const itemStates = config.item.state;
@@ -37,7 +37,7 @@ function buildPatternSidebar(lookups, defaultMode, page) {
 
     const ihPath = resolveHeight(md['item-height']);
     if (ihPath) {
-      const hVar = primHeight[ihPath];
+      const hVar = heights[ihPath];
       if (hVar) row.setBoundVariable('height', hVar);
       row.counterAxisSizingMode = 'FIXED';
     }

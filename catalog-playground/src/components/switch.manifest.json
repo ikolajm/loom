@@ -1,5 +1,6 @@
 {
   "name": "switch",
+  "kind": "atom",
   "category": "form",
   "description": "",
   "version": "355163056df3",

@@ -2,7 +2,7 @@
   "top-bar": {
     "$note": "App header bar. Holds title, navigation icon (left), and action icons (right). Scrolled state adds elevation — code-only state change. 2-3 action icons max, overflow menu for the rest.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-bottom": "color/outline/outline-subtle" },
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-bottom": "color/outline/outline" },
       "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border-bottom": "none", "shadow": "effects/shadow-1" }
     },
     "typography": {
@@ -24,8 +24,8 @@
   "sidebar": {
     "$note": "Vertical navigation panel. Permanent (desktop), collapsible, or rail (icons only). Items use list-item structure with leading icon + label. Active item highlighted with primary color. Rail variant hides labels and narrows to icon column — same surface as default; the generated atom selects width vs rail-width per variant via a CSS var, so rail stays one variant (no compound × size). SidebarItem labels auto-collapse in rail via the parent's group marker.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" },
-      "rail": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline" },
+      "rail": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline" }
     },
     "item": {
       "state": {
@@ -76,7 +76,7 @@
   "bottom-nav": {
     "$note": "Mobile bottom navigation bar. 3-5 destinations only. Always includes labels — never icon-only. Active item uses primary color.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "border-top": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface", "border-top": "color/outline/outline" }
     },
     "item": {
       "state": {
@@ -185,7 +185,7 @@
         "fg": "color/surface/on-surface",
         "overlay": "color/surface/scrim",
         "shadow": "effects/shadow-3",
-        "border": "color/outline/outline-subtle"
+        "border": "color/outline/outline"
       }
     },
     "input": {

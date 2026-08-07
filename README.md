@@ -1,6 +1,6 @@
 # Loom
 
-A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (66 atoms on a shared token foundation) — so the design surface and the code surface never drift from each other.
+A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (66 components on a shared token foundation) — so the design surface and the code surface never drift from each other.
 
 Loom started as a personal engine for spinning up consistent design systems across projects. It's open source for the model: a single source of truth feeding two codegen pipelines, with a catalog you copy components *from* rather than depend *on* (the shadcn approach — own the files, no upstream sync).
 
@@ -18,7 +18,7 @@ Loom started as a personal engine for spinning up consistent design systems acro
    scripts/assemble-figma.js      scripts/code-templates/orchestrator.js
             │                           │
             ▼                           ▼
-   Figma variables /            catalog/  →  66 React atoms
+   Figma variables /            catalog/  →  66 React components
    styles / components          + tokens.css substrate
    (paste into plugin console)  + per-atom manifests
                                         │
@@ -33,7 +33,9 @@ Change a value in `spec/config/` → regenerate → **both** the Figma file and 
 
 ## What's in the catalog
 
-66 atoms across 8 groups, each generated as a `.tsx` component + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+66 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+
+**Two kinds, one catalog.** Every manifest carries a `kind`: **41 atoms** and **25 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`search-bar`, `command-palette`, `list-item`, `date-picker`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
 
 | Group | Atoms |
 |-------|-------|
@@ -70,9 +72,13 @@ npm install
 npm run dev          # → http://localhost:3000
 ```
 
+This works on a bare clone with no configuration — see *Configure and generate* below. The playground regenerates its token substrate on every `dev` / `build`, so it renders Loom's default look until you generate a brand, and yours from then on.
+
 ### Configure and generate
 
-Loom generates from one hand-authored file, **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
+**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the playground above runs before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the atoms are there on clone. `generated/` is not — the Figma scripts and `init.sh` exist only after you run the commands in this section.)
+
+To build *your* brand, hand-author **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
 
 ```bash
 cp spec/answers.example.json spec/answers.json
@@ -81,12 +87,14 @@ cp spec/answers.example.json spec/answers.json
 See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference. Then run the three pipelines:
 
 ```bash
-npm run configs      # spec/answers.json → base token configs
+npm run configs      # spec/answers.json → spec/config/local/  (git-ignored)
 npm run generate     # → React catalog (catalog/) + tokens.css + tokens.json
 npm run figma        # → Figma plugin scripts (paste into the Figma console)
 ```
 
-Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+**Where your brand lands.** `npm run configs` writes to `spec/config/local/`, never to the committed set — so generating a brand never dirties the Loom repo. Every generator resolves each config file through `local/` first and falls back to `spec/config/base/`. Two things follow. Hand-edit `spec/config/local/`, not `spec/config/base/`: a local file of the same name overrides the committed one anyway, and editing the committed set fails the `base-config-provenance` check on the next `npm run generate`. And deleting `spec/config/local/` reverts you to Loom's default look.
+
+Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
 
 Alongside the web `tokens.css`, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 
@@ -147,13 +155,13 @@ Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Go
 
 ### Apply the Figma scripts
 
-`npm run figma` writes 31 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`30` step scripts (each a self-contained async IIFE). To build the Figma file:
+`npm run figma` writes 32 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`31` step scripts (each a self-contained async IIFE). To build the Figma file:
 
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
-3. Paste the step scripts **`01` → `30` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
+3. Paste the step scripts **`01` → `31` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
 
-**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`15`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
+**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`16`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
 
 ```js
 // Clear variable collections
@@ -169,7 +177,7 @@ for (const page of figma.root.children) {
 while (figma.root.children.length > 1) { try { figma.root.children[figma.root.children.length - 1].remove(); } catch(e) { break; } }
 ```
 
-Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/gotchas.md`](docs/gotchas.md)).
+Step `14` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/gotchas.md`](docs/gotchas.md)).
 
 ---
 
@@ -178,7 +186,8 @@ Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠`
 ```
 spec/                  Single source of truth
   config/
-    base/              ← token configs, generated from questionnaire answers
+    base/              ← Loom's committed default token set — the fallback
+    local/             ← your generated brand (git-ignored; preferred over base/)
     components/        ← hand-authored component schemas (8 group files)
     figma/             ← Figma variable-collection definitions
     presentation/      ← Figma documentation chrome (layout, templates)

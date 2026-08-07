@@ -16,11 +16,27 @@ function resolveScale(val) {
 }
 
 /**
- * Resolve "height/ch-N" → "height/N" variable path.
+ * Resolve a config height reference to a Figma variable path. Two forms, and both
+ * are live — item 7 moved controls onto the role ladder but left avatar portraits
+ * and stepper indicators on primitives, because those are not controls:
+ *
+ *   "height/ch-5"    → "height/5"          (primitives.component-height)
+ *   "height/row-md"  → "height/row/md"     (semantic.component-height)
+ *
+ * Both land in one merged lookup — see utils/lookups.js. Recognising only the
+ * primitive form is what silently unbound 77 of 84 heights and left every affected
+ * frame at Figma's default 100px.
  */
 function resolveHeight(val) {
   if (!val || typeof val !== 'string') return null;
-  return val.startsWith('height/ch-') ? val.replace('ch-', '') : null;
+  if (!val.startsWith('height/')) return null;
+  if (val.startsWith('height/ch-')) return val.replace('ch-', '');
+  // Role form: the LAST hyphen separates role from tier, so multi-word roles
+  // like "bottom-bar-md" and "nav-item-sm" split correctly.
+  const ref = val.slice('height/'.length);
+  const split = ref.lastIndexOf('-');
+  if (split === -1) return null;
+  return `height/${ref.slice(0, split)}/${ref.slice(split + 1)}`;
 }
 
 /**

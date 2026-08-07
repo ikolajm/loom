@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternSearchBar(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components['search-bar'];
   const md = config.sizes.md;
 
@@ -23,7 +23,7 @@ function buildPatternSearchBar(lookups, defaultMode, page) {
   box.itemSpacing = 8;
 
   const hPath = resolveHeight(md.height);
-  if (hPath) { const v = primHeight[hPath]; if (v) box.setBoundVariable('height', v); }
+  if (hPath) { const v = heights[hPath]; if (v) box.setBoundVariable('height', v); }
 
   const padPath = resolveScale('{scale.4}');
   if (padPath) { const v = primSpacing[padPath]; if (v) { box.setBoundVariable('paddingLeft', v); box.setBoundVariable('paddingRight', v); } }

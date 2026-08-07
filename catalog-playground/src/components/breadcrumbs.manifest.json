@@ -1,5 +1,6 @@
 {
   "name": "breadcrumbs",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
   "version": "fd8b56ef0f1b",

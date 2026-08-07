@@ -1,8 +1,9 @@
 {
   "name": "command-palette",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "07c9ea19dc31",
+  "version": "5b64646208db",
   "dependencies": [
     "cn"
   ],

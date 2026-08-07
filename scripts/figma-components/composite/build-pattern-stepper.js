@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternStepper(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primBW } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primBW } = lookups;
   const config = CONFIG.components.stepper;
   const md = config.sizes.md;
 
@@ -56,7 +56,7 @@ function buildPatternStepper(lookups, defaultMode, page) {
     indicator.counterAxisAlignItems = 'CENTER';
 
     if (indicatorPath) {
-      const hVar = primHeight[indicatorPath];
+      const hVar = heights[indicatorPath];
       if (hVar) {
         indicator.setBoundVariable('width', hVar);
         indicator.setBoundVariable('height', hVar);

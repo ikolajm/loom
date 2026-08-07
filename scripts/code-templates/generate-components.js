@@ -21,6 +21,7 @@ const crypto = require('crypto');
 
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
+const { kindOf } = require('./shared');
 const { applyPins } = require('./npm-pins');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
@@ -150,6 +151,9 @@ function buildManifest(def, config, version, src) {
 
   const manifest = {
     name: def.key,
+    // `kind` is atom-vs-pattern (what the thing is). `composition` further down is
+    // asChild/Slot mechanics (how it renders). Different axes, easily confused.
+    kind: kindOf(def.key),
     category: cat.category || CATEGORY_MAP[def.category] || 'misc',
     description: cat.description || '',
     version: cat.version || version,
@@ -221,6 +225,9 @@ function generate(registry, outputDir, configs) {
   fs.writeFileSync(path.join(CATALOG_DIR, 'cn.ts'), cnSrc);
   fs.writeFileSync(path.join(CATALOG_DIR, 'cn.manifest.json'), JSON.stringify({
     name: 'cn',
+    // Neither an atom nor a pattern — it renders nothing. Its own kind, so a consumer
+    // filtering the catalog by kind never has to special-case it.
+    kind: 'utility',
     category: 'utility',
     description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
     version: contentVersion(cnSrc),

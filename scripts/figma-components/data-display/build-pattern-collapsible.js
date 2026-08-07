@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternCollapsible(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, primIconSize, heights } = lookups;
   const config = CONFIG.components.collapsible;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -38,7 +38,7 @@ function buildPatternCollapsible(lookups, defaultMode, page) {
   trigger.counterAxisAlignItems = 'CENTER';
   trigger.fills = [];
 
-  const hVar = primSpacing[resolveHeight(md['trigger-height'])];
+  const hVar = heights[resolveHeight(md['trigger-height'])];
   if (hVar) trigger.setBoundVariable('height', hVar);
   const txp = resolveScale(md['trigger-x-padding']); if (txp) { const v = primSpacing[txp]; if (v) { trigger.setBoundVariable('paddingLeft', v); trigger.setBoundVariable('paddingRight', v); } }
 

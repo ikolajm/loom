@@ -1,5 +1,6 @@
 {
   "name": "sheet",
+  "kind": "atom",
   "category": "layout",
   "description": "",
   "version": "5ed1e088b64f",

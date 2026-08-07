@@ -1,5 +1,6 @@
 {
   "name": "tabs",
+  "kind": "atom",
   "category": "navigation",
   "description": "",
   "version": "fce77f084f01",

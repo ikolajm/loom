@@ -7,7 +7,7 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface-1 text-on-surface border-outline-subtle border shadow-[var(--shadow-1)]',
+        default: 'bg-surface-1 text-on-surface border-outline border shadow-[var(--shadow-1)]',
         elevated: 'bg-surface-1 text-on-surface border-0 shadow-[var(--shadow-2)]',
         outline: 'bg-transparent text-on-surface border-outline border',
         flush: 'bg-transparent text-on-surface border-0',

@@ -1,8 +1,9 @@
 {
   "name": "input",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "0a02cf3acef1",
+  "version": "f2db0dd86ea8",
   "dependencies": [
     "cn",
     "form-field"

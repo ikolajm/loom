@@ -1,5 +1,6 @@
 {
   "name": "empty-state",
+  "kind": "pattern",
   "category": "feedback",
   "description": "",
   "version": "70a1fabd6df0",

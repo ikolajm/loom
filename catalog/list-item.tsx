@@ -8,7 +8,7 @@ const listItemVariants = cva(
     variants: {
       variant: {
         default: 'bg-transparent border-0',
-        bordered: 'bg-transparent border-outline-subtle border',
+        bordered: 'bg-transparent border-outline border',
       },
       size: {
         sm: 'h-row-sm px-3 gap-2',

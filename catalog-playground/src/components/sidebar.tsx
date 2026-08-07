@@ -7,8 +7,8 @@ const sidebarVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface text-on-surface border-outline-subtle border-r w-[var(--sidebar-w)]',
-        rail: 'bg-surface text-on-surface border-outline-subtle border-r is-rail w-[var(--sidebar-rail-w)]',
+        default: 'bg-surface text-on-surface border-outline border-r w-[var(--sidebar-w)]',
+        rail: 'bg-surface text-on-surface border-outline border-r is-rail w-[var(--sidebar-rail-w)]',
       },
       size: {
         sm: '[--sidebar-w:220px] [--sidebar-rail-w:56px] px-2',

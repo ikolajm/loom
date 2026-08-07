@@ -1,8 +1,9 @@
 {
   "name": "file-upload",
+  "kind": "pattern",
   "category": "form",
   "description": "",
-  "version": "413a1dd4a86c",
+  "version": "c1f185efc40c",
   "dependencies": [
     "cn",
     "form-field"

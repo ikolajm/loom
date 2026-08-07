@@ -1,8 +1,9 @@
 {
   "name": "collapsible",
+  "kind": "atom",
   "category": "data-display",
   "description": "",
-  "version": "3bf4c309044e",
+  "version": "bcc8c64c86b4",
   "dependencies": [
     "cn"
   ],

@@ -1,5 +1,6 @@
 {
   "name": "tooltip",
+  "kind": "atom",
   "category": "feedback",
   "description": "",
   "version": "052532cb6522",

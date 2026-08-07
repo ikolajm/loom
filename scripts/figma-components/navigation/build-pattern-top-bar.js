@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternTopBar(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, primIconSize, layoutVars } = lookups;
+  const { semColors, primSpacing, heights, primIconSize, layoutVars } = lookups;
   const config = CONFIG.components['top-bar'];
   const md = config.sizes.md;
 
@@ -32,7 +32,7 @@ function buildPatternTopBar(lookups, defaultMode, page) {
 
     const hPath = resolveHeight(md.height);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) bar.setBoundVariable('height', hVar);
       bar.counterAxisSizingMode = 'FIXED';
     }

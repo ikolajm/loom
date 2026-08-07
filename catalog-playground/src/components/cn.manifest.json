@@ -1,5 +1,6 @@
 {
   "name": "cn",
+  "kind": "utility",
   "category": "utility",
   "description": "Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.",
   "version": "c639b97ecb2e",

@@ -32,7 +32,7 @@ function buildPatternRating(lookups, defaultMode, page) {
 
   for (let i = 0; i < max; i++) {
     const filled = i < value;
-    const inst = makeIcon('icon/star', filled ? filledVar : emptyVar, iconSizeVar);
+    const inst = makeIcon('icon/star', filled ? filledVar : emptyVar, iconSizeVar, filled);
     if (inst) {
       inst.name = filled ? 'star-filled' : 'star-empty';
       row.appendChild(inst);

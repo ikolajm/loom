@@ -188,7 +188,7 @@
   "hover-card": {
     "$note": "Hover-triggered preview card. Richer than tooltip (supports structured content — images, links, metadata). Different from popover (hover trigger vs click trigger). Delay before show (~300ms), dismiss on mouse leave. Anchor positioning.",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-2" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-2" }
     },
     "typography": {
       "font-family": "body",

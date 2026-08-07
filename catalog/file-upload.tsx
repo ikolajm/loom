@@ -7,7 +7,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const fileUploadVariants = cva(
-  'relative flex flex-col items-center justify-center overflow-hidden border-2 border-dashed cursor-pointer transition-colors bg-surface text-on-surface border-outline-subtle border',
+  'relative flex flex-col items-center justify-center overflow-hidden border-2 border-dashed cursor-pointer transition-colors bg-surface text-on-surface border-outline border',
   {
     variants: {
       size: {

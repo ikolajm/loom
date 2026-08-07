@@ -1,8 +1,9 @@
 {
   "name": "slider",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "2aa93b6ccaeb",
+  "version": "99730e3716a9",
   "dependencies": [
     "cn"
   ],

@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { GalleryStory } from './shell';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
@@ -64,6 +64,10 @@ const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const Arrow = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 5l7 7-7 7" /></svg>;
 const Star = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" /></svg>;
 
+// Inline so the gallery never reaches the network for a demo asset.
+const SAMPLE_AVATAR =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%234b5563'/><circle cx='20' cy='15' r='7' fill='%239ca3af'/><path d='M6 40c0-8 6-13 14-13s14 5 14 13z' fill='%239ca3af'/></svg>";
+
 const TREATMENTS = ['filled', 'outline', 'ghost'] as const;
 const COLORS = ['primary', 'secondary', 'destructive', 'success', 'warning', 'neutral'] as const;
 const SIZES = ['sm', 'md', 'lg'] as const;
@@ -81,6 +85,21 @@ const treeSample: TreeNodeData[] = [
 ];
 
 // Stateful examples are small components so story content stays declarative.
+
+// Relative to now, computed after mount. These were absolute dates and went wrong
+// within weeks — "future" rendered "2 months ago" — so the story made a working atom
+// look broken. Module scope would not work either: the server and client would each
+// call Date.now() and disagree on the <time dateTime> attribute, which is exactly the
+// hydration mismatch RelativeTime is built to avoid.
+function RelativeTimeExample({ offsetMs, numeric }: { offsetMs: number; numeric?: 'auto' | 'always' }) {
+  const [date, setDate] = useState<Date | null>(null);
+  useEffect(() => {
+    setDate(new Date(Date.now() + offsetMs));
+  }, [offsetMs]);
+  if (!date) return <time className="text-on-surface-variant">&mdash;</time>;
+  return <RelativeTime date={date} numeric={numeric} />;
+}
+
 function ToggleExample() {
   const [on, setOn] = useState(false);
   return <Toggle pressed={on} onPressedChange={setOn}>{on ? 'Pressed' : 'Press me'}</Toggle>;
@@ -621,7 +640,7 @@ export const STORIES: GalleryStory[] = [
     sections: [
       { label: 'default (search glyph)', content: <div className="w-64"><SearchBar placeholder="Search…" /></div> },
       { label: 'no leading icon (text to edge)', content: <div className="w-64"><SearchBar icon={null} placeholder="No icon — text at the edge" /></div> },
-      { label: 'leading icon · sizes (slot scales)', content: SIZES.map((s) => <div key={s} className="w-64"><SearchBar size={s} icon={<Star />} placeholder={`size ${s}`} /></div>) },
+      { label: 'leading icon · sizes (slot scales)', content: SIZES.map((s) => <div key={s} className="w-64"><SearchBar size={s} placeholder={`size ${s}`} /></div>) },
     ],
   },
   {
@@ -631,7 +650,7 @@ export const STORIES: GalleryStory[] = [
     sections: [
       { label: 'sizes', content: (['sm', 'md', 'lg', 'xl'] as const).map((s) => <Avatar key={s} size={s}><AvatarFallback>JI</AvatarFallback></Avatar>) },
       { label: 'shapes', content: [<Avatar key="c" shape="circle"><AvatarFallback>JI</AvatarFallback></Avatar>, <Avatar key="r" shape="rounded"><AvatarFallback>JI</AvatarFallback></Avatar>] },
-      { label: 'image + fallback', content: [<Avatar key="1" size="lg"><AvatarImage src="data:," alt="" /><AvatarFallback>AB</AvatarFallback></Avatar>, <Avatar key="2" size="lg"><AvatarFallback>CD</AvatarFallback></Avatar>] },
+      { label: 'image loads · broken src falls back to initials', content: [<Avatar key="1" size="lg"><AvatarImage src={SAMPLE_AVATAR} alt="" /><AvatarFallback>AB</AvatarFallback></Avatar>, <Avatar key="2" size="lg"><AvatarImage src="data:," alt="" /><AvatarFallback>CD</AvatarFallback></Avatar>] },
     ],
   },
   {
@@ -699,10 +718,10 @@ export const STORIES: GalleryStory[] = [
     category: 'Data Display',
     description: 'Intl.RelativeTimeFormat in a <time> element. SSR-stable date fallback, relative string after mount (avoids hydration mismatch). Optional live tick.',
     sections: [
-      { label: 'past', content: <RelativeTime date="2026-06-08T07:00:00Z" /> },
-      { label: 'future', content: <RelativeTime date="2026-06-10T12:00:00Z" /> },
-      { label: 'weeks ago', content: <RelativeTime date="2026-05-20T12:00:00Z" /> },
-      { label: 'numeric=always', content: <RelativeTime date="2026-06-08T08:30:00Z" numeric="always" /> },
+      { label: 'past', content: <RelativeTimeExample offsetMs={-2 * 60 * 60 * 1000} /> },
+      { label: 'future', content: <RelativeTimeExample offsetMs={3 * 24 * 60 * 60 * 1000} /> },
+      { label: 'weeks ago', content: <RelativeTimeExample offsetMs={-3 * 7 * 24 * 60 * 60 * 1000} /> },
+      { label: 'numeric=always', content: <RelativeTimeExample offsetMs={-30 * 60 * 1000} numeric="always" /> },
     ],
   },
   {

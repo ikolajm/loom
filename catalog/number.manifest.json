@@ -1,5 +1,6 @@
 {
   "name": "number",
+  "kind": "atom",
   "category": "data-display",
   "description": "",
   "version": "ed61da804bf8",

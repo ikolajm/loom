@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternBottomNav(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components['bottom-nav'];
   const md = config.sizes.md;
   const itemStates = config.item.state;
@@ -24,7 +24,7 @@ function buildPatternBottomNav(lookups, defaultMode, page) {
 
   const hPath = resolveHeight(md.height);
   if (hPath) {
-    const hVar = primHeight[hPath];
+    const hVar = heights[hPath];
     if (hVar) bar.setBoundVariable('height', hVar);
     bar.counterAxisSizingMode = 'FIXED';
   }

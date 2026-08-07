@@ -120,7 +120,7 @@ function resolveVariantEntries(compConfig) {
  * @returns {{ name: string, count: number }}
  */
 function buildStandardComponent(descriptor, compConfig, lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize, primBW } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize, primBW } = lookups;
   const variants = [];
   const iconSlots = compConfig['icon-slots'];
 
@@ -154,7 +154,7 @@ function buildStandardComponent(descriptor, compConfig, lookups, defaultMode, pa
       // Height — fixed from variable, or min-height, or auto
       const hPath = resolveHeight(sz.height);
       if (hPath) {
-        const hVar = primHeight[hPath];
+        const hVar = heights[hPath];
         if (hVar) comp.setBoundVariable('height', hVar);
         comp.counterAxisSizingMode = 'FIXED';
       } else if (sz['min-height']) {

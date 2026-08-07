@@ -1,8 +1,9 @@
 {
   "name": "list-item",
+  "kind": "pattern",
   "category": "data-display",
   "description": "",
-  "version": "f65caa13d987",
+  "version": "061034ccae41",
   "dependencies": [
     "cn"
   ],

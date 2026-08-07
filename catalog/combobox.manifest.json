@@ -1,5 +1,6 @@
 {
   "name": "combobox",
+  "kind": "pattern",
   "category": "form",
   "description": "",
   "version": "f45e7df77cc4",

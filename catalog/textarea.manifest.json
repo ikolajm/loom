@@ -1,8 +1,9 @@
 {
   "name": "textarea",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "e1883ee841da",
+  "version": "c431f6bf7fd0",
   "dependencies": [
     "cn",
     "form-field"

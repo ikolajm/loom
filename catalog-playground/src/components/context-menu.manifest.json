@@ -1,5 +1,6 @@
 {
   "name": "context-menu",
+  "kind": "pattern",
   "category": "feedback",
   "description": "",
   "version": "905131820a35",

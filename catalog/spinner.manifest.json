@@ -1,5 +1,6 @@
 {
   "name": "spinner",
+  "kind": "atom",
   "category": "feedback",
   "description": "",
   "version": "d8c0fbf71818",

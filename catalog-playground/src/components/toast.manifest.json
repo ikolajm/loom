@@ -1,5 +1,6 @@
 {
   "name": "toast",
+  "kind": "atom",
   "category": "feedback",
   "description": "",
   "version": "990b8497e4b4",

@@ -1,5 +1,6 @@
 {
   "name": "toggle-group",
+  "kind": "pattern",
   "category": "button",
   "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
   "version": "3087037fcdb8",

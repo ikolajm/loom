@@ -219,6 +219,9 @@ function buildSizeStyles(sizes) {
     if (h) classes.push(`h-${h}`);
     // Min-height (e.g. textarea)
     if (sz['min-height']) classes.push(`min-h-[${sz['min-height']}]`);
+    // Min-width (e.g. kbd) — for atoms whose content can be a single narrow
+    // character, where x-padding alone leaves the box narrower than it is tall.
+    if (sz['min-width']) classes.push(`min-w-[${sz['min-width']}]`);
     // Padding — handles both {scale.N} and raw values
     const px = spacingToClass(sz['x-padding'], 'px');
     if (px) classes.push(px);
@@ -280,6 +283,45 @@ function resolveBase(allComponents, configKey) {
   // explicitly; otherwise a $base-extending atom can never declare its catalog manifest.
   if (config['$catalog']) merged['$catalog'] = config['$catalog'];
   return merged;
+}
+
+// --- Catalog kind ---
+//
+// Two things live in this catalog and it only had one word for them. An **atom** is a
+// primitive you compose with — one control, one mark, one piece of content. A
+// **pattern** is an arrangement already composed for you, solving an assembly you
+// would otherwise repeat. Both are first-class and installed identically; the split is
+// vocabulary, not a tier. Nothing branches on it.
+//
+// It has to be declared. Two mechanical derivations were tried and both measure a
+// different axis:
+//   - The Figma `build-pattern-*` prefix marks "cannot be emitted by the standard
+//     variant × size builder" — which is why `number` and `relative-time` carry it.
+//   - Manifest `dependencies` marks "imports another atom" — which makes `input` a
+//     composer (it imports form-field for error context) and `search-bar` a primitive
+//     (it reimplements an input inline rather than importing one). Exactly backwards.
+//
+// The test that does hold: could a competent consumer assemble this from other Loom
+// atoms without inventing anything? If yes, it is a pattern. Default is `atom`; only
+// the exceptions are listed, so this stays one auditable list instead of 66 fields.
+const PATTERN_IDS = new Set([
+  // Compose several controls into a working arrangement
+  'combobox', 'date-picker', 'time-picker', 'file-upload', 'search-bar',
+  // Menu and overlay arrangements built from a trigger + surface + item rows
+  'dropdown-menu', 'context-menu', 'command-palette', 'navigation-menu',
+  // Structural page furniture
+  'top-bar', 'sidebar', 'bottom-nav', 'breadcrumbs', 'pagination', 'toolbar',
+  // Repeating-item arrangements
+  'list-item', 'accordion', 'avatar-group', 'tree-view', 'stepper', 'carousel',
+  // Composed states
+  'empty-state', 'fab-menu', 'toggle-group',
+  // Motion that drives other motion atoms
+  'stagger',
+]);
+
+/** `atom` unless listed above. See PATTERN_IDS for why this is authored, not derived. */
+function kindOf(key) {
+  return PATTERN_IDS.has(key) ? 'pattern' : 'atom';
 }
 
 // --- Component registry ---
@@ -416,5 +458,7 @@ module.exports = {
   buildTypographyClasses,
   resolveBase,
   getComponentRegistry,
+  kindOf,
+  PATTERN_IDS,
   formatDisplayName,
 };

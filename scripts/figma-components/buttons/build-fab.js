@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildFab(lookups, defaultMode, page) {
-  const { semColors, semRadius, primHeight, primIconSize, primSpacing } = lookups;
+  const { semColors, semRadius, heights, primIconSize, primSpacing } = lookups;
   const config = CONFIG.components.fab;
   const colors = config.variants.default;
   const bgVar = semColors[colors.bg];
@@ -34,7 +34,7 @@ function buildFab(lookups, defaultMode, page) {
 
     const hPath = resolveHeight(sz.size);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) {
         stdComp.setBoundVariable('width', hVar);
         stdComp.setBoundVariable('height', hVar);
@@ -75,7 +75,7 @@ function buildFab(lookups, defaultMode, page) {
 
       const extHPath = resolveHeight(extSz.height);
       if (extHPath) {
-        const hVar = primHeight[extHPath];
+        const hVar = heights[extHPath];
         if (hVar) extComp.setBoundVariable('height', hVar);
         extComp.counterAxisSizingMode = 'FIXED';
       }

@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternAccordion(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components.accordion;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -79,7 +79,7 @@ function buildPatternAccordion(lookups, defaultMode, page) {
     // Height
     const hPath = resolveHeight(md['header-height']);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) header.setBoundVariable('height', hVar);
       header.counterAxisSizingMode = 'FIXED';
     }

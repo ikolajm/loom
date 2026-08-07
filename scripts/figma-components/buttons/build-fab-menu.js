@@ -9,7 +9,7 @@
 // =============================================================================
 
 function buildFabMenu(lookups, defaultMode, page) {
-  const { semColors, semRadius, primHeight, primIconSize, primSpacing } = lookups;
+  const { semColors, semRadius, heights, primIconSize, primSpacing } = lookups;
   const config = CONFIG.components['fab-menu'];
   const colors = config.variants.default;
   const bgVar = semColors[colors.bg];
@@ -42,7 +42,7 @@ function buildFabMenu(lookups, defaultMode, page) {
     comp.counterAxisAlignItems = 'CENTER';
 
     const hPath = resolveHeight(sz.size);
-    const hVar = hPath ? primHeight[hPath] : null;
+    const hVar = hPath ? heights[hPath] : null;
     if (hVar) {
       comp.setBoundVariable('width', hVar);
       comp.setBoundVariable('height', hVar);

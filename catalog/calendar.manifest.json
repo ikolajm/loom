@@ -1,5 +1,6 @@
 {
   "name": "calendar",
+  "kind": "atom",
   "category": "form",
   "description": "",
   "version": "229b2884dacf",

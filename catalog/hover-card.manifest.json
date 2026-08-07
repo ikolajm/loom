@@ -1,8 +1,9 @@
 {
   "name": "hover-card",
+  "kind": "atom",
   "category": "feedback",
   "description": "",
-  "version": "f58e5bbf5852",
+  "version": "135dc75ae304",
   "dependencies": [
     "cn"
   ],

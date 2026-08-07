@@ -1,5 +1,6 @@
 {
   "name": "avatar-group",
+  "kind": "pattern",
   "category": "data-display",
   "description": "",
   "version": "2c21fb06e2bc",

@@ -1,5 +1,6 @@
 {
   "name": "popover",
+  "kind": "atom",
   "category": "feedback",
   "description": "",
   "version": "367d998b6116",

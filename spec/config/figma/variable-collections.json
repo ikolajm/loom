@@ -232,6 +232,29 @@
         "radius/pill"
       ]
     },
+    "semantic.component-height": {
+      "description": "Control height roles. Aliases primitives.component-height. This layer is what a project's controlHeight answer (compact / standard / touch) actually selects — the same role names resolve to different ch-* steps per ladder. Without it the pasted file states heights as raw primitives, so two projects with opposite ladders produce identical height variables and a designer cannot see that button/md and text-field/md are one decision.",
+      "type": "FLOAT",
+      "source": "config/base/sizing.json → component-height",
+      "modes": [
+        "default"
+      ],
+      "naming": "height/{role}/{tier}",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "code-syntax": "var(--height-{role}-{tier})",
+      "examples": [
+        "height/control/md",
+        "height/row/lg",
+        "height/nav-item/sm",
+        "height/menu-item/md",
+        "height/bar/lg",
+        "height/bottom-bar/md",
+        "height/fab/md"
+      ],
+      "primitive-note": "Avatar portraits and stepper indicators deliberately stay on primitives.component-height — they are sized objects, not controls, so they take no role."
+    },
     "semantic.opacity": {
       "description": "State opacity roles. The one semantic collection that resolves to literal values rather than aliasing a primitive layer — opacity has no underlying scale, so disabled and muted are the whole set. Naming them primitives would have taught the next reader that the layer names do not mean anything.",
       "type": "FLOAT",

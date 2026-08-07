@@ -21,9 +21,9 @@ const badgeVariants = cva(
         info: '[--v-bg:var(--info-container)] [--v-fg:var(--on-info-container)] [--v-text:var(--info)] [--v-border:var(--info)]',
       },
       size: {
-        sm: 'px-1 py-[2px] gap-1 text-[10px] leading-[14px] rounded-component',
-        md: 'px-2 py-1 gap-1 text-[10px] leading-[14px] rounded-component',
-        lg: 'px-3 py-1 gap-1 text-[12px] leading-[16px] rounded-component',
+        sm: 'px-1 py-[2px] gap-1 text-label-sm rounded-component',
+        md: 'px-2 py-1 gap-1 text-label-md rounded-component',
+        lg: 'px-3 py-1 gap-1 text-label-lg rounded-component',
       },
     },
     defaultVariants: {

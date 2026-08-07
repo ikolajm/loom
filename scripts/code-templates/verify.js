@@ -10,12 +10,13 @@
  * `strict` + `noUnusedLocals` — a real compiler beats a regex, so nothing here re-checks
  * what tsc already covers. This file checks the artifacts around the code:
  *
- *   doc-counts        — hand-written "N atoms" claims match the catalog
+ *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match
  *   playground-parity — the playground's synced copies match what the generator emits
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   archetype-picks   — every archetype's curated pick-list names a real atom
  *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
+ *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
  * is not — a check whose scope silently shrank reads identically to one that passed.
@@ -24,6 +25,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { resolveIntent } = require('../generate-configs/resolve-intent');
+const { loadConfig } = require('../config-paths');
 
 const ROOT = path.resolve(__dirname, '../..');
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
@@ -47,7 +49,22 @@ function atomNames() {
 function checkDocCounts(atoms) {
   const groups = Object.keys(JSON.parse(fs.readFileSync(path.join(CATALOG, 'atoms.json'), 'utf8')))
     .filter((k) => !k.startsWith('$')).length;
-  const expected = { atoms: atoms.length, groups };
+
+  // `atoms` counted the whole catalog until kind was introduced, when "66 atoms"
+  // stopped being true — 66 is the total, 41 of them are atoms. The total is now
+  // "components" and "atoms" means the kind, so a doc cannot claim one while meaning
+  // the other. Splitting the numbers without gating the new ones is how the Figma step
+  // numbers drifted, which is why patterns is checked here rather than trusted.
+  const kinds = atoms.map((a) => {
+    const m = JSON.parse(fs.readFileSync(path.join(CATALOG, `${a}.manifest.json`), 'utf8'));
+    return m.kind || 'atom';
+  });
+  const expected = {
+    components: atoms.length,
+    atoms: kinds.filter((k) => k === 'atom').length,
+    patterns: kinds.filter((k) => k === 'pattern').length,
+    groups,
+  };
   const failures = [];
   let claims = 0;
 
@@ -59,7 +76,9 @@ function checkDocCounts(atoms) {
     }
     fs.readFileSync(abs, 'utf8').split('\n').forEach((line, i) => {
       for (const [kind, re] of [
-        ['atoms', /(\d+)\s+(?:React\s+)?atoms\b/g],
+        ['components', /(\d+)\s+(?:React\s+)?components\b/g],
+        ['atoms', /(\d+)\s+atoms\b/g],
+        ['patterns', /(\d+)\s+patterns\b/g],
         ['groups', /(\d+)\s+groups\b/g],
       ]) {
         for (const m of line.matchAll(re)) {
@@ -252,6 +271,84 @@ function checkArchetypePicks(atoms) {
   return { failures, note: `${picks} picks across ${archetypes.length} archetypes` };
 }
 
+// --- contrast ---------------------------------------------------------------
+// Every `on-X` role exists to be read against `X` — the naming is the contract, so
+// these are the pairs the system itself declares, not combinations invented here.
+// WCAG 2.1 AA: 4.5:1 for text. Deliberately not AAA (7.0), which both Bootstrap and
+// Material also miss on their own defaults.
+//
+// This is checked per generated brand rather than fixed once, because only the status
+// palettes are brand-independent (STATUS_HUES pins their hue). `primary` and `neutral`
+// are derived from the answers file, so a consumer generates their own pass or fail —
+// six pairs failed on Loom's own default and nothing surfaced it until a human
+// measured. Same shape as touch-target: a value declared and never made binding.
+const AA_TEXT = 4.5;
+
+function srgbToLinear(channel) {
+  const s = channel / 255;
+  return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+}
+
+function relativeLuminance(hex) {
+  const raw = hex.replace('#', '');
+  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+}
+
+function contrastRatio(a, b) {
+  const [hi, lo] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+function checkContrast() {
+  // Read through config-paths, so this validates whichever brand is active. That is
+  // the exact opposite of base-config-provenance two checks up, which reads the
+  // committed set by explicit path — a provenance check that read a local brand would
+  // check nothing, and a contrast check that read the committed one would pass a
+  // consumer straight through with their own failing palette.
+  const colors = loadConfig('base/colors.json');
+  const failures = [];
+  let pairs = 0;
+
+  for (const mode of Object.keys(colors.roles || {})) {
+    const flat = {};
+    for (const group of Object.values(colors.roles[mode])) {
+      for (const [role, value] of Object.entries(group)) {
+        if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
+      }
+    }
+    const check = (fg, bg, why) => {
+      if (!flat[fg] || !flat[bg]) return;
+      pairs++;
+      const ratio = contrastRatio(flat[fg], flat[bg]);
+      if (ratio < AA_TEXT) {
+        failures.push(
+          `${mode}: ${fg} (${flat[fg]}) on ${bg} (${flat[bg]}) — ${ratio.toFixed(2)}:1, needs ${AA_TEXT}${why ? ` — ${why}` : ''}`
+        );
+      }
+    };
+
+    // Declared pairs: `on-X` exists to be read against `X`.
+    for (const role of Object.keys(flat)) {
+      if (!role.startsWith('on-')) continue;
+      check(role, role.slice(3));
+    }
+
+    // Body and muted text over every surface tier. A page's text roles are not
+    // declared against each raised tier by name, but a card sits on surface-2 and its
+    // text is still on-surface — so the pairing is real even though no role name
+    // states it. Found by hand: on-surface-variant on surface-3 in dark.
+    for (const surface of ['surface', 'surface-1', 'surface-2', 'surface-3']) {
+      for (const text of ['on-surface', 'on-surface-variant']) {
+        if (text === 'on-surface' && surface === 'surface') continue; // declared above
+        check(text, surface, 'text on a raised tier');
+      }
+    }
+  }
+  return { failures, note: `${pairs} on-X/X pairs against WCAG AA ${AA_TEXT}:1` };
+}
+
 function verify() {
   const atoms = atomNames();
   const checks = [
@@ -261,6 +358,7 @@ function verify() {
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['archetype-picks', checkArchetypePicks(atoms)],
     ['touch-target', checkTouchTarget()],
+    ['contrast', checkContrast()],
   ];
 
   let failed = 0;

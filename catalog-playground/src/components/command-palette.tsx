@@ -111,7 +111,7 @@ const CommandPaletteItem = forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex items-center select-none interactive cursor-pointer',
+      'relative flex items-center select-none interactive cursor-pointer rounded-component',
       'data-[selected=true]:bg-surface-2',
       'data-[disabled=true]:opacity-(--opacity-disabled) data-[disabled=true]:cursor-not-allowed',
       itemSizeMap[size],

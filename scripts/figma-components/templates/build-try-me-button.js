@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildTryMeButton(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
 
   const comp = figma.createComponent();
   comp.name = 'template/try-me-button';
@@ -16,7 +16,7 @@ function buildTryMeButton(lookups, defaultMode, page) {
   comp.counterAxisAlignItems = 'CENTER';
   comp.primaryAxisSizingMode = 'AUTO';
 
-  const hVar = primHeight['height/3'];
+  const hVar = heights['height/3'];
   if (hVar) { comp.setBoundVariable('height', hVar); comp.counterAxisSizingMode = 'FIXED'; }
 
   const xp = primSpacing[resolveScale('{scale.3}')];

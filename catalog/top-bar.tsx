@@ -7,7 +7,7 @@ const topBarVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface text-on-surface border-outline-subtle border-b',
+        default: 'bg-surface text-on-surface border-outline border-b',
         elevated: 'bg-surface-1 text-on-surface shadow-[var(--shadow-1)]',
       },
       size: {

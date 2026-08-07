@@ -27,7 +27,7 @@
     "$note": "Structural shell with three slots: leading (icon/avatar), content (consumer-driven), trailing (action/icon). No internal text styling — content fills the slots.",
     "variants": {
       "default":  { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "none" },
-      "bordered": { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "color/outline/outline-subtle" }
+      "bordered": { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "color/outline/outline" }
     },
     "sizes": {
       "sm": { "height": "height/row-sm", "x-padding": "{scale.3}", "gap": "{scale.2}" },
@@ -40,7 +40,7 @@
   "accordion": {
     "$note": "Collapsible section. Header defines the toggle label — content area is a blank container for consumer-driven content.",
     "variants": {
-      "default":  { "bg": "transparent", "border": "color/outline/outline-subtle" },
+      "default":  { "bg": "transparent", "border": "color/outline/outline" },
       "filled":   { "bg": "color/surface/surface-1", "border": "none" }
     },
     "header-typography": {
@@ -59,9 +59,9 @@
   },
 
   "kbd": {
-    "$note": "Keyboard shortcut indicator. Inline element styled as a key cap. Platform-appropriate modifier keys (Cmd vs Ctrl) are code-only. Combination keys separated by + with gap between elements.",
+    "$note": "Keyboard shortcut indicator. Inline element styled as a key cap. Platform-appropriate modifier keys (Cmd vs Ctrl) are code-only. Combination keys separated by + with gap between elements. min-width per size equals that size's own box height (y-padding × 2 + line-height + border × 2), so a single narrow character like p or an arrow glyph renders as a square cap rather than a pinched one — x-padding cannot do this, because it scales with the content instead of setting a floor.",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline" }
     },
     "typography": {
       "font-family": "body",
@@ -70,9 +70,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum. Required to maintain proportional key cap at small font size.", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "10px", "line-height": "14px" },
-      "md": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "12px", "line-height": "16px" },
-      "lg": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "14px", "line-height": "20px" }
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "min-width": "20px", "$exception": "2px y-padding — below spacing scale minimum. Required to maintain proportional key cap at small font size.", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "10px", "line-height": "14px" },
+      "md": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "min-width": "26px", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "12px", "line-height": "16px" },
+      "lg": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "min-width": "30px", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "14px", "line-height": "20px" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -81,7 +81,7 @@
     "$note": "Single collapsible panel. Simpler than Accordion — no group behavior, no mutual exclusion. Just a trigger + content that toggles open/closed. Use for progressive disclosure, optional details, expandable sections. Maps to HTML details/summary for simple cases.",
     "variants": {
       "default":  { "bg": "transparent", "border": "none" },
-      "bordered": { "bg": "transparent", "border": "color/outline/outline-subtle" }
+      "bordered": { "bg": "transparent", "border": "color/outline/outline" }
     },
     "trigger-typography": {
       "font-family": "body",

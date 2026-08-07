@@ -6,7 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const hoverCardContentVariants = cva(
-  'z-[var(--z-popover)] flex flex-col overflow-hidden bg-surface-1 text-on-surface border-outline-subtle border shadow-[var(--shadow-2)] border border-outline-subtle animate-in fade-in-0 zoom-in-95',
+  'z-[var(--z-popover)] flex flex-col overflow-hidden bg-surface-1 text-on-surface border-outline border shadow-[var(--shadow-2)] border border-outline-subtle animate-in fade-in-0 zoom-in-95',
   {
     variants: {
       size: {

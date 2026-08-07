@@ -1,6 +1,6 @@
 # Deferred engineering (post-v2-ship)
 
-Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Four items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
+Known engineering debt in the generator, plus one presentation pass that is Jacob-led. Three items, none a ship-blocker — the pipeline is correct and ships. Feature-level deferrals (wider motion families, motion-in-Figma, `marquee`) are separate and live in [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) § *Scope* and [`gotchas.md`](gotchas.md).
 
 ## What's next
 
@@ -8,7 +8,6 @@ Known engineering debt in the generator, plus one presentation pass that is Jaco
 |---|------|------|
 | 17 | Opacity: code and Figma both built, neither Figma half pasted yet | Verification only. Paste `09` and look — belongs with item 10 |
 | 18 | Figma variable steps create but never update, so a re-paste duplicates collections | Medium. Verifiable only by pasting twice — belongs with item 10 |
-| 12 | Figma has no `semantic.component-height` collection, so the paste lost a layer code now has | Medium. Needs a Figma paste to verify — belongs with item 10 |
 | 10 | Figma + playground presentation, and whether a token service earns a place | **Jacob-led, and a gate on calling this arc done.** Needs his eyes and his own Figma template |
 
 Ordered by what a consumer feels, not by number. Numbers are stable ids, so the gaps are closed items — see *Closed* at the bottom. Each entry below carries the reasoning; read it before re-deriving the problem.
@@ -29,16 +28,6 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 ---
 
-## 12. Figma has no `semantic.component-height` collection
-
-**Problem.** Code and Figma both carry a primitives layer (`primitives.component-height`, `ch-0`..`ch-9`) and both carry a semantic radius layer (`semantic.radius`). Item 7 added a semantic height layer to code — `--height-control-md` and the role ladder behind it — with no Figma counterpart, so the pasted file states heights as raw `ch-N` primitives while the code states them as roles. A designer reading the Figma file cannot see that `button/md` and `text-field/md` are the same decision.
-
-**Fix direction.** Mirror `semantic.radius` exactly: a `semantic.component-height` collection in `spec/config/figma/variable-collections.json`, a generator under `scripts/figma-primitives/`, aliasing each `<role>/<tier>` to its `primitives.component-height` variable, and a lookup in `scripts/figma-components/utils/lookups.js` so the component builders bind to the role rather than the primitive.
-
-**Why it is filed rather than done.** It is only verifiable by pasting into Figma and looking, which is the same gate as item 10 and needs Jacob's file. Building it blind is the failure this repo has recorded before. **Do it inside item 10's pass**, not before it.
-
----
-
 ## 17. Opacity — code half shipped, Figma counterpart outstanding
 
 **Shipped.** `standards.json` now carries `effects.opacity` with two roles, `disabled: 0.5` and `muted: 0.7`, emitted into `tokens.css` as `--opacity-disabled` / `--opacity-muted` and into `tokens.json` under `effects.opacity`. Twenty-eight literals across fifteen templates were converted, and 21 atoms now resolve their state opacity through a token. **One deliberate value change:** the toast close button rested at `opacity-60` where its three siblings rested at `70`; it moved to `muted`. Reverse it by giving toast its own role rather than by editing the shared one.
@@ -49,7 +38,7 @@ Ordered by what a consumer feels, not by number. Numbers are stable ids, so the 
 
 **Built but unverified — the Figma counterpart.** `semantic.opacity`, not `primitives.opacity` as this entry first proposed. Every other primitive collection is a scale (`radius/0..N`, `ch-0..9`); opacity has none, so `disabled` and `muted` are role names with nothing beneath them. It is therefore the first `semantic.*` collection that resolves to literals rather than aliasing a primitive layer — a deliberate convention break, taken because the alternative was calling two role names "primitives" and teaching the next reader that the layer names carry no information.
 
-Generator at `scripts/figma-semantics/opacity.js`, scoped `OPACITY`, code syntax `var(--opacity-{role})`. **It leads the semantics as step `09`**, because it is the only semantic collection with no primitive to be pasted after; everything downstream shifted by one and the paste is now `01`–`30`. Nobody has pasted it — that is item 10's pass.
+Generator at `scripts/figma-semantics/opacity.js`, scoped `OPACITY`, code syntax `var(--opacity-{role})`. **It leads the semantics as step `09`**, because it is the only semantic collection with no primitive to be pasted after; everything downstream shifted by one and the paste is now `01`–`31`. Pasted clean on 2026-08-06 with no errors; the visual half is still item 10's pass.
 
 ---
 
@@ -69,7 +58,7 @@ About 21 of those are the **disabled state** (`disabled:opacity-50`, `data-[disa
 
 ## 18. Figma variable steps create but never update
 
-**Problem.** Paste steps `01`–`15` only ever create. Re-pasting them onto a file that already holds Loom variables produces duplicate collections, so [`../README.md`](../README.md) tells you to build into a fresh file or paste a reset snippet first.
+**Problem.** Paste steps `01`–`16` only ever create. Re-pasting them onto a file that already holds Loom variables produces duplicate collections, so [`../README.md`](../README.md) tells you to build into a fresh file or paste a reset snippet first.
 
 That costs nothing while nobody has built on the file, and turns destructive the moment somebody has: clearing the file to rebuild unbinds every component a designer bound to a Loom variable. **The cost arrives exactly when item 10's pass produces a file worth working in**, which is why this is filed now rather than after.
 
@@ -88,6 +77,8 @@ That costs nothing while nobody has built on the file, and turns destructive the
 ## Closed
 
 One line each; the reasoning that outlived the fix is in the code it touched, and the history is in git.
+
+- **Figma had no `semantic.component-height` collection — and it was a regression, not a gap** *(2026-08-06)* — filed as a legibility problem (a designer could not see that `button/md` and `text-field/md` are one decision) and found on the first real paste to be much worse. `utils/resolvers.js` recognised only the `height/ch-N` primitive form, so once item 7 moved the component configs onto the role ladder, `resolveHeight` returned `null` for **77 of 84** height references, no variable was bound, and every affected frame kept Figma's default 100px. Fifteen components read as "some kind of large min-height." The seven that still worked were avatar portraits and stepper indicators — exactly the two item 7 left on primitives because they are not controls, which is what confirmed the diagnosis. Fixed by mirroring `semantic.radius`: a `semantic.component-height` collection aliasing each `<role>/<tier>` to its primitive, pasted as step `13`, plus a `heights` lookup merging both collections into one keyspace (they cannot collide — `height/N` versus `height/{role}/{tier}`) so builders bind to the role wherever one exists. Two builders were separately reading a height path out of `primSpacing` and never bound either; repaired in the same pass. Verified twice: all 84 config references resolved against the exact names both generators emit (84 of 84, up from 7), then confirmed on a real paste — the fifteen components that had been sizing to 100px render correctly in Figma. **`origin/master` was never affected** — it predates the role ladder. The general lesson is the one this repo keeps re-learning: the code side had five invariant checks and a compile gate, the Figma side had none, so a regression in it survived two sessions of "verified" work and needed a human to paste and look.
 
 - **The tokens tier had no web path** *(2026-08-05)* — `init.sh <project> --tokens` writes `src/tokens.css` and `src/tokens.json` and stops: no `globals.css`, no `ThemeProvider`, no root layout, no `/preview`, no `npm install`, no starter `loom-picks.json`. Verified by footprint — the tokens tier produces exactly two files and leaves `package.json` untouched, while the catalog tier's seven steps and eight artifacts are unchanged. It also validates less, requiring only a `src/` directory rather than `src/app/`, because a values-only consumer need not be a Next.js app or a React one. Re-running without the flag moves a project up a tier.
 - **The install had two tiers by accident and named neither** *(2026-08-05)* — they are **tokens** and **catalog**, documented in the README with what each delivers and when to take it. Named `tokens` rather than `substrate` deliberately: this repo already uses "substrate" for the token layer itself, and reusing it as an install mode would have made the word mean two things one paragraph apart. The `/preview` route is gated to the catalog tier rather than cut — it is the only thing that catches a silently failed Tailwind v4 `@theme` wiring, and its own header already called it a token-landing check rather than a component gallery. The web `--tokens` flag the decision implies is filed as item 16; native already has the tokens tier.

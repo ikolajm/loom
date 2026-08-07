@@ -30,10 +30,21 @@ const collection = figma.variables.createVariableCollection("primitives.color");
 const modeId = collection.modes[0].modeId;
 collection.renameMode(modeId, "default");
 
+// A derived family is a guess the generator made because the answers file left the
+// value blank — it generates a ramp structurally identical to a chosen one, so in
+// the variable picker it is indistinguishable from a real brand colour. The
+// description is the only place that distinction survives into Figma.
+const DERIVED_NOTE =
+  "Derived from primary, not chosen. Nobody picked this colour — the answers file " +
+  "left it blank and the generator rotated the primary hue. Set it in your answers " +
+  "file and regenerate to make it a real brand colour.";
+
 let count = 0;
-for (const [family, shades] of Object.entries(CONFIG)) {
+let derivedCount = 0;
+for (const [family, shades] of Object.entries(CONFIG.palette)) {
+  const isDerived = CONFIG.derived && CONFIG.derived[family];
   for (const [shade, hex] of Object.entries(shades)) {
-    createVar(
+    const v = createVar(
       collection,
       `color/${family}/${shade}`,
       "COLOR",
@@ -42,8 +53,16 @@ for (const [family, shades] of Object.entries(CONFIG)) {
       SCOPES,
       `var(--color-${family}-${shade})`
     );
+    if (isDerived) {
+      v.description = DERIVED_NOTE;
+      derivedCount++;
+    }
     count++;
   }
 }
 
-return `primitives.color: ${count} variables created`;
+const derivedFamilies = Object.keys(CONFIG.derived || {}).filter((f) => CONFIG.derived[f]);
+return `primitives.color: ${count} variables created` +
+  (derivedFamilies.length
+    ? ` (${derivedCount} marked derived: ${derivedFamilies.join(', ')})`
+    : '');

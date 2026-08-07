@@ -1,8 +1,9 @@
 {
   "name": "table",
+  "kind": "atom",
   "category": "layout",
   "description": "",
-  "version": "7a82addea9e9",
+  "version": "b2bb7dc0ccdd",
   "dependencies": [
     "cn"
   ],

@@ -1,5 +1,6 @@
 {
   "name": "alert-dialog",
+  "kind": "atom",
   "category": "layout",
   "description": "",
   "version": "b792bca57add",

@@ -8,7 +8,7 @@ const inputVariants = cva(
   {
     variants: {
       state: {
-        default: 'bg-surface text-on-surface border-outline-subtle border',
+        default: 'bg-surface text-on-surface border-outline border',
         error: 'bg-surface text-on-surface border-error border',
       },
       size: {

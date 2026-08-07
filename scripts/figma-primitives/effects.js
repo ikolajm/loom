@@ -25,7 +25,9 @@ collection.renameMode(modeId, "default");
 let count = 0;
 for (const [level, props] of Object.entries(CONFIG)) {
   for (const [prop, value] of Object.entries(props)) {
-    createVar(collection, `shadow/${level}/${prop}`, "FLOAT", value, modeId, SCOPES, `var(--shadow-${level}-${prop})`);
+    // Each sub-property points at the composite: CSS ships one --shadow-N string,
+    // never a variable per offset, so the level is the only writable reference.
+    createVar(collection, `shadow/${level}/${prop}`, "FLOAT", value, modeId, SCOPES, `var(--shadow-${level})`);
     count++;
   }
 }

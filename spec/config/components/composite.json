@@ -39,7 +39,7 @@
         "icon-size": "icon/icon-2"
       },
       "dots": {
-        "default-bg": "color/outline/outline-subtle",
+        "default-bg": "color/outline/outline",
         "active-bg": "color/primary/primary",
         "size": "{scale.2}",
         "radius": "radius/pill",

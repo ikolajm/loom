@@ -1,5 +1,6 @@
 {
   "name": "stagger",
+  "kind": "pattern",
   "category": "motion",
   "description": "",
   "version": "0d29c7a7d1ae",

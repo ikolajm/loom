@@ -9,7 +9,7 @@ import { cn } from './cn';
 const accordionVariants = cva('flex flex-col', {
   variants: {
     variant: {
-      default: 'bg-transparent border-outline-subtle border',
+      default: 'bg-transparent border-outline border',
       filled: 'bg-surface-1 border-0',
     },
   },

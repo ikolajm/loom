@@ -1,5 +1,6 @@
 {
   "name": "navigation-menu",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
   "version": "85c539f569b1",

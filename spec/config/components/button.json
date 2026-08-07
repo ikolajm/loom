@@ -71,9 +71,10 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at 10px font size.", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon": "icon/icon-1" }
+      "$note": "Type is not declared here — it comes from the label/{tier} ramp (10/12/14), which the Figma builder has always bound to and which code now reads too. The font-size and line-height keys that used to sit on each tier were dead once code switched to the ramp, and they did not ramp anyway: sm and md both declared 10px/14px, so md differed from sm only in padding. Icons stay at 12/12/16 — against the label ramp that is 120%/100%/114% of the font and never more than 86% of the line box, where the old lg pairing put a 16px icon in 16px of leading.",
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-1" }
     },
     "default": { "variant": "filled", "state": "default", "size": "md" }
   },
@@ -188,7 +189,7 @@
     },
     "$note": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider control) and Chip (selection tag). Used for toolbar actions (bold, italic), view toggles, feature on/off. aria-pressed required.",
     "state": {
-      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline-subtle" },
+      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline" },
       "pressed":   { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary-container" }
     },
     "typography": {
@@ -222,7 +223,7 @@
       "segmented": {
         "$note": "Items touch (no gap), share borders, radius collapses to first/last only.",
         "bg": "transparent",
-        "border": "color/outline/outline-subtle",
+        "border": "color/outline/outline",
         "gap": "{scale.0}"
       },
       "spaced": {

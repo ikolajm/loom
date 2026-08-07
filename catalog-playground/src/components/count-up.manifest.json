@@ -1,5 +1,6 @@
 {
   "name": "count-up",
+  "kind": "atom",
   "category": "motion",
   "description": "",
   "version": "0e9318fe5301",

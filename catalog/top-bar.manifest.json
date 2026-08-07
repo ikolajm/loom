@@ -1,8 +1,9 @@
 {
   "name": "top-bar",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "6b43fc8b0298",
+  "version": "b68293dbfe06",
   "dependencies": [
     "cn"
   ],

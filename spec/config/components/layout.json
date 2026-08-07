@@ -1,7 +1,7 @@
 {
   "card": {
     "variants": {
-      "default":  { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-1" },
+      "default":  { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-1" },
       "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-2" },
       "outline":  { "bg": "transparent", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-0" },
       "flush":    { "bg": "transparent", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-0" }
@@ -29,7 +29,7 @@
   },
   "table": {
     "variants": {
-      "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+      "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline" }
     },
     "typography": {
       "header": {
@@ -60,7 +60,7 @@
     },
     "handle": {
       "$note": "Drag handle for bottom sheet. Centered at top of sheet.",
-      "bg": "color/outline/outline-subtle",
+      "bg": "color/outline/outline",
       "width": "{scale.10}",
       "height": "{scale.1}",
       "radius": "radius/pill"
@@ -99,7 +99,7 @@
       "composition": "none"
     },
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline" }
     },
     "typography": {
       "font-family": "body",

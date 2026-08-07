@@ -185,7 +185,12 @@ function createBaseFrame(componentName, description, componentSet, lookups, defa
 // foreground variable. Catalog icons are stroked vectors (Lucide-style), so
 // color binds to strokes with fills cleared. Single source of truth for icon
 // recoloring — every builder that places an icon goes through here.
-function styleIconInstance(inst, fgVar, iconSizeVar) {
+// `filled` paints the glyph body instead of its outline. The icon set is stroke-based,
+// so clearing fills is right for almost every use — but a few marks read as solid or
+// hollow rather than as present or absent (a rating star is the case that surfaced it).
+// Colour alone cannot express that: recolouring an outline star just gives you an
+// outline star in a different colour, which is what the Figma rating page was showing.
+function styleIconInstance(inst, fgVar, iconSizeVar, filled) {
   if (iconSizeVar) {
     inst.setBoundVariable("width", iconSizeVar);
     inst.setBoundVariable("height", iconSizeVar);
@@ -195,18 +200,23 @@ function styleIconInstance(inst, fgVar, iconSizeVar) {
     const paint = [figma.variables.setBoundVariableForPaint(
       { type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 } }, "color", fgVar
     )];
-    for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
+    // Filled marks take the stroke too, so the silhouette closes at small sizes rather
+    // than leaving a hairline gap where the outline used to be.
+    for (const vec of vecs) {
+      vec.strokes = paint;
+      vec.fills = filled ? paint : [];
+    }
   }
   return inst;
 }
 
 // Create a sized, colored icon instance by component name, falling back to
 // icon/placeholder. Returns null if no icon component exists in the file.
-function makeIcon(iconName, fgVar, iconSizeVar) {
+function makeIcon(iconName, fgVar, iconSizeVar, filled) {
   let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === iconName);
   if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
   if (!iconComp) return null;
-  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar);
+  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar, filled);
 }
 
 function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {
