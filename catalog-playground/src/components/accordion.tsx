@@ -9,7 +9,7 @@ import { cn } from './cn';
 const accordionVariants = cva('flex flex-col', {
   variants: {
     variant: {
-      default: 'bg-transparent border-outline-subtle border',
+      default: 'bg-transparent border-outline border',
       filled: 'bg-surface-1 border-0',
     },
   },
@@ -33,9 +33,9 @@ const AccordionItem = forwardRef<
 AccordionItem.displayName = 'AccordionItem';
 
 const triggerSize: Record<string, string> = {
-  sm: 'h-ch-5 px-3 gap-2 text-[14px] leading-[20px]',
-  md: 'h-ch-7 px-4 gap-3 text-[16px] leading-[24px]',
-  lg: 'h-ch-9 px-6 gap-4 text-[18px] leading-[28px]',
+  sm: 'h-row-sm px-3 gap-2 text-body-sm',
+  md: 'h-row-md px-4 gap-3 text-body-md',
+  lg: 'h-row-lg px-6 gap-4 text-body-lg',
 };
 
 const chevronSize: Record<string, string> = {

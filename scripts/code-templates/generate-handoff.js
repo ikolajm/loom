@@ -9,7 +9,7 @@ const path = require('path');
 
 function generate(configs, registry, outputDir) {
   const { typography, standards, colors, effects } = configs;
-  const defaultMode = standards.colors['default-mode'] || 'dark';
+  const defaultMode = colors['default-mode'] || 'dark';
   const headingFont = typography.families.heading;
   const bodyFont = typography.families.body;
 

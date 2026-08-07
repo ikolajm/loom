@@ -1,10 +1,12 @@
 {
   "name": "input",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "18289448c523",
+  "version": "f2db0dd86ea8",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "class-variance-authority"

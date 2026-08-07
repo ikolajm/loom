@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternTreeView(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components['tree-view'];
   const md = config.sizes.md;
   const itemStates = config.item.state;
@@ -45,7 +45,7 @@ function buildPatternTreeView(lookups, defaultMode, page) {
 
     const hPath = resolveHeight(md['item-height']);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) row.setBoundVariable('height', hVar);
       row.counterAxisSizingMode = 'FIXED';
     }

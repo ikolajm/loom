@@ -1,8 +1,9 @@
 {
   "name": "bottom-nav",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "9c9513cff5e2",
+  "version": "0dfa21b77d23",
   "dependencies": [
     "cn"
   ],

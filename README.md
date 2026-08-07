@@ -1,6 +1,6 @@
 # Loom
 
-A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (66 atoms on a shared token foundation) — so the design surface and the code surface never drift from each other.
+A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (62 components on a shared token foundation) — so the design surface and the code surface never drift from each other.
 
 Loom started as a personal engine for spinning up consistent design systems across projects. It's open source for the model: a single source of truth feeding two codegen pipelines, with a catalog you copy components *from* rather than depend *on* (the shadcn approach — own the files, no upstream sync).
 
@@ -18,7 +18,7 @@ Loom started as a personal engine for spinning up consistent design systems acro
    scripts/assemble-figma.js      scripts/code-templates/orchestrator.js
             │                           │
             ▼                           ▼
-   Figma variables /            catalog/  →  66 React atoms
+   Figma variables /            catalog/  →  62 React components
    styles / components          + tokens.css substrate
    (paste into plugin console)  + per-atom manifests
                                         │
@@ -33,15 +33,17 @@ Change a value in `spec/config/` → regenerate → **both** the Figma file and 
 
 ## What's in the catalog
 
-66 atoms across 8 groups, each generated as a `.tsx` component + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+62 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+
+**Two kinds, one catalog.** Every manifest carries a `kind`: **38 atoms** and **24 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
 
 | Group | Atoms |
 |-------|-------|
 | **Buttons** | button, badge, dot, fab, fab-menu, toggle, toggle-group |
-| **Forms** | input, select, textarea, checkbox, radio, switch, slider, combobox, date-picker, calendar, time-picker, file-upload, input-otp, label, helper-text, form-field, rating, search-bar |
+| **Forms** | input, select, textarea, checkbox, radio, switch, slider, combobox, date-picker, calendar, time-picker, file-upload, input-otp, label, helper-text, form-field |
 | **Layout** | card, dialog, alert-dialog, sheet, table, separator, toolbar |
 | **Feedback** | toast, banner, tooltip, popover, dropdown-menu, context-menu, hover-card, skeleton, spinner, progress-bar, empty-state |
-| **Data display** | avatar, avatar-group, list-item, accordion, collapsible, kbd, number, relative-time |
+| **Data display** | avatar, avatar-group, list-item, accordion, kbd, relative-time |
 | **Navigation** | top-bar, sidebar, tabs, bottom-nav, breadcrumbs, pagination, navigation-menu, command-palette |
 | **Composite** | stepper, carousel, tree-view |
 | **Motion** | reveal, stagger, count-up, scroll-progress |
@@ -70,9 +72,13 @@ npm install
 npm run dev          # → http://localhost:3000
 ```
 
+This works on a bare clone with no configuration — see *Configure and generate* below. The playground regenerates its token substrate on every `dev` / `build`, so it renders Loom's default look until you generate a brand, and yours from then on.
+
 ### Configure and generate
 
-Loom generates from one hand-authored file, **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
+**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the playground above runs before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the atoms are there on clone. `generated/` is not — the Figma scripts and `init.sh` exist only after you run the commands in this section.)
+
+To build *your* brand, hand-author **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
 
 ```bash
 cp spec/answers.example.json spec/answers.json
@@ -81,16 +87,36 @@ cp spec/answers.example.json spec/answers.json
 See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference. Then run the three pipelines:
 
 ```bash
-npm run configs      # spec/answers.json → base token configs
+npm run configs      # spec/answers.json → spec/config/local/  (git-ignored)
 npm run generate     # → React catalog (catalog/) + tokens.css + tokens.json
 npm run figma        # → Figma plugin scripts (paste into the Figma console)
 ```
 
-Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+**Where your brand lands.** `npm run configs` writes to `spec/config/local/`, never to the committed set — so generating a brand never dirties the Loom repo. Every generator resolves each config file through `local/` first and falls back to `spec/config/base/`. Two things follow. Hand-edit `spec/config/local/`, not `spec/config/base/`: a local file of the same name overrides the committed one anyway, and editing the committed set fails the `base-config-provenance` check on the next `npm run generate`. And deleting `spec/config/local/` reverts you to Loom's default look.
+
+Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
 
 Alongside the web `tokens.css`, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 
 ### Use Loom in a project
+
+**Two install tiers.** Pick before you start; the difference is what Loom is allowed to put in your project.
+
+| Tier | You get | Use when |
+|------|---------|----------|
+| **tokens** | `tokens.css` + `tokens.json`, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values. This is the only tier a non-web runtime can take: [`native/`](native/README.md) is this tier, consumed through the NativeWind preset |
+| **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`, a `/preview` route), the core dependencies, and the atoms you pick | You want the components too. This is what the quickstart below installs |
+
+The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
+
+Both tiers are first-class on web:
+
+```bash
+./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes src/tokens.css + src/tokens.json, nothing else
+./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
+```
+
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` into your global stylesheet after the `tailwindcss` import and use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
@@ -123,19 +149,19 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 #    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated `tokens.css` substrate. It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated `tokens.css` substrate. It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
 Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
 ### Apply the Figma scripts
 
-`npm run figma` writes 30 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`29` step scripts (each a self-contained async IIFE). To build the Figma file:
+`npm run figma` writes 32 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`31` step scripts (each a self-contained async IIFE). To build the Figma file:
 
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
-3. Paste the step scripts **`01` → `29` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
+3. Paste the step scripts **`01` → `31` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
 
-**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`14`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
+**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`16`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
 
 ```js
 // Clear variable collections
@@ -151,7 +177,7 @@ for (const page of figma.root.children) {
 while (figma.root.children.length > 1) { try { figma.root.children[figma.root.children.length - 1].remove(); } catch(e) { break; } }
 ```
 
-Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/gotchas.md`](docs/gotchas.md)).
+Step `14` (text styles) runs the font-availability check and reports `✓`/`⚠` per family; a font this Figma can't render is substituted with Inter so the paste completes (see [`docs/gotchas.md`](docs/gotchas.md)).
 
 ---
 
@@ -160,7 +186,8 @@ Step `12` (text styles) runs the font-availability check and reports `✓`/`⚠`
 ```
 spec/                  Single source of truth
   config/
-    base/              ← token configs, generated from questionnaire answers
+    base/              ← Loom's committed default token set — the fallback
+    local/             ← your generated brand (git-ignored; preferred over base/)
     components/        ← hand-authored component schemas (8 group files)
     figma/             ← Figma variable-collection definitions
     presentation/      ← Figma documentation chrome (layout, templates)
@@ -174,7 +201,7 @@ scripts/               The two codegen pipelines
   resolve-picks.js     ← the picker's dependency resolver
   setup.sh             ← (repo root) installs picked atoms into a project
 
-catalog/               Generated output — per-atom .tsx + .manifest.json + story
+catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
 catalog-playground/    Next.js app that browses the whole catalog
 native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)
@@ -186,7 +213,7 @@ docs/                  Design-system engineering docs (see below)
 
 The full catalog model — surfaces, picker, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
 
-A note on generated code: some atoms with not-yet-wired Radix primitives carry an intentional `// TODO: wrap with <primitive>` marker in their generated output — those are deliberate fallback signals, not unfinished work.
+A note on generated code: when an atom's Radix primitive has no template wired, the generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`. That marker is a deliberate fallback signal, not unfinished work. No atom in the current catalog carries one.
 
 ---
 

@@ -6,8 +6,9 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Config loading ---
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ (your brand, git-ignored) over the committed default set.
+// See scripts/config-paths.js for why the generator no longer writes a tracked path.
+const { loadConfig: load } = require('../config-paths');
 
 function loadAllConfigs() {
   return {
@@ -218,6 +219,9 @@ function buildSizeStyles(sizes) {
     if (h) classes.push(`h-${h}`);
     // Min-height (e.g. textarea)
     if (sz['min-height']) classes.push(`min-h-[${sz['min-height']}]`);
+    // Min-width (e.g. kbd) — for atoms whose content can be a single narrow
+    // character, where x-padding alone leaves the box narrower than it is tall.
+    if (sz['min-width']) classes.push(`min-w-[${sz['min-width']}]`);
     // Padding — handles both {scale.N} and raw values
     const px = spacingToClass(sz['x-padding'], 'px');
     if (px) classes.push(px);
@@ -281,93 +285,128 @@ function resolveBase(allComponents, configKey) {
   return merged;
 }
 
+// --- Catalog kind ---
+//
+// Two things live in this catalog and it only had one word for them. An **atom** is a
+// primitive you compose with — one control, one mark, one piece of content. A
+// **pattern** is an arrangement already composed for you, solving an assembly you
+// would otherwise repeat. Both are first-class and installed identically; the split is
+// vocabulary, not a tier. Nothing branches on it.
+//
+// It has to be declared. Two mechanical derivations were tried and both measure a
+// different axis:
+//   - The Figma `build-pattern-*` prefix marks "cannot be emitted by the standard
+//     variant × size builder" — which is why `number` and `relative-time` carry it.
+//   - Manifest `dependencies` marks "imports another atom" — which makes `input` a
+//     composer (it imports form-field for error context) and a self-contained shell a primitive
+//     (it reimplements an input inline rather than importing one). Exactly backwards.
+//
+// The test that does hold: could a competent consumer assemble this from other Loom
+// atoms without inventing anything? If yes, it is a pattern. Default is `atom`; only
+// the exceptions are listed, so this stays one auditable list instead of 66 fields.
+const PATTERN_IDS = new Set([
+  // Compose several controls into a working arrangement
+  'combobox', 'date-picker', 'time-picker', 'file-upload',
+  // Menu and overlay arrangements built from a trigger + surface + item rows
+  'dropdown-menu', 'context-menu', 'command-palette', 'navigation-menu',
+  // Structural page furniture
+  'top-bar', 'sidebar', 'bottom-nav', 'breadcrumbs', 'pagination', 'toolbar',
+  // Repeating-item arrangements
+  'list-item', 'accordion', 'avatar-group', 'tree-view', 'stepper', 'carousel',
+  // Composed states
+  'empty-state', 'fab-menu', 'toggle-group',
+  // Motion that drives other motion atoms
+  'stagger',
+]);
+
+/** `atom` unless listed above. See PATTERN_IDS for why this is authored, not derived. */
+function kindOf(key) {
+  return PATTERN_IDS.has(key) ? 'pattern' : 'atom';
+}
+
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
   const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig, motionConfig } = configs;
   return {
     // === Actions ===
-    'Button': { source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
     // IconButton removed — use <Button variant="ghost" size="icon"> instead
-    'FAB': { source: buttonConfig, key: 'fab', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', iconOnly: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
-    'FabMenu': { source: buttonConfig, key: 'fab-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
-    'Badge': { source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
-    'Dot': { source: buttonConfig, key: 'dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, noChildren: true, variantKey: 'state', textFamily: null, category: 'Feedback', template: 'cva-only', primitive: null },
-    'Toggle': { source: buttonConfig, key: 'toggle', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle', variantKey: 'state' },
-    'ToggleGroup': { source: buttonConfig, key: 'toggle-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle-group' },
+    'FAB': { generator: 'fab#generateFAB', source: buttonConfig, key: 'fab', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', iconOnly: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
+    'FabMenu': { generator: 'fab-menu#generateFabMenu', source: buttonConfig, key: 'fab-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: null },
+    'Badge': { generator: 'badge#generateBadge', source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Dot': { generator: 'dot#generateDot', source: buttonConfig, key: 'dot', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, noChildren: true, variantKey: 'state', textFamily: null, category: 'Feedback', template: 'cva-only', primitive: null },
+    'Toggle': { generator: 'radix-toggle#generateRadixToggle', source: buttonConfig, key: 'toggle', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle', variantKey: 'state' },
+    'ToggleGroup': { generator: 'radix-toggle#generateRadixToggleGroup', source: buttonConfig, key: 'toggle-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Actions', template: 'radix', primitive: '@radix-ui/react-toggle-group' },
 
     // === Inputs ===
     'Input': { source: formConfig, key: 'input', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, formControl: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
-    'Select': { source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-select', variantKey: 'state' },
+    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-select', variantKey: 'state' },
     'Textarea': { source: formConfig, key: 'textarea', baseKey: 'text-field', element: 'textarea', htmlType: 'TextareaHTMLAttributes<HTMLTextAreaElement>', noIconSlots: true, formControl: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null, variantKey: 'state' },
-    'DatePicker': { source: formConfig, key: 'date-picker', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, inputType: 'date', textFamily: 'input', category: 'Inputs', template: 'lib', primitive: 'react-day-picker', variantKey: 'state' },
-    'Checkbox': { source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'checkbox', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-checkbox' },
-    'Radio': { source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'radio', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-radio-group' },
-    'Switch': { source: formConfig, key: 'switch', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', noIconSlots: true, noChildren: true, variantKey: 'active', role: 'switch', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-switch' },
-    'Combobox': { source: formConfig, key: 'combobox', baseKey: 'text-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: 'cmdk' },
-    'Slider': { source: formConfig, key: 'slider', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, inputType: 'range', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-slider' },
-    'FileUpload': { source: formConfig, key: 'file-upload', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'stack', textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
-    'InputOTP': { source: formConfig, key: 'input-otp', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null },
+    'DatePicker': { generator: 'date-picker#generateDatePicker', source: formConfig, key: 'date-picker', baseKey: 'text-field', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, inputType: 'date', textFamily: 'input', category: 'Inputs', template: 'lib', primitive: 'react-day-picker', variantKey: 'state' },
+    'Checkbox': { generator: 'radix-form-controls#generateRadixCheckbox', source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'checkbox', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-checkbox' },
+    'Radio': { generator: 'radix-form-controls#generateRadixRadio', source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, variantKey: 'checked', inputType: 'radio', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-radio-group' },
+    'Switch': { generator: 'radix-form-controls#generateRadixSwitch', source: formConfig, key: 'switch', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', noIconSlots: true, noChildren: true, variantKey: 'active', role: 'switch', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-switch' },
+    'Combobox': { generator: 'combobox#generateCombobox', source: formConfig, key: 'combobox', baseKey: 'text-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: 'cmdk' },
+    'Slider': { generator: 'radix-form-controls#generateRadixSlider', source: formConfig, key: 'slider', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', selfClosing: true, noIconSlots: true, inputType: 'range', textFamily: 'body', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-slider' },
+    'FileUpload': { generator: 'file-upload#generateFileUpload', source: formConfig, key: 'file-upload', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'stack', textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
+    'InputOTP': { generator: 'input-otp#generateInputOTP', source: formConfig, key: 'input-otp', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'cva-only', primitive: null },
     'Label': { source: formConfig, key: 'label', element: 'label', htmlType: 'LabelHTMLAttributes<HTMLLabelElement>', noInteractive: true, layout: 'row', textFamily: 'action', category: 'Inputs', template: 'cva-only', primitive: null },
-    'HelperText': { source: formConfig, key: 'helper-text', element: 'p', htmlType: 'HTMLAttributes<HTMLParagraphElement>', noInteractive: true, layout: 'row', textFamily: 'label', category: 'Inputs', template: 'cva-only', primitive: null },
-    'FormField': { source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
-    'Calendar': { source: formConfig, key: 'calendar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Inputs', template: 'lib', primitive: 'react-day-picker' },
-    'Rating': { source: formConfig, key: 'rating', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Inputs', template: 'lib', primitive: null },
-    'TimePicker': { source: formConfig, key: 'time-picker', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
-    'SearchBar': { source: formConfig, key: 'search-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
+    'HelperText': { generator: 'helper-text#generateHelperText', source: formConfig, key: 'helper-text', element: 'p', htmlType: 'HTMLAttributes<HTMLParagraphElement>', noInteractive: true, layout: 'row', textFamily: 'label', category: 'Inputs', template: 'cva-only', primitive: null },
+    'FormField': { generator: 'form-field#generateFormField', source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
+    'Calendar': { generator: 'calendar#generateCalendar', source: formConfig, key: 'calendar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Inputs', template: 'lib', primitive: 'react-day-picker' },
+    'TimePicker': { generator: 'time-picker#generateTimePicker', source: formConfig, key: 'time-picker', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
 
     // === Layout ===
     'Card': { source: layoutConfig, key: 'card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
-    'Dialog': { source: layoutConfig, key: 'dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
-    'Table': { source: layoutConfig, key: 'table', element: 'table', htmlType: 'TableHTMLAttributes<HTMLTableElement>', noInteractive: true, noChildren: true, layout: 'block', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
-    'Sheet': { source: layoutConfig, key: 'sheet', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
-    'Separator': { source: layoutConfig, key: 'separator', element: 'hr', htmlType: 'HTMLAttributes<HTMLHRElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-separator' },
-    'AlertDialog': { source: layoutConfig, key: 'alert-dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'alertdialog', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-alert-dialog' },
+    'Dialog': { generator: 'radix-dialogs#generateRadixDialog', source: layoutConfig, key: 'dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
+    'Table': { generator: 'table#generateTable', source: layoutConfig, key: 'table', element: 'table', htmlType: 'TableHTMLAttributes<HTMLTableElement>', noInteractive: true, noChildren: true, layout: 'block', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
+    'Sheet': { generator: 'radix-dialogs#generateRadixSheet', source: layoutConfig, key: 'sheet', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
+    'Separator': { generator: 'radix-feedback#generateRadixSeparator', source: layoutConfig, key: 'separator', element: 'hr', htmlType: 'HTMLAttributes<HTMLHRElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-separator' },
+    'AlertDialog': { generator: 'radix-dialogs#generateRadixAlertDialog', source: layoutConfig, key: 'alert-dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'alertdialog', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-alert-dialog' },
     'Toolbar': { source: layoutConfig, key: 'toolbar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
 
     // === Feedback ===
-    'Toast': { source: feedbackConfig, key: 'toast', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', textFamily: 'action', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-toast' },
-    'Banner': { source: feedbackConfig, key: 'banner', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
-    'Tooltip': { source: feedbackConfig, key: 'tooltip', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, role: 'tooltip', textFamily: 'label', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-tooltip' },
-    'Popover': { source: feedbackConfig, key: 'popover', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-popover' },
-    'DropdownMenu': { source: feedbackConfig, key: 'dropdown-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-dropdown-menu' },
-    'Skeleton': { source: feedbackConfig, key: 'skeleton', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
-    'ProgressBar': { source: feedbackConfig, key: 'progress-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'block', noIconSlots: true, role: 'progressbar', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-progress' },
-    'EmptyState': { source: feedbackConfig, key: 'empty-state', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
-    'ContextMenu': { source: feedbackConfig, key: 'context-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-context-menu' },
-    'HoverCard': { source: feedbackConfig, key: 'hover-card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-hover-card' },
+    'Toast': { generator: 'radix-toast#generateRadixToast', source: feedbackConfig, key: 'toast', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', textFamily: 'action', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-toast' },
+    'Banner': { generator: 'banner#generateBanner', source: feedbackConfig, key: 'banner', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', role: 'status', noInteractive: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
+    'Tooltip': { generator: 'radix-feedback#generateRadixTooltip', source: feedbackConfig, key: 'tooltip', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, role: 'tooltip', textFamily: 'label', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-tooltip' },
+    'Popover': { generator: 'radix-feedback#generateRadixPopover', source: feedbackConfig, key: 'popover', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-popover' },
+    'DropdownMenu': { generator: 'radix-menus#generateRadixDropdownMenu', source: feedbackConfig, key: 'dropdown-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-dropdown-menu' },
+    'Skeleton': { generator: 'skeleton#generateSkeleton', source: feedbackConfig, key: 'skeleton', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, minimal: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
+    'ProgressBar': { generator: 'radix-feedback#generateRadixProgress', source: feedbackConfig, key: 'progress-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'block', noIconSlots: true, role: 'progressbar', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-progress' },
+    'EmptyState': { generator: 'empty-state#generateEmptyState', source: feedbackConfig, key: 'empty-state', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'cva-only', primitive: null },
+    'ContextMenu': { generator: 'radix-menus#generateRadixContextMenu', source: feedbackConfig, key: 'context-menu', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'menu', textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-context-menu' },
+    'HoverCard': { generator: 'radix-feedback#generateRadixHoverCard', source: feedbackConfig, key: 'hover-card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Feedback', template: 'radix', primitive: '@radix-ui/react-hover-card' },
     'Spinner': { source: feedbackConfig, key: 'spinner', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: null, sizeSkipKeys: ['border-width'], category: 'Feedback', template: 'cva-only', primitive: null },
 
     // === Data Display ===
-    'Avatar': { source: dataDisplayConfig, key: 'avatar', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-avatar' },
-    'ListItem': { source: dataDisplayConfig, key: 'list-item', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', baseExtra: 'cursor-pointer', textFamily: null, category: 'Data Display', template: 'cva-only', primitive: null },
-    'Accordion': { source: dataDisplayConfig, key: 'accordion', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-accordion' },
+    'Avatar': { generator: 'radix-feedback#generateRadixAvatar', source: dataDisplayConfig, key: 'avatar', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-avatar' },
+    'ListItem': { generator: 'list-item#generateListItem', source: dataDisplayConfig, key: 'list-item', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', baseExtra: 'cursor-pointer', textFamily: 'body', category: 'Data Display', template: 'cva-only', primitive: null },
+    'Accordion': { generator: 'radix-navigation#generateRadixAccordion', source: dataDisplayConfig, key: 'accordion', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-accordion' },
     'Kbd': { source: dataDisplayConfig, key: 'kbd', element: 'kbd', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'cva-only', primitive: null },
-    'Collapsible': { source: dataDisplayConfig, key: 'collapsible', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-collapsible' },
-    'AvatarGroup': { source: dataDisplayConfig, key: 'avatar-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'lib', primitive: null },
-    'NumberDisplay': { source: dataDisplayConfig, key: 'number', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
-    'RelativeTime': { source: dataDisplayConfig, key: 'relative-time', element: 'time', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
+    'AvatarGroup': { generator: 'avatar-group#generateAvatarGroup', source: dataDisplayConfig, key: 'avatar-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'lib', primitive: null },
+    'RelativeTime': { generator: 'relative-time#generateRelativeTime', source: dataDisplayConfig, key: 'relative-time', element: 'time', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
 
     // === Navigation ===
     'TopBar': { source: navigationConfig, key: 'top-bar', element: 'header', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'title', category: 'Navigation', template: 'cva-only', primitive: null },
-    'Sidebar': { source: navigationConfig, key: 'sidebar', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Navigation', template: 'cva-only', primitive: null },
-    'Tabs': { source: navigationConfig, key: 'tabs', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, role: 'tablist', textFamily: 'action', category: 'Navigation', template: 'radix', primitive: '@radix-ui/react-tabs' },
+    'Sidebar': { generator: 'sidebar#generateSidebar', source: navigationConfig, key: 'sidebar', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Navigation', template: 'cva-only', primitive: null },
+    'Tabs': { generator: 'radix-navigation#generateRadixTabs', source: navigationConfig, key: 'tabs', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, role: 'tablist', textFamily: 'action', category: 'Navigation', template: 'radix', primitive: '@radix-ui/react-tabs' },
     'BottomNav': { source: navigationConfig, key: 'bottom-nav', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', baseExtra: 'justify-around w-full', noIconSlots: true, textFamily: 'label', category: 'Navigation', template: 'cva-only', primitive: null },
     'Breadcrumbs': { source: navigationConfig, key: 'breadcrumbs', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Navigation', template: 'cva-only', primitive: null },
-    'Pagination': { source: navigationConfig, key: 'pagination', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Navigation', template: 'cva-only', primitive: null },
-    'NavigationMenu': { source: navigationConfig, key: 'navigation-menu', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Navigation', template: 'radix', primitive: '@radix-ui/react-navigation-menu' },
-    'CommandPalette': { source: navigationConfig, key: 'command-palette', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'dialog', textFamily: 'body', category: 'Navigation', template: 'lib', primitive: 'cmdk' },
+    'Pagination': { generator: 'pagination#generatePagination', source: navigationConfig, key: 'pagination', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Navigation', template: 'cva-only', primitive: null },
+    'NavigationMenu': { generator: 'radix-navigation-menu#generateRadixNavigationMenu', source: navigationConfig, key: 'navigation-menu', element: 'nav', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'body', category: 'Navigation', template: 'radix', primitive: '@radix-ui/react-navigation-menu' },
+    'CommandPalette': { generator: 'command-palette#generateCommandPalette', source: navigationConfig, key: 'command-palette', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'dialog', textFamily: 'body', category: 'Navigation', template: 'lib', primitive: 'cmdk' },
 
     // === Composite ===
-    'Stepper': { source: compositeConfig, key: 'stepper', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, variantKey: 'step-state', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
-    'Carousel': { source: compositeConfig, key: 'carousel', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Composite', template: 'lib', primitive: 'embla-carousel-react' },
-    'TreeView': { source: compositeConfig, key: 'tree-view', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'tree', variantKey: 'item', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
+    'Stepper': { generator: 'stepper#generateStepper', source: compositeConfig, key: 'stepper', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, variantKey: 'step-state', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
+    'Carousel': { generator: 'carousel#generateCarousel', source: compositeConfig, key: 'carousel', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Composite', template: 'lib', primitive: 'embla-carousel-react' },
+    'TreeView': { generator: 'tree-view#generateTreeView', source: compositeConfig, key: 'tree-view', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, role: 'tree', variantKey: 'item', textFamily: 'body', category: 'Composite', template: 'cva-only', primitive: null },
 
     // === Motion ===
-    'Reveal': { source: motionConfig, key: 'reveal', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
-    'Stagger': { source: motionConfig, key: 'stagger', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
-    'CountUp': { source: motionConfig, key: 'count-up', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Motion', template: 'lib', primitive: null },
-    'ScrollProgress': { source: motionConfig, key: 'scroll-progress', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'Reveal': { generator: 'reveal#generateReveal', source: motionConfig, key: 'reveal', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'Stagger': { generator: 'stagger#generateStagger', source: motionConfig, key: 'stagger', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
+    'CountUp': { generator: 'count-up#generateCountUp', source: motionConfig, key: 'count-up', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Motion', template: 'lib', primitive: null },
+    'ScrollProgress': { generator: 'scroll-progress#generateScrollProgress', source: motionConfig, key: 'scroll-progress', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Motion', template: 'lib', primitive: null },
   };
 }
 
@@ -415,5 +454,7 @@ module.exports = {
   buildTypographyClasses,
   resolveBase,
   getComponentRegistry,
+  kindOf,
+  PATTERN_IDS,
   formatDisplayName,
 };

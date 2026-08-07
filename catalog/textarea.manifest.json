@@ -1,10 +1,12 @@
 {
   "name": "textarea",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "71214df128e4",
+  "version": "c431f6bf7fd0",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "class-variance-authority"

@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateCombobox(name, config, meta) {
   const itemSizes = config.item?.sizes ? filterSizes(config.item.sizes) : {};
@@ -14,8 +14,8 @@ function generateCombobox(name, config, meta) {
     if (px) classes.push(`px-${px[1]}`);
     const gap = sz.gap?.match(/\{scale\.(\d+)\}/);
     if (gap) classes.push(`gap-${gap[1]}`);
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    const itemRole = textRoleClass(sz.text);
+    if (itemRole) classes.push(itemRole);
     itemEntries[tier] = classes.join(' ');
   }
 
@@ -66,10 +66,10 @@ const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
             className={cn(
               'flex items-center justify-between w-full border border-outline-subtle bg-surface text-on-surface rounded-input interactive cursor-pointer',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              'h-ch-5 px-3 text-input-md',
-              size === 'sm' && 'h-ch-3 px-2 text-input-sm',
-              size === 'lg' && 'h-ch-7 px-4 text-input-lg',
+              'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+              'h-control-md px-3 text-input-md',
+              size === 'sm' && 'h-control-sm px-2 text-input-sm',
+              size === 'lg' && 'h-control-lg px-4 text-input-lg',
               isError && 'border-error',
               className,
             )}
@@ -85,7 +85,7 @@ const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
             <div className={cn('flex items-center border-b border-outline-subtle', size === 'sm' ? 'px-2' : size === 'lg' ? 'px-4' : 'px-3')}>
               <CommandPrimitive.Input
                 placeholder={searchPlaceholder}
-                className={cn('flex w-full bg-transparent py-3 outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-50', size === 'sm' ? 'h-ch-3 text-body-sm' : size === 'lg' ? 'h-ch-7 text-body-lg' : 'h-ch-5 text-body-md')}
+                className={cn('flex w-full bg-transparent py-3 outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled)', size === 'sm' ? 'h-control-sm text-body-sm' : size === 'lg' ? 'h-control-lg text-body-lg' : 'h-control-md text-body-md')}
               />
             </div>
             <CommandPrimitive.List className="max-h-[200px] overflow-y-auto overflow-x-hidden p-1">

@@ -10,9 +10,9 @@ const tabsListVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-ch-5 text-[12px] leading-[16px]',
-        md: 'h-ch-7 text-[14px] leading-[20px]',
-        lg: 'h-ch-8 text-[16px] leading-[24px]',
+        sm: 'h-nav-item-sm text-action-sm',
+        md: 'h-nav-item-md text-action-md',
+        lg: 'h-nav-item-lg text-action-lg',
       },
     },
     defaultVariants: { size: 'md' },
@@ -44,7 +44,7 @@ const TabsTrigger = forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'h-full font-medium tracking-[0.01em] cursor-pointer transition-colors',
+      'h-full font-medium cursor-pointer transition-colors',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
       'text-on-surface-variant hover:text-on-surface',
       'data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary',

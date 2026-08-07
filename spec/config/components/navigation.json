@@ -2,7 +2,7 @@
   "top-bar": {
     "$note": "App header bar. Holds title, navigation icon (left), and action icons (right). Scrolled state adds elevation — code-only state change. 2-3 action icons max, overflow menu for the rest.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-bottom": "color/outline/outline-subtle" },
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-bottom": "color/outline/outline" },
       "elevated": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border-bottom": "none", "shadow": "effects/shadow-1" }
     },
     "typography": {
@@ -14,9 +14,9 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/ch-7", "x-padding": "{scale.3}", "gap": "{scale.2}", "title-font-size": "16px", "title-line-height": "24px", "icon-size": "icon/icon-2" },
-      "md": { "height": "height/ch-8", "x-padding": "{scale.4}", "gap": "{scale.3}", "title-font-size": "18px", "title-line-height": "28px", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.4}", "title-font-size": "20px", "title-line-height": "28px", "icon-size": "icon/icon-3" }
+      "sm": { "height": "height/bar-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/bar-md", "x-padding": "{scale.4}", "gap": "{scale.3}", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/bar-lg", "x-padding": "{scale.6}", "gap": "{scale.4}", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -24,8 +24,8 @@
   "sidebar": {
     "$note": "Vertical navigation panel. Permanent (desktop), collapsible, or rail (icons only). Items use list-item structure with leading icon + label. Active item highlighted with primary color. Rail variant hides labels and narrows to icon column — same surface as default; the generated atom selects width vs rail-width per variant via a CSS var, so rail stays one variant (no compound × size). SidebarItem labels auto-collapse in rail via the parent's group marker.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" },
-      "rail": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline" },
+      "rail": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border-right": "color/outline/outline" }
     },
     "item": {
       "state": {
@@ -41,9 +41,9 @@
       }
     },
     "sizes": {
-      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/ch-5", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/ch-7", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/ch-8", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "text": "action/md", "icon-size": "icon/icon-2" },
+      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "text": "action/md", "icon-size": "icon/icon-2" },
+      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "text": "action/lg", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -62,13 +62,12 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/ch-8", "x-padding": "{scale.6}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "height": "height/nav-item-sm", "x-padding": "{scale.3}", "gap": "{scale.1}", "text": "action/sm", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/nav-item-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/md", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/nav-item-lg", "x-padding": "{scale.6}", "gap": "{scale.2}", "text": "action/lg", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -76,7 +75,7 @@
   "bottom-nav": {
     "$note": "Mobile bottom navigation bar. 3-5 destinations only. Always includes labels — never icon-only. Active item uses primary color.",
     "variants": {
-      "default": { "bg": "color/surface/surface", "border-top": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface", "border-top": "color/outline/outline" }
     },
     "item": {
       "state": {
@@ -91,9 +90,9 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/ch-8", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "icon-size": "icon/icon-2" },
-      "md": { "height": "height/ch-9", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-2" },
-      "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-3" }
+      "sm": { "height": "height/bottom-bar-sm", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/bottom-bar-md", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
+      "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "gap": "{scale.1}", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -115,9 +114,9 @@
     },
     "separator": "/",
     "sizes": {
-      "sm": { "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-1" },
-      "lg": { "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "gap": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md": { "gap": "{scale.2}", "icon-size": "icon/icon-1" },
+      "lg": { "gap": "{scale.2}", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -140,9 +139,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "item-size": "height/ch-3", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "item-size": "height/ch-5", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "item-size": "height/ch-7", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "item-size": "height/control-sm", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md": { "item-size": "height/control-md", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg": { "item-size": "height/control-lg", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -170,9 +169,9 @@
       "radius": "radius/card"
     },
     "sizes": {
-      "sm": { "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "gap": "{scale.1}", "font-size": "14px", "line-height": "20px" },
-      "md": { "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "lg": { "item-height": "height/ch-8", "item-x-padding": "{scale.6}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+      "sm": { "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "gap": "{scale.1}" },
+      "md": { "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "gap": "{scale.2}" },
+      "lg": { "item-height": "height/nav-item-lg", "item-x-padding": "{scale.6}", "gap": "{scale.3}" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -185,7 +184,7 @@
         "fg": "color/surface/on-surface",
         "overlay": "color/surface/scrim",
         "shadow": "effects/shadow-3",
-        "border": "color/outline/outline-subtle"
+        "border": "color/outline/outline"
       }
     },
     "input": {
@@ -209,13 +208,12 @@
     "group-label": {
       "fg": "color/surface/on-surface-variant",
       "font-weight": 500,
-      "letter-spacing": "0.02em",
       "text-transform": "uppercase"
     },
     "sizes": {
-      "sm": { "max-width": "480px", "radius": "radius/modal", "input-font-size": "16px", "input-line-height": "24px", "input-x-padding": "{scale.3}", "input-height": "height/ch-7", "item-height": "height/ch-5", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "10px", "group-line-height": "14px", "icon-size": "icon/icon-1" },
-      "md": { "max-width": "560px", "radius": "radius/modal", "input-font-size": "18px", "input-line-height": "28px", "input-x-padding": "{scale.4}", "input-height": "height/ch-8", "item-height": "height/ch-7", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "14px", "item-line-height": "20px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" },
-      "lg": { "max-width": "640px", "radius": "radius/modal", "input-font-size": "20px", "input-line-height": "28px", "input-x-padding": "{scale.6}", "input-height": "height/ch-9", "item-height": "height/ch-8", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-font-size": "16px", "item-line-height": "24px", "group-font-size": "12px", "group-line-height": "16px", "icon-size": "icon/icon-2" }
+      "sm": { "max-width": "480px", "radius": "radius/modal", "input-text": "input/md", "input-x-padding": "{scale.3}", "input-height": "height/bar-sm", "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-text": "action/md", "group-text": "label/sm", "icon-size": "icon/icon-1" },
+      "md": { "max-width": "560px", "radius": "radius/modal", "input-text": "input/lg", "input-x-padding": "{scale.4}", "input-height": "height/bar-md", "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/md", "group-text": "label/md", "icon-size": "icon/icon-2" },
+      "lg": { "max-width": "640px", "radius": "radius/modal", "input-text": "title/md", "input-x-padding": "{scale.6}", "input-height": "height/bar-lg", "item-height": "height/nav-item-lg", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/lg", "group-text": "label/md", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   }

@@ -1,8 +1,8 @@
 // CountUp — leaf motion atom. Animates a number from `from` to `value` when scrolled into view.
 //
 // Own IntersectionObserver triggers the count; requestAnimationFrame interpolates the value with
-// easeOutCubic. Composes NumberDisplay for ALL Intl formatting (separators, decimals, currency,
-// compact notation) — CountUp adds only the value animation, the format is delegated.
+// easeOutCubic. Formats through Intl.NumberFormat directly — separators, decimals, currency and
+// compact notation — so the animated value and its formatting stay in one place.
 //
 // NO spring/overshoot axis: a stat animating 97 -> 104 -> 99 reads as a data error, not delight.
 // Reduced-motion is a JS matchMedia check (a leaf that animates a JS value can't use the pure-CSS
@@ -19,7 +19,7 @@ function generateCountUp(name, config, meta) {
   return `'use client';
 
 import { forwardRef, useCallback, useEffect, useRef, useState, type HTMLAttributes } from 'react';
-import { NumberDisplay } from './number';
+import { cn } from './cn';
 
 type CountUpFormat = 'decimal' | 'currency' | 'percent' | 'unit';
 
@@ -38,7 +38,7 @@ export interface CountUpProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'chi
   once?: boolean;
   /** Fraction digits held steady during the count. Defaults to the target value's own precision. */
   decimals?: number;
-  // --- formatting, forwarded to NumberDisplay ---
+  // --- Intl formatting ---
   format?: CountUpFormat;
   currency?: string;
   unit?: string;
@@ -76,6 +76,7 @@ export const CountUp = forwardRef<HTMLSpanElement, CountUpProps>(function CountU
     notation,
     locale,
     options,
+    className,
     ...props
   },
   forwardedRef,
@@ -136,18 +137,24 @@ export const CountUp = forwardRef<HTMLSpanElement, CountUpProps>(function CountU
 
   const dec = decimals ?? precisionOf(value);
 
+  // currency needs a code, unit needs a unit; if the caller omitted it, degrade to a plain
+  // number rather than letting Intl throw (symmetric — neither format is special-cased).
+  const style =
+    (format === 'currency' && !currency) || (format === 'unit' && !unit) ? 'decimal' : format;
+  const formatted = new Intl.NumberFormat(locale, {
+    style,
+    currency: style === 'currency' ? currency : undefined,
+    unit: style === 'unit' ? unit : undefined,
+    notation,
+    minimumFractionDigits: dec,
+    maximumFractionDigits: dec,
+    ...options,
+  }).format(current);
+
   return (
-    <NumberDisplay
-      ref={setRefs}
-      value={current}
-      format={format}
-      currency={currency}
-      unit={unit}
-      notation={notation}
-      locale={locale}
-      options={{ minimumFractionDigits: dec, maximumFractionDigits: dec, ...options }}
-      {...props}
-    />
+    <span ref={setRefs} className={cn('tabular-nums', className)} {...props}>
+      {formatted}
+    </span>
   );
 });
 `;

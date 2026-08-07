@@ -12,8 +12,13 @@ function buildCnUtility(configs) {
   // utilities. A scale added there but not here silently regresses overrides for it.
   const q = (arr) => arr.map(v => `'${v}'`).join(', ');
   const radiusValues = Object.keys(configs.sizing['border-radius']);     // component, card, input, modal, pill
+  // Semantic heights are `<role>-<tier>` (control-md, bar-sm, ...) — the same strings the
+  // h-* and size-* utilities carry, so an `h-12` override displaces `h-control-md`.
+  const semanticHeights = Object.entries(configs.sizing['component-height'])
+    .flatMap(([role, tiers]) => Object.keys(tiers).map((tier) => `${role}-${tier}`));
   const spacingValues = [
     ...Object.keys(configs.standards.sizing['component-height']),         // ch-0 .. ch-9
+    ...semanticHeights,                                                  // control-md, row-lg, ...
     ...Object.keys(configs.standards.sizing['icon-size']),                // icon-0 .. icon-4
     ...Object.keys(configs.spacing.categories),                          // screen, content, section, group, component
   ];

@@ -32,18 +32,14 @@
       "helper-text",
       "form-field",
       "calendar",
-      "rating",
       "time-picker",
-      "search-bar",
       "popover",
       "banner",
       "avatar",
       "list-item",
       "accordion",
       "kbd",
-      "collapsible",
       "avatar-group",
-      "number",
       "relative-time",
       "top-bar",
       "tabs",
@@ -58,7 +54,16 @@
       "reveal",
       "stagger",
       "count-up",
-      "scroll-progress"
+      "scroll-progress",
+      "context-menu",
+      "dropdown-menu",
+      "empty-state",
+      "hover-card",
+      "progress-bar",
+      "skeleton",
+      "spinner",
+      "toast",
+      "tooltip"
     ]
   }
 }

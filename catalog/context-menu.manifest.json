@@ -1,8 +1,9 @@
 {
   "name": "context-menu",
+  "kind": "pattern",
   "category": "feedback",
   "description": "",
-  "version": "4b3dbaca2ec9",
+  "version": "905131820a35",
   "dependencies": [
     "cn"
   ],

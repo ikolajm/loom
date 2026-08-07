@@ -1,8 +1,9 @@
 {
   "name": "pagination",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "5d4652bbe2af",
+  "version": "06530dbb7d8b",
   "dependencies": [
     "cn"
   ],

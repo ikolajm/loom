@@ -21,7 +21,8 @@ const CONFIG_ROOT = path.join(ROOT, 'spec/config');
 const SCRIPTS_DIR = __dirname;
 
 // --- Load configs ---
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('./config-paths');
 const standards = load('standards.json');
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -124,6 +125,10 @@ function jsonLine(varName, data) {
   return `const ${varName} = ${JSON.stringify(data)};`;
 }
 
+function omitNotes(o) {
+  return Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith('$')));
+}
+
 // --- Step Definitions ---
 
 function buildAllSteps() {
@@ -140,7 +145,7 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_primitives_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  primStep(1, 'color', colors.palette, 'color.js');
+  primStep(1, 'color', { palette: colors.palette, derived: colors.$derived || {} }, 'color.js');
   primStep(2, 'spacing', standards.spacing.scale, 'spacing.js');
   primStep(3, 'radius', standards.sizing['border-radius'], 'radius.js');
   primStep(4, 'border-width', standards.sizing['border-width'], 'border-width.js');
@@ -159,9 +164,46 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_semantics_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  semStep(9, 'color', { defaultMode: standards.colors['default-mode'], modes: standards.colors.modes }, 'color.js');
-  semStep(10, 'spacing', spacing.categories, 'spacing.js');
-  semStep(11, 'radius', sizing['border-radius'], 'radius.js');
+  // Opacity leads the semantics because it is the only one that aliases nothing —
+  // it has no primitive layer to be pasted after.
+  semStep(9, 'opacity', omitNotes(standards.effects.opacity), 'opacity.js');
+  // Substitute each {fill.family.shade} with the shade the generator actually landed on
+  // (colors.$fillShades). The Figma step aliases roles to primitive colour variables by
+  // name, so it cannot resolve {fill.*} itself — and must not guess the intent shade,
+  // because the resolver moves it whenever AA demands.
+  //
+  // A missing entry throws here rather than emitting the raw template. It happened once:
+  // a stale spec/config/local/ predating $fillShades took precedence over a freshly
+  // regenerated committed set, and the unresolved template travelled all the way into
+  // the Figma console before anything complained. Failing in Node names the cause and
+  // the fix; failing in the plugin console names neither.
+  const resolvedModes = {};
+  for (const [mode, groups] of Object.entries(standards.colors.modes)) {
+    resolvedModes[mode] = {};
+    for (const [group, roles] of Object.entries(groups)) {
+      resolvedModes[mode][group] = {};
+      for (const [role, template] of Object.entries(roles)) {
+        if (typeof template === 'string' && template.startsWith('{fill.')) {
+          const landed = colors.$fillShades && colors.$fillShades[mode] && colors.$fillShades[mode][role];
+          if (!landed) {
+            throw new Error(
+              `No $fillShades entry for ${mode}.${role} (template ${template}).\n` +
+                `  The active colors.json predates the fill resolver — regenerate it:\n` +
+                `    npm run configs                 (your brand, spec/config/local/)\n` +
+                `    npm run configs -- --input spec/answers.example.json --default-set   (maintainers)`
+            );
+          }
+          resolvedModes[mode][group][role] = `{palette.${landed}}`;
+        } else {
+          resolvedModes[mode][group][role] = template;
+        }
+      }
+    }
+  }
+  semStep(10, 'color', { defaultMode: colors['default-mode'], modes: resolvedModes }, 'color.js');
+  semStep(11, 'spacing', spacing.categories, 'spacing.js');
+  semStep(12, 'radius', sizing['border-radius'], 'radius.js');
+  semStep(13, 'component-height', sizing['component-height'], 'component-height.js');
 
   // --- Styles ---
   const stylesDir = path.join(SCRIPTS_DIR, 'figma-styles');
@@ -173,8 +215,8 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_styles_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  styleStep(12, 'text-styles', { families: typography.families, textStyles: typography.textStyles }, 'text-styles.js');
-  styleStep(13, 'effect-styles', { shadow: effects.shadow, properties: effects['shadow-properties'] }, 'effect-styles.js');
+  styleStep(14, 'text-styles', { families: typography.families, textStyles: typography.textStyles }, 'text-styles.js');
+  styleStep(15, 'effect-styles', { shadow: effects.shadow, properties: effects['shadow-properties'] }, 'effect-styles.js');
 
   // --- Layout ---
   const layoutDir = path.join(SCRIPTS_DIR, 'figma-layout');
@@ -182,7 +224,7 @@ function buildAllSteps() {
     let template = fs.readFileSync(path.join(layoutDir, 'layout.js'), 'utf-8');
     const pipelineMarker = template.indexOf('// --- Pipeline ---');
     if (pipelineMarker !== -1) template = template.slice(pipelineMarker);
-    steps.push(slim('14_layout', `${jsonLine('CONFIG', layout)}\n${template}`));
+    steps.push(slim('16_layout', `${jsonLine('CONFIG', layout)}\n${template}`));
   }
 
   // --- Templates + Core Page ---
@@ -205,7 +247,7 @@ function buildAllSteps() {
           code = code.slice(0, utilsStart) + code.slice(pageStart);
         }
       }
-      steps.push(slim('15_templates', code.trim()));
+      steps.push(slim('17_templates', code.trim()));
     }
   }
 
@@ -220,13 +262,13 @@ function buildAllSteps() {
       if (utilsStart !== -1 && buildStart !== -1) {
         code = code.slice(0, utilsStart) + code.slice(buildStart);
       }
-      steps.push(slim('16_core-page', code.trim()));
+      steps.push(slim('18_core-page', code.trim()));
     }
   }
 
   // --- Component Pages ---
   const componentPages = [
-    { name: 'buttons', num: 17 },
+    { name: 'buttons', num: 19 },
     { name: 'forms', num: null },
     { name: 'layout-page', num: null },
     { name: 'feedback', num: null },
@@ -235,7 +277,7 @@ function buildAllSteps() {
     { name: 'composite', num: null },
   ];
 
-  let stepNum = 17;
+  let stepNum = 19;
   for (const page of componentPages) {
     const scripts = compOrch.assembleScript(page.name);
     for (const s of scripts) {

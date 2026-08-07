@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateTreeView(name, config, meta) {
   const sizes = filterSizes(config.sizes);
@@ -22,8 +22,8 @@ function generateTreeView(name, config, meta) {
     if (pxMatch) classes.push(`px-${pxMatch[1]}`);
     const gapMatch = sz.gap?.match(/\{scale\.(\d+)\}/);
     if (gapMatch) classes.push(`gap-${gapMatch[1]}`);
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    const roleCls = textRoleClass(sz.text);
+    if (roleCls) classes.push(roleCls);
     itemSizeEntries[tier] = classes.join(' ');
 
     // Indent per depth level (raw number for style calc)

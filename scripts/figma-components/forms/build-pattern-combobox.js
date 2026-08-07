@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternCombobox(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize, layoutVars } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize, layoutVars } = lookups;
   const config = CONFIG.components.combobox;
   const baseConfig = resolveBase(CONFIG.components, 'combobox');
   const dropdown = config.dropdown;
@@ -101,7 +101,7 @@ function buildPatternCombobox(lookups, defaultMode, page) {
     // Search input height matches size tier
     const searchHPath = resolveHeight(baseSz.height);
     if (searchHPath) {
-      const shVar = primHeight[searchHPath];
+      const shVar = heights[searchHPath];
       if (shVar) searchRow.setBoundVariable('height', shVar);
       searchRow.counterAxisSizingMode = 'FIXED';
     }
@@ -151,7 +151,7 @@ function buildPatternCombobox(lookups, defaultMode, page) {
 
       const ihPath = resolveHeight(itemSz.height);
       if (ihPath) {
-        const ihVar = primHeight[ihPath];
+        const ihVar = heights[ihPath];
         if (ihVar) item.setBoundVariable('height', ihVar);
         item.counterAxisSizingMode = 'FIXED';
       }

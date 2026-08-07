@@ -24,23 +24,23 @@
   },
 
   "list-item": {
-    "$note": "Structural shell with three slots: leading (icon/avatar), content (consumer-driven), trailing (action/icon). No internal text styling — content fills the slots.",
+    "$note": "Structural shell with three slots: leading (icon/avatar), content (consumer-driven), trailing (action/icon). Type comes from the body/{tier} ramp on the container, so it is inherited rather than imposed: a bare string scales with the row, and any child carrying its own text-* class still wins. Without it, size would move height, x-padding and gap while content held one size at every tier — a size ladder that does nothing to what you can read. The leading and trailing slots are deliberately unsized — they hold avatars and controls as well as icons, so a size-icon-* wrapper would constrain the non-icon cases.",
     "variants": {
       "default":  { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "none" },
-      "bordered": { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "color/outline/outline-subtle" }
+      "bordered": { "bg": "transparent", "hover-bg": "color/surface/surface-1", "border": "color/outline/outline" }
     },
     "sizes": {
-      "sm": { "height": "height/ch-5", "x-padding": "{scale.3}", "gap": "{scale.2}" },
-      "md": { "height": "height/ch-7", "x-padding": "{scale.4}", "gap": "{scale.3}" },
-      "lg": { "height": "height/ch-9", "x-padding": "{scale.6}", "gap": "{scale.4}" }
+      "sm": { "height": "height/row-sm", "x-padding": "{scale.3}", "gap": "{scale.2}" },
+      "md": { "height": "height/row-md", "x-padding": "{scale.4}", "gap": "{scale.3}" },
+      "lg": { "height": "height/row-lg", "x-padding": "{scale.6}", "gap": "{scale.4}" }
     },
     "default": { "variant": "default", "size": "md" }
   },
 
   "accordion": {
-    "$note": "Collapsible section. Header defines the toggle label — content area is a blank container for consumer-driven content.",
+    "$note": "Collapsible section group. Header defines the toggle label — content area is a blank container for consumer-driven content. **This covers the single-panel case too**: `type=\"single\" collapsible` with one AccordionItem is a disclosure panel, so the catalog has no separate single-panel component. A dedicated one would differ only in whether group state is carried — same surface, same trigger, same chevron — and carrying unused group state is cheaper than maintaining two components that render identically.",
     "variants": {
-      "default":  { "bg": "transparent", "border": "color/outline/outline-subtle" },
+      "default":  { "bg": "transparent", "border": "color/outline/outline" },
       "filled":   { "bg": "color/surface/surface-1", "border": "none" }
     },
     "header-typography": {
@@ -51,49 +51,27 @@
     },
     "indicator-icon": "icon/chevron-down",
     "sizes": {
-      "sm": { "header-height": "height/ch-5", "header-x-padding": "{scale.3}", "header-gap": "{scale.2}", "content-padding": "{scale.3}", "header-font-size": "14px", "header-line-height": "20px", "indicator": "icon/icon-1" },
-      "md": { "header-height": "height/ch-7", "header-x-padding": "{scale.4}", "header-gap": "{scale.3}", "content-padding": "{scale.4}", "header-font-size": "16px", "header-line-height": "24px", "indicator": "icon/icon-2" },
-      "lg": { "header-height": "height/ch-9", "header-x-padding": "{scale.6}", "header-gap": "{scale.4}", "content-padding": "{scale.6}", "header-font-size": "18px", "header-line-height": "28px", "indicator": "icon/icon-3" }
+      "sm": { "header-height": "height/row-sm", "header-x-padding": "{scale.3}", "header-gap": "{scale.2}", "content-padding": "{scale.3}", "header-text": "body/sm", "indicator": "icon/icon-1" },
+      "md": { "header-height": "height/row-md", "header-x-padding": "{scale.4}", "header-gap": "{scale.3}", "content-padding": "{scale.4}", "header-text": "body/md", "indicator": "icon/icon-2" },
+      "lg": { "header-height": "height/row-lg", "header-x-padding": "{scale.6}", "header-gap": "{scale.4}", "content-padding": "{scale.6}", "header-text": "body/lg", "indicator": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
 
   "kbd": {
-    "$note": "Keyboard shortcut indicator. Inline element styled as a key cap. Platform-appropriate modifier keys (Cmd vs Ctrl) are code-only. Combination keys separated by + with gap between elements.",
+    "$note": "Keyboard shortcut indicator. Inline element styled as a key cap. Platform-appropriate modifier keys (Cmd vs Ctrl) are code-only. Combination keys separated by + with gap between elements. min-width per size equals that size's own box height (y-padding × 2 + line-height + border × 2), so a single narrow character like p or an arrow glyph renders as a square cap rather than a pinched one — x-padding cannot do this, because it scales with the content instead of setting a floor.",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline" }
     },
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.02em",
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum. Required to maintain proportional key cap at small font size.", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "10px", "line-height": "14px" },
-      "md": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "12px", "line-height": "16px" },
-      "lg": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "radius": "radius/component", "border-width": "border-width/bw-1", "font-size": "14px", "line-height": "20px" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
-
-  "collapsible": {
-    "$note": "Single collapsible panel. Simpler than Accordion — no group behavior, no mutual exclusion. Just a trigger + content that toggles open/closed. Use for progressive disclosure, optional details, expandable sections. Maps to HTML details/summary for simple cases.",
-    "variants": {
-      "default":  { "bg": "transparent", "border": "none" },
-      "bordered": { "bg": "transparent", "border": "color/outline/outline-subtle" }
-    },
-    "trigger-typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "indicator-icon": "icon/chevron-down",
-    "sizes": {
-      "sm": { "trigger-height": "height/ch-5", "trigger-x-padding": "{scale.3}", "trigger-gap": "{scale.2}", "content-padding": "{scale.3}", "trigger-font-size": "14px", "trigger-line-height": "20px", "indicator": "icon/icon-1" },
-      "md": { "trigger-height": "height/ch-7", "trigger-x-padding": "{scale.4}", "trigger-gap": "{scale.3}", "content-padding": "{scale.4}", "trigger-font-size": "16px", "trigger-line-height": "24px", "indicator": "icon/icon-2" },
-      "lg": { "trigger-height": "height/ch-9", "trigger-x-padding": "{scale.6}", "trigger-gap": "{scale.4}", "content-padding": "{scale.6}", "trigger-font-size": "18px", "trigger-line-height": "28px", "indicator": "icon/icon-3" }
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "min-width": "20px", "$exception": "2px y-padding — below spacing scale minimum. Required to maintain proportional key cap at small font size.", "radius": "radius/component", "border-width": "border-width/bw-1" },
+      "md": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "min-width": "26px", "radius": "radius/component", "border-width": "border-width/bw-1" },
+      "lg": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "min-width": "30px", "radius": "radius/component", "border-width": "border-width/bw-1" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -104,13 +82,8 @@
     "default": { "size": "md", "spacing": "normal" }
   },
 
-  "number": {
-    "$note": "Formatted number primitive via Intl.NumberFormat. RSC-safe (no hooks). tabular-nums so digits don't jitter on update. Sprint 2 CountUp motion atom wraps it.",
-    "$catalog": { "dependencies": ["cn"], "tokens": ["typography"] }
-  },
-
   "relative-time": {
-    "$note": "Relative timestamp ('2 hours ago') via Intl.RelativeTimeFormat. Client component — renders <time dateTime> with an SSR-stable date fallback, swaps to the relative string after mount (avoids server-now != client-now hydration mismatch). Optional `live` interval keeps it fresh.",
+    "$note": "Relative timestamp ('2 hours ago') via Intl.RelativeTimeFormat. Client component — renders <time dateTime> with an SSR-stable date fallback, swaps to the relative string after mount (avoids server-now != client-now hydration mismatch). Optional `live` interval keeps it fresh. **No Figma card**: its only visual output is a formatted string, and a frame of four sample strings is sample copy rather than a specimen — nothing about it is a design decision a designer would make. The same bar applies to any atom whose output is a formatted string rather than an arrangement.",
     "$catalog": { "dependencies": ["cn"], "tokens": ["typography"] }
   }
 }

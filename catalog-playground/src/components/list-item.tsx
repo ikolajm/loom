@@ -8,12 +8,12 @@ const listItemVariants = cva(
     variants: {
       variant: {
         default: 'bg-transparent border-0',
-        bordered: 'bg-transparent border-outline-subtle border',
+        bordered: 'bg-transparent border-outline border',
       },
       size: {
-        sm: 'h-ch-5 px-3 gap-2',
-        md: 'h-ch-7 px-4 gap-3',
-        lg: 'h-ch-9 px-6 gap-4',
+        sm: 'h-row-sm px-3 gap-2 text-body-sm',
+        md: 'h-row-md px-4 gap-3 text-body-md',
+        lg: 'h-row-lg px-6 gap-4 text-body-lg',
       },
     },
     defaultVariants: {

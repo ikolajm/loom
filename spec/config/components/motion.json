@@ -1,7 +1,7 @@
 {
   "reveal": {
     "$catalog": { "category": "motion", "composition": "none", "tokens": ["spacing"] },
-    "$note": "Scroll-reveal envelope on a hand-rolled IntersectionObserver — zero runtime dep. Holds children hidden (motion-safe: opacity 0 + a small transform per variant) and transitions them to the resting state when scrolled into view. prefers-reduced-motion is handled in pure CSS via the motion-safe: prefix on the from-state classes: under reduce, nothing hides and content renders instantly. `stagger` composes this. Sprint-1 base; richer variants are Sprint 2. The transform offset (translate-*-4 = {scale.4}) and rootMargin are frozen-but-editable in the installed copy.",
+    "$note": "Scroll-reveal envelope on a hand-rolled IntersectionObserver — zero runtime dep. Holds children hidden (motion-safe: opacity 0 + a small transform per variant) and transitions them to the resting state when scrolled into view. prefers-reduced-motion is handled in pure CSS via the motion-safe: prefix on the from-state classes: under reduce, nothing hides and content renders instantly. `stagger` composes this. Base variants only — richer ones are gated on the motion-library adoption decision (CATALOG_SPEC.md § Scope). The transform offset (translate-*-4 = {scale.4}) and rootMargin are frozen-but-editable in the installed copy.",
     "variants": {
       "fade":       { "from": "motion-safe:opacity-0" },
       "fade-up":    { "from": "motion-safe:opacity-0 motion-safe:translate-y-4" },
@@ -14,8 +14,8 @@
   },
 
   "stagger": {
-    "$catalog": { "category": "motion", "composition": "none", "tokens": ["spacing"], "dependencies": ["cn", "reveal"] },
-    "$note": "Cascade envelope — reveals its children one-by-one with an incremental delay. Composes Reveal: each child is wrapped in a Reveal at delay = base + index*step, so the whole machinery (IO, reduced-motion, will-change) is reused and the only added behaviour is the per-child stagger. The Stagger div is itself the layout container (e.g. className='flex gap-4'). variant/easing/duration/threshold/once forward to every child. Caveat: per-child IO means children spread across a viewport-taller container reveal on their own visibility — clean for grouped rows/lists; a single-container-trigger refinement is a Sprint-2 option.",
+    "$catalog": { "category": "motion", "composition": "none", "tokens": ["spacing"], "dependencies": ["reveal"] },
+    "$note": "Cascade envelope — reveals its children one-by-one with an incremental delay. Composes Reveal: each child is wrapped in a Reveal at delay = base + index*step, so the whole machinery (IO, reduced-motion, will-change) is reused and the only added behaviour is the per-child stagger. The Stagger div is itself the layout container (e.g. className='flex gap-4'). variant/easing/duration/threshold/once forward to every child. Caveat: per-child IO means children spread across a viewport-taller container reveal on their own visibility — clean for grouped rows/lists; a single-container-trigger refinement is deferred.",
     "variants": {
       "fade": {}, "fade-up": {}, "fade-down": {}, "fade-left": {}, "fade-right": {}, "scale": {}
     },
@@ -23,7 +23,7 @@
   },
 
   "count-up": {
-    "$catalog": { "category": "motion", "composition": "none", "tokens": [], "dependencies": ["cn", "number"] },
+    "$catalog": { "category": "motion", "composition": "none", "tokens": [], "dependencies": ["cn"] },
     "$note": "Leaf motion atom — animates a number from `from` to `value` when scrolled into view (own IntersectionObserver, requestAnimationFrame, easeOutCubic). Composes NumberDisplay for all Intl formatting (separators / decimals / currency / compact notation), so it adds only the value animation. NO spring/overshoot axis — numeric overshoot reads as a data error. Reduced-motion: a matchMedia check snaps to the target (leaf JS atoms can't use the pure-CSS motion-safe gate). duration is numeric ms (content-dependent, unlike the micro-interaction --transition-* tokens). decimals defaults to the target's own precision.",
     "default": { "from": 0, "duration": 1200, "easing": "ease-out", "threshold": 0, "once": true }
   },

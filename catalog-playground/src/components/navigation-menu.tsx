@@ -6,9 +6,9 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from './cn';
 
 const triggerSizeMap: Record<string, string> = {
-  sm: 'h-ch-5 px-3 text-body-sm',
-  md: 'h-ch-7 px-4 text-body-md',
-  lg: 'h-ch-8 px-6 text-body-lg',
+  sm: 'h-nav-item-sm px-3 text-body-sm',
+  md: 'h-nav-item-md px-4 text-body-md',
+  lg: 'h-nav-item-lg px-6 text-body-lg',
 };
 
 const listGapMap: Record<string, string> = {

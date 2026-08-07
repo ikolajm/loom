@@ -1,8 +1,9 @@
 {
   "name": "navigation-menu",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "733d770400f1",
+  "version": "85c539f569b1",
   "dependencies": [
     "cn"
   ],

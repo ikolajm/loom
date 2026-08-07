@@ -3,8 +3,9 @@ const { filterSizes } = require('./helpers');
 // Sliding content container on an embla-carousel-react base (the registry-declared primitive).
 // embla owns the hard interaction half — touch/drag inertia, snap points, loop — that a hand-rolled
 // translateX index can't do honestly. Loom owns the chrome: ghost-button arrows, dot indicators,
-// keyboard (arrow keys), and the token-driven gap/radius/inset. Sprint-1 base structure only;
-// the motion variants (coverflow / parallax / lightbox / thumbnail) layer on top in Sprint 2.
+// keyboard (arrow keys), and the token-driven gap/radius/inset. The motion variants (coverflow /
+// parallax / lightbox / thumbnail) layer on top and are gated on the motion-library adoption
+// decision — see CATALOG_SPEC.md, "Scope".
 //
 // Tailwind needs literal class strings (runtime-interpolated classes are scanner-blind), so the
 // per-size gap + arrow insets are emitted as full literal classes, not composed at runtime.

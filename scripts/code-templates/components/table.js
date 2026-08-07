@@ -1,5 +1,5 @@
 const { colorToClass, fontWeightToClass } = require('../shared');
-const { filterSizes, resolveConfig } = require('./helpers');
+const { filterSizes, resolveConfig, textRoleClass } = require('./helpers');
 
 function generateTable(name, config, meta) {
   const resolved = resolveConfig(meta.source, meta.key, meta.baseKey);
@@ -22,17 +22,15 @@ function generateTable(name, config, meta) {
   const sizeEntries = Object.entries(sizes).map(([tier, s]) => {
     const px = s['x-padding']?.replace('{scale.', '').replace('}', '') || '4';
     const py = s['y-padding']?.replace('{scale.', '').replace('}', '') || '2';
-    const fs = s['font-size'] || '14px';
-    const lh = s['line-height'] || '20px';
-    return { tier, px, py, fs, lh };
+    return { tier, px, py, role: textRoleClass(s.text) };
   });
 
   const cellSizeMap = sizeEntries.map(s =>
-    `  ${s.tier}: 'px-${s.px} py-${s.py} text-[${s.fs}] leading-[${s.lh}]',`
+    `  ${s.tier}: 'px-${s.px} py-${s.py}${s.role ? ' ' + s.role : ''}',`
   ).join('\n');
 
   const headSizeMap = sizeEntries.map(s =>
-    `  ${s.tier}: 'px-${s.px} py-${s.py} text-[${s.fs}] leading-[${s.lh}]',`
+    `  ${s.tier}: 'px-${s.px} py-${s.py}${s.role ? ' ' + s.role : ''}',`
   ).join('\n');
 
   const defaultSize = resolved.default?.size || 'md';

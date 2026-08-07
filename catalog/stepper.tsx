@@ -17,15 +17,15 @@ const stepperVariants = cva('flex items-center w-full', {
 });
 
 const indicatorSize: Record<string, string> = {
-  sm: 'size-ch-1 text-[12px] leading-[16px]',
-  md: 'size-ch-3 text-[14px] leading-[20px]',
-  lg: 'size-ch-5 text-[16px] leading-[24px]',
+  sm: 'size-ch-1 text-action-sm',
+  md: 'size-ch-3 text-action-md',
+  lg: 'size-ch-5 text-action-lg',
 };
 
 const labelSize: Record<string, string> = {
-  sm: 'text-[12px] leading-[16px]',
-  md: 'text-[14px] leading-[20px]',
-  lg: 'text-[16px] leading-[24px]',
+  sm: 'text-action-sm',
+  md: 'text-action-md',
+  lg: 'text-action-lg',
 };
 
 type StepState = 'incomplete' | 'active' | 'completed' | 'error';

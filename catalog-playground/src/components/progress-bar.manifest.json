@@ -1,15 +1,15 @@
 {
-  "name": "collapsible",
-  "category": "data-display",
+  "name": "progress-bar",
+  "kind": "atom",
+  "category": "feedback",
   "description": "",
-  "version": "5440c67e4630",
+  "version": "2804a21f95f7",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
-    "@radix-ui/react-collapsible",
-    "class-variance-authority",
-    "lucide-react"
+    "@radix-ui/react-progress",
+    "class-variance-authority"
   ],
   "tokens": [
     "color",
@@ -20,7 +20,9 @@
   "composition": "none",
   "variants": [
     "default",
-    "bordered"
+    "success",
+    "warning",
+    "error"
   ],
   "sizes": [
     "sm",

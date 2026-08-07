@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternPagination(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components.pagination;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -48,7 +48,7 @@ function buildPatternPagination(lookups, defaultMode, page) {
 
     const hPath = resolveHeight(md['item-size']);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) {
         item.setBoundVariable('width', hVar);
         item.setBoundVariable('height', hVar);

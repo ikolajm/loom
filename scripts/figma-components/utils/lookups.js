@@ -22,13 +22,23 @@ function bLookup(collectionName) {
 
 /**
  * Get all variable lookups needed for component generation.
+ *
+ * `heights` merges both height collections into one keyspace. They cannot collide:
+ * primitives are named "height/N" and semantic roles "height/{role}/{tier}", and
+ * resolveHeight() emits whichever form the config asked for. Builders bind to the
+ * role wherever one exists, which is the point of semantic.component-height —
+ * binding the primitive would put `ch-5` in the Figma inspector where the decision
+ * is actually "control/md".
  */
 function getAllLookups() {
   return {
     semColors: bLookup("semantic.color"),
     semRadius: bLookup("semantic.radius"),
     primSpacing: bLookup("primitives.spacing"),
-    primHeight: bLookup("primitives.component-height"),
+    heights: Object.assign(
+      bLookup("primitives.component-height"),
+      bLookup("semantic.component-height")
+    ),
     primIconSize: bLookup("primitives.icon-size"),
     primBW: bLookup("primitives.border-width"),
     layoutVars: bLookup("figma.layout")

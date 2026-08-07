@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternTabs(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, primBW, layoutVars } = lookups;
+  const { semColors, primSpacing, heights, primBW, layoutVars } = lookups;
   const config = CONFIG.components.tabs;
   const colors = config.variants.default;
 
@@ -65,7 +65,7 @@ function buildPatternTabs(lookups, defaultMode, page) {
       // Height per size tier
       const hPath = resolveHeight(sz.height);
       if (hPath) {
-        const hVar = primHeight[hPath];
+        const hVar = heights[hPath];
         if (hVar) tabFrame.setBoundVariable('height', hVar);
         tabFrame.counterAxisSizingMode = 'FIXED';
       }

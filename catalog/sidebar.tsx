@@ -7,8 +7,8 @@ const sidebarVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface text-on-surface border-outline-subtle border-r w-[var(--sidebar-w)]',
-        rail: 'bg-surface text-on-surface border-outline-subtle border-r is-rail w-[var(--sidebar-rail-w)]',
+        default: 'bg-surface text-on-surface border-outline border-r w-[var(--sidebar-w)]',
+        rail: 'bg-surface text-on-surface border-outline border-r is-rail w-[var(--sidebar-rail-w)]',
       },
       size: {
         sm: '[--sidebar-w:220px] [--sidebar-rail-w:56px] px-2',
@@ -41,9 +41,9 @@ Sidebar.displayName = 'Sidebar';
 export { Sidebar, sidebarVariants };
 
 const sidebarItemSize: Record<string, string> = {
-  sm: 'h-ch-5 px-3 gap-2 text-[14px] leading-[20px]',
-  md: 'h-ch-7 px-4 gap-3 text-[14px] leading-[20px]',
-  lg: 'h-ch-8 px-4 gap-3 text-[16px] leading-[24px]',
+  sm: 'h-nav-item-sm px-3 gap-2 text-action-md',
+  md: 'h-nav-item-md px-4 gap-3 text-action-md',
+  lg: 'h-nav-item-lg px-4 gap-3 text-action-lg',
 };
 
 // Label hides + item centers when an ancestor <Sidebar variant="rail"> carries .is-rail.

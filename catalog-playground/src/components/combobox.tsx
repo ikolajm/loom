@@ -8,9 +8,9 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 px-2 gap-1 text-[12px] leading-[16px]',
-  md: 'h-ch-4 px-3 gap-2 text-[14px] leading-[20px]',
-  lg: 'h-ch-5 px-4 gap-2 text-[16px] leading-[24px]',
+  sm: 'h-menu-item-sm px-2 gap-1 text-action-sm',
+  md: 'h-menu-item-md px-3 gap-2 text-action-md',
+  lg: 'h-menu-item-lg px-4 gap-2 text-action-lg',
 };
 
 type ComboboxOption = { value: string; label: string };
@@ -47,10 +47,10 @@ const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
             className={cn(
               'flex items-center justify-between w-full border border-outline-subtle bg-surface text-on-surface rounded-input interactive cursor-pointer',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              'h-ch-5 px-3 text-input-md',
-              size === 'sm' && 'h-ch-3 px-2 text-input-sm',
-              size === 'lg' && 'h-ch-7 px-4 text-input-lg',
+              'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+              'h-control-md px-3 text-input-md',
+              size === 'sm' && 'h-control-sm px-2 text-input-sm',
+              size === 'lg' && 'h-control-lg px-4 text-input-lg',
               isError && 'border-error',
               className,
             )}
@@ -66,7 +66,7 @@ const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(
             <div className={cn('flex items-center border-b border-outline-subtle', size === 'sm' ? 'px-2' : size === 'lg' ? 'px-4' : 'px-3')}>
               <CommandPrimitive.Input
                 placeholder={searchPlaceholder}
-                className={cn('flex w-full bg-transparent py-3 outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-50', size === 'sm' ? 'h-ch-3 text-body-sm' : size === 'lg' ? 'h-ch-7 text-body-lg' : 'h-ch-5 text-body-md')}
+                className={cn('flex w-full bg-transparent py-3 outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled)', size === 'sm' ? 'h-control-sm text-body-sm' : size === 'lg' ? 'h-control-lg text-body-lg' : 'h-control-md text-body-md')}
               />
             </div>
             <CommandPrimitive.List className="max-h-[200px] overflow-y-auto overflow-x-hidden p-1">

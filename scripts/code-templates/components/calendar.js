@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateCalendar(name, config, meta) {
   const sizes = filterSizes(config.sizes);
@@ -9,6 +9,7 @@ function generateCalendar(name, config, meta) {
   const cellEntries = {};
   const headerEntries = {};
   const navIconEntries = {};
+  const navSizeEntries = {};
 
   for (const [tier, sz] of Object.entries(sizes)) {
     if (tier.startsWith('$')) continue;
@@ -23,16 +24,20 @@ function generateCalendar(name, config, meta) {
 
     // Cell (day button) — font + radius only, sizing handled by flex
     const dClasses = [];
-    if (sz['day-font-size']) dClasses.push(`text-[${sz['day-font-size']}]`);
-    if (sz['day-line-height']) dClasses.push(`leading-[${sz['day-line-height']}]`);
+    const dayRole = textRoleClass(sz['day-text']);
+    if (dayRole) dClasses.push(dayRole);
     if (sz['day-radius'] === 'radius/component') dClasses.push('rounded-component');
     cellEntries[tier] = dClasses.join(' ');
 
-    // Header
+    // Header — a text role, so Figma binds the same style instead of matching a number
     const hClasses = [];
-    if (sz['header-font-size']) hClasses.push(`text-[${sz['header-font-size']}]`);
-    if (sz['header-line-height']) hClasses.push(`leading-[${sz['header-line-height']}]`);
+    const headerText = sz['header-text'];
+    if (headerText) hClasses.push(`text-${headerText.replace('/', '-')}`);
     headerEntries[tier] = hClasses.join(' ');
+
+    // Nav button — square at the caption's line box, so `top-0` lands them on the
+    // caption row rather than overhanging it. The icon alone is 4px short at sm and lg.
+    if (sz['nav-height']) navSizeEntries[tier] = `h-[${sz['nav-height']}] w-[${sz['nav-height']}]`;
 
     // Nav icon
     if (sz['nav-icon'] && sz['nav-icon'].startsWith('icon/')) {
@@ -63,6 +68,10 @@ const navIconSizeMap: Record<string, string> = {
 ${Object.entries(navIconEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
 };
 
+const navSizeMap: Record<string, string> = {
+${Object.entries(navSizeEntries).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
+};
+
 type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   size?: ${Object.keys(sizes).map(k => `'${k}'`).join(' | ')};
 };
@@ -72,9 +81,11 @@ const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
     const cellSize = cellSizeMap[size];
     const headerSize = headerSizeMap[size];
     const navIcon = navIconSizeMap[size] || 'size-icon-2';
+    const navSize = navSizeMap[size];
 
     return (
       <DayPicker
+        navLayout="around"
         className={cn(
           'bg-surface-1 text-on-surface border border-outline-subtle shadow-[var(--shadow-2)]',
           containerSizeMap[size],
@@ -82,11 +93,16 @@ const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
         )}
         classNames={{
           months: 'flex flex-col gap-2',
-          month: 'flex flex-col gap-2',
-          month_caption: cn('flex items-center justify-center font-semibold', headerSize),
+          // One flex row: navLayout=around puts the buttons either side of the caption in
+          // source order, so the trio needs no ordering. The grid takes w-full and wraps
+          // onto its own line. RDP's own stylesheet does this with absolute positioning,
+          // which needs a containing block the atom never established.
+          month: 'flex flex-wrap items-center gap-2',
+          month_caption: cn('flex flex-1 items-center justify-center', headerSize),
           nav: 'flex items-center gap-1',
-          button_previous: cn('absolute left-1 top-0 inline-flex items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', cellSize),
-          button_next: cn('absolute right-1 top-0 inline-flex items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', cellSize),
+          button_previous: cn('inline-flex shrink-0 items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', navSize),
+          button_next: cn('inline-flex shrink-0 items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', navSize),
+          month_grid: 'w-full',
           weekdays: 'flex w-full',
           weekday: cn('flex flex-1 items-center justify-center font-medium text-on-surface-variant aspect-square', cellSize),
           week: 'flex w-full',

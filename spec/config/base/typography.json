@@ -1,8 +1,8 @@
 {
-  "$note": "Generated from \"standard\" type scale + font pairing (Space Mono / Space Mono). Text style families with sm/md/lg tiers. Components bind to a family; the size prop selects the tier. Change via questionnaire, not manual editing.",
+  "$note": "Generated from \"standard\" type scale + font pairing (Inter / Inter). Text style families with sm/md/lg tiers. Components bind to a family; the size prop selects the tier. Change via questionnaire, not manual editing.",
   "families": {
-    "heading": "Space Mono",
-    "body": "Space Mono"
+    "heading": "Inter",
+    "body": "Inter"
   },
   "textStyles": {
     "display": {
@@ -59,7 +59,7 @@
     "action": {
       "font": "body",
       "weight": 500,
-      "letter-spacing": "0",
+      "letter-spacing": "0.01em",
       "sm": {
         "size": "12px",
         "line-height": "16px"

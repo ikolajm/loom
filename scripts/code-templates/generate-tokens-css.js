@@ -22,8 +22,8 @@ const fs = require('fs');
 const path = require('path');
 
 // --- Config loading ---
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('../config-paths');
 
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -130,11 +130,20 @@ function buildSection5_Sizing() {
     lines.push(`--${token}: ${val};`);
   }
 
-  // Component height
+  // Component height primitives
   lines.push('');
-  lines.push('/* === Component Height === */');
+  lines.push('/* === Component Height Primitives === */');
   for (const [token, val] of Object.entries(standards.sizing['component-height'])) {
     lines.push(`--${token}: ${val};`);
+  }
+
+  // Component height semantic — role → ladder, picked by the archetype's controlHeight.
+  lines.push('');
+  lines.push('/* === Component Height Semantic === */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const [tier, token] of Object.entries(tiers)) {
+      lines.push(`--height-${role}-${tier}: var(--${token});`);
+    }
   }
 
   // Touch target
@@ -168,6 +177,16 @@ function buildSection6_Effects() {
   lines.push(`--focus-ring-offset: ${standards.effects['focus-ring'].offset};`);
   lines.push(`--focus-ring-color: var(--${standards.effects['focus-ring'].color});`);
   lines.push(`--ring: var(--${standards.effects['focus-ring'].color});`);
+
+  // Plain custom properties, deliberately not inside @theme: Tailwind v4 has no
+  // --opacity-* namespace, so @theme would emit the variable and never generate the
+  // matching utility. Atoms consume these as opacity-(--opacity-disabled).
+  lines.push('');
+  lines.push('/* === State Opacity === */');
+  for (const [name, val] of Object.entries(standards.effects.opacity)) {
+    if (name.startsWith('$')) continue;
+    lines.push(`--opacity-${name}: ${val};`);
+  }
 
   return lines;
 }
@@ -376,7 +395,7 @@ function buildSection12_TailwindTheme() {
 
   // Colors — from semantic roles
   lines.push('  /* Colors */');
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   const defaultRoles = colors.roles[defaultMode];
   if (defaultRoles) {
     for (const [group, roleMap] of Object.entries(defaultRoles)) {
@@ -418,11 +437,32 @@ function buildSection12_TailwindTheme() {
     lines.push(`  --height-${token}: var(--${token});`);
   }
 
+  // Semantic heights — enables h-control-md, h-bar-sm, etc. The block is `@theme inline`,
+  // so this substitutes textually into the utility rather than redefining the :root var;
+  // the same self-reference is how semantic radius reaches `rounded-component`.
+  lines.push('');
+  lines.push('  /* Component Heights (semantic) */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const tier of Object.keys(tiers)) {
+      lines.push(`  --height-${role}-${tier}: var(--height-${role}-${tier});`);
+    }
+  }
+
   // Component Sizes (square) — enables size-ch-0 through size-ch-9 (for icon-only buttons etc.)
   lines.push('');
   lines.push('  /* Component Sizes (square) */');
   for (const token of Object.keys(standards.sizing['component-height'])) {
     lines.push(`  --size-${token}: var(--${token});`);
+  }
+
+  // Square semantic — a square control (icon button, fab, pagination cell) takes its edge
+  // from the same role ladder, so size-control-md and h-control-md can never disagree.
+  lines.push('');
+  lines.push('  /* Component Sizes (square, semantic) */');
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    for (const tier of Object.keys(tiers)) {
+      lines.push(`  --size-${role}-${tier}: var(--height-${role}-${tier});`);
+    }
   }
 
   // Icon Sizes — enables w-icon-0 through w-icon-4, h-icon-0 through h-icon-4
@@ -459,7 +499,7 @@ function buildSection12_TailwindTheme() {
 
 // --- Assembly ---
 function generate() {
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   const altMode = defaultMode === 'dark' ? 'light' : 'dark';
 
   // Sections 1-8 in :root

@@ -1,5 +1,6 @@
 {
   "name": "form-field",
+  "kind": "atom",
   "category": "form",
   "description": "",
   "version": "2adc5040d1d9",

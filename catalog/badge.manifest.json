@@ -1,8 +1,9 @@
 {
   "name": "badge",
+  "kind": "atom",
   "category": "button",
   "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
-  "version": "643bcf120798",
+  "version": "27dcae24a84e",
   "dependencies": [
     "cn"
   ],

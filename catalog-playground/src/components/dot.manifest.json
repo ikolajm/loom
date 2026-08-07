@@ -1,8 +1,9 @@
 {
   "name": "dot",
+  "kind": "atom",
   "category": "feedback",
   "description": "Status/severity indicator dot — a small colored circle keyed by state. Standalone primitive; compose into badges, banners, list items, subheadings, nav. For a notification count bubble, use Badge size=\"sm\".",
-  "version": "08f2f192f763",
+  "version": "ac13956ffdf6",
   "dependencies": [
     "cn"
   ],
@@ -16,7 +17,6 @@
   "composition": "none",
   "variants": [
     "default",
-    "neutral",
     "destructive",
     "success",
     "warning",

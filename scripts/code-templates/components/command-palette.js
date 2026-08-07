@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateCommandPalette(name, config, meta) {
   const sizes = filterSizes(config.sizes);
@@ -26,8 +26,8 @@ function generateCommandPalette(name, config, meta) {
     if (sz['input-height']) iClasses.push(`h-${sz['input-height'].replace('height/', '')}`);
     const ipx = sz['input-x-padding']?.match(/\{scale\.(\d+)\}/);
     if (ipx) iClasses.push(`px-${ipx[1]}`);
-    if (sz['input-font-size']) iClasses.push(`text-[${sz['input-font-size']}]`);
-    if (sz['input-line-height']) iClasses.push(`leading-[${sz['input-line-height']}]`);
+    const inputRole = textRoleClass(sz['input-text']);
+    if (inputRole) iClasses.push(inputRole);
     inputEntries[tier] = iClasses.join(' ');
 
     // Item
@@ -37,16 +37,16 @@ function generateCommandPalette(name, config, meta) {
     if (tpx) tClasses.push(`px-${tpx[1]}`);
     const tgap = sz['item-gap']?.match(/\{scale\.(\d+)\}/);
     if (tgap) tClasses.push(`gap-${tgap[1]}`);
-    if (sz['item-font-size']) tClasses.push(`text-[${sz['item-font-size']}]`);
-    if (sz['item-line-height']) tClasses.push(`leading-[${sz['item-line-height']}]`);
+    const itemRole = textRoleClass(sz['item-text']);
+    if (itemRole) tClasses.push(itemRole);
     itemEntries[tier] = tClasses.join(' ');
 
     // Group label — prefix the cmdk-group-heading selector at GENERATION time so the
     // class strings are statically scannable by Tailwind. (Interpolating the prefix at
     // runtime produces classes the scanner never sees → the sizing silently no-ops.)
     const gClasses = [];
-    if (sz['group-font-size']) gClasses.push(`[&_[cmdk-group-heading]]:text-[${sz['group-font-size']}]`);
-    if (sz['group-line-height']) gClasses.push(`[&_[cmdk-group-heading]]:leading-[${sz['group-line-height']}]`);
+    const groupRole = textRoleClass(sz['group-text']);
+    if (groupRole) gClasses.push(`[&_[cmdk-group-heading]]:${groupRole}`);
     groupLabelEntries[tier] = gClasses.join(' ');
 
     // Icon
@@ -109,7 +109,7 @@ const CommandPaletteInput = forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex w-full bg-transparent outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-50',
+        'flex w-full bg-transparent outline-none placeholder:text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled)',
         inputSizeMap[size],
         className,
       )}
@@ -142,7 +142,7 @@ const CommandPaletteGroup = forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-on-surface-variant [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.02em]',
+      'overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-on-surface-variant [&_[cmdk-group-heading]]:uppercase',
       groupLabelSizeMap[size],
       className,
     )}
@@ -158,9 +158,9 @@ const CommandPaletteItem = forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex items-center select-none interactive cursor-pointer',
+      'relative flex items-center select-none interactive cursor-pointer rounded-component',
       'data-[selected=true]:bg-surface-2',
-      'data-[disabled=true]:opacity-50 data-[disabled=true]:cursor-not-allowed',
+      'data-[disabled=true]:opacity-(--opacity-disabled) data-[disabled=true]:cursor-not-allowed',
       itemSizeMap[size],
       className,
     )}

@@ -1,11 +1,11 @@
 import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { Slot } from '@radix-ui/react-slot';
 import { X } from 'lucide-react';
 import { cn } from './cn';
 
 const badgeVariants = cva(
-  'inline-flex items-center justify-center font-medium tracking-[0.02em]',
+  'inline-flex items-center justify-center font-medium',
   {
     variants: {
       variant: {
@@ -21,9 +21,9 @@ const badgeVariants = cva(
         info: '[--v-bg:var(--info-container)] [--v-fg:var(--on-info-container)] [--v-text:var(--info)] [--v-border:var(--info)]',
       },
       size: {
-        sm: 'px-1 py-[2px] gap-1 text-[10px] leading-[14px] rounded-component',
-        md: 'px-2 py-1 gap-1 text-[10px] leading-[14px] rounded-component',
-        lg: 'px-3 py-1 gap-1 text-[12px] leading-[16px] rounded-component',
+        sm: 'px-1 py-[2px] gap-1 text-label-sm rounded-component',
+        md: 'px-2 py-1 gap-1 text-label-md rounded-component',
+        lg: 'px-3 py-1 gap-1 text-label-lg rounded-component',
       },
     },
     defaultVariants: {
@@ -64,7 +64,7 @@ type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
   };
 
 const INTERACTIVE_CLASSES = 'interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
-const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 opacity-70 hover:opacity-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-center rounded-component p-0.5 interactive opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
 const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {

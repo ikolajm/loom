@@ -1,15 +1,20 @@
 // =============================================================================
 // Dropdown Menu — Frame Pattern Mock
 // =============================================================================
-// List of item-rows with hover state on one item.
+// One menu per size tier, each a list of item-rows with hover state on one item.
 // Surface-2 bg, shadow-2, component radius.
+//
+// The size ladder is built from config rather than pinned to md. The code atom has
+// always carried sm/md/lg — distinct item heights off the menu-item ladder, distinct
+// padding and type — and this pattern rendered only md, so the Figma file understated
+// what the component offers and read as though no ladder existed.
 // =============================================================================
 
 function buildPatternDropdown(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight } = lookups;
+  const { semColors, semRadius, primSpacing, heights } = lookups;
   const config = CONFIG.components['dropdown-menu'];
   const colors = config.variants.default;
-  const md = config.sizes.md;
+  const sizeNames = Object.keys(config.sizes).filter((k) => !k.startsWith('$'));
 
   function getEffectStyle(ref) {
     if (!ref) return null;
@@ -18,10 +23,23 @@ function buildPatternDropdown(lookups, defaultMode, page) {
   }
 
   const frame = createSectionFrame('base.pattern-dropdown', lookups);
-  addHeader(frame, 'Dropdown Menu', 'Frame pattern — item list with hover state. Surface-2 bg, shadow-2.');
+  addHeader(frame, 'Dropdown Menu', `Frame pattern — item list with hover state. Surface-2 bg, shadow-2. ${sizeNames.length} sizes, item height off the menu-item ladder.`);
+
+  // Named sizesRow, not row — the item loop below already binds `row` per item.
+  const sizesRow = figma.createFrame();
+  sizesRow.name = 'dropdown-sizes';
+  sizesRow.layoutMode = 'HORIZONTAL';
+  sizesRow.primaryAxisSizingMode = 'AUTO';
+  sizesRow.counterAxisSizingMode = 'AUTO';
+  sizesRow.counterAxisAlignItems = 'MIN';
+  sizesRow.itemSpacing = 32;
+  sizesRow.fills = [];
+
+  for (const sizeName of sizeNames) {
+  const md = config.sizes[sizeName];
 
   const menu = figma.createFrame();
-  menu.name = 'dropdown-mock';
+  menu.name = `dropdown-mock-${sizeName}`;
   menu.layoutMode = 'VERTICAL';
   menu.primaryAxisSizingMode = 'AUTO';
   menu.counterAxisSizingMode = 'FIXED';
@@ -50,12 +68,10 @@ function buildPatternDropdown(lookups, defaultMode, page) {
   const items = ['Edit', 'Duplicate', 'Archive', 'Delete'];
   const fgVar = semColors[colors.fg];
   const hoverBgVar = semColors[colors['hover-bg']];
-  const fontSize = parsePx(md['font-size']);
-  const lineHeight = parsePx(md['line-height']);
 
   // Item height
   const itemHeightPath = resolveHeight(md['item-height']);
-  const itemHeightVar = itemHeightPath ? primHeight[itemHeightPath] : null;
+  const itemHeightVar = itemHeightPath ? heights[itemHeightPath] : null;
 
   for (let i = 0; i < items.length; i++) {
     const row = figma.createFrame();
@@ -84,7 +100,7 @@ function buildPatternDropdown(lookups, defaultMode, page) {
     const text = figma.createText();
     text.name = 'label';
     text.characters = items[i];
-    applyTextStyle(text, 'action', 'md');
+    applyTextStyle(text, ...((md.text || 'body/' + sizeName).split('/')));
     if (fgVar) text.fills = [figma.variables.setBoundVariableForPaint(
       { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fgVar
     )];
@@ -93,7 +109,30 @@ function buildPatternDropdown(lookups, defaultMode, page) {
     row.layoutSizingHorizontal = 'FILL';
   }
 
-  frame.appendChild(menu);
+  // Label the tier so the ladder is legible without measuring.
+  const column = figma.createFrame();
+  column.name = `size-${sizeName}`;
+  column.layoutMode = 'VERTICAL';
+  column.primaryAxisSizingMode = 'AUTO';
+  column.counterAxisSizingMode = 'AUTO';
+  column.itemSpacing = 8;
+  column.fills = [];
+
+  const caption = figma.createText();
+  caption.name = 'size-label';
+  caption.characters = sizeName;
+  applyTextStyle(caption, 'label', 'sm');
+  const captionVar = semColors['color/surface/on-surface-variant'];
+  if (captionVar) caption.fills = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', captionVar
+  )];
+
+  column.appendChild(caption);
+  column.appendChild(menu);
+  sizesRow.appendChild(column);
+  }
+
+  frame.appendChild(sizesRow);
   setDefaultMode(frame, defaultMode);
-  return { name: 'Pattern Dropdown', count: 1 };
+  return { name: 'Pattern Dropdown', count: sizeNames.length };
 }

@@ -51,6 +51,14 @@ function extractIconSizes(sizes) {
   return hasAny ? map : null;
 }
 
+/** A per-slot type role, "action/md" -> "text-action-md".
+ *  buildSizeStylesWithText binds ONE family to an atom's root size class, so any atom
+ *  with a second text role (a heading beside a description, a label beside a step
+ *  indicator) fell out of it and declared raw px instead. This is the per-slot form. */
+function textRoleClass(ref) {
+  return typeof ref === 'string' && ref.includes('/') ? `text-${ref.replace('/', '-')}` : null;
+}
+
 /** Build size styles with text family class appended. Only appends for standard tiers (sm/md/lg). */
 function buildSizeStylesWithText(sizes, textFamily) {
   const base = buildSizeStyles(sizes);
@@ -123,7 +131,7 @@ function buildCvaString(varName, config, meta) {
     const isTextInput = ['input', 'textarea'].includes(meta.element) && !meta.inputType;
     if (isTextInput) base.push('cursor-text placeholder:text-on-surface-variant');
     base.push('focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none');
-    base.push('disabled:opacity-50 disabled:cursor-not-allowed');
+    base.push('disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed');
   }
   const baseStr = base.filter(Boolean).join(' ');
 
@@ -179,6 +187,7 @@ module.exports = {
   layoutClass,
   extractIconSizes,
   buildSizeStylesWithText,
+  textRoleClass,
   resolveConfig,
   extractVariants,
   filterSizes,

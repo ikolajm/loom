@@ -21,7 +21,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -29,15 +28,15 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm":   { "height": "height/ch-3", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md":   { "height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg":   { "height": "height/ch-7", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/component", "icon-size": "icon/icon-3" }
+      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-3" }
     },
     "icon-sizes": {
       "$note": "Square sizing for icon-only mode (iconOnly prop). No padding — icon centers via flexbox. Touch target met at all sizes.",
-      "sm":   { "size": "height/ch-3", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md":   { "size": "height/ch-5", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg":   { "size": "height/ch-7", "radius": "radius/component", "icon-size": "icon/icon-3" }
+      "sm":   { "size": "height/control-sm", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md":   { "size": "height/control-md", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg":   { "size": "height/control-lg", "radius": "radius/component", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "filled", "color": "primary", "size": "md" }
   },
@@ -62,7 +61,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.02em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -71,9 +69,10 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at 10px font size.", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "10px", "line-height": "14px", "radius": "radius/component", "icon": "icon/icon-0" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon": "icon/icon-1" }
+      "$note": "Type is not declared here — it comes from the label/{tier} ramp (10/12/14), which the Figma builder has always bound to and which code now reads too. The font-size and line-height keys that used to sit on each tier were dead once code switched to the ramp, and they did not ramp anyway: sm and md both declared 10px/14px, so md differed from sm only in padding. Icons stay at 12/12/16 — against the label ramp that is 120%/100%/114% of the font and never more than 86% of the line box, where the old lg pairing put a 16px icon in 16px of leading.",
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-1" }
     },
     "default": { "variant": "filled", "state": "default", "size": "md" }
   },
@@ -85,10 +84,9 @@
       "tokens": ["color", "sizing"],
       "composition": "none"
     },
-    "$note": "Single-axis atom: state → base color fill. Always a circle (rounded-pill). No text/icon. Sizes reuse icon tokens.",
+    "$note": "Single-axis atom: state → base color fill. Always a circle (rounded-pill). No text/icon. Sizes reuse icon tokens. No neutral state: a dot exists to say which of several conditions holds, and a neutral dot says nothing a missing dot does not — brand and status hues carry the meaning. Badge keeps neutral because a badge carries a label that means something on its own.",
     "state": {
       "default":     { "bg": "color/primary/primary" },
-      "neutral":     { "bg": "color/neutral/neutral" },
       "destructive": { "bg": "color/error/error" },
       "success":     { "bg": "color/success/success" },
       "warning":     { "bg": "color/warning/warning" },
@@ -116,27 +114,26 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "size": "height/ch-4", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "md": { "size": "height/ch-6", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
-      "lg": { "size": "height/ch-8", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
+      "sm": { "size": "height/fab-sm", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "md": { "size": "height/fab-md", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
+      "lg": { "size": "height/fab-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
     },
     "extended": {
       "$note": "Extended FAB adds a label. Allowed at all sizes incl. sm (sm uses compact 12px label typography).",
-      "sm": { "height": "height/ch-4", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "12px", "line-height": "16px" },
-      "md": { "height": "height/ch-6", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "lg": { "height": "height/ch-8", "x-padding": "{scale.5}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+      "sm": { "height": "height/fab-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "text": "action/sm" },
+      "md": { "height": "height/fab-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/md" },
+      "lg": { "height": "height/fab-lg", "x-padding": "{scale.5}", "gap": "{scale.3}", "text": "action/lg" }
     },
     "default": { "variant": "default", "size": "md" }
   },
   "fab-menu": {
     "$catalog": {
       "category": "button",
-      "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed in Sprint 1; expand animation wraps via motion library in Sprint 2.",
-      "dependencies": ["fab", "cn"],
+      "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed — the expand animation wraps via the motion library and is gated on that adoption decision.",
+      "dependencies": ["cn"],
       "tokens": ["color", "typography", "spacing", "sizing", "effects"],
       "composition": "slot"
     },
@@ -146,15 +143,15 @@
     },
     "trigger-sizes": {
       "$note": "Trigger FAB sizes — matches fab atom.",
-      "sm": { "size": "height/ch-4", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "md": { "size": "height/ch-6", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
-      "lg": { "size": "height/ch-8", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
+      "sm": { "size": "height/fab-sm", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "md": { "size": "height/fab-md", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
+      "lg": { "size": "height/fab-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
     },
     "action-sizes": {
       "$note": "Action button sizes — one step smaller than trigger. Circular by default; extended adds label.",
-      "sm": { "size": "height/ch-3", "radius": "radius/card", "icon-size": "icon/icon-1", "shadow": "effects/shadow-1" },
-      "md": { "size": "height/ch-5", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "lg": { "size": "height/ch-7", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-2" }
+      "sm": { "size": "height/control-sm", "radius": "radius/card", "icon-size": "icon/icon-1", "shadow": "effects/shadow-1" },
+      "md": { "size": "height/control-md", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "lg": { "size": "height/control-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-2" }
     },
     "stack-spacing": {
       "$note": "Gap between stacked actions when expanded.",
@@ -166,9 +163,7 @@
       "$note": "Optional label rendered next to action (right side). Pill shape, small typography.",
       "font-family": "body",
       "font-weight": 500,
-      "font-size": "12px",
-      "line-height": "16px",
-      "letter-spacing": "0.01em",
+      "text": "action/sm",
       "x-padding": "{scale.2}",
       "y-padding": "{scale.1}",
       "radius": "radius/component",
@@ -188,13 +183,12 @@
     },
     "$note": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider control) and Chip (selection tag). Used for toolbar actions (bold, italic), view toggles, feature on/off. aria-pressed required.",
     "state": {
-      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline-subtle" },
+      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline" },
       "pressed":   { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary-container" }
     },
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -202,9 +196,9 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm": { "height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1", "font-size": "12px", "line-height": "16px" },
-      "md": { "height": "height/ch-5", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "14px", "line-height": "20px" },
-      "lg": { "height": "height/ch-7", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "16px", "line-height": "24px" }
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
     },
     "default": { "state": "unpressed", "size": "md" }
   },
@@ -213,7 +207,7 @@
     "$catalog": {
       "category": "button",
       "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
-      "dependencies": ["toggle", "cn"],
+      "dependencies": ["cn"],
       "tokens": ["color", "spacing", "sizing"],
       "composition": "none"
     },
@@ -222,7 +216,7 @@
       "segmented": {
         "$note": "Items touch (no gap), share borders, radius collapses to first/last only.",
         "bg": "transparent",
-        "border": "color/outline/outline-subtle",
+        "border": "color/outline/outline",
         "gap": "{scale.0}"
       },
       "spaced": {
@@ -233,9 +227,9 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/ch-3", "radius": "radius/component" },
-      "md": { "height": "height/ch-5", "radius": "radius/component" },
-      "lg": { "height": "height/ch-7", "radius": "radius/component" }
+      "sm": { "height": "height/control-sm", "radius": "radius/component" },
+      "md": { "height": "height/control-md", "radius": "radius/component" },
+      "lg": { "height": "height/control-lg", "radius": "radius/component" }
     },
     "default": { "variant": "segmented", "size": "md" }
   }

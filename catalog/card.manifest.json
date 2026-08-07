@@ -1,8 +1,9 @@
 {
   "name": "card",
+  "kind": "atom",
   "category": "layout",
   "description": "",
-  "version": "0dcdcd69ca9e",
+  "version": "13c08c8324bd",
   "dependencies": [
     "cn"
   ],

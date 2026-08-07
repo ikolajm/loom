@@ -8,7 +8,6 @@ const dotVariants = cva(
     variants: {
       state: {
         default: 'bg-primary',
-        neutral: 'bg-neutral',
         destructive: 'bg-error',
         success: 'bg-success',
         warning: 'bg-warning',

@@ -1,13 +1,14 @@
 {
   "name": "date-picker",
+  "kind": "pattern",
   "category": "form",
   "description": "",
-  "version": "02a9de70122f",
+  "version": "b385a3968dfd",
   "dependencies": [
-    "cn",
-    "popover",
     "calendar",
-    "form-field"
+    "cn",
+    "form-field",
+    "popover"
   ],
   "npmDependencies": [
     "lucide-react"

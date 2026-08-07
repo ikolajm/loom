@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternListItem(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, layoutVars } = lookups;
+  const { semColors, primSpacing, heights, layoutVars } = lookups;
   const config = CONFIG.components['list-item'];
   const md = config.sizes.md;
 
@@ -47,7 +47,7 @@ function buildPatternListItem(lookups, defaultMode, page) {
     // Height
     const hPath = resolveHeight(md.height);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) row.setBoundVariable('height', hVar);
       row.counterAxisSizingMode = 'FIXED';
     }

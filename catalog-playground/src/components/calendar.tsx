@@ -13,17 +13,17 @@ const containerSizeMap: Record<string, string> = {
 };
 
 const cellSizeMap: Record<string, string> = {
-  compact: 'text-[11px] leading-[16px] rounded-component',
-  sm: 'text-[12px] leading-[16px] rounded-component',
-  md: 'text-[14px] leading-[20px] rounded-component',
-  lg: 'text-[16px] leading-[24px] rounded-component',
+  compact: 'text-action-sm rounded-component',
+  sm: 'text-action-sm rounded-component',
+  md: 'text-action-md rounded-component',
+  lg: 'text-action-lg rounded-component',
 };
 
 const headerSizeMap: Record<string, string> = {
-  compact: 'text-[12px] leading-[16px]',
-  sm: 'text-[14px] leading-[20px]',
-  md: 'text-[14px] leading-[20px]',
-  lg: 'text-[16px] leading-[24px]',
+  compact: 'text-action-sm',
+  sm: 'text-action-md',
+  md: 'text-action-md',
+  lg: 'text-action-lg',
 };
 
 const navIconSizeMap: Record<string, string> = {
@@ -31,6 +31,13 @@ const navIconSizeMap: Record<string, string> = {
   sm: 'size-icon-1',
   md: 'size-icon-2',
   lg: 'size-icon-2',
+};
+
+const navSizeMap: Record<string, string> = {
+  compact: 'h-[16px] w-[16px]',
+  sm: 'h-[20px] w-[20px]',
+  md: 'h-[20px] w-[20px]',
+  lg: 'h-[24px] w-[24px]',
 };
 
 type CalendarProps = React.ComponentProps<typeof DayPicker> & {
@@ -42,9 +49,11 @@ const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
     const cellSize = cellSizeMap[size];
     const headerSize = headerSizeMap[size];
     const navIcon = navIconSizeMap[size] || 'size-icon-2';
+    const navSize = navSizeMap[size];
 
     return (
       <DayPicker
+        navLayout="around"
         className={cn(
           'bg-surface-1 text-on-surface border border-outline-subtle shadow-[var(--shadow-2)]',
           containerSizeMap[size],
@@ -52,11 +61,16 @@ const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
         )}
         classNames={{
           months: 'flex flex-col gap-2',
-          month: 'flex flex-col gap-2',
-          month_caption: cn('flex items-center justify-center font-semibold', headerSize),
+          // One flex row: navLayout=around puts the buttons either side of the caption in
+          // source order, so the trio needs no ordering. The grid takes w-full and wraps
+          // onto its own line. RDP's own stylesheet does this with absolute positioning,
+          // which needs a containing block the atom never established.
+          month: 'flex flex-wrap items-center gap-2',
+          month_caption: cn('flex flex-1 items-center justify-center', headerSize),
           nav: 'flex items-center gap-1',
-          button_previous: cn('absolute left-1 top-0 inline-flex items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', cellSize),
-          button_next: cn('absolute right-1 top-0 inline-flex items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', cellSize),
+          button_previous: cn('inline-flex shrink-0 items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', navSize),
+          button_next: cn('inline-flex shrink-0 items-center justify-center rounded-component interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', navSize),
+          month_grid: 'w-full',
           weekdays: 'flex w-full',
           weekday: cn('flex flex-1 items-center justify-center font-medium text-on-surface-variant aspect-square', cellSize),
           week: 'flex w-full',

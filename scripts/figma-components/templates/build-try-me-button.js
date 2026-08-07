@@ -1,13 +1,13 @@
 // =============================================================================
 // Try Me Button — Template Component
 // =============================================================================
-// Uses the project primary color, so the preview reads as the consumer's own.
+// Monochrome on purpose: it is chrome around a specimen, not a specimen.
 // Absolutely positioned in interactive previews.
 // Appended directly to page — no base/preview framing.
 // =============================================================================
 
 function buildTryMeButton(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize, primBW } = lookups;
 
   const comp = figma.createComponent();
   comp.name = 'template/try-me-button';
@@ -16,7 +16,7 @@ function buildTryMeButton(lookups, defaultMode, page) {
   comp.counterAxisAlignItems = 'CENTER';
   comp.primaryAxisSizingMode = 'AUTO';
 
-  const hVar = primHeight['height/3'];
+  const hVar = heights['height/3'];
   if (hVar) { comp.setBoundVariable('height', hVar); comp.counterAxisSizingMode = 'FIXED'; }
 
   const xp = primSpacing[resolveScale('{scale.3}')];
@@ -30,16 +30,21 @@ function buildTryMeButton(lookups, defaultMode, page) {
   const rad = semRadius['radius/component'];
   if (rad) { comp.setBoundVariable('topLeftRadius', rad); comp.setBoundVariable('topRightRadius', rad); comp.setBoundVariable('bottomLeftRadius', rad); comp.setBoundVariable('bottomRightRadius', rad); }
 
-  const primaryVar = semColors['color/primary/primary'];
-  if (primaryVar) comp.fills = [figma.variables.setBoundVariableForPaint(
-    { type: 'SOLID', color: { r: 0.627, g: 0.384, b: 0.918 } }, 'color', primaryVar
+  const surfaceVar = semColors['color/surface/surface'];
+  if (surfaceVar) comp.fills = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.949, g: 0.945, b: 0.953 } }, 'color', surfaceVar
   )];
+
+  const onSurfaceVar = semColors['color/surface/on-surface'];
+  if (onSurfaceVar) comp.strokes = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.098, g: 0.094, b: 0.106 } }, 'color', onSurfaceVar
+  )];
+  const bw1 = primBW['border-width/1'];
+  if (bw1) comp.setBoundVariable('strokeWeight', bw1);
 
   const effectStyles = figma.getLocalEffectStyles();
   const shadow2 = effectStyles.find(s => s.name === 'shadow/2');
   if (shadow2) comp.effectStyleId = shadow2.id;
-
-  const onPrimaryVar = semColors['color/primary/on-primary'];
 
   const mouseIcon = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === 'icon/mouse-pointer-click');
   if (mouseIcon) {
@@ -47,10 +52,10 @@ function buildTryMeButton(lookups, defaultMode, page) {
     iconInst.name = 'icon';
     const iconSz = primIconSize['icon/1'];
     if (iconSz) { iconInst.setBoundVariable('width', iconSz); iconInst.setBoundVariable('height', iconSz); }
-    if (onPrimaryVar) {
+    if (onSurfaceVar) {
       const vecs = iconInst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
       const paint = [figma.variables.setBoundVariableForPaint(
-        { type: 'SOLID', color: { r: 0.141, g: 0.059, b: 0.243 } }, 'color', onPrimaryVar
+        { type: 'SOLID', color: { r: 0.098, g: 0.094, b: 0.106 } }, 'color', onSurfaceVar
       )];
       for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
     }
@@ -61,8 +66,8 @@ function buildTryMeButton(lookups, defaultMode, page) {
   label.name = 'label';
   label.characters = 'Try Me!';
   applyTextStyle(label, 'action', 'sm');
-  if (onPrimaryVar) label.fills = [figma.variables.setBoundVariableForPaint(
-    { type: 'SOLID', color: { r: 0.141, g: 0.059, b: 0.243 } }, 'color', onPrimaryVar
+  if (onSurfaceVar) label.fills = [figma.variables.setBoundVariableForPaint(
+    { type: 'SOLID', color: { r: 0.098, g: 0.094, b: 0.106 } }, 'color', onSurfaceVar
   )];
   comp.appendChild(label);
 

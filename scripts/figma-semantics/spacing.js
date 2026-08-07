@@ -41,21 +41,27 @@ collection.renameMode(modeId, "default");
 
 let count = 0;
 
+// These roles have no CSS counterpart and will not get one: layout spacing is written
+// as Tailwind utilities in the atoms, never as --spacing-{category}-{variant} variables.
+// The utility is therefore the only writable reference. An unmapped property gets no
+// code syntax rather than a fabricated one.
+const UTILITY = { "x-padding": "px", "y-padding": "py", "gap": "gap", "max-width": "max-w" };
+
 for (const [category, variants] of Object.entries(CONFIG)) {
   for (const [variant, properties] of Object.entries(variants)) {
     for (const [prop, value] of Object.entries(properties)) {
       const varName = `spacing/${category}/${variant}/${prop}`;
-      const codeSyntax = `var(--spacing-${category}-${variant}-${prop})`;
+      const utility = UTILITY[prop] || null;
 
       if (typeof value === 'string' && value.startsWith('{scale.')) {
         // Alias: {scale.N} → primitives.spacing spacing/N
         const step = value.match(/\{scale\.(\d+)\}/)[1];
         const primVar = primitives[`spacing/${step}`];
         if (!primVar) throw new Error(`Primitive spacing/${step} not found for ${varName}`);
-        createAlias(collection, varName, "FLOAT", modeId, primVar, SCOPES, codeSyntax);
+        createAlias(collection, varName, "FLOAT", modeId, primVar, SCOPES, utility ? `${utility}-${step}` : null);
       } else {
-        // Direct value (e.g., max-width: "1280px")
-        createDirect(collection, varName, "FLOAT", pxToNumber(value), modeId, SCOPES, codeSyntax);
+        // Direct value (e.g., max-width: "1280px") — no scale step, so an arbitrary-value utility
+        createDirect(collection, varName, "FLOAT", pxToNumber(value), modeId, SCOPES, utility ? `${utility}-[${value}]` : null);
       }
       count++;
     }

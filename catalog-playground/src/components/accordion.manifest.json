@@ -1,8 +1,9 @@
 {
   "name": "accordion",
+  "kind": "pattern",
   "category": "data-display",
   "description": "",
-  "version": "f463353a17ed",
+  "version": "85329daf93f8",
   "dependencies": [
     "cn"
   ],

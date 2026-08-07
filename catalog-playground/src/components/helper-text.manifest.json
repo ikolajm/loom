@@ -1,10 +1,12 @@
 {
   "name": "helper-text",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "eee1a2740f19",
+  "version": "0996ee55e4e7",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "class-variance-authority"

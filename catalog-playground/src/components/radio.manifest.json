@@ -1,8 +1,9 @@
 {
   "name": "radio",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "47ac4f4c97c7",
+  "version": "7bd573c8bfe7",
   "dependencies": [
     "cn"
   ],

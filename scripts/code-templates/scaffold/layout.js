@@ -4,7 +4,7 @@
  */
 
 function generate(configs) {
-  const defaultMode = configs.standards.colors['default-mode'] || 'dark';
+  const defaultMode = configs.colors['default-mode'] || 'dark';
   const headingFont = configs.typography.families.heading;
   const bodyFont = configs.typography.families.body;
 
@@ -15,7 +15,7 @@ function generate(configs) {
     .join('&');
 
   return `import type { Metadata } from 'next';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import './globals.css';
 
 export const metadata: Metadata = {

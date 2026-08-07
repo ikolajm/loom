@@ -1,5 +1,6 @@
 {
   "name": "avatar",
+  "kind": "atom",
   "category": "data-display",
   "description": "",
   "version": "b1fd8d8b7ef6",

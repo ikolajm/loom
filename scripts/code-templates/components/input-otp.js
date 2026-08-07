@@ -1,5 +1,5 @@
 const { buildVariantStyles } = require('../shared');
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateInputOTP(name, config, meta) {
   const states = config.state || {};
@@ -15,8 +15,8 @@ function generateInputOTP(name, config, meta) {
     if (sz['cell-size']) classes.push(`size-${sz['cell-size'].replace('height/', '')}`);
     if (sz.radius === 'radius/input') classes.push('rounded-input');
     else if (sz.radius === 'radius/component') classes.push('rounded-component');
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    const otpRole = textRoleClass(sz.text);
+    if (otpRole) classes.push(otpRole);
     if (sz['border-width'] === 'border-width/bw-2') classes.push('border-2');
     else classes.push('border');
     cellSizeEntries[tier] = classes.join(' ');
@@ -106,7 +106,7 @@ const InputOTP = forwardRef<HTMLDivElement, InputOTPProps>(
             className={cn(
               'text-center font-semibold tracking-[0.1em] bg-surface text-on-surface outline-none transition-colors',
               borderColor, focusBorder,
-              disabled && 'opacity-50 cursor-not-allowed',
+              disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
               cellSizeMap[size],
             )}
           />

@@ -1,5 +1,5 @@
 const { buildVariantStyles, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateEmptyState(name, config, meta) {
   const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
@@ -24,14 +24,14 @@ function generateEmptyState(name, config, meta) {
 
     // Heading font size
     const hfs = [];
-    if (sz['heading-font-size']) hfs.push(`text-[${sz['heading-font-size']}]`);
-    if (sz['heading-line-height']) hfs.push(`leading-[${sz['heading-line-height']}]`);
+    const headRole = textRoleClass(sz['heading-text']);
+    if (headRole) hfs.push(headRole);
     headingSizeEntries[tier] = hfs.join(' ');
 
     // Description font size
     const dfs = [];
-    if (sz['description-font-size']) dfs.push(`text-[${sz['description-font-size']}]`);
-    if (sz['description-line-height']) dfs.push(`leading-[${sz['description-line-height']}]`);
+    const descRole = textRoleClass(sz['description-text']);
+    if (descRole) dfs.push(descRole);
     descSizeEntries[tier] = dfs.join(' ');
   }
 

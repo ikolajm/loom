@@ -4,12 +4,13 @@
   "primary": "#731DD8",
   "secondary": "#48A9A6",
   "accent": "#C0DA74",
-  "heading": "Finlandica",
-  "body": "Finlandica",
+  "heading": "Inter",
+  "body": "Inter",
   "edges": "soft",
   "density": "comfortable",
   "shadowDepth": "flat",
   "typeScale": "standard",
+  "controlHeight": "standard",
   "defaultMode": "dark",
   "projectName": "loom-test"
 }

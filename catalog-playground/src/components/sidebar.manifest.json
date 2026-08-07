@@ -1,8 +1,9 @@
 {
   "name": "sidebar",
+  "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "b53b51818ccc",
+  "version": "2e6f85b3904e",
   "dependencies": [
     "cn"
   ],

@@ -20,13 +20,13 @@ const Slider = forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, Slide
     return (
       <SliderPrimitive.Root
         ref={ref}
-        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-50 data-[disabled]:pointer-events-none', className)}
+        className={cn('relative flex w-full touch-none select-none items-center data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none', className)}
         {...props}
       >
-        <SliderPrimitive.Track className={cn('relative w-full grow overflow-hidden rounded-pill bg-surface-1', s.track)}>
+        <SliderPrimitive.Track className={cn('relative w-full grow cursor-pointer overflow-hidden rounded-pill bg-surface-1', s.track)}>
           <SliderPrimitive.Range className="absolute h-full bg-primary" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className={cn('block rounded-full bg-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', s.thumb)} />
+        <SliderPrimitive.Thumb className={cn('block cursor-pointer rounded-full bg-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', s.thumb)} />
       </SliderPrimitive.Root>
     );
   }

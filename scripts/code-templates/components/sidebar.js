@@ -1,5 +1,5 @@
 const { buildVariantStyles, heightToClass, spacingToClass, radiusToClass } = require('../shared');
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 // Sidebar — vertical app-navigation panel. Two variants on one axis:
 //   default — full width with labels
@@ -42,8 +42,8 @@ function generateSidebar(name, config, meta) {
     if (itemPx) item.push(itemPx);
     const itemGap = spacingToClass(sz['item-gap'], 'gap');
     if (itemGap) item.push(itemGap);
-    if (sz['font-size']) item.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) item.push(`leading-[${sz['line-height']}]`);
+    const itemRole = textRoleClass(sz.text);
+    if (itemRole) item.push(itemRole);
     itemSize[tier] = item.join(' ');
   }
 

@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternCommandPalette(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight } = lookups;
+  const { semColors, semRadius, primSpacing, heights } = lookups;
   const config = CONFIG.components['command-palette'];
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -60,7 +60,7 @@ function buildPatternCommandPalette(lookups, defaultMode, page) {
 
   const ihPath = resolveHeight(md['input-height']);
   if (ihPath) {
-    const hVar = primHeight[ihPath];
+    const hVar = heights[ihPath];
     if (hVar) inputRow.setBoundVariable('height', hVar);
     inputRow.counterAxisSizingMode = 'FIXED';
   }
@@ -131,7 +131,7 @@ function buildPatternCommandPalette(lookups, defaultMode, page) {
 
     const itemHPath = resolveHeight(md['item-height']);
     if (itemHPath) {
-      const hVar = primHeight[itemHPath];
+      const hVar = heights[itemHPath];
       if (hVar) item.setBoundVariable('height', hVar);
       item.counterAxisSizingMode = 'FIXED';
     }

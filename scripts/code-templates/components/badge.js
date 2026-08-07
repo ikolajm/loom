@@ -25,8 +25,19 @@ function generateBadge(name, config, meta) {
     }
     const gap = spacingToClass(sz.gap, 'gap');
     if (gap) classes.push(gap);
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    // Type comes from the family ramp, not from literals in this config. Two reasons:
+    // the literals did not ramp (sm and md were both 10px/14px, so md differed from sm
+    // only in padding), and the Figma builder has always bound badge text to the
+    // label/{tier} text style — so Figma rendered md at 12px while code rendered 10px.
+    // Reading the same ramp both sides closes that drift and makes badge track a
+    // project's typeScale, which a hardcoded pixel value can never do.
+    const standardTier = ['sm', 'md', 'lg'].includes(tier);
+    if (meta.textFamily && standardTier) {
+      classes.push(`text-${meta.textFamily}-${tier}`);
+    } else {
+      if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
+      if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    }
     const rad = radiusToClass(sz.radius);
     if (rad) classes.push(`rounded-${rad}`);
     sizeClasses[tier] = classes.join(' ');
@@ -60,7 +71,7 @@ function generateBadge(name, config, meta) {
   const dflt = config.default || {};
 
   return `import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { Slot } from '@radix-ui/react-slot';
 import { X } from 'lucide-react';
 import { cn } from './cn';
@@ -113,7 +124,7 @@ type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
   };
 
 const INTERACTIVE_CLASSES = 'interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
-const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 opacity-70 hover:opacity-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-center rounded-component p-0.5 interactive opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
 const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {

@@ -18,9 +18,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "shadow": "effects/shadow-3", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "shadow": "effects/shadow-3", "icon-size": "icon/icon-1" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "shadow": "effects/shadow-3", "icon-size": "icon/icon-2" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "shadow": "effects/shadow-3", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -33,7 +33,7 @@
       "tokens": ["color", "typography", "spacing", "sizing"],
       "composition": "none"
     },
-    "$note": "Severity axis only — info is the neutral-notice default (the old surface `default` variant was dropped; info subsumes it). promo was intentionally not added — a marketing strip is variant=info + className or a Marketing-group atom, not a severity. Dismiss is stateless and keyed off onDismiss presence (no `dismissible` flag — that flag could only produce a dead close button) to stay RSC-safe. The container is non-interactive; the close affordance composes the iconOnly Button at color=inherit so it takes the banner's foreground and reuses the shared focus/hover treatment.",
+    "$note": "Severity axis only — every banner states a severity, and `info` is the neutral notice. There is no severity-less variant: a banner with nothing to say about urgency is a layout container, not a banner. promo was intentionally not added — a marketing strip is variant=info + className or a Marketing-group atom, not a severity. Dismiss is stateless and keyed off onDismiss presence (no `dismissible` flag — that flag could only produce a dead close button) to stay RSC-safe. The container is non-interactive; the close affordance composes the iconOnly Button at color=inherit so it takes the banner's foreground and reuses the shared focus/hover treatment.",
     "variants": {
       "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" },
       "success": { "bg": "color/success/success-container", "fg": "color/success/on-success-container" },
@@ -51,9 +51,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-3" }
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "radius": "radius/component", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "info", "size": "md" }
   },
@@ -69,9 +69,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "10px", "line-height": "14px" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "14px", "line-height": "20px" }
+      "sm": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -87,9 +87,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card", "font-size": "12px", "line-height": "16px" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card", "font-size": "14px", "line-height": "20px" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card", "font-size": "16px", "line-height": "24px" }
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -105,9 +105,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px" },
-      "md": { "item-height": "height/ch-4", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px" },
-      "lg": { "item-height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px" }
+      "sm": { "item-height": "height/menu-item-sm", "text": "body/sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component" },
+      "md": { "item-height": "height/menu-item-md", "text": "body/md", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component" },
+      "lg": { "item-height": "height/menu-item-lg", "text": "body/lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -149,7 +149,6 @@
     "heading-typography": {
       "font-family": "body",
       "font-weight": 600,
-      "letter-spacing": "-0.01em",
       "text-transform": "none"
     },
     "description-typography": {
@@ -159,9 +158,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "gap": "{scale.3}", "icon-size": "icon/icon-3", "heading-font-size": "16px", "heading-line-height": "24px", "description-font-size": "14px", "description-line-height": "20px" },
-      "md": { "gap": "{scale.4}", "icon-size": "icon/icon-4", "heading-font-size": "20px", "heading-line-height": "28px", "description-font-size": "16px", "description-line-height": "24px" },
-      "lg": { "gap": "{scale.6}", "icon-size": "icon/icon-4", "heading-font-size": "24px", "heading-line-height": "32px", "description-font-size": "18px", "description-line-height": "28px" }
+      "sm": { "gap": "{scale.3}", "icon-size": "icon/icon-3", "heading-text": "title/sm", "description-text": "body/sm" },
+      "md": { "gap": "{scale.4}", "icon-size": "icon/icon-4", "heading-text": "title/md", "description-text": "body/md" },
+      "lg": { "gap": "{scale.6}", "icon-size": "icon/icon-4", "heading-text": "title/lg", "description-text": "body/lg" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -178,9 +177,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "item-height": "height/ch-3", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "12px", "line-height": "16px", "icon-size": "icon/icon-1" },
-      "md": { "item-height": "height/ch-4", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "font-size": "14px", "line-height": "20px", "icon-size": "icon/icon-2" },
-      "lg": { "item-height": "height/ch-5", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "font-size": "16px", "line-height": "24px", "icon-size": "icon/icon-2" }
+      "sm": { "item-height": "height/menu-item-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md": { "item-height": "height/menu-item-md", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg": { "item-height": "height/menu-item-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -188,7 +187,7 @@
   "hover-card": {
     "$note": "Hover-triggered preview card. Richer than tooltip (supports structured content — images, links, metadata). Different from popover (hover trigger vs click trigger). Delay before show (~300ms), dismiss on mouse leave. Anchor positioning.",
     "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline-subtle", "shadow": "effects/shadow-2" }
+      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-2" }
     },
     "typography": {
       "font-family": "body",
@@ -197,9 +196,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "max-width": "240px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card", "font-size": "12px", "line-height": "16px" },
-      "md": { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card", "font-size": "14px", "line-height": "20px" },
-      "lg": { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card", "font-size": "16px", "line-height": "24px" }
+      "sm": { "max-width": "240px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/card" },
+      "md": { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card" },
+      "lg": { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card" }
     },
     "default": { "variant": "default", "size": "md" }
   },

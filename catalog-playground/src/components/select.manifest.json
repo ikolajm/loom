@@ -1,10 +1,12 @@
 {
   "name": "select",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "f00ff88ff0a3",
+  "version": "d7e65d66e4b0",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "@radix-ui/react-select",

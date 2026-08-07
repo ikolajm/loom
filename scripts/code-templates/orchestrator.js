@@ -16,10 +16,34 @@
 const fs = require('fs');
 const path = require('path');
 const { loadAllConfigs, getComponentRegistry } = require('./shared');
+const { archetypePicks } = require('../generate-configs/resolve-intent');
 
 // --- Load config once ---
 const configs = loadAllConfigs();
 const registry = getComponentRegistry(configs);
+
+// --- Archetype pick-list for the starter loom-picks.json ---
+// loadAllConfigs() reads token configs, not answers, so the archetype needs its own
+// channel into this pipeline. spec/answers.json is git-ignored and absent in a fresh
+// clone — no answers file means the scaffold falls back to its two-atom starter pair,
+// which is what shipped before.
+const ANSWERS_PATH = path.resolve(__dirname, '../../spec/answers.json');
+const MAPPINGS_PATH = path.resolve(__dirname, '../../spec/direction-mappings.json');
+
+function loadArchetypePicks() {
+  if (!fs.existsSync(ANSWERS_PATH)) return null;
+  const answers = JSON.parse(fs.readFileSync(ANSWERS_PATH, 'utf8'));
+  const mappings = JSON.parse(fs.readFileSync(MAPPINGS_PATH, 'utf8'));
+  try {
+    return archetypePicks(answers, mappings);
+  } catch (err) {
+    // Same bad answers file that `npm run configs` rejects with one line. Without this
+    // it surfaces here as a stack trace, so one defect gets two presentations and the
+    // uglier one lands in the pipeline consumers run more often.
+    console.error(`Error in spec/answers.json: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 // --- Generator modules ---
 const GENERATORS = {
@@ -66,7 +90,7 @@ const GENERATORS = {
     description: 'scaffold/ (init.sh, globals.css, ThemeProvider, layout)',
     run: (outputDir) => {
       const { generate } = require('./scaffold');
-      generate(configs, outputDir);
+      generate(configs, outputDir, loadArchetypePicks());
     },
   },
   'handoff': {
@@ -74,6 +98,14 @@ const GENERATORS = {
     run: (outputDir) => {
       const { generate } = require('./generate-handoff');
       generate(configs, registry, outputDir);
+    },
+  },
+  // Not a generator — writes nothing. Runs last so a full `npm run generate` cannot
+  // report success over broken output; exits non-zero on any failed invariant.
+  'verify': {
+    description: 'invariant checks over the emitted catalog (writes nothing; fails the run)',
+    run: () => {
+      require('./verify').verify();
     },
   },
 };
@@ -102,9 +134,15 @@ if (require.main === module) {
 
   console.log(`\n=== Generating → ${outputDir} ===\n`);
 
-  // Copy answers.json as a receipt — the DNA of this generation
+  // Copy answers.json as a receipt — the DNA of this generation. Only for a FULL run:
+  // answers.json holds the brand and the project name, and a partial run is how it
+  // reaches somewhere it should not be. `--only tokens --output <consumer>/src` is a
+  // real invocation — setup.sh and the playground's prebuild hook both use it — and it
+  // was dropping a private answers file into a consumer's source tree, where nothing
+  // was ignoring it. A receipt belongs with the artifact set it documents, not beside
+  // one file pulled out of it.
   const answersPath = path.resolve(__dirname, '../../spec/answers.json');
-  if (fs.existsSync(answersPath)) {
+  if (!only && fs.existsSync(answersPath)) {
     fs.copyFileSync(answersPath, path.join(outputDir, 'answers.json'));
     console.log('[answers]\n  answers.json\n');
   }

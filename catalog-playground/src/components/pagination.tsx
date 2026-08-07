@@ -3,9 +3,9 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { cn } from './cn';
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'size-ch-3 rounded-component text-body-sm',
-  md: 'size-ch-5 rounded-component text-body-md',
-  lg: 'size-ch-7 rounded-component text-body-lg',
+  sm: 'size-control-sm rounded-component text-body-sm',
+  md: 'size-control-md rounded-component text-body-md',
+  lg: 'size-control-lg rounded-component text-body-lg',
 };
 
 const iconSizeMap: Record<string, string> = {

@@ -1,10 +1,23 @@
 # Loom Catalog Spec
 
-**Architectural reference for the v2 catalog model.** For each atom's concrete contract — dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
+**Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom does not ship all 66 atoms by default. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom does not ship all 62 components by default. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
 The model resolves the playground/production split structurally: the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only picked atom files, with zero playground/stories footprint. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
+
+## Kind: atoms and patterns
+
+Every manifest carries a `kind` — **38 atoms**, **24 patterns**, and `cn` as `utility`. The catalog held both from the start and had one word for them, which is what made "does this earn its place?" hard to answer: the two justify themselves differently.
+
+- **atom** — a primitive you compose *with*. One control, one mark, one piece of content: `button`, `input`, `badge`, `avatar`, `label`. An atom earns its place by being unavoidable — you cannot build a form without an input.
+- **pattern** — an arrangement already composed *for* you, solving an assembly a consumer would otherwise repeat: `command-palette`, `list-item`, `date-picker`, `sidebar`. A pattern earns its place by saving composition, and is judged against that bar rather than against inevitability.
+
+**The distinction is vocabulary and nothing else.** Both kinds install identically, resolve dependencies identically, and are equally first-class; no generator, check, or install path branches on `kind`. Making it a second install tier was considered and rejected — it would owe consumers a migration and a second mental model to fix what was only a description problem.
+
+**It is declared, not derived**, in `PATTERN_IDS` in `scripts/code-templates/shared.js`. Two mechanical derivations were tried and each measures a different axis. The Figma `build-pattern-*` prefix means "cannot be emitted by the standard variant × size builder," which is why `number` and `relative-time` carry it despite composing nothing. Manifest `dependencies` means "imports another atom," which makes `input` a composer — it imports `form-field` for error context — and a self-contained shell a primitive, since it reimplements an input inline rather than importing one. Both classify backwards. The test that holds: *could a competent consumer assemble this from other Loom components without inventing anything?*
+
+Do not confuse `kind` with the neighbouring `composition` field, which records `asChild`/Slot mechanics — what a component *is* versus how it renders.
 
 ---
 
@@ -20,7 +33,7 @@ The catalog covers the primitives, the infrastructure, the static catalog, and a
 
 The wrapping motion atoms compose arbitrary children via the standard composition patterns. Loom does not ship `AnimatedButton` parallel to `Button`. Consumers compose: `<Reveal><Card>…</Card></Reveal>`, `<Stagger><List/></Stagger>`. The leaf motion atoms take their own props: `<CountUp value={42} />`, `<ScrollProgress />`. N primitives × M wrappers = N+M atoms, not N×M.
 
-Pre-composed molecules (e.g., a stat-trend display combining `NumberDisplay` + caption + trend arrow + `CountUp` + `Reveal`) live in the consuming project as project-authored composition; they graduate to catalog atoms only if a stable shape emerges across projects — hand-author molecules in the project, generalize only when the pattern holds.
+Pre-composed molecules (e.g., a stat-trend display combining `CountUp` + caption + trend arrow + `Reveal`) live in the consuming project as project-authored composition; they graduate to catalog atoms only if a stable shape emerges across projects — hand-author molecules in the project, generalize only when the pattern holds.
 
 ### Marketing characterization is project-owned
 
@@ -170,7 +183,7 @@ Hand-editing an individual catalog file is allowed for one-off polish, but the t
 
 ## Token bundle: substrate, not picked
 
-Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json`. Per [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md): tokens are foundation; characterization is project-owned.
+Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json` — or from `spec/config/local/base/*.json` when you have run `npm run configs` for your own brand, which is git-ignored and takes precedence (see `scripts/config-paths.js`). Per [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md): tokens are foundation; characterization is project-owned.
 
 Motion tokens land with the substrate bundle — easings (`standard` / `decelerate` / `accelerate` / `emphasized`) and spring `linear()` presets sampled from real physics. They shipped before the motion components so the atoms had a stable token foundation, and so a consuming project's animations draw from the substrate rather than hard-coded values.
 
@@ -179,6 +192,8 @@ Motion tokens land with the substrate bundle — easings (`standard` / `decelera
 ## Catalog playground hosting
 
 The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom: its `loom-picks.json` lists the full catalog, and `setup.sh` populates `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
+
+**Its `src/tokens.css` is git-ignored and regenerated on every `npm run dev` / `npm run build`** by a `predev` / `prebuild` hook. That makes the playground a live reflection of whichever config set is active: run it holding your own brand in `spec/config/local/` and the ramps, type and control sizing are yours, so token-source edits can be checked against the whole catalog in one place. A fresh clone with no local set renders Loom's own look. Committing that file would force it to be both canonical enough to review in a diff and local enough to be useful, and it cannot be both — so it is generated, never tracked. Build with `npm run build` rather than `npx next build`; the latter bypasses the hook and fails on a missing import if the file was never generated.
 
 Structure:
 

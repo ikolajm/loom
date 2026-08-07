@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternToggleGroup(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, layoutVars } = lookups;
+  const { semColors, semRadius, primSpacing, heights, layoutVars } = lookups;
   const config = CONFIG.components['toggle-group'];
   const toggleConfig = CONFIG.components['toggle'];
   // v2 toggle-group exposes segmented/spaced variants (no `default`). The mock
@@ -69,7 +69,7 @@ function buildPatternToggleGroup(lookups, defaultMode, page) {
       // Height from toggle-group config
       const hPath = resolveHeight(sz.height);
       if (hPath) {
-        const hVar = primHeight ? primHeight[hPath] : primSpacing[hPath];
+        const hVar = heights ? heights[hPath] : primSpacing[hPath];
         if (hVar) item.setBoundVariable('height', hVar);
       }
 

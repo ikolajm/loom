@@ -4,11 +4,11 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const textareaVariants = cva(
-  'inline-flex items-center justify-center font-normal interactive cursor-text placeholder:text-on-surface-variant focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center font-normal interactive cursor-text placeholder:text-on-surface-variant focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       state: {
-        default: 'bg-surface text-on-surface border-outline-subtle border',
+        default: 'bg-surface text-on-surface border-outline border',
         error: 'bg-surface text-on-surface border-error border',
       },
       size: {

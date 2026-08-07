@@ -1,8 +1,9 @@
 {
   "name": "input-otp",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "294048cd9f28",
+  "version": "8f234286c9b5",
   "dependencies": [
     "cn"
   ],

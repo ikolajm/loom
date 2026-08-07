@@ -1,12 +1,15 @@
 {
-  "name": "search-bar",
-  "category": "form",
-  "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
-  "version": "68cb1a21055a",
+  "name": "context-menu",
+  "kind": "pattern",
+  "category": "feedback",
+  "description": "",
+  "version": "905131820a35",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
+    "@radix-ui/react-context-menu",
+    "class-variance-authority",
     "lucide-react"
   ],
   "tokens": [
@@ -16,6 +19,9 @@
     "sizing"
   ],
   "composition": "none",
+  "variants": [
+    "default"
+  ],
   "sizes": [
     "sm",
     "md",

@@ -7,7 +7,7 @@ const toolbarVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface-1 text-on-surface border-outline-subtle border',
+        default: 'bg-surface-1 text-on-surface border-outline border',
       },
       size: {
         sm: 'px-2 py-1 gap-1 text-body-sm',

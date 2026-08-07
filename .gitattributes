@@ -1,0 +1,18 @@
+# Line endings are pinned, not left to each machine's git default.
+#
+# Two mechanisms in this repo compare bytes, and CRLF breaks both:
+#   - verify.js's base-config-provenance check regenerates spec/config/base/*.json
+#     and compares byte-for-byte against the committed set.
+#   - every atom manifest's `version` is the sha256 of the delivered source, which
+#     check-local-edits.js re-hashes to decide whether a consumer edited a file.
+#
+# Without this file, a clone on Windows (core.autocrlf=true is git's default there)
+# fails verification and reports all 67 atoms as locally edited, so setup.sh skips
+# every one of them. The content is never wrong — only its line endings are.
+* text=auto eol=lf
+
+# Shell scripts, called out separately because the failure is unrecognisable: a CRLF
+# shebang makes the kernel look for an interpreter literally named "bash\r" and
+# report "not found", naming the interpreter rather than the line ending. init.sh and
+# setup.sh are the ones a consumer runs.
+*.sh text eol=lf

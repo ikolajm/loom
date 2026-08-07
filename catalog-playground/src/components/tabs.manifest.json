@@ -1,8 +1,9 @@
 {
   "name": "tabs",
+  "kind": "atom",
   "category": "navigation",
   "description": "",
-  "version": "cd566bd3e3ca",
+  "version": "3d14f1db13f8",
   "dependencies": [
     "cn"
   ],

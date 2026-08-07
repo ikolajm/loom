@@ -4,18 +4,11 @@ const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 function generateListItem(name, config, meta) {
   const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
   const sizes = filterSizes(config.sizes);
-  // No text family — structural shell, content fills the slots
-  const sizeStyles = {};
-  for (const [tier, sz] of Object.entries(sizes)) {
-    if (tier.startsWith('$')) continue;
-    const classes = [];
-    if (sz.height && sz.height.startsWith('height/')) classes.push(`h-${sz.height.replace('height/', '')}`);
-    const pxMatch = sz['x-padding']?.match(/\{scale\.(\d+)\}/);
-    if (pxMatch) classes.push(`px-${pxMatch[1]}`);
-    const gapMatch = sz.gap?.match(/\{scale\.(\d+)\}/);
-    if (gapMatch) classes.push(`gap-${gapMatch[1]}`);
-    sizeStyles[tier] = classes.join(' ');
-  }
+  // Type sits on the container, not on the content slot, so it is inherited rather
+  // than imposed: a bare string scales with the row, and any child carrying its own
+  // text-* class still wins. That keeps the three-slot shell contract while giving
+  // the size ladder a visible effect on content.
+  const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
 
   return `import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';

@@ -1,11 +1,12 @@
 {
   "name": "carousel",
+  "kind": "pattern",
   "category": "composite",
   "description": "",
   "version": "f7f641a313a6",
   "dependencies": [
-    "cn",
-    "button"
+    "button",
+    "cn"
   ],
   "npmDependencies": [
     "embla-carousel-react",

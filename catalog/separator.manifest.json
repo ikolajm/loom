@@ -1,5 +1,6 @@
 {
   "name": "separator",
+  "kind": "atom",
   "category": "layout",
   "description": "",
   "version": "d58f82cef587",

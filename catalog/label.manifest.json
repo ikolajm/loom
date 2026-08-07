@@ -1,8 +1,9 @@
 {
   "name": "label",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "e79d43779502",
+  "version": "19d39dafec3d",
   "dependencies": [
     "cn"
   ],

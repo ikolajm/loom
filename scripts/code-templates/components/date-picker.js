@@ -11,9 +11,9 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const triggerSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 px-2 text-input-sm',
-  md: 'h-ch-5 px-3 text-input-md',
-  lg: 'h-ch-7 px-4 text-input-lg',
+  sm: 'h-control-sm px-2 text-input-sm',
+  md: 'h-control-md px-3 text-input-md',
+  lg: 'h-control-lg px-4 text-input-lg',
 };
 
 const iconSizeMap: Record<string, string> = {
@@ -52,7 +52,7 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
             className={cn(
               'flex items-center justify-between w-full border border-outline-subtle bg-surface text-on-surface rounded-input interactive cursor-pointer',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
               triggerSizeMap[size],
               isError && 'border-error',
               className,

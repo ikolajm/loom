@@ -5,9 +5,9 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { cn } from './cn';
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-ch-3 px-2 text-action-sm',
-  md: 'h-ch-5 px-3 text-action-md',
-  lg: 'h-ch-7 px-4 text-action-lg',
+  sm: 'h-control-sm px-2 text-action-sm',
+  md: 'h-control-md px-3 text-action-md',
+  lg: 'h-control-lg px-4 text-action-lg',
 };
 
 type ToggleGroupSize = 'sm' | 'md' | 'lg';

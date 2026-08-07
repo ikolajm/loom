@@ -1,8 +1,9 @@
 {
   "name": "tree-view",
+  "kind": "pattern",
   "category": "composite",
   "description": "",
-  "version": "71b6313bc6bc",
+  "version": "735b1e5211dd",
   "dependencies": [
     "cn"
   ],

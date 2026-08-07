@@ -1,11 +1,12 @@
 {
   "name": "dialog",
+  "kind": "atom",
   "category": "layout",
   "description": "",
   "version": "80511940bb0e",
   "dependencies": [
-    "cn",
-    "button"
+    "button",
+    "cn"
   ],
   "npmDependencies": [
     "@radix-ui/react-dialog",

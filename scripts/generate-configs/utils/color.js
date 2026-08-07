@@ -167,6 +167,27 @@ function deriveTriadic(hex) {
   return hslToHex((h + 120) % 360, s * 0.9, l);
 }
 
+/**
+ * Derive an analogous color — a small rotation on the same side of the wheel.
+ *
+ * This is what fills an absent `secondary` or `accent`, and the rotation is
+ * deliberately small. Complementary (180°) and triadic (120°) are correct colour
+ * theory and the wrong default: a teal primary derived a fire-engine red secondary
+ * and a magenta accent, neither of which anyone chose, both of which shipped into
+ * tokens.css and the Figma ramps looking exactly as deliberate as the primary.
+ * An analogous derivation stays in the primary's family, so an unspecified value
+ * reads as a plausible second brand colour rather than as a mistake.
+ *
+ * Both are still guesses. The provenance note in the generated colors.json and the
+ * Figma variable descriptions are what stop a guess from reading as a decision —
+ * see generate-colors.js. deriveComplementary and deriveTriadic are kept for
+ * callers that want a deliberate contrast rather than a default.
+ */
+function deriveAnalogous(hex, degrees) {
+  const { h, s, l } = hexToHsl(hex);
+  return hslToHex((h + degrees + 360) % 360, s * 0.9, l);
+}
+
 module.exports = {
   hexToRgb,
   rgbToHex,
@@ -176,5 +197,6 @@ module.exports = {
   generateNeutralPalette,
   generateStatusPalette,
   deriveComplementary,
-  deriveTriadic
+  deriveTriadic,
+  deriveAnalogous
 };

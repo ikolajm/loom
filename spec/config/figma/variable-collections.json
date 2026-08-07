@@ -1,14 +1,20 @@
 {
   "$schema": "Defines the complete Figma variable collection architecture — all collections, their variable types, naming conventions, scoping rules, mode configuration, and code syntax format. Components consume these variables directly during generation; no component-level variable collections.",
-
   "primitive-collections": {
     "primitives.color": {
       "description": "Raw color palette values. All hex → 0-1 float conversion at generation time.",
       "type": "COLOR",
       "source": "config/base/colors.json → palette",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "color/{family}/{shade-or-tone}",
-      "scopes": ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL", "STROKE_COLOR"],
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
       "code-syntax": "var(--color-{family}-{shade})",
       "examples": [
         "color/primary/500",
@@ -20,9 +26,14 @@
       "description": "Universal spacing scale. Single source for all gap, padding, and dimensional values.",
       "type": "FLOAT",
       "source": "config/standards.json → spacing.scale",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "spacing/{step}",
-      "scopes": ["GAP", "WIDTH_HEIGHT"],
+      "scopes": [
+        "GAP",
+        "WIDTH_HEIGHT"
+      ],
       "code-syntax": "var(--spacing-{step})",
       "examples": [
         "spacing/0",
@@ -34,9 +45,13 @@
       "description": "Border radius primitives. Full scale from sharp to pill.",
       "type": "FLOAT",
       "source": "config/standards.json → sizing.border-radius",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "radius/{step}",
-      "scopes": ["CORNER_RADIUS"],
+      "scopes": [
+        "CORNER_RADIUS"
+      ],
       "code-syntax": "var(--radius-{step})",
       "examples": [
         "radius/0",
@@ -48,9 +63,13 @@
       "description": "Border width primitives.",
       "type": "FLOAT",
       "source": "config/standards.json → sizing.border-width",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "border-width/{step}",
-      "scopes": ["STROKE_FLOAT"],
+      "scopes": [
+        "STROKE_FLOAT"
+      ],
       "code-syntax": "var(--border-width-{step})",
       "examples": [
         "border-width/0",
@@ -62,9 +81,13 @@
       "description": "Component height scale. Used for buttons, inputs, list items, nav bars, etc.",
       "type": "FLOAT",
       "source": "config/standards.json → sizing.component-height",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "height/{step}",
-      "scopes": ["WIDTH_HEIGHT"],
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
       "code-syntax": "var(--height-{step})",
       "examples": [
         "height/0",
@@ -76,9 +99,13 @@
       "description": "Icon sizing scale.",
       "type": "FLOAT",
       "source": "config/standards.json → sizing.icon-size",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "icon/{step}",
-      "scopes": ["WIDTH_HEIGHT"],
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
       "code-syntax": "var(--icon-{step})",
       "examples": [
         "icon/0",
@@ -90,11 +117,19 @@
       "description": "Typography property variables. Text styles bind to these — changing a variable cascades through all bound text styles.",
       "type": "FLOAT + STRING",
       "source": "config/base/typography.json → presets",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "type/{property-or-preset}/{sub}",
       "scopes": {
-        "STRING": ["FONT_FAMILY"],
-        "FLOAT": ["FONT_SIZE", "LINE_HEIGHT", "FONT_WEIGHT"]
+        "STRING": [
+          "FONT_FAMILY"
+        ],
+        "FLOAT": [
+          "FONT_SIZE",
+          "LINE_HEIGHT",
+          "FONT_WEIGHT"
+        ]
       },
       "code-syntax": "var(--type-{preset}-{property})",
       "examples": [
@@ -111,9 +146,13 @@
       "description": "Shadow property primitives. Effect styles bind individual properties (offset-y, blur, spread) to these variables. Shadow color stays in the effect style directly (Figma limitation).",
       "type": "FLOAT",
       "source": "config/base/effects.json → shadow-properties",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "shadow/{level}/{property}",
-      "scopes": ["EFFECT_FLOAT"],
+      "scopes": [
+        "EFFECT_FLOAT"
+      ],
       "code-syntax": "var(--shadow-{level}-{property})",
       "examples": [
         "shadow/1/offset-y",
@@ -123,16 +162,23 @@
       ]
     }
   },
-
   "semantic-collections": {
     "semantic.color": {
       "description": "Semantic color roles. Aliases primitive colors. Light and dark modes swap which primitives are referenced.",
       "type": "COLOR",
       "source": "config/standards.json → colors.modes",
-      "modes": ["light", "dark"],
+      "modes": [
+        "light",
+        "dark"
+      ],
       "default-mode": "config/standards.json → colors.default-mode",
       "naming": "color/{group}/{role}",
-      "scopes": ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL", "STROKE_COLOR"],
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
       "code-syntax": "var(--{role})",
       "alias-pattern": "Each variable aliases a primitives.color variable. Mode determines which primitive: light.primary → primitives.color/primary/600, dark.primary → primitives.color/primary/400.",
       "examples": [
@@ -149,9 +195,14 @@
       "description": "Categorical spacing values. Default and compact variants as separate paths, not modes. Aliases primitive spacing scale.",
       "type": "FLOAT",
       "source": "config/base/spacing.json → categories",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "spacing/{category}/{variant}/{property}",
-      "scopes": ["GAP", "WIDTH_HEIGHT"],
+      "scopes": [
+        "GAP",
+        "WIDTH_HEIGHT"
+      ],
       "code-syntax": "var(--spacing-{category}-{variant}-{property})",
       "variant-note": "Default and compact are separate variable paths, not Figma modes. A designer picks spacing/section/default/x-padding or spacing/section/compact/x-padding explicitly. Compact is a per-context choice, not a global swap.",
       "examples": [
@@ -165,9 +216,13 @@
       "description": "Semantic border-radius roles. Aliases primitive radius values.",
       "type": "FLOAT",
       "source": "config/base/sizing.json → border-radius",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "radius/{role}",
-      "scopes": ["CORNER_RADIUS"],
+      "scopes": [
+        "CORNER_RADIUS"
+      ],
       "code-syntax": "var(--radius-{role})",
       "examples": [
         "radius/component",
@@ -176,19 +231,69 @@
         "radius/modal",
         "radius/pill"
       ]
+    },
+    "semantic.component-height": {
+      "description": "Control height roles. Aliases primitives.component-height. This layer is what a project's controlHeight answer (compact / standard / touch) actually selects — the same role names resolve to different ch-* steps per ladder. Without it the pasted file states heights as raw primitives, so two projects with opposite ladders produce identical height variables and a designer cannot see that button/md and text-field/md are one decision.",
+      "type": "FLOAT",
+      "source": "config/base/sizing.json → component-height",
+      "modes": [
+        "default"
+      ],
+      "naming": "height/{role}/{tier}",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "code-syntax": "var(--height-{role}-{tier})",
+      "examples": [
+        "height/control/md",
+        "height/row/lg",
+        "height/nav-item/sm",
+        "height/menu-item/md",
+        "height/bar/lg",
+        "height/bottom-bar/md",
+        "height/fab/md"
+      ],
+      "primitive-note": "Avatar portraits and stepper indicators deliberately stay on primitives.component-height — they are sized objects, not controls, so they take no role."
+    },
+    "semantic.opacity": {
+      "description": "State opacity roles. The one semantic collection that resolves to literal values rather than aliasing a primitive layer — opacity has no underlying scale, so disabled and muted are the whole set. Naming them primitives would have taught the next reader that the layer names do not mean anything.",
+      "type": "FLOAT",
+      "source": "config/standards.json → effects.opacity",
+      "modes": [
+        "default"
+      ],
+      "naming": "opacity/{role}",
+      "scopes": [
+        "OPACITY"
+      ],
+      "code-syntax": "var(--opacity-{role})",
+      "examples": [
+        "opacity/disabled",
+        "opacity/muted"
+      ]
     }
   },
-
   "figma-collections": {
     "figma.layout": {
       "description": "Documentation-specific layout values. Hue-neutral, mode-independent. COLOR values are direct hex (not semantic aliases). FLOAT spacing values alias primitives.spacing. Includes surface elevations and outline levels.",
       "type": "FLOAT + COLOR",
       "source": "config/presentation/layout.json",
-      "modes": ["default"],
+      "modes": [
+        "default"
+      ],
       "naming": "layout/{property}",
       "scopes": {
-        "FLOAT": ["GAP", "WIDTH_HEIGHT", "CORNER_RADIUS"],
-        "COLOR": ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL", "STROKE_COLOR"]
+        "FLOAT": [
+          "GAP",
+          "WIDTH_HEIGHT",
+          "CORNER_RADIUS"
+        ],
+        "COLOR": [
+          "FRAME_FILL",
+          "SHAPE_FILL",
+          "TEXT_FILL",
+          "STROKE_COLOR"
+        ]
       },
       "code-syntax": null,
       "variables": {
@@ -214,13 +319,17 @@
       }
     }
   },
-
   "styles": {
     "text-styles": {
       "description": "Figma text styles bound to primitives.typography variables. One style per typography preset. Changing a typography variable cascades through all bound text styles.",
       "source": "config/base/typography.json → presets",
       "naming": "{preset-name}",
-      "bindings": ["fontSize", "lineHeight", "fontFamily", "fontWeight"],
+      "bindings": [
+        "fontSize",
+        "lineHeight",
+        "fontFamily",
+        "fontWeight"
+      ],
       "examples": [
         "display → binds to type/display/size, type/display/height, type/family/body, type/display/weight",
         "body → binds to type/body/size, type/body/height, type/family/body, type/body/weight",
@@ -240,7 +349,6 @@
       ]
     }
   },
-
   "component-generation": {
     "description": "Components do NOT have their own variable collections. During generation, the script reads component configs and binds Figma component properties directly to semantic/primitive variables. This keeps the variable panel clean and human-navigable.",
     "approach": "The generation script reads config/components/*.json, builds Figma components, and binds fills/spacing/typography to existing semantic and primitive variables. No intermediate variable layer.",
@@ -252,33 +360,64 @@
       "Toast shadow → applies effect style shadow/3"
     ]
   },
-
   "scoping-rules": {
     "description": "Each variable type is scoped to restrict where it appears in the Figma variable picker. This prevents misuse (e.g., picking a spacing value for a color fill).",
     "rules": {
       "COLOR": {
-        "surface/fill colors": ["FRAME_FILL", "SHAPE_FILL"],
-        "text colors": ["TEXT_FILL"],
-        "border/stroke colors": ["STROKE_COLOR"],
-        "all-purpose colors": ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL", "STROKE_COLOR"]
+        "surface/fill colors": [
+          "FRAME_FILL",
+          "SHAPE_FILL"
+        ],
+        "text colors": [
+          "TEXT_FILL"
+        ],
+        "border/stroke colors": [
+          "STROKE_COLOR"
+        ],
+        "all-purpose colors": [
+          "FRAME_FILL",
+          "SHAPE_FILL",
+          "TEXT_FILL",
+          "STROKE_COLOR"
+        ]
       },
       "FLOAT": {
-        "spacing": ["GAP", "WIDTH_HEIGHT"],
-        "radius": ["CORNER_RADIUS"],
-        "border-width": ["STROKE_FLOAT"],
-        "component-height": ["WIDTH_HEIGHT"],
-        "icon-size": ["WIDTH_HEIGHT"],
-        "font-size": ["FONT_SIZE"],
-        "line-height": ["LINE_HEIGHT"],
-        "font-weight": ["FONT_WEIGHT"],
-        "shadow-properties": ["EFFECT_FLOAT"]
+        "spacing": [
+          "GAP",
+          "WIDTH_HEIGHT"
+        ],
+        "radius": [
+          "CORNER_RADIUS"
+        ],
+        "border-width": [
+          "STROKE_FLOAT"
+        ],
+        "component-height": [
+          "WIDTH_HEIGHT"
+        ],
+        "icon-size": [
+          "WIDTH_HEIGHT"
+        ],
+        "font-size": [
+          "FONT_SIZE"
+        ],
+        "line-height": [
+          "LINE_HEIGHT"
+        ],
+        "font-weight": [
+          "FONT_WEIGHT"
+        ],
+        "shadow-properties": [
+          "EFFECT_FLOAT"
+        ]
       },
       "STRING": {
-        "font-family": ["FONT_FAMILY"]
+        "font-family": [
+          "FONT_FAMILY"
+        ]
       }
     }
   },
-
   "code-syntax-format": {
     "description": "All variables get WEB code syntax set via setVariableCodeSyntax('WEB', ...). This appears in Figma Dev Mode when inspecting elements.",
     "format": "CSS custom property: var(--{name})",

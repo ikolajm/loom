@@ -3,12 +3,13 @@
 // =============================================================================
 // M3 speed-dial: a trigger FAB that expands into a vertical stack of action
 // buttons (each an optional label + smaller circular button). Shown in the
-// open state — the expand/collapse animation wraps via the motion library in
-// Sprint 2. NOT a component — frame pattern for per-project application.
+// open state — the expand/collapse animation wraps via the motion library and is
+// gated on that adoption decision (CATALOG_SPEC.md, "Scope").
+// NOT a component — frame pattern for per-project application.
 // =============================================================================
 
 function buildFabMenu(lookups, defaultMode, page) {
-  const { semColors, semRadius, primHeight, primIconSize, primSpacing } = lookups;
+  const { semColors, semRadius, heights, primIconSize, primSpacing } = lookups;
   const config = CONFIG.components['fab-menu'];
   const colors = config.variants.default;
   const bgVar = semColors[colors.bg];
@@ -16,7 +17,7 @@ function buildFabMenu(lookups, defaultMode, page) {
   const labelCfg = config['action-label'];
 
   const frame = createSectionFrame('base.fab-menu', lookups);
-  addHeader(frame, 'FAB Menu', 'Frame pattern — speed-dial. Trigger FAB expands into a stack of action buttons. Shown open; expand animation is Sprint 2.');
+  addHeader(frame, 'FAB Menu', 'Frame pattern — speed-dial. Trigger FAB expands into a stack of action buttons. Shown open; the expand animation is not built yet.');
 
   function getEffectStyle(configRef) {
     if (!configRef || configRef === 'none') return null;
@@ -41,7 +42,7 @@ function buildFabMenu(lookups, defaultMode, page) {
     comp.counterAxisAlignItems = 'CENTER';
 
     const hPath = resolveHeight(sz.size);
-    const hVar = hPath ? primHeight[hPath] : null;
+    const hVar = hPath ? heights[hPath] : null;
     if (hVar) {
       comp.setBoundVariable('width', hVar);
       comp.setBoundVariable('height', hVar);

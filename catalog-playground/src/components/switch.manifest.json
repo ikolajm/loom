@@ -1,8 +1,9 @@
 {
   "name": "switch",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "28d06b1011ea",
+  "version": "355163056df3",
   "dependencies": [
     "cn"
   ],

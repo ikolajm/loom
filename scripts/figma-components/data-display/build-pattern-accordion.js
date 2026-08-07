@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildPatternAccordion(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, primSpacing, heights, primIconSize } = lookups;
   const config = CONFIG.components.accordion;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -36,8 +36,7 @@ function buildPatternAccordion(lookups, defaultMode, page) {
     { title: 'Section Three', expanded: false }
   ];
 
-  const fontSize = parsePx(md['header-font-size']);
-  const lineHeight = parsePx(md['header-line-height']);
+  const [headFamily, headTier] = (md['header-text'] || 'body/md').split('/');
 
   // Chevron icon
   const chevronComp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === config['indicator-icon']);
@@ -79,7 +78,7 @@ function buildPatternAccordion(lookups, defaultMode, page) {
     // Height
     const hPath = resolveHeight(md['header-height']);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) header.setBoundVariable('height', hVar);
       header.counterAxisSizingMode = 'FIXED';
     }
@@ -96,7 +95,7 @@ function buildPatternAccordion(lookups, defaultMode, page) {
     const title = figma.createText();
     title.name = 'title';
     title.characters = section.title;
-    applyTextStyle(title, 'action', 'md');
+    applyTextStyle(title, headFamily, headTier);
     if (fgVar) title.fills = [figma.variables.setBoundVariableForPaint(
       { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fgVar
     )];

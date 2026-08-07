@@ -7,7 +7,7 @@
 // =============================================================================
 
 function buildAvatar(lookups, defaultMode, page) {
-  const { semColors, semRadius, primHeight } = lookups;
+  const { semColors, semRadius, heights } = lookups;
   const config = CONFIG.components.avatar;
   const colors = config.variants.default;
   const bgVar = semColors[colors.bg];
@@ -33,7 +33,7 @@ function buildAvatar(lookups, defaultMode, page) {
       const hPath = resolveHeight(sz.size);
       const px = sizePx[sizeName] || 32;
       if (hPath) {
-        const hVar = primHeight[hPath];
+        const hVar = heights[hPath];
         if (hVar) {
           comp.setBoundVariable('width', hVar);
           comp.setBoundVariable('height', hVar);

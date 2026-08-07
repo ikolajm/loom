@@ -1,8 +1,9 @@
 {
   "name": "checkbox",
+  "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "602bfba1aafc",
+  "version": "ea1b0a315c54",
   "dependencies": [
     "cn"
   ],

@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildInputOtp(lookups, defaultMode, page) {
-  const { semColors, semRadius, primHeight, primSpacing, primBW } = lookups;
+  const { semColors, semRadius, heights, primSpacing, primBW } = lookups;
   const config = CONFIG.components['input-otp'];
   const state = config.state.default;
   const bgVar = semColors[state.bg];
@@ -29,7 +29,7 @@ function buildInputOtp(lookups, defaultMode, page) {
     }
 
     const cellPath = resolveHeight(sz['cell-size']);
-    const cellVar = cellPath ? primHeight[cellPath] : null;
+    const cellVar = cellPath ? heights[cellPath] : null;
     const radVar = semRadius[sz.radius];
     const bwPath = sz['border-width'].replace('/bw-', '/');
     const bwVar = primBW[bwPath];

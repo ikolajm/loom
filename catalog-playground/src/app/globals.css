@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./tokens.css";
+@import "../tokens.css";
 @import "./doc-layout.css";
 
 html, body {

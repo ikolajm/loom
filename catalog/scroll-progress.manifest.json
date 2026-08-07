@@ -1,5 +1,6 @@
 {
   "name": "scroll-progress",
+  "kind": "atom",
   "category": "motion",
   "description": "",
   "version": "fddf00ed81fc",

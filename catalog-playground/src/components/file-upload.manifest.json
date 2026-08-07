@@ -1,10 +1,12 @@
 {
   "name": "file-upload",
+  "kind": "pattern",
   "category": "form",
   "description": "",
-  "version": "f6706bd3aecd",
+  "version": "c00ed06e0b42",
   "dependencies": [
-    "cn"
+    "cn",
+    "form-field"
   ],
   "npmDependencies": [
     "class-variance-authority",

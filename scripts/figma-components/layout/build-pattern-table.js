@@ -15,8 +15,7 @@ function buildPatternTable(lookups, defaultMode, page) {
   const headerTypo = tableConfig.typography.header;
   const cellTypo = tableConfig.typography.cell;
 
-  const fontSize = parsePx(md['font-size']);
-  const lineHeight = parsePx(md['line-height']);
+  const [cellFamily, cellTier] = (md.text || 'body/sm').split('/');
 
   // Section frame
   const frame = createSectionFrame('base.pattern-table', lookups);
@@ -94,7 +93,7 @@ function buildPatternTable(lookups, defaultMode, page) {
       const text = figma.createText();
       text.name = 'text';
       text.characters = cellText;
-      applyTextStyle(text, weight >= 500 ? 'label' : 'body', 'md');
+      applyTextStyle(text, weight >= 500 ? 'label' : cellFamily, cellTier);
       if (fg) text.fills = [figma.variables.setBoundVariableForPaint(
         { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fg
       )];

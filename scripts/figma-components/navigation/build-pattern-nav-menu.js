@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternNavMenu(lookups, defaultMode, page) {
-  const { semColors, primSpacing, primHeight } = lookups;
+  const { semColors, primSpacing, heights } = lookups;
   const config = CONFIG.components['navigation-menu'];
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -43,7 +43,7 @@ function buildPatternNavMenu(lookups, defaultMode, page) {
 
     const hPath = resolveHeight(md['item-height']);
     if (hPath) {
-      const hVar = primHeight[hPath];
+      const hVar = heights[hPath];
       if (hVar) menuItem.setBoundVariable('height', hVar);
       menuItem.counterAxisSizingMode = 'FIXED';
     }

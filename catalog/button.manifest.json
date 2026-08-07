@@ -1,8 +1,9 @@
 {
   "name": "button",
+  "kind": "atom",
   "category": "button",
   "description": "Primary action button — orthogonal variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral/inherit). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons. The `inherit` color reads currentColor — for icon-button affordances embedded in colored surfaces (e.g. a Banner dismiss) that must take the parent's foreground.",
-  "version": "6399b3888416",
+  "version": "89f8155d752d",
   "dependencies": [
     "cn"
   ],

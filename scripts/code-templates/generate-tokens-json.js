@@ -24,8 +24,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
-const load = (rel) => JSON.parse(fs.readFileSync(path.join(CONFIG_ROOT, rel), 'utf-8'));
+// Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
+const { loadConfig: load } = require('../config-paths');
 
 const colors = load('base/colors.json');
 const spacing = load('base/spacing.json');
@@ -104,6 +104,20 @@ function buildSemanticRadius() {
   return out;
 }
 
+// Resolved to px, same as semantic radius: a native consumer reads values, not the
+// ch-* names, which are a web-utility concern. The role names DO cross — they are the
+// vocabulary half of the values-port boundary.
+function buildSemanticHeight() {
+  const out = {};
+  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
+    out[role] = {};
+    for (const [tier, token] of Object.entries(tiers)) {
+      out[role][tier] = standards.sizing['component-height'][token] || token;
+    }
+  }
+  return out;
+}
+
 function buildEffects() {
   const focus = standards.effects['focus-ring'];
   const easing = {};
@@ -111,16 +125,22 @@ function buildEffects() {
     if (name.startsWith('$')) continue;
     easing[name] = val;
   }
+  const opacity = {};
+  for (const [name, val] of Object.entries(standards.effects.opacity)) {
+    if (name.startsWith('$')) continue;
+    opacity[name] = val;
+  }
   return {
     shadow: effects.shadow,
     transition: standards.effects.transition,
     easing,
     focusRing: { width: focus.width, offset: focus.offset, color: focus.color },
+    opacity,
   };
 }
 
 function generate() {
-  const defaultMode = standards.colors['default-mode'] || 'light';
+  const defaultMode = colors['default-mode'] || 'light';
   return {
     $meta: {
       artifact: 'tokens.json',
@@ -145,7 +165,10 @@ function generate() {
     },
     borderWidth: standards.sizing['border-width'],
     iconSize: standards.sizing['icon-size'],
-    componentHeight: standards.sizing['component-height'],
+    componentHeight: {
+      primitive: standards.sizing['component-height'],
+      semantic: buildSemanticHeight(),
+    },
     touchTarget: standards.sizing['touch-target'].min,
     effects: buildEffects(),
   };

@@ -8,17 +8,17 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const selectTriggerVariants = cva(
-  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
+  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
   {
     variants: {
       state: {
-        default: 'bg-surface text-on-surface border-outline-subtle border',
+        default: 'bg-surface text-on-surface border-outline border',
         error: 'bg-surface text-on-surface border-error border',
       },
       size: {
-        sm: 'h-ch-3 px-3 py-1 gap-2 rounded-input text-input-sm',
-        md: 'h-ch-5 px-4 py-2 gap-2 rounded-input text-input-md',
-        lg: 'h-ch-7 px-4 py-3 gap-2 rounded-input text-input-lg',
+        sm: 'h-control-sm px-3 py-1 gap-2 rounded-input text-input-sm',
+        md: 'h-control-md px-4 py-2 gap-2 rounded-input text-input-md',
+        lg: 'h-control-lg px-4 py-3 gap-2 rounded-input text-input-lg',
       },
     },
     defaultVariants: {
@@ -84,7 +84,7 @@ const SelectItem = forwardRef<
     className={cn(
       'relative flex w-full items-center rounded-component px-3 py-2 pr-8 text-action-sm cursor-pointer select-none',
       'focus:bg-surface-2 focus:text-on-surface focus:outline-none',
-      'data-[disabled]:opacity-50 data-[disabled]:pointer-events-none',
+      'data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none',
       className,
     )}
     {...props}

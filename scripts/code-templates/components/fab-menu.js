@@ -1,5 +1,5 @@
 const { buildVariantStyles, buildSizeStyles, colorToClass, spacingToClass, radiusToClass, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes, extractIconSizes } = require('./helpers');
+const { filterSizes, extractIconSizes, textRoleClass } = require('./helpers');
 
 function generateFabMenu(name, config, meta) {
   const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
@@ -34,8 +34,8 @@ function generateFabMenu(name, config, meta) {
   if (labelRad) labelClasses.push(`rounded-${labelRad}`);
   const fwMap = { 400: 'font-normal', 500: 'font-medium', 600: 'font-semibold', 700: 'font-bold' };
   if (labelCfg['font-weight'] && fwMap[labelCfg['font-weight']]) labelClasses.push(fwMap[labelCfg['font-weight']]);
-  if (labelCfg['font-size']) labelClasses.push(`text-[${labelCfg['font-size']}]`);
-  if (labelCfg['line-height']) labelClasses.push(`leading-[${labelCfg['line-height']}]`);
+  const labelRole = textRoleClass(labelCfg.text);
+  if (labelRole) labelClasses.push(labelRole);
   if (labelCfg['letter-spacing'] && labelCfg['letter-spacing'] !== '0') labelClasses.push(`tracking-[${labelCfg['letter-spacing']}]`);
   const labelClassStr = labelClasses.join(' ');
 
@@ -46,7 +46,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const fabMenuTriggerVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
@@ -64,7 +64,7 @@ ${Object.entries(triggerSizeStyles).map(([k, v]) => `        ${k}: '${v}',`).joi
 );
 
 const fabMenuActionVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {

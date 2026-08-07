@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternTimePicker(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing, primHeight, primIconSize } = lookups;
+  const { semColors, semRadius, primSpacing, heights, primIconSize } = lookups;
   // Time picker delegates sizing to Select, which extends the text-field base.
   const baseConfig = resolveBase(CONFIG.components, 'select');
   const md = baseConfig.sizes.md;
@@ -43,7 +43,7 @@ function buildPatternTimePicker(lookups, defaultMode, page) {
     box.counterAxisSizingMode = 'FIXED';
     box.itemSpacing = 4;
 
-    if (hPath) { const v = primHeight[hPath]; if (v) box.setBoundVariable('height', v); }
+    if (hPath) { const v = heights[hPath]; if (v) box.setBoundVariable('height', v); }
     if (padPath) { const v = primSpacing[padPath]; if (v) { box.setBoundVariable('paddingLeft', v); box.setBoundVariable('paddingRight', v); } }
     if (radVar) {
       box.setBoundVariable('topLeftRadius', radVar);

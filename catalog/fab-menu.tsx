@@ -3,16 +3,16 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const fabMenuTriggerVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
         default: 'bg-primary-container text-on-primary-container',
       },
       size: {
-        sm: 'size-ch-4 rounded-card shadow-[var(--shadow-2)]',
-        md: 'size-ch-6 rounded-card shadow-[var(--shadow-3)]',
-        lg: 'size-ch-8 rounded-card shadow-[var(--shadow-3)]',
+        sm: 'size-fab-sm rounded-card shadow-[var(--shadow-2)]',
+        md: 'size-fab-md rounded-card shadow-[var(--shadow-3)]',
+        lg: 'size-fab-lg rounded-card shadow-[var(--shadow-3)]',
       },
     },
     defaultVariants: {
@@ -23,16 +23,16 @@ const fabMenuTriggerVariants = cva(
 );
 
 const fabMenuActionVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
         default: 'bg-primary-container text-on-primary-container',
       },
       size: {
-        sm: 'size-ch-3 rounded-card shadow-[var(--shadow-1)]',
-        md: 'size-ch-5 rounded-card shadow-[var(--shadow-2)]',
-        lg: 'size-ch-7 rounded-card shadow-[var(--shadow-2)]',
+        sm: 'size-control-sm rounded-card shadow-[var(--shadow-1)]',
+        md: 'size-control-md rounded-card shadow-[var(--shadow-2)]',
+        lg: 'size-control-lg rounded-card shadow-[var(--shadow-2)]',
       },
     },
     defaultVariants: {
@@ -60,7 +60,7 @@ const fabMenuStackGap: Record<string, string> = {
   lg: 'gap-3',
 };
 
-const FAB_LABEL_CLASSES = 'bg-surface-2 text-on-surface px-2 py-1 rounded-component font-medium text-[12px] leading-[16px] tracking-[0.01em]';
+const FAB_LABEL_CLASSES = 'bg-surface-2 text-on-surface px-2 py-1 rounded-component font-medium text-action-sm';
 
 type FabMenuSize = 'sm' | 'md' | 'lg';
 

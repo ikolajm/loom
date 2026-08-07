@@ -7,13 +7,13 @@ const topBarVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface text-on-surface border-outline-subtle border-b',
+        default: 'bg-surface text-on-surface border-outline border-b',
         elevated: 'bg-surface-1 text-on-surface shadow-[var(--shadow-1)]',
       },
       size: {
-        sm: 'h-ch-7 px-3 gap-2 text-title-sm',
-        md: 'h-ch-8 px-4 gap-3 text-title-md',
-        lg: 'h-ch-9 px-6 gap-4 text-title-lg',
+        sm: 'h-bar-sm px-3 gap-2 text-title-sm',
+        md: 'h-bar-md px-4 gap-3 text-title-md',
+        lg: 'h-bar-lg px-6 gap-4 text-title-lg',
       },
     },
     defaultVariants: {

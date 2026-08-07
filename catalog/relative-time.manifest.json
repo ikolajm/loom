@@ -1,5 +1,6 @@
 {
   "name": "relative-time",
+  "kind": "atom",
   "category": "data-display",
   "description": "",
   "version": "70d88df37213",

@@ -43,7 +43,7 @@ Both *looked* correct and compiled clean; both only showed up at visual-confirm.
 
 **Symptom.** Carousel arrows passed `className="absolute …"` through `Button` fell into normal document flow and stacked at the top instead of pinning to the viewport edges.
 
-**Root cause.** Button's base pulls Loom's `.interactive` utility, which **hard-sets `position: relative`**. When you pass `absolute` via Button's `className`, tailwind-merge keeps it — but tailwind-merge *cannot dedupe a custom utility class (`.interactive`) against a Tailwind position utility (`absolute`)*; it has no idea `.interactive` also sets `position`. Both land in the class list, and the cascade resolves `.interactive`'s `position: relative` as the winner. The `absolute` is present in the DOM and silently overridden. General rule: **any base class that sets a CSS property via a custom (non-Tailwind) utility wins over a Tailwind utility for the same property passed through `className`** — tailwind-merge only knows Tailwind's own vocabulary.
+**Root cause.** Button's base pulls Loom's `.interactive` utility, which **hard-sets `position: relative`**. When you pass `absolute` via Button's `className`, tailwind-merge keeps it — but tailwind-merge *cannot dedupe a custom utility class (`.interactive`) against a Tailwind position utility (`absolute`)*; it has no idea `.interactive` also sets `position`. Both land in the class list, and the cascade resolves `.interactive`'s `position: relative` as the winner — decisively, not narrowly: `tokens.css` is imported **unlayered** while Tailwind v4 puts its utilities in `@layer utilities`, and unlayered styles beat layered ones regardless of source order. The `absolute` is present in the DOM and silently overridden. General rule: **any base class that sets a CSS property via a custom (non-Tailwind) utility wins over a Tailwind utility for the same property passed through `className`** — tailwind-merge only knows Tailwind's own vocabulary.
 
 **Fix — wrap, don't override.** Wrap the Button in a plain positioning `<div>`, inside a `relative` viewport:
 
@@ -87,6 +87,7 @@ Operational reference for the Figma Plugin API — data formats, gotchas, valida
 - **Shared-utils architecture:** paste the utils bundle once, then run small step scripts that reference globals — 50–70% size reduction per script.
 - Variable IDs are session-specific. Get references in the same script; don't hardcode IDs across runs.
 - Wrap step scripts in async IIFEs (console scope collisions are real).
+- **A Figma deliverable only changes on re-paste.** Regenerating the scripts updates `generated/figma-scripts/`, not any file you already built — an existing Figma file keeps the old variables, styles and components until you re-run the paste. So "the generator is fixed" and "the file is fixed" are separate claims, and only the second one is checkable by looking.
 - **Re-pasting the shared-utils bundle throws `redeclaration of const X` and *silently halts*.** Console scope persists across pastes, and top-level `const`/`let` can't be redeclared — so a second paste of `00` dies at the first collision and every helper below it never reloads (a fix you just made silently won't take). `assemble-figma.js` emits the bundle with top-level `const`/`let` rewritten to `var` so re-pastes redefine cleanly. One exception: the first hop *out of* a `const`-era console session still needs a reload (a `var` can't redeclare an existing `const`).
 
 **API quirks**
@@ -153,3 +154,20 @@ Both placements: a soft config-time warning against [`spec/parity-safe-fonts.jso
 A scroll-progress bar frozen "to respect reduced-motion" would just be broken — you can't reduce the motion of a thing the user is actively moving. Implementation also varies per atom: `reveal` honors it in pure CSS (a media query lands the final state, no JS); `count-up` uses `matchMedia('(prefers-reduced-motion: reduce)')` to skip the rAF loop and set the final value (CSS can't intercept a JS animation); `scroll-progress` **deliberately** omits any handling — documented as intentional so a future reader doesn't "fix" the missing handler and break it.
 
 **The rule:** before reaching for `prefers-reduced-motion`, ask *"did the user trigger this, or is it playing on its own?"* Autonomous → honor it (pick the mechanism). Direct-manipulation → don't, and leave a comment saying so.
+
+---
+
+## Config resolution — a stale local set silently outranks a fresh committed one
+
+**Symptom.** You change a value in `spec/direction-mappings.json`, regenerate the committed base, confirm the new value in `spec/config/base/`, and the emitted `tokens.css` still carries the old one. Everything reports success.
+
+**Root cause.** `scripts/config-paths.js` resolves every config through `local/` first, falling back to the committed set — which is what lets a fresh clone build with no answers file. `--default-set` writes only the *committed* set. If `spec/config/local/` exists, it keeps winning, and nothing announces which set is in play.
+
+**Fix.** After changing anything upstream of the configs, regenerate **both**:
+
+```bash
+node scripts/generate-configs/index.js --default-set   # committed default
+npm run configs                                        # your local brand
+```
+
+**Verify on the emitted artifact, not the config.** The config being right proves nothing about what rendered — check `tokens.css` (or the generated atom) for the value you expect. `sourceOf()` in `config-paths.js` reports which root a file actually came from.

@@ -1,15 +1,15 @@
 {
-  "name": "collapsible",
-  "category": "data-display",
+  "name": "tooltip",
+  "kind": "atom",
+  "category": "feedback",
   "description": "",
-  "version": "5440c67e4630",
+  "version": "052532cb6522",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
-    "@radix-ui/react-collapsible",
-    "class-variance-authority",
-    "lucide-react"
+    "@radix-ui/react-tooltip",
+    "class-variance-authority"
   ],
   "tokens": [
     "color",
@@ -19,8 +19,7 @@
   ],
   "composition": "none",
   "variants": [
-    "default",
-    "bordered"
+    "default"
   ],
   "sizes": [
     "sm",

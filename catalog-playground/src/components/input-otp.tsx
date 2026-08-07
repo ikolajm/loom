@@ -4,9 +4,9 @@ import { forwardRef, useRef, useCallback, useState, useEffect } from 'react';
 import { cn } from './cn';
 
 const cellSizeMap: Record<string, string> = {
-  sm: 'size-ch-5 rounded-input text-[16px] leading-[24px] border',
-  md: 'size-ch-7 rounded-input text-[20px] leading-[28px] border',
-  lg: 'size-ch-9 rounded-input text-[24px] leading-[32px] border-2',
+  sm: 'size-control-sm rounded-input text-title-sm border',
+  md: 'size-control-md rounded-input text-title-md border',
+  lg: 'size-control-lg rounded-input text-title-lg border-2',
 };
 
 const gapMap: Record<string, string> = {
@@ -78,7 +78,7 @@ const InputOTP = forwardRef<HTMLDivElement, InputOTPProps>(
             className={cn(
               'text-center font-semibold tracking-[0.1em] bg-surface text-on-surface outline-none transition-colors',
               borderColor, focusBorder,
-              disabled && 'opacity-50 cursor-not-allowed',
+              disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
               cellSizeMap[size],
             )}
           />

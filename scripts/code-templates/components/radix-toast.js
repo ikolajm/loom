@@ -96,7 +96,7 @@ const ToastAction = forwardRef<
       'inline-flex shrink-0 items-center justify-center rounded-component px-3 py-1 text-action-sm font-medium',
       'ring-1 ring-inset ring-current/20 interactive cursor-pointer',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      'disabled:opacity-50 disabled:cursor-not-allowed',
+      'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
       className,
     )}
     {...props}
@@ -111,7 +111,7 @@ const ToastClose = forwardRef<
   <ToastPrimitive.Close
     ref={ref}
     className={cn(
-      'shrink-0 rounded-component interactive cursor-pointer opacity-60 hover:opacity-100 transition-opacity',
+      'shrink-0 rounded-component p-1 interactive cursor-pointer opacity-(--opacity-muted) hover:opacity-100 transition-opacity',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
       className,
     )}

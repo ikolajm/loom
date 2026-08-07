@@ -1,8 +1,9 @@
 {
   "name": "dropdown-menu",
+  "kind": "pattern",
   "category": "feedback",
   "description": "",
-  "version": "ad43a2fb2f2c",
+  "version": "15ad27607344",
   "dependencies": [
     "cn"
   ],

@@ -6,13 +6,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const toggleVariants = cva(
-  'inline-flex items-center justify-center font-medium tracking-[0.01em] interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=off]:bg-transparent data-[state=off]:text-on-surface-variant data-[state=off]:border-outline-subtle data-[state=off]:border data-[state=on]:bg-primary-container data-[state=on]:text-on-primary-container data-[state=on]:border-primary-container data-[state=on]:border',
+  'inline-flex items-center justify-center font-medium interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed data-[state=off]:bg-transparent data-[state=off]:text-on-surface-variant data-[state=off]:border-outline data-[state=off]:border data-[state=on]:bg-primary-container data-[state=on]:text-on-primary-container data-[state=on]:border-primary-container data-[state=on]:border',
   {
     variants: {
       size: {
-        sm: 'h-ch-3 px-2 py-1 gap-1 rounded-component text-action-sm',
-        md: 'h-ch-5 px-3 py-2 gap-2 rounded-component text-action-md',
-        lg: 'h-ch-7 px-4 py-2 gap-2 rounded-component text-action-lg',
+        sm: 'h-control-sm px-2 py-1 gap-1 rounded-component text-action-sm',
+        md: 'h-control-md px-3 py-2 gap-2 rounded-component text-action-md',
+        lg: 'h-control-lg px-4 py-2 gap-2 rounded-component text-action-lg',
       },
     },
     defaultVariants: { size: 'md' },

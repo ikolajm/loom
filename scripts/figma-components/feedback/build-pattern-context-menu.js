@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternContextMenu(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing } = lookups;
+  const { semColors, semRadius, primSpacing, heights } = lookups;
   const config = CONFIG.components['context-menu'];
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -69,7 +69,7 @@ function buildPatternContextMenu(lookups, defaultMode, page) {
     row.primaryAxisAlignItems = 'SPACE_BETWEEN';
     row.counterAxisAlignItems = 'CENTER';
 
-    const ihVar = primSpacing[resolveHeight(md['item-height'])];
+    const ihVar = heights[resolveHeight(md['item-height'])];
     if (ihVar) row.setBoundVariable('height', ihVar);
     const ixp = resolveScale(md['x-padding']); if (ixp) { const v = primSpacing[ixp]; if (v) { row.setBoundVariable('paddingLeft', v); row.setBoundVariable('paddingRight', v); } }
 
