@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateStepper(name, config, meta) {
   const sizes = filterSizes(config.sizes);
@@ -14,14 +14,14 @@ function generateStepper(name, config, meta) {
       const h = sz['indicator-size'].replace('height/', '');
       indClasses.push(`size-${h}`);
     }
-    if (sz['label-font-size']) indClasses.push(`text-[${sz['label-font-size']}]`);
-    if (sz['label-line-height']) indClasses.push(`leading-[${sz['label-line-height']}]`);
+    const indRole = textRoleClass(sz['label-text']);
+    if (indRole) indClasses.push(indRole);
     indicatorSizeEntries[tier] = indClasses.join(' ');
 
     // Label size
     const lblClasses = [];
-    if (sz['label-font-size']) lblClasses.push(`text-[${sz['label-font-size']}]`);
-    if (sz['label-line-height']) lblClasses.push(`leading-[${sz['label-line-height']}]`);
+    const lblRole = textRoleClass(sz['label-text']);
+    if (lblRole) lblClasses.push(lblRole);
     labelSizeEntries[tier] = lblClasses.join(' ');
   }
 

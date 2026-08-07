@@ -298,7 +298,7 @@ function resolveBase(allComponents, configKey) {
 //   - The Figma `build-pattern-*` prefix marks "cannot be emitted by the standard
 //     variant × size builder" — which is why `number` and `relative-time` carry it.
 //   - Manifest `dependencies` marks "imports another atom" — which makes `input` a
-//     composer (it imports form-field for error context) and `search-bar` a primitive
+//     composer (it imports form-field for error context) and a self-contained shell a primitive
 //     (it reimplements an input inline rather than importing one). Exactly backwards.
 //
 // The test that does hold: could a competent consumer assemble this from other Loom
@@ -306,7 +306,7 @@ function resolveBase(allComponents, configKey) {
 // the exceptions are listed, so this stays one auditable list instead of 66 fields.
 const PATTERN_IDS = new Set([
   // Compose several controls into a working arrangement
-  'combobox', 'date-picker', 'time-picker', 'file-upload', 'search-bar',
+  'combobox', 'date-picker', 'time-picker', 'file-upload',
   // Menu and overlay arrangements built from a trigger + surface + item rows
   'dropdown-menu', 'context-menu', 'command-palette', 'navigation-menu',
   // Structural page furniture
@@ -355,9 +355,7 @@ function getComponentRegistry(configs) {
     'HelperText': { generator: 'helper-text#generateHelperText', source: formConfig, key: 'helper-text', element: 'p', htmlType: 'HTMLAttributes<HTMLParagraphElement>', noInteractive: true, layout: 'row', textFamily: 'label', category: 'Inputs', template: 'cva-only', primitive: null },
     'FormField': { generator: 'form-field#generateFormField', source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
     'Calendar': { generator: 'calendar#generateCalendar', source: formConfig, key: 'calendar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Inputs', template: 'lib', primitive: 'react-day-picker' },
-    'Rating': { generator: 'rating#generateRating', source: formConfig, key: 'rating', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: null, category: 'Inputs', template: 'lib', primitive: null },
     'TimePicker': { generator: 'time-picker#generateTimePicker', source: formConfig, key: 'time-picker', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
-    'SearchBar': { generator: 'search-bar#generateSearchBar', source: formConfig, key: 'search-bar', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'lib', primitive: null },
 
     // === Layout ===
     'Card': { source: layoutConfig, key: 'card', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', textFamily: 'body', category: 'Layout', template: 'cva-only', primitive: null },
@@ -383,12 +381,10 @@ function getComponentRegistry(configs) {
 
     // === Data Display ===
     'Avatar': { generator: 'radix-feedback#generateRadixAvatar', source: dataDisplayConfig, key: 'avatar', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-avatar' },
-    'ListItem': { generator: 'list-item#generateListItem', source: dataDisplayConfig, key: 'list-item', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', baseExtra: 'cursor-pointer', textFamily: null, category: 'Data Display', template: 'cva-only', primitive: null },
+    'ListItem': { generator: 'list-item#generateListItem', source: dataDisplayConfig, key: 'list-item', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', layout: 'row', baseExtra: 'cursor-pointer', textFamily: 'body', category: 'Data Display', template: 'cva-only', primitive: null },
     'Accordion': { generator: 'radix-navigation#generateRadixAccordion', source: dataDisplayConfig, key: 'accordion', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-accordion' },
     'Kbd': { source: dataDisplayConfig, key: 'kbd', element: 'kbd', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'cva-only', primitive: null },
-    'Collapsible': { generator: 'radix-navigation#generateRadixCollapsible', source: dataDisplayConfig, key: 'collapsible', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'stack', noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'radix', primitive: '@radix-ui/react-collapsible' },
     'AvatarGroup': { generator: 'avatar-group#generateAvatarGroup', source: dataDisplayConfig, key: 'avatar-group', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, layout: 'row', noIconSlots: true, textFamily: 'label', category: 'Data Display', template: 'lib', primitive: null },
-    'NumberDisplay': { generator: 'number#generateNumber', source: dataDisplayConfig, key: 'number', element: 'span', htmlType: 'HTMLAttributes<HTMLSpanElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
     'RelativeTime': { generator: 'relative-time#generateRelativeTime', source: dataDisplayConfig, key: 'relative-time', element: 'time', htmlType: 'HTMLAttributes<HTMLElement>', noInteractive: true, noIconSlots: true, textFamily: 'body', category: 'Data Display', template: 'lib', primitive: null },
 
     // === Navigation ===

@@ -1,7 +1,8 @@
 // =============================================================================
-// Sheet / Drawer — Frame Pattern Mock
+// Sheet — Frame Pattern Mock
 // =============================================================================
-// Shows a bottom sheet example with drag handle and content area.
+// Shows an edge-anchored panel example with a content area. No drag handle: a handle
+// promises a swipe gesture this catalog does not implement.
 // Surface-2 bg, scrim overlay, modal radius on top corners.
 // =============================================================================
 
@@ -10,10 +11,9 @@ function buildPatternSheet(lookups, defaultMode, page) {
   const config = CONFIG.components.sheet;
   const colors = config.variants.default;
   const md = config.sizes.md;
-  const handle = config.handle;
 
   const frame = createSectionFrame('base.pattern-sheet', lookups);
-  addHeader(frame, 'Sheet / Drawer', 'Frame pattern — overlay panel with drag handle. Bottom sheet and side drawer variants.');
+  addHeader(frame, 'Sheet', 'Frame pattern — overlay panel anchored to one edge. Top, bottom, left or right; no drag handle.');
 
   // Container simulating a screen with scrim
   const screen = figma.createFrame();
@@ -65,26 +65,6 @@ function buildPatternSheet(lookups, defaultMode, page) {
   const gapPath = resolveScale(md.gap);
   if (gapPath) { const v = primSpacing[gapPath]; if (v) sheet.setBoundVariable('itemSpacing', v); }
 
-  // Drag handle
-  const handleBar = figma.createFrame();
-  handleBar.name = 'drag-handle';
-  const handleWidthPath = resolveScale(handle.width);
-  const handleHeightPath = resolveScale(handle.height);
-  handleBar.resize(40, 4);
-  if (handleWidthPath) { const v = primSpacing[handleWidthPath]; if (v) handleBar.setBoundVariable('width', v); }
-  if (handleHeightPath) { const v = primSpacing[handleHeightPath]; if (v) handleBar.setBoundVariable('height', v); }
-  const handleBgVar = semColors[handle.bg];
-  if (handleBgVar) handleBar.fills = [figma.variables.setBoundVariableForPaint(
-    { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', handleBgVar
-  )];
-  const handleRadVar = semRadius[handle.radius];
-  if (handleRadVar) {
-    handleBar.setBoundVariable('topLeftRadius', handleRadVar);
-    handleBar.setBoundVariable('topRightRadius', handleRadVar);
-    handleBar.setBoundVariable('bottomLeftRadius', handleRadVar);
-    handleBar.setBoundVariable('bottomRightRadius', handleRadVar);
-  }
-  sheet.appendChild(handleBar);
 
   // Content placeholder
   const fgVar = semColors[colors.fg];

@@ -1,5 +1,5 @@
 const { buildVariantStyles, buildTypographyClasses } = require('../shared');
-const { filterSizes, buildSizeStylesWithText, extractIconSizes } = require('./helpers');
+const { filterSizes, buildSizeStylesWithText, extractIconSizes, textRoleClass } = require('./helpers');
 
 /**
  * Build trigger/content size maps from config sizes that have header-* or trigger-* prefixed keys.
@@ -34,10 +34,8 @@ function buildDisclosureSizeMaps(config) {
       if (match) tc.push(`gap-${match[1]}`);
     }
     // Font size
-    const fs = sz['header-font-size'] || sz['trigger-font-size'] || sz['font-size'];
-    const lh = sz['header-line-height'] || sz['trigger-line-height'] || sz['line-height'];
-    if (fs) tc.push(`text-[${fs}]`);
-    if (lh) tc.push(`leading-[${lh}]`);
+    const tRole = textRoleClass(sz['header-text'] || sz['trigger-text'] || sz.text);
+    if (tRole) tc.push(tRole);
 
     trigger[tier] = tc.join(' ');
 
@@ -77,8 +75,8 @@ function generateRadixTabs(name, config, meta) {
     const classes = [];
     const h = sz.height;
     if (h && h.startsWith('height/')) classes.push(`h-${h.replace('height/', '')}`);
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    const listRole = textRoleClass(sz.text);
+    if (listRole) classes.push(listRole);
     listSizes[tier] = classes.join(' ');
     // Trigger x-padding
     const px = sz['x-padding']?.match(/\{scale\.(\d+)\}/);
@@ -247,91 +245,4 @@ export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, accordion
 `;
 }
 
-function generateRadixCollapsible(name, config, meta) {
-  const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
-  const { trigger, chevron, contentPad, contentText } = buildDisclosureSizeMaps(config);
-
-  // Add rounded-component to bordered variant
-  const borderedClass = variantStyles.bordered || '';
-  const borderedWithRound = borderedClass.includes('border') ? borderedClass + ' rounded-component' : borderedClass;
-
-  return `'use client';
-
-import { forwardRef } from 'react';
-import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { ChevronDown } from 'lucide-react';
-import { cn } from './cn';
-
-const collapsibleVariants = cva('flex flex-col', {
-  variants: {
-    variant: {
-${Object.entries(variantStyles).map(([k, v]) => {
-    const val = k === 'bordered' ? borderedWithRound : v;
-    return `      ${k}: '${val}',`;
-  }).join('\n')}
-    },
-  },
-  defaultVariants: { variant: '${config.default?.variant || 'default'}' },
-});
-
-const triggerSize: Record<string, string> = {
-${mapToRecord(trigger)}
-};
-
-const chevronSize: Record<string, string> = {
-${mapToRecord(chevron)}
-};
-
-const contentPadding: Record<string, string> = {
-${mapToRecord(contentPad)}
-};
-
-const contentText: Record<string, string> = {
-${mapToRecord(contentText)}
-};
-
-const Collapsible = forwardRef<
-  React.ComponentRef<typeof CollapsiblePrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Root> & VariantProps<typeof collapsibleVariants>
->(({ variant, className, ...props }, ref) => (
-  <CollapsiblePrimitive.Root ref={ref} className={cn(collapsibleVariants({ variant }), className)} {...props} />
-));
-Collapsible.displayName = 'Collapsible';
-
-const CollapsibleTrigger = forwardRef<
-  React.ComponentRef<typeof CollapsiblePrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Trigger> & { size?: 'sm' | 'md' | 'lg' }
->(({ size = 'md', className, children, ...props }, ref) => (
-  <CollapsiblePrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'flex w-full items-center justify-between font-medium cursor-pointer transition-all rounded-[inherit]',
-      'hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      '[&[data-state=open]>svg]:rotate-180',
-      triggerSize[size],
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <ChevronDown className={cn('shrink-0 transition-transform duration-200', chevronSize[size])} />
-  </CollapsiblePrimitive.Trigger>
-));
-CollapsibleTrigger.displayName = 'CollapsibleTrigger';
-
-const CollapsibleContent = forwardRef<
-  React.ComponentRef<typeof CollapsiblePrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Content> & { size?: 'sm' | 'md' | 'lg' }
->(({ size = 'md', className, children, ...props }, ref) => (
-  <CollapsiblePrimitive.Content ref={ref} className={cn('overflow-hidden', contentText[size])} {...props}>
-    <div className={cn('text-on-surface-variant', contentPadding[size], className)}>{children}</div>
-  </CollapsiblePrimitive.Content>
-));
-CollapsibleContent.displayName = 'CollapsibleContent';
-
-export { Collapsible, CollapsibleTrigger, CollapsibleContent, collapsibleVariants };
-`;
-}
-
-module.exports = { generateRadixTabs, generateRadixAccordion, generateRadixCollapsible };
+module.exports = { generateRadixTabs, generateRadixAccordion };

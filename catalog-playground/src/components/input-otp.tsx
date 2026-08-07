@@ -4,9 +4,9 @@ import { forwardRef, useRef, useCallback, useState, useEffect } from 'react';
 import { cn } from './cn';
 
 const cellSizeMap: Record<string, string> = {
-  sm: 'size-control-sm rounded-input text-[16px] leading-[24px] border',
-  md: 'size-control-md rounded-input text-[20px] leading-[28px] border',
-  lg: 'size-control-lg rounded-input text-[24px] leading-[32px] border-2',
+  sm: 'size-control-sm rounded-input text-title-sm border',
+  md: 'size-control-md rounded-input text-title-md border',
+  lg: 'size-control-lg rounded-input text-title-lg border-2',
 };
 
 const gapMap: Record<string, string> = {

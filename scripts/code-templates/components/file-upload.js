@@ -20,6 +20,23 @@ function generateFileUpload(name, config, meta) {
 
   const defaultSize = config.default?.size || 'md';
 
+  // border-style was declared per size tier and read by nothing; it is the resting style
+  // and it is one decision, so it is read once here rather than emitted three times.
+  const restingBorderStyle = Object.values(sizes).find((sz) => sz['border-style'])?.['border-style'] || 'dashed';
+  const settled = config.settled || {};
+  const settledStyle = settled['border-style'] || 'solid';
+  const settledBorder = (state) => {
+    const ref = settled[state]?.border;
+    if (!ref) return '';
+    const role = ref.replace(/^color\/[^/]+\//, '');
+    return `border-${role}`;
+  };
+  // The status glyph reads the same icon-fg the Figma builder does. Hardcoding it here
+  // made the two agree by coincidence: change one and nothing catches the other.
+  const toneOf = (ref, fallback) => (ref ? `text-${ref.replace(/^color\/[^/]+\//, '')}` : fallback);
+  const restTone = toneOf(config.variants?.default?.['icon-fg'], 'text-on-surface-variant');
+  const settledTone = (state) => toneOf(settled[state]?.['icon-fg'], restTone);
+
   return `'use client';
 
 import { forwardRef, useCallback, useState, useRef } from 'react';
@@ -29,7 +46,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const fileUploadVariants = cva(
-  'relative flex flex-col items-center justify-center overflow-hidden border-2 border-dashed cursor-pointer transition-colors ${defaultColors}',
+  'relative flex flex-col items-center justify-center overflow-hidden border-2 border-${restingBorderStyle} cursor-pointer transition-colors ${defaultColors}',
   {
     variants: {
       size: {
@@ -55,10 +72,10 @@ const STATUS_GLYPH: Record<FileUploadStatus, React.ComponentType<{ className?: s
 };
 
 const STATUS_TONE: Record<FileUploadStatus, string> = {
-  idle: 'text-on-surface-variant',
-  uploading: 'text-on-surface-variant',
-  success: 'text-success',
-  error: 'text-error',
+  idle: '${restTone}',
+  uploading: '${restTone}',
+  success: '${settledTone('success')}',
+  error: '${settledTone('error')}',
 };
 
 // The trailing detail for a file: error message → progress% → size.
@@ -95,6 +112,7 @@ const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     const inputRef = useRef<HTMLInputElement>(null);
     // Error border cascades off FormFieldContext unless an explicit error prop is given.
     const isError = useFieldError(error) || selectedFile?.status === 'error';
+    const isSettled = selectedFile?.status === 'success' || isError;
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
       e.preventDefault();
@@ -152,7 +170,9 @@ const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
         className={cn(
           fileUploadVariants({ size }),
           isDragover && '${dragoverColors}',
-          isError && 'border-error',
+          isSettled && 'border-${settledStyle}',
+          selectedFile?.status === 'success' && '${settledBorder('success')}',
+          isError && '${settledBorder('error')}',
           disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
           className,
         )}
@@ -220,7 +240,7 @@ const FileUploadItem = forwardRef<HTMLDivElement, FileUploadItemProps>(
               type="button"
               onClick={onRemove}
               aria-label={\`Remove \${name}\`}
-              className="inline-flex items-center justify-center rounded-component text-on-surface-variant transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="inline-flex items-center justify-center rounded-component p-1 text-on-surface-variant interactive transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               <X className="size-icon-1" />
             </button>

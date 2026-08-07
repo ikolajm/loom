@@ -1,5 +1,5 @@
 const { buildVariantStyles, buildSizeStyles, colorToClass, spacingToClass, radiusToClass, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes, extractIconSizes } = require('./helpers');
+const { filterSizes, extractIconSizes, textRoleClass } = require('./helpers');
 
 function generateFabMenu(name, config, meta) {
   const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
@@ -34,8 +34,8 @@ function generateFabMenu(name, config, meta) {
   if (labelRad) labelClasses.push(`rounded-${labelRad}`);
   const fwMap = { 400: 'font-normal', 500: 'font-medium', 600: 'font-semibold', 700: 'font-bold' };
   if (labelCfg['font-weight'] && fwMap[labelCfg['font-weight']]) labelClasses.push(fwMap[labelCfg['font-weight']]);
-  if (labelCfg['font-size']) labelClasses.push(`text-[${labelCfg['font-size']}]`);
-  if (labelCfg['line-height']) labelClasses.push(`leading-[${labelCfg['line-height']}]`);
+  const labelRole = textRoleClass(labelCfg.text);
+  if (labelRole) labelClasses.push(labelRole);
   if (labelCfg['letter-spacing'] && labelCfg['letter-spacing'] !== '0') labelClasses.push(`tracking-[${labelCfg['letter-spacing']}]`);
   const labelClassStr = labelClasses.join(' ');
 

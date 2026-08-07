@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "navigation",
   "description": "",
-  "version": "fce77f084f01",
+  "version": "3d14f1db13f8",
   "dependencies": [
     "cn"
   ],

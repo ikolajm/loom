@@ -360,7 +360,7 @@
         "lg": { "size": "18px", "line-height": "28px" }
       },
       "action": {
-        "font": "body", "weight": 500, "letter-spacing": "0",
+        "font": "body", "weight": 500, "letter-spacing": "0.01em",
         "sm": { "size": "12px", "line-height": "16px" },
         "md": { "size": "14px", "line-height": "20px" },
         "lg": { "size": "16px", "line-height": "24px" }

@@ -17,6 +17,9 @@
  *   archetype-picks   — every archetype's curated pick-list names a real atom
  *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
  *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
+ *   composited-contrast — the same pairs still clear 3:1 after the muted opacity role
+ *   story-coverage    — every atom is actually rendered somewhere in the playground
+ *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
  * is not — a check whose scope silently shrank reads identically to one that passed.
@@ -349,6 +352,121 @@ function checkContrast() {
   return { failures, note: `${pairs} on-X/X pairs against WCAG AA ${AA_TEXT}:1` };
 }
 
+// --- composited-contrast -----------------------------------------------------
+// A token is not what renders: at `opacity-muted` a pair that clears 4.5:1 as declared
+// composites toward its background and can land far below it.
+//
+// 3:1 rather than 4.5 because `muted`'s uses — the dismiss controls on badge, toast and
+// file-upload — all wrap an icon glyph, so WCAG 1.4.11 non-text applies.
+// If it ever lands on text, re-measure rather than bump this: 22 of the 50 pairs fall
+// under 4.5:1 once composited. `disabled` is excluded — WCAG 1.4.3 exempts inactive
+// components, and it is dim by intent.
+const AA_NON_TEXT = 3.0;
+
+function compositeOver(fgHex, bgHex, alpha) {
+  const parse = (hex) => {
+    const raw = hex.replace('#', '');
+    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
+    return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  };
+  // Browsers composite in gamma space, per channel — not in linear light.
+  const [fg, bg] = [parse(fgHex), parse(bgHex)];
+  const out = fg.map((v, i) => Math.round(v * alpha + bg[i] * (1 - alpha)));
+  return '#' + out.map((v) => v.toString(16).padStart(2, '0')).join('');
+}
+
+function checkCompositedContrast() {
+  const colors = loadConfig('base/colors.json');
+  const standards = readJson('spec/config/standards.json');
+  const muted = standards.effects?.opacity?.muted;
+  const failures = [];
+  let pairs = 0;
+
+  if (typeof muted !== 'number') {
+    return { failures: ['standards.json declares no effects.opacity.muted'], note: 'muted role missing' };
+  }
+
+  for (const mode of Object.keys(colors.roles || {})) {
+    const flat = {};
+    for (const group of Object.values(colors.roles[mode])) {
+      for (const [role, value] of Object.entries(group)) {
+        if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
+      }
+    }
+    const check = (fg, bg) => {
+      if (!flat[fg] || !flat[bg]) return;
+      pairs++;
+      const rendered = compositeOver(flat[fg], flat[bg], muted);
+      const ratio = contrastRatio(rendered, flat[bg]);
+      if (ratio < AA_NON_TEXT) {
+        failures.push(
+          `${mode}: ${fg} (${flat[fg]}) at opacity ${muted} over ${bg} (${flat[bg]}) renders ${rendered} — ${ratio.toFixed(2)}:1, needs ${AA_NON_TEXT}`
+        );
+      }
+    };
+
+    for (const role of Object.keys(flat)) {
+      if (!role.startsWith('on-')) continue;
+      check(role, role.slice(3));
+    }
+    // `surface` only, not the four tiers the full-opacity check sweeps: both muted
+    // on-surface-variant controls declare bg-surface. Revisit if one moves off it —
+    // on a teal brand the same pair renders 2.90:1 over surface-3.
+    check('on-surface-variant', 'surface');
+  }
+
+  return { failures, note: `${pairs} pairs at muted opacity ${muted} against ${AA_NON_TEXT}:1` };
+}
+
+// --- typecheck ---------------------------------------------------------------
+// The compile gate lives in catalog-playground's build, not here, so generated TSX with
+// a syntax error passed every check in this file — twice in one session. tsc is the only
+// instrument that reads the emitted code as code; everything else reads it as text.
+// Skipped rather than failed when the playground has no node_modules: a fresh clone runs
+// `npm run generate` before it installs, and a missing toolchain is not a defect.
+function checkTypecheck() {
+  const dir = path.join(ROOT, 'catalog-playground');
+  const tsc = path.join(dir, 'node_modules/typescript/bin/tsc');
+  if (!fs.existsSync(tsc)) return { failures: [], note: 'playground deps not installed — skipped' };
+  const { spawnSync } = require('child_process');
+  const run = spawnSync(process.execPath, [tsc, '--noEmit'], { cwd: dir, encoding: 'utf-8' });
+  if (run.status === 0) return { failures: [], note: 'catalog-playground tsc --noEmit' };
+  const lines = String(run.stdout || run.stderr || '').split('\n').filter(Boolean).slice(0, 10);
+  return { failures: lines, note: 'catalog-playground tsc --noEmit' };
+}
+
+// --- story-coverage ----------------------------------------------------------
+// playground-parity counts synced *files*, so it reported "66/66 atoms covered" while
+// nine atoms were rendered nowhere and could not be looked at — Toast among them, which
+// is how a change to it shipped unverifiable. An atom counts as covered when any
+// component it exports is rendered in stories.tsx; six atoms (checkbox, radio, switch,
+// label, form-field, helper-text) are covered only inside other atoms' stories, which is
+// visible and therefore fine.
+const STORIES = path.join(ROOT, 'catalog-playground/src/gallery/stories.tsx');
+
+function checkStoryCoverage(atoms) {
+  if (!fs.existsSync(STORIES)) return { failures: [], note: 'no stories file — skipped' };
+  const src = fs.readFileSync(STORIES, 'utf-8');
+  const failures = [];
+  let covered = 0;
+
+  for (const atom of atoms) {
+    const file = path.join(CATALOG, `${atom}.tsx`);
+    if (!fs.existsSync(file)) continue;
+    const names = new Set();
+    for (const m of fs.readFileSync(file, 'utf-8').matchAll(/export\s*\{([^}]+)\}/g)) {
+      for (const raw of m[1].split(',')) {
+        const n = raw.trim().split(/\s+as\s+/).pop().trim();
+        if (n && /^[A-Z]/.test(n)) names.add(n);
+      }
+    }
+    if (!names.size) continue; // utility, nothing to render
+    if ([...names].some((n) => new RegExp(`<${n}(\\s|/|>)`).test(src))) covered++;
+    else failures.push(`${atom} — no export of it is rendered in stories.tsx`);
+  }
+  return { failures, note: `${covered} atoms rendered in the playground` };
+}
+
 function verify() {
   const atoms = atomNames();
   const checks = [
@@ -359,6 +477,9 @@ function verify() {
     ['archetype-picks', checkArchetypePicks(atoms)],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],
+    ['composited-contrast', checkCompositedContrast()],
+    ['story-coverage', checkStoryCoverage(atoms)],
+    ['typecheck', checkTypecheck()],
   ];
 
   let failed = 0;

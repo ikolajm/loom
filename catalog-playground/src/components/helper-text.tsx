@@ -4,7 +4,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const helperTextVariants = cva(
-  'flex items-center font-normal tracking-[0.02em]',
+  'flex items-center font-normal',
   {
     variants: {
       state: {

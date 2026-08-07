@@ -111,7 +111,7 @@ const ToastClose = forwardRef<
   <ToastPrimitive.Close
     ref={ref}
     className={cn(
-      'shrink-0 rounded-component interactive cursor-pointer opacity-(--opacity-muted) hover:opacity-100 transition-opacity',
+      'shrink-0 rounded-component p-1 interactive cursor-pointer opacity-(--opacity-muted) hover:opacity-100 transition-opacity',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
       className,
     )}

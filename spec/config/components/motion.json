@@ -23,7 +23,7 @@
   },
 
   "count-up": {
-    "$catalog": { "category": "motion", "composition": "none", "tokens": [], "dependencies": ["number"] },
+    "$catalog": { "category": "motion", "composition": "none", "tokens": [], "dependencies": ["cn"] },
     "$note": "Leaf motion atom — animates a number from `from` to `value` when scrolled into view (own IntersectionObserver, requestAnimationFrame, easeOutCubic). Composes NumberDisplay for all Intl formatting (separators / decimals / currency / compact notation), so it adds only the value animation. NO spring/overshoot axis — numeric overshoot reads as a data error. Reduced-motion: a matchMedia check snaps to the target (leaf JS atoms can't use the pure-CSS motion-safe gate). duration is numeric ms (content-dependent, unlike the micro-interaction --transition-* tokens). decimals defaults to the target's own precision.",
     "default": { "from": 0, "duration": 1200, "easing": "ease-out", "threshold": 0, "once": true }
   },

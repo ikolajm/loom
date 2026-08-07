@@ -77,6 +77,7 @@ const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     const inputRef = useRef<HTMLInputElement>(null);
     // Error border cascades off FormFieldContext unless an explicit error prop is given.
     const isError = useFieldError(error) || selectedFile?.status === 'error';
+    const isSettled = selectedFile?.status === 'success' || isError;
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
       e.preventDefault();
@@ -134,6 +135,8 @@ const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
         className={cn(
           fileUploadVariants({ size }),
           isDragover && 'bg-primary-container text-on-primary-container border-primary border',
+          isSettled && 'border-solid',
+          selectedFile?.status === 'success' && 'border-success',
           isError && 'border-error',
           disabled && 'opacity-(--opacity-disabled) cursor-not-allowed',
           className,
@@ -202,7 +205,7 @@ const FileUploadItem = forwardRef<HTMLDivElement, FileUploadItemProps>(
               type="button"
               onClick={onRemove}
               aria-label={`Remove ${name}`}
-              className="inline-flex items-center justify-center rounded-component text-on-surface-variant transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="inline-flex items-center justify-center rounded-component p-1 text-on-surface-variant interactive transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               <X className="size-icon-1" />
             </button>

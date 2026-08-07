@@ -8,7 +8,7 @@
  * Usage:
  *   node index.js --input answers.json
  *   node index.js --primary "#53599A" --edges sharp --density comfortable --shadowDepth elevated --typeScale standard
- *   node index.js --input ../../spec/answers.example.json --default-set   (maintainers only)
+ *   node index.js --default-set   (maintainers only — always reads spec/answers.example.json)
  */
 const fs = require('fs');
 const path = require('path');
@@ -58,6 +58,26 @@ function parseArgs(argv) {
 }
 
 function loadAnswers(args) {
+  // `--default-set` is the only path that writes the tracked spec/config/base/, so its
+  // input is pinned to the tracked answers.example.json and every brand-bearing flag is
+  // ignored rather than honoured. Without this, `npm run configs -- --default-set` writes
+  // whatever brand you are testing into the committed set: the npm script bakes in
+  // `--input spec/answers.json`, which is git-ignored precisely because it holds your
+  // brand and not Loom's. That is the mechanism of e935de3, which put a local dashboard's
+  // colors on master for a day — the redirect to spec/config/local/ closed the ordinary
+  // write path and left this one open.
+  if (args['default-set']) {
+    const example = path.join(PIPELINE_ROOT, 'spec/answers.example.json');
+    const overridden = [
+      args.input && path.resolve(args.input) !== example ? `--input ${args.input}` : null,
+      args.primary ? `--primary ${args.primary}` : null,
+    ].filter(Boolean);
+    if (overridden.length) {
+      console.log(`Note: --default-set ignores ${overridden.join(' and ')} — reading spec/answers.example.json`);
+    }
+    args.input = example;
+  }
+
   // If --input provided, read from file
   if (args.input) {
     const inputPath = path.resolve(args.input);

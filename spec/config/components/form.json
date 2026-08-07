@@ -17,9 +17,9 @@
     },
     "width": "280px",
     "sizes": {
-      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input", "icon-size": "icon/icon-3" }
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-3" }
     }
   },
 
@@ -45,9 +45,9 @@
     "$note": "Extends text-field but replaces fixed height with min-height. No icon slots — trailing/leading icons don't apply to multi-line input.",
     "$exception": "Textarea min-heights are hardcoded — content-area minimums specific to multi-line input, not derivable from sizing primitives.",
     "sizes": {
-      "sm": { "min-height": "80px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/input" },
-      "md": { "min-height": "120px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/input" },
-      "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "18px", "line-height": "28px", "radius": "radius/input" }
+      "sm": { "min-height": "80px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/input" },
+      "md": { "min-height": "120px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input" },
+      "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input" }
     },
     "resize": "vertical",
     "default": { "state": "default", "size": "md" }
@@ -120,15 +120,14 @@
     },
     "item": {
       "sizes": {
-        "sm": { "height": "height/menu-item-sm", "x-padding": "{scale.2}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px" },
-        "md": { "height": "height/menu-item-md", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-        "lg": { "height": "height/menu-item-lg", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px" }
+        "sm": { "height": "height/menu-item-sm", "x-padding": "{scale.2}", "gap": "{scale.1}", "text": "action/sm" },
+        "md": { "height": "height/menu-item-md", "x-padding": "{scale.3}", "gap": "{scale.2}", "text": "action/md" },
+        "lg": { "height": "height/menu-item-lg", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/lg" }
       }
     },
     "empty": {
       "fg": "color/surface/on-surface-variant",
-      "font-size": "14px",
-      "line-height": "20px"
+      "text": "body/sm"
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -147,11 +146,17 @@
   },
 
   "file-upload": {
-    "$note": "Dropzone — dashed-border drag-and-drop / click-to-browse area. Single-variant (the dropzone IS the atom; a button trigger is just a button). The dropzone is stateless — it fires onFilesSelected and owns no file array; the FileUploadItem subcomponent renders the selected-files list the consumer maps over. `dragover` is an internal runtime state (drag highlight), NOT a consumer-facing variant. `uploading` is code-only.",
+    "$note": "Dropzone — drag-and-drop / click-to-browse area, dashed while it is still asking for a file and solid once an upload has settled (see `settled`). Single-variant (the dropzone IS the atom; a button trigger is just a button). The dropzone is stateless — it fires onFilesSelected and owns no file array; the FileUploadItem subcomponent renders the selected-files list the consumer maps over. `dragover` is an internal runtime state (drag highlight), NOT a consumer-facing variant. `uploading` is code-only.",
     "variants": {
       "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline", "icon-fg": "color/surface/on-surface-variant" }
     },
     "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" },
+    "settled": {
+      "$note": "Border style carries whether the dropzone is still asking for a file. Dashed reads as an open target; once an upload has resolved the box is reporting, not inviting, so it takes a full stroke. `uploading` stays dashed — nothing has been uploaded yet.",
+      "border-style": "solid",
+      "success": { "border": "color/success/success", "icon-fg": "color/success/success" },
+      "error": { "border": "color/error/error", "icon-fg": "color/error/error" }
+    },
     "typography": {
       "font-family": "body",
       "font-weight": 400,
@@ -159,9 +164,9 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-2", "font-size": "14px", "line-height": "20px" },
-      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-3", "font-size": "16px", "line-height": "24px" },
-      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-4", "font-size": "18px", "line-height": "28px" }
+      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-2" },
+      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-3" },
+      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-4" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -181,9 +186,9 @@
     },
     "$exception": "OTP cells are square — width equals height. Monospace-like letter-spacing ensures centered digits. Cell sizes are hardcoded to maintain square proportions.",
     "sizes": {
-      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "radius": "radius/input", "font-size": "16px", "line-height": "24px", "border-width": "border-width/bw-1" },
-      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "radius": "radius/input", "font-size": "20px", "line-height": "28px", "border-width": "border-width/bw-1" },
-      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "radius": "radius/input", "font-size": "24px", "line-height": "32px", "border-width": "border-width/bw-2" }
+      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "radius": "radius/input", "text": "title/sm", "border-width": "border-width/bw-1" },
+      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "radius": "radius/input", "text": "title/md", "border-width": "border-width/bw-1" },
+      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "radius": "radius/input", "text": "title/lg", "border-width": "border-width/bw-2" }
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -195,13 +200,12 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "font-size": "12px", "line-height": "16px" },
-      "md": { "font-size": "14px", "line-height": "20px" },
-      "lg": { "font-size": "16px", "line-height": "24px" }
+      "sm": { "line-height": "16px" },
+      "md": { "line-height": "20px" },
+      "lg": { "line-height": "24px" }
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -214,14 +218,13 @@
     "typography": {
       "font-family": "body",
       "font-weight": 400,
-      "letter-spacing": "0.02em",
       "text-transform": "none"
     },
     "$exception": "Helper text sm font-size (11px) is below the caption preset minimum (12px) — must remain visually subordinate to label at every size tier.",
     "sizes": {
-      "sm": { "font-size": "11px", "line-height": "16px" },
-      "md": { "font-size": "12px", "line-height": "16px" },
-      "lg": { "font-size": "14px", "line-height": "20px" }
+      "sm": { "line-height": "16px" },
+      "md": { "line-height": "16px" },
+      "lg": { "line-height": "20px" }
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -254,29 +257,12 @@
       "text-transform": "none"
     },
     "sizes": {
-      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "12px", "header-line-height": "16px", "day-font-size": "11px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "12px", "day-line-height": "16px", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "header-font-size": "14px", "header-line-height": "20px", "day-font-size": "14px", "day-line-height": "20px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
-      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "header-font-size": "16px", "header-line-height": "24px", "day-font-size": "16px", "day-line-height": "24px", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
+      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/sm", "nav-height": "16px", "day-text": "action/sm", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
+      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/md", "nav-height": "20px", "day-text": "action/sm", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
+      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/md", "nav-height": "20px", "day-text": "action/md", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
+      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "header-text": "action/lg", "nav-height": "24px", "day-text": "action/lg", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
-  },
-
-  "rating": {
-    "$catalog": {
-      "category": "form",
-      "description": "Star (or custom-icon) rating input. Interactive or read-only, optional half-steps. Filled vs empty driven by value.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "sizing"],
-      "composition": "none"
-    },
-    "$note": "Star rating. Filled overlay clipped to value for half-steps. Icon swappable via the `icon` prop (default lucide Star). Filled color = primary; empty = outline — project-owned, swap in the file.",
-    "sizes": {
-      "sm": { "icon-size": "icon/icon-2", "gap": "{scale.1}" },
-      "md": { "icon-size": "icon/icon-3", "gap": "{scale.1}" },
-      "lg": { "icon-size": "icon/icon-4", "gap": "{scale.2}" }
-    },
-    "default": { "size": "md" }
   },
 
   "time-picker": {
@@ -292,23 +278,6 @@
       "sm": {},
       "md": {},
       "lg": {}
-    },
-    "default": { "size": "md" }
-  },
-
-  "search-bar": {
-    "$catalog": {
-      "category": "form",
-      "description": "In-body search input — leading search icon + clearable input. Distinct from command-palette (overlay).",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
-      "composition": "none"
-    },
-    "$note": "Static input shell (search icon + clear X); a live-results dropdown is deferred. Controlled (`value`) or uncontrolled.",
-    "sizes": {
-      "sm": { "height": "height/control-sm" },
-      "md": { "height": "height/control-md" },
-      "lg": { "height": "height/control-lg" }
     },
     "default": { "size": "md" }
   }

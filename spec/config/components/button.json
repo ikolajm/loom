@@ -21,7 +21,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -29,9 +28,9 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "font-size": "12px", "line-height": "16px", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "16px", "line-height": "24px", "radius": "radius/component", "icon-size": "icon/icon-3" }
+      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-3" }
     },
     "icon-sizes": {
       "$note": "Square sizing for icon-only mode (iconOnly prop). No padding — icon centers via flexbox. Touch target met at all sizes.",
@@ -62,7 +61,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.02em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -86,10 +84,9 @@
       "tokens": ["color", "sizing"],
       "composition": "none"
     },
-    "$note": "Single-axis atom: state → base color fill. Always a circle (rounded-pill). No text/icon. Sizes reuse icon tokens.",
+    "$note": "Single-axis atom: state → base color fill. Always a circle (rounded-pill). No text/icon. Sizes reuse icon tokens. No neutral state: a dot exists to say which of several conditions holds, and a neutral dot says nothing a missing dot does not — brand and status hues carry the meaning. Badge keeps neutral because a badge carries a label that means something on its own.",
     "state": {
       "default":     { "bg": "color/primary/primary" },
-      "neutral":     { "bg": "color/neutral/neutral" },
       "destructive": { "bg": "color/error/error" },
       "success":     { "bg": "color/success/success" },
       "warning":     { "bg": "color/warning/warning" },
@@ -117,7 +114,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "sizes": {
@@ -127,9 +123,9 @@
     },
     "extended": {
       "$note": "Extended FAB adds a label. Allowed at all sizes incl. sm (sm uses compact 12px label typography).",
-      "sm": { "height": "height/fab-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "font-size": "12px", "line-height": "16px" },
-      "md": { "height": "height/fab-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "lg": { "height": "height/fab-lg", "x-padding": "{scale.5}", "gap": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+      "sm": { "height": "height/fab-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "text": "action/sm" },
+      "md": { "height": "height/fab-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/md" },
+      "lg": { "height": "height/fab-lg", "x-padding": "{scale.5}", "gap": "{scale.3}", "text": "action/lg" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -167,9 +163,7 @@
       "$note": "Optional label rendered next to action (right side). Pill shape, small typography.",
       "font-family": "body",
       "font-weight": 500,
-      "font-size": "12px",
-      "line-height": "16px",
-      "letter-spacing": "0.01em",
+      "text": "action/sm",
       "x-padding": "{scale.2}",
       "y-padding": "{scale.1}",
       "radius": "radius/component",
@@ -195,7 +189,6 @@
     "typography": {
       "font-family": "body",
       "font-weight": 500,
-      "letter-spacing": "0.01em",
       "text-transform": "none"
     },
     "icon-slots": {
@@ -203,9 +196,9 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1", "font-size": "12px", "line-height": "16px" },
-      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "14px", "line-height": "20px" },
-      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2", "font-size": "16px", "line-height": "24px" }
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
     },
     "default": { "state": "unpressed", "size": "md" }
   },

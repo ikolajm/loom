@@ -20,8 +20,6 @@
     "input-otp",
     "label",
     "radio",
-    "rating",
-    "search-bar",
     "select",
     "slider",
     "switch",
@@ -55,10 +53,8 @@
     "accordion",
     "avatar",
     "avatar-group",
-    "collapsible",
     "kbd",
     "list-item",
-    "number",
     "relative-time"
   ],
   "navigation": [

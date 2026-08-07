@@ -33,9 +33,9 @@ const AccordionItem = forwardRef<
 AccordionItem.displayName = 'AccordionItem';
 
 const triggerSize: Record<string, string> = {
-  sm: 'h-row-sm px-3 gap-2 text-[14px] leading-[20px]',
-  md: 'h-row-md px-4 gap-3 text-[16px] leading-[24px]',
-  lg: 'h-row-lg px-6 gap-4 text-[18px] leading-[28px]',
+  sm: 'h-row-sm px-3 gap-2 text-body-sm',
+  md: 'h-row-md px-4 gap-3 text-body-md',
+  lg: 'h-row-lg px-6 gap-4 text-body-lg',
 };
 
 const chevronSize: Record<string, string> = {

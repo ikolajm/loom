@@ -5,6 +5,16 @@ import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
 import { Dot } from '@/components/dot';
 import { Banner } from '@/components/banner';
+import { Spinner } from '@/components/spinner';
+import { Skeleton } from '@/components/skeleton';
+import { ProgressBar } from '@/components/progress-bar';
+import { EmptyState } from '@/components/empty-state';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/tooltip';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/popover';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/hover-card';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut } from '@/components/dropdown-menu';
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut } from '@/components/context-menu';
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/toast';
 import { FAB } from '@/components/fab';
 import { FabMenu, FabAction } from '@/components/fab-menu';
 import { Toggle } from '@/components/toggle';
@@ -31,16 +41,12 @@ import { Label } from '@/components/label';
 import { HelperText } from '@/components/helper-text';
 import { FormField } from '@/components/form-field';
 import { FileUpload, FileUploadItem } from '@/components/file-upload';
-import { Rating } from '@/components/rating';
 import { TimePicker, type TimeValue } from '@/components/time-picker';
-import { SearchBar } from '@/components/search-bar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
 import { AvatarGroup } from '@/components/avatar-group';
 import { ListItem } from '@/components/list-item';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/accordion';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/collapsible';
 import { Kbd } from '@/components/kbd';
-import { NumberDisplay } from '@/components/number';
 import { RelativeTime } from '@/components/relative-time';
 import { TopBar } from '@/components/top-bar';
 import { Sidebar, SidebarItem } from '@/components/sidebar';
@@ -72,6 +78,8 @@ const TREATMENTS = ['filled', 'outline', 'ghost'] as const;
 const COLORS = ['primary', 'secondary', 'destructive', 'success', 'warning', 'neutral'] as const;
 const SIZES = ['sm', 'md', 'lg'] as const;
 const BADGE_STATES = ['default', 'neutral', 'destructive', 'success', 'warning', 'info'] as const;
+const DOT_STATES = ['default', 'destructive', 'success', 'warning', 'info'] as const;
+const TOAST_VARIANTS = ['default', 'success', 'warning', 'error', 'info'] as const;
 
 const treeSample: TreeNodeData[] = [
   { id: 'src', label: 'src', children: [
@@ -98,6 +106,42 @@ function RelativeTimeExample({ offsetMs, numeric }: { offsetMs: number; numeric?
   }, [offsetMs]);
   if (!date) return <time className="text-on-surface-variant">&mdash;</time>;
   return <RelativeTime date={date} numeric={numeric} />;
+}
+
+// Radix Toast only mounts an open Root, and it portals into a fixed viewport — so a
+// toast cannot be rendered inline the way the other specimens are. One provider and one
+// viewport are shared across the buttons; the toast lands top-right of the window.
+function ToastExample({ variants, sizes }: { variants?: typeof TOAST_VARIANTS[number][]; sizes?: typeof SIZES[number][] }) {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const keys = variants ?? sizes ?? [];
+  return (
+    <ToastProvider swipeDirection="right">
+      <div className="flex flex-wrap gap-2">
+        {keys.map((k) => (
+          <Button key={k} size="sm" variant="outline" color="neutral" onClick={() => setOpenKey(k)}>{k}</Button>
+        ))}
+      </div>
+      {openKey && (
+        <Toast
+          key={openKey}
+          variant={variants ? (openKey as typeof TOAST_VARIANTS[number]) : undefined}
+          size={sizes ? (openKey as typeof SIZES[number]) : undefined}
+          open
+          onOpenChange={(o) => { if (!o) setOpenKey(null); }}
+        >
+          <div className="flex flex-col gap-1">
+            <ToastTitle>Toast {openKey}</ToastTitle>
+            <ToastDescription>Hover the close X — it carries a background wash.</ToastDescription>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <ToastAction altText="Undo">Undo</ToastAction>
+            <ToastClose />
+          </div>
+        </Toast>
+      )}
+      <ToastViewport />
+    </ToastProvider>
+  );
 }
 
 function ToggleExample() {
@@ -178,10 +222,7 @@ function OTPExample() {
   const [v, setV] = useState('');
   return <InputOTP value={v} onValueChange={setV} length={6} />;
 }
-function RatingExample({ allowHalf }: { allowHalf?: boolean }) {
-  const [v, setV] = useState(allowHalf ? 2.5 : 3);
-  return <Rating value={v} onValueChange={setV} allowHalf={allowHalf} />;
-}
+
 function TimePickerExample() {
   const [t, setT] = useState<TimeValue>({ hour: 9, minute: 30, period: 'AM' });
   return <TimePicker value={t} onValueChange={setT} />;
@@ -245,7 +286,7 @@ function StaggerDemo() {
 }
 
 // CountUp animates on in-view. In the always-visible gallery it counts on mount; Replay remounts
-// the group (key bump) to re-run. Shows formatting forwarded to NumberDisplay (separators, currency, percent).
+// the group (key bump) to re-run. Shows the Intl formatting count-up applies (separators, currency, percent).
 function CountUpDemo() {
   const [k, setK] = useState(0);
   const stat = (node: React.ReactNode, label: string) => (
@@ -261,7 +302,7 @@ function CountUpDemo() {
         {stat(<CountUp value={147} />, 'Clients')}
         {stat(<CountUp value={45200} format="currency" currency="USD" />, 'Revenue')}
         {stat(<CountUp value={0.92} format="percent" decimals={0} />, 'Growth')}
-        {stat(<CountUp value={4.8} />, 'Rating')}
+        {stat(<CountUp value={4.8} />, 'Score')}
       </div>
     </div>
   );
@@ -326,7 +367,7 @@ export const STORIES: GalleryStory[] = [
     category: 'Feedback',
     description: 'Standalone status/severity indicator. Composes into badges, alerts, list items, headings.',
     sections: [
-      { label: 'states', content: BADGE_STATES.map((s) => <span key={s} className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state={s} />{s}</span>) },
+      { label: 'states', content: DOT_STATES.map((s) => <span key={s} className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state={s} />{s}</span>) },
       { label: 'sizes', content: SIZES.map((s) => <Dot key={s} size={s} />) },
       { label: 'composed', content: [<span key="1" className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state="success" /> Online</span>, <Badge key="2" state="warning"><Dot state="warning" className="mr-1" />Pending</Badge>] },
     ],
@@ -341,6 +382,171 @@ export const STORIES: GalleryStory[] = [
       { label: 'leading icon', content: <div className="w-[460px]"><Banner variant="info" leadingIcon={<Star />}>Heads up — a new version is available.</Banner></div> },
       { label: 'action slot', content: <div className="w-[460px]"><Banner variant="warning" leadingIcon={<Star />} action={<Button size="sm" variant="outline" color="neutral">Review</Button>}>Your trial ends in 3 days.</Banner></div> },
       { label: 'dismissible', content: <BannerDismissExample /> },
+    ],
+  },
+  {
+    name: 'Toast',
+    category: 'Feedback',
+    description: 'Transient notification. Variant × size, optional action and close X. Radix-backed — opens into a fixed viewport rather than inline.',
+    sections: [
+      { label: 'variants (click to open)', content: <ToastExample variants={[...TOAST_VARIANTS]} /> },
+      { label: 'sizes (click to open)', content: <ToastExample sizes={[...SIZES]} /> },
+    ],
+  },
+  {
+    name: 'Spinner',
+    category: 'Feedback',
+    description: 'Indeterminate loading indicator. variant (default/muted/inherit) × size.',
+    sections: [
+      { label: 'sizes', content: SIZES.map((s) => <Spinner key={s} size={s} />) },
+      { label: 'variants', content: (['default', 'muted', 'inherit'] as const).map((v) => <Spinner key={v} variant={v} />) },
+    ],
+  },
+  {
+    name: 'Skeleton',
+    category: 'Feedback',
+    description: 'Loading placeholder. Shape presets (text/avatar/card); defaults to a full-width text line.',
+    sections: [
+      { label: 'default (text line)', content: <div className="w-64"><Skeleton /></div> },
+      { label: 'shapes', content: (['text', 'avatar', 'card'] as const).map((s) => <div key={s} className="w-64"><Skeleton shape={s} /></div>) },
+    ],
+  },
+  {
+    name: 'ProgressBar',
+    category: 'Feedback',
+    description: 'Determinate progress. Variant × size, value 0–100.',
+    sections: [
+      { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-64"><ProgressBar size={s} value={60} /></div>) },
+      { label: 'variants', content: (['default', 'success', 'warning', 'error'] as const).map((v) => <div key={v} className="w-64"><ProgressBar variant={v} value={60} /></div>) },
+      { label: 'values', content: [0, 35, 70, 100].map((v) => <div key={v} className="w-64"><ProgressBar value={v} /></div>) },
+    ],
+  },
+  {
+    name: 'EmptyState',
+    category: 'Feedback',
+    description: 'Zero-data placeholder. Optional icon, heading, description and action slot; every slot is independent, so a heading-only state is valid.',
+    sections: [
+      { label: 'full (icon + heading + description + action)', content: (
+        <div className="w-[380px]">
+          <EmptyState
+            icon={<Users />}
+            heading="No members yet"
+            description="Invite someone to collaborate and they will show up here."
+            action={<Button size="sm">Invite a member</Button>}
+          />
+        </div>
+      ) },
+      { label: 'heading + description only', content: (
+        <div className="w-[380px]"><EmptyState heading="Nothing to review" description="You are all caught up." /></div>
+      ) },
+      { label: 'sizes', content: SIZES.map((s) => (
+        <div key={s} className="w-[380px]">
+          <EmptyState size={s} icon={<Users />} heading={`Size ${s}`} description="Icon, heading and description all scale with the size." />
+        </div>
+      )) },
+    ],
+  },
+  {
+    name: 'Tooltip',
+    category: 'Feedback',
+    description: 'Hover/focus hint on a trigger. Radix-backed, portalled — opens on hover after a delay. Needs a TooltipProvider above it.',
+    sections: [
+      { label: 'sizes (hover the trigger)', content: (
+        <TooltipProvider delayDuration={150}>
+          <div className="flex flex-wrap gap-2">
+            {SIZES.map((s) => (
+              <Tooltip key={s}>
+                <TooltipTrigger asChild><Button size="sm" variant="outline" color="neutral">{s}</Button></TooltipTrigger>
+                <TooltipContent size={s}>Tooltip at {s} size</TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+        </TooltipProvider>
+      ) },
+    ],
+  },
+  {
+    name: 'Popover',
+    category: 'Layout',
+    description: 'Click-triggered floating panel. Unlike Tooltip it holds interactive content and stays open until dismissed.',
+    sections: [
+      { label: 'sizes (click to open)', content: (
+        <div className="flex flex-wrap gap-2">
+          {SIZES.map((s) => (
+            <Popover key={s}>
+              <PopoverTrigger asChild><Button size="sm" variant="outline" color="neutral">{s}</Button></PopoverTrigger>
+              <PopoverContent size={s}>
+                <p className="text-body-sm">Popover at {s} size. Interactive content lives here.</p>
+              </PopoverContent>
+            </Popover>
+          ))}
+        </div>
+      ) },
+    ],
+  },
+  {
+    name: 'HoverCard',
+    category: 'Layout',
+    description: 'Preview card on hover — richer than a tooltip, non-interactive by intent. Used for profile and link previews.',
+    sections: [
+      { label: 'sizes (hover the trigger)', content: (
+        <div className="flex flex-wrap gap-2">
+          {SIZES.map((s) => (
+            <HoverCard key={s} openDelay={150}>
+              <HoverCardTrigger asChild><Button size="sm" variant="ghost" color="primary">{s}</Button></HoverCardTrigger>
+              <HoverCardContent size={s}>
+                <p className="text-body-sm">Hover card at {s} size — a preview, not a menu.</p>
+              </HoverCardContent>
+            </HoverCard>
+          ))}
+        </div>
+      ) },
+    ],
+  },
+  {
+    name: 'DropdownMenu',
+    category: 'Navigation',
+    description: 'Click-triggered menu with items, labels, separators and shortcut hints. Full sm/md/lg ladder.',
+    sections: [
+      { label: 'sizes (click to open)', content: (
+        <div className="flex flex-wrap gap-2">
+          {SIZES.map((s) => (
+            <DropdownMenu key={s}>
+              <DropdownMenuTrigger asChild><Button size="sm" variant="outline" color="neutral">{s}</Button></DropdownMenuTrigger>
+              <DropdownMenuContent size={s}>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem>Edit<DropdownMenuShortcut>⌘E</DropdownMenuShortcut></DropdownMenuItem>
+                <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Delete</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ))}
+        </div>
+      ) },
+    ],
+  },
+  {
+    name: 'ContextMenu',
+    category: 'Navigation',
+    description: 'Right-click menu. Same item vocabulary as DropdownMenu; the trigger is the surface itself rather than a button.',
+    sections: [
+      { label: 'right-click the panel', content: (
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div className="flex h-24 w-72 items-center justify-center rounded-card border border-dashed border-outline text-body-sm text-on-surface-variant">
+              Right-click here
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuLabel>Actions</ContextMenuLabel>
+            <ContextMenuItem>Cut<ContextMenuShortcut>⌘X</ContextMenuShortcut></ContextMenuItem>
+            <ContextMenuItem>Copy<ContextMenuShortcut>⌘C</ContextMenuShortcut></ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem>Delete</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      ) },
     ],
   },
   {
@@ -615,32 +821,12 @@ export const STORIES: GalleryStory[] = [
     ],
   },
   {
-    name: 'Rating',
-    category: 'Inputs',
-    description: 'Star (or custom-icon) rating. Interactive, optional half-steps, read-only. Filled = primary (project-owned).',
-    sections: [
-      { label: 'half steps', content: <RatingExample allowHalf /> },
-      { label: 'read-only', content: <Rating value={4} readOnly /> },
-      { label: 'sizes', content: SIZES.map((s) => <Rating key={s} size={s} value={3} readOnly />) },
-    ],
-  },
-  {
     name: 'TimePicker',
     category: 'Inputs',
     description: 'Option A — three composed Selects (hour / minute / period). No masking; a11y via Select.',
     sections: [
       { label: '12-hour', content: <TimePickerExample /> },
       { label: '24-hour', content: <TimePicker use24Hour value={{ hour: 14, minute: 0 }} /> },
-    ],
-  },
-  {
-    name: 'SearchBar',
-    category: 'Inputs',
-    description: 'In-body search shell — leading icon (optional) + clearable X. Distinct from command-palette (overlay).',
-    sections: [
-      { label: 'default (search glyph)', content: <div className="w-64"><SearchBar placeholder="Search…" /></div> },
-      { label: 'no leading icon (text to edge)', content: <div className="w-64"><SearchBar icon={null} placeholder="No icon — text at the edge" /></div> },
-      { label: 'leading icon · sizes (slot scales)', content: SIZES.map((s) => <div key={s} className="w-64"><SearchBar size={s} placeholder={`size ${s}`} /></div>) },
     ],
   },
   {
@@ -684,33 +870,12 @@ export const STORIES: GalleryStory[] = [
     ],
   },
   {
-    name: 'Collapsible',
-    category: 'Data Display',
-    description: 'Single progressive-disclosure panel — no group behavior. Simpler than Accordion.',
-    sections: [
-      { label: 'default (open)', content: <div className="w-80"><Collapsible defaultOpen><CollapsibleTrigger>Toggle details</CollapsibleTrigger><CollapsibleContent><div className="px-4 py-2 text-on-surface-variant text-body-md">Optional detail content lives here.</div></CollapsibleContent></Collapsible></div> },
-      { label: 'bordered', content: <div className="w-80"><Collapsible variant="bordered"><CollapsibleTrigger>Show more</CollapsibleTrigger><CollapsibleContent><div className="px-4 py-2 text-on-surface-variant text-body-md">Hidden until toggled.</div></CollapsibleContent></Collapsible></div> },
-    ],
-  },
-  {
     name: 'Kbd',
     category: 'Data Display',
     description: 'Keyboard shortcut key cap. Inline element; combos compose with a gap.',
     sections: [
       { label: 'sizes', content: SIZES.map((s) => <Kbd key={s} size={s}>⌘K</Kbd>) },
       { label: 'combination', content: <span className="inline-flex items-center gap-1"><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></span> },
-    ],
-  },
-  {
-    name: 'NumberDisplay',
-    category: 'Data Display',
-    description: 'Intl.NumberFormat primitive. RSC-safe, tabular-nums. The count-up atom wraps it. options spreads last as an escape hatch.',
-    sections: [
-      { label: 'decimal', content: <NumberDisplay value={1234567.89} /> },
-      { label: 'currency', content: [<NumberDisplay key="1" value={1299.99} format="currency" currency="USD" />, <NumberDisplay key="2" value={1299.99} format="currency" currency="EUR" locale="de-DE" />] },
-      { label: 'percent', content: <NumberDisplay value={0.4267} format="percent" /> },
-      { label: 'compact notation', content: [<NumberDisplay key="1" value={12500} notation="compact" />, <NumberDisplay key="2" value={3400000} notation="compact" />] },
-      { label: 'unit', content: <NumberDisplay value={72} format="unit" unit="mile-per-hour" /> },
     ],
   },
   {

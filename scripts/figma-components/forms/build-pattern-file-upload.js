@@ -27,7 +27,11 @@ function buildPatternFileUpload(lookups, defaultMode, page) {
   const zones = [
     ...Object.entries(config.variants),
     ...(config.dragover ? [['dragover', config.dragover]] : []),
+    ...['success', 'error']
+      .filter((s) => config.settled && config.settled[s])
+      .map((s) => [s, Object.assign({}, config.variants.default, config.settled[s])]),
   ];
+  const SETTLED = new Set(['success', 'error']);
   for (const [variantName, colors] of zones) {
     const zone = figma.createFrame();
     zone.name = `dropzone-${variantName}`;
@@ -48,7 +52,7 @@ function buildPatternFileUpload(lookups, defaultMode, page) {
       zone.strokes = [figma.variables.setBoundVariableForPaint(
         { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }, 'color', borderVar
       )];
-      zone.dashPattern = [6, 4];
+      zone.dashPattern = SETTLED.has(variantName) ? [] : [6, 4];
       zone.strokeWeight = 2;
     }
 

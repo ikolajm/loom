@@ -1,5 +1,5 @@
 const { buildVariantStyles, buildSizeStyles, buildTypographyClasses, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes, extractIconSizes } = require('./helpers');
+const { filterSizes, extractIconSizes, textRoleClass } = require('./helpers');
 
 function generateFAB(name, config, meta) {
   const variantStyles = config.variants ? buildVariantStyles(config.variants) : {};
@@ -16,13 +16,12 @@ function generateFAB(name, config, meta) {
       shadow: ext.shadow || base.shadow,
     };
   }
-  // Extended sizes use their own font-size from config (not text family class)
-  // because extended FAB text needs to scale with the icon, not the family ceiling
+  // Extended sizes carry their own role rather than the atom's family: the label has to
+  // scale with the icon, not with the family ceiling.
   const extendedSizeStyles = buildSizeStyles(mergedExtended);
   for (const [tier, sz] of Object.entries(mergedExtended)) {
-    if (sz['font-size']) {
-      extendedSizeStyles[tier] += ` text-[${sz['font-size']}] leading-[${sz['line-height'] || '1.5'}]`;
-    }
+    const role = textRoleClass(sz.text);
+    if (role) extendedSizeStyles[tier] += ` ${role}`;
   }
   const iconSizes = extractIconSizes(sizes);
   const typo = buildTypographyClasses(config);

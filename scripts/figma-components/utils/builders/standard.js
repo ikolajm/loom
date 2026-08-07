@@ -110,6 +110,50 @@ function resolveVariantEntries(compConfig) {
 }
 
 /**
+ * Position an orthogonal variant set as a grid: one row per treatment, one column per
+ * color, sizes stacked in the cell. Variants are generated treatment → color → size, so
+ * index i is at treatment floor(i/(nColors*nSizes)), color floor(i/nSizes)%nColors,
+ * size i%nSizes. Columns share a width across all rows so the color axis stays aligned.
+ */
+function layoutOrthogonalGrid(set, nTreatments, nColors, nSizes) {
+  const GAP = 16;
+  const ROW_GAP = 48;
+  const kids = set.children;
+  const at = (t, c, s) => kids[t * nColors * nSizes + c * nSizes + s];
+
+  const colWidths = [];
+  for (let c = 0; c < nColors; c++) {
+    let w = 0;
+    for (let t = 0; t < nTreatments; t++) {
+      for (let s = 0; s < nSizes; s++) w = Math.max(w, at(t, c, s).width);
+    }
+    colWidths.push(w);
+  }
+
+  let y = 0;
+  let totalW = 0;
+  for (let t = 0; t < nTreatments; t++) {
+    let x = 0;
+    let rowH = 0;
+    for (let c = 0; c < nColors; c++) {
+      let cy = y;
+      for (let s = 0; s < nSizes; s++) {
+        const node = at(t, c, s);
+        node.x = x;
+        node.y = cy;
+        cy += node.height + GAP;
+      }
+      rowH = Math.max(rowH, cy - y - GAP);
+      x += colWidths[c] + GAP;
+    }
+    totalW = Math.max(totalW, x - GAP);
+    y += rowH + ROW_GAP;
+  }
+
+  set.resize(totalW, y - ROW_GAP);
+}
+
+/**
  * Build a standard component from a descriptor + config.
  *
  * @param {object} descriptor - { name, configKey, description }
@@ -277,11 +321,21 @@ function buildStandardComponent(descriptor, compConfig, lookups, defaultMode, pa
   // Combine into component set
   const set = figma.combineAsVariants(variants, page);
   set.name = descriptor.name;
-  set.layoutMode = 'VERTICAL';
-  set.itemSpacing = 8;
-  set.primaryAxisSizingMode = 'AUTO';
-  set.counterAxisSizingMode = 'AUTO';
   set.fills = [];
+
+  const sizeNames = Object.keys(compConfig.sizes).filter(k => !k.startsWith('$'));
+  const isOrthogonal = compConfig.treatments && compConfig.colors;
+  if (isOrthogonal) {
+    const colorNames = Object.keys(compConfig.colors).filter(k => !k.startsWith('$'));
+    const treatments = compConfig.treatments.filter(t => ['filled', 'outline', 'ghost'].includes(t));
+    set.layoutMode = 'NONE';
+    layoutOrthogonalGrid(set, treatments.length, colorNames.length, sizeNames.length);
+  } else {
+    set.layoutMode = 'VERTICAL';
+    set.itemSpacing = 8;
+    set.primaryAxisSizingMode = 'AUTO';
+    set.counterAxisSizingMode = 'AUTO';
+  }
 
   // Base frame
   createBaseFrame(descriptor.configKey, descriptor.description, set, lookups, defaultMode);

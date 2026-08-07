@@ -59,7 +59,7 @@
     "action": {
       "font": "body",
       "weight": 500,
-      "letter-spacing": "0",
+      "letter-spacing": "0.01em",
       "sm": {
         "size": "12px",
         "line-height": "16px"

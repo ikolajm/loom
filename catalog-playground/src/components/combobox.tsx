@@ -8,9 +8,9 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-menu-item-sm px-2 gap-1 text-[12px] leading-[16px]',
-  md: 'h-menu-item-md px-3 gap-2 text-[14px] leading-[20px]',
-  lg: 'h-menu-item-lg px-4 gap-2 text-[16px] leading-[24px]',
+  sm: 'h-menu-item-sm px-2 gap-1 text-action-sm',
+  md: 'h-menu-item-md px-3 gap-2 text-action-md',
+  lg: 'h-menu-item-lg px-4 gap-2 text-action-lg',
 };
 
 type ComboboxOption = { value: string; label: string };

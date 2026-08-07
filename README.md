@@ -1,6 +1,6 @@
 # Loom
 
-A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (66 components on a shared token foundation) — so the design surface and the code surface never drift from each other.
+A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (62 components on a shared token foundation) — so the design surface and the code surface never drift from each other.
 
 Loom started as a personal engine for spinning up consistent design systems across projects. It's open source for the model: a single source of truth feeding two codegen pipelines, with a catalog you copy components *from* rather than depend *on* (the shadcn approach — own the files, no upstream sync).
 
@@ -18,7 +18,7 @@ Loom started as a personal engine for spinning up consistent design systems acro
    scripts/assemble-figma.js      scripts/code-templates/orchestrator.js
             │                           │
             ▼                           ▼
-   Figma variables /            catalog/  →  66 React components
+   Figma variables /            catalog/  →  62 React components
    styles / components          + tokens.css substrate
    (paste into plugin console)  + per-atom manifests
                                         │
@@ -33,17 +33,17 @@ Change a value in `spec/config/` → regenerate → **both** the Figma file and 
 
 ## What's in the catalog
 
-66 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+62 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
 
-**Two kinds, one catalog.** Every manifest carries a `kind`: **41 atoms** and **25 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`search-bar`, `command-palette`, `list-item`, `date-picker`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
+**Two kinds, one catalog.** Every manifest carries a `kind`: **38 atoms** and **24 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
 
 | Group | Atoms |
 |-------|-------|
 | **Buttons** | button, badge, dot, fab, fab-menu, toggle, toggle-group |
-| **Forms** | input, select, textarea, checkbox, radio, switch, slider, combobox, date-picker, calendar, time-picker, file-upload, input-otp, label, helper-text, form-field, rating, search-bar |
+| **Forms** | input, select, textarea, checkbox, radio, switch, slider, combobox, date-picker, calendar, time-picker, file-upload, input-otp, label, helper-text, form-field |
 | **Layout** | card, dialog, alert-dialog, sheet, table, separator, toolbar |
 | **Feedback** | toast, banner, tooltip, popover, dropdown-menu, context-menu, hover-card, skeleton, spinner, progress-bar, empty-state |
-| **Data display** | avatar, avatar-group, list-item, accordion, collapsible, kbd, number, relative-time |
+| **Data display** | avatar, avatar-group, list-item, accordion, kbd, relative-time |
 | **Navigation** | top-bar, sidebar, tabs, bottom-nav, breadcrumbs, pagination, navigation-menu, command-palette |
 | **Composite** | stepper, carousel, tree-view |
 | **Motion** | reveal, stagger, count-up, scroll-progress |
@@ -201,7 +201,7 @@ scripts/               The two codegen pipelines
   resolve-picks.js     ← the picker's dependency resolver
   setup.sh             ← (repo root) installs picked atoms into a project
 
-catalog/               Generated output — per-atom .tsx + .manifest.json + story
+catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
 catalog-playground/    Next.js app that browses the whole catalog
 native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)

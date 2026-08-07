@@ -83,7 +83,7 @@ function addHeader(frame, title, description) {
 function createInteractivePreview(componentInstance, lookups) {
   const { layoutVars, semColors, semRadius, primBW } = lookups;
   const surface1Var = layoutVars["layout/surface-1"];
-  const primaryVar = semColors["color/primary/primary"];
+  const onSurfaceVar = semColors["color/surface/on-surface"];
   const radComp = semRadius["radius/component"];
   const bw2 = primBW["border-width/2"];
   const tryMeComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "template/try-me-button");
@@ -104,8 +104,8 @@ function createInteractivePreview(componentInstance, lookups) {
   if (surface1Var) ip.fills = [figma.variables.setBoundVariableForPaint(
     { type: "SOLID", color: { r: 0.93, g: 0.93, b: 0.93 } }, "color", surface1Var
   )];
-  if (primaryVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
-    { type: "SOLID", color: { r: 0.627, g: 0.384, b: 0.918 } }, "color", primaryVar
+  if (onSurfaceVar) ip.strokes = [figma.variables.setBoundVariableForPaint(
+    { type: "SOLID", color: { r: 0.098, g: 0.094, b: 0.106 } }, "color", onSurfaceVar
   )];
   if (bw2) ip.setBoundVariable("strokeWeight", bw2);
   ip.dashPattern = [8, 8];
@@ -185,12 +185,8 @@ function createBaseFrame(componentName, description, componentSet, lookups, defa
 // foreground variable. Catalog icons are stroked vectors (Lucide-style), so
 // color binds to strokes with fills cleared. Single source of truth for icon
 // recoloring — every builder that places an icon goes through here.
-// `filled` paints the glyph body instead of its outline. The icon set is stroke-based,
-// so clearing fills is right for almost every use — but a few marks read as solid or
-// hollow rather than as present or absent (a rating star is the case that surfaced it).
-// Colour alone cannot express that: recolouring an outline star just gives you an
-// outline star in a different colour, which is what the Figma rating page was showing.
-function styleIconInstance(inst, fgVar, iconSizeVar, filled) {
+// The icon set is stroke-based, so colour binds to strokes and fills are cleared.
+function styleIconInstance(inst, fgVar, iconSizeVar) {
   if (iconSizeVar) {
     inst.setBoundVariable("width", iconSizeVar);
     inst.setBoundVariable("height", iconSizeVar);
@@ -200,11 +196,9 @@ function styleIconInstance(inst, fgVar, iconSizeVar, filled) {
     const paint = [figma.variables.setBoundVariableForPaint(
       { type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 } }, "color", fgVar
     )];
-    // Filled marks take the stroke too, so the silhouette closes at small sizes rather
-    // than leaving a hairline gap where the outline used to be.
     for (const vec of vecs) {
       vec.strokes = paint;
-      vec.fills = filled ? paint : [];
+      vec.fills = [];
     }
   }
   return inst;
@@ -212,11 +206,11 @@ function styleIconInstance(inst, fgVar, iconSizeVar, filled) {
 
 // Create a sized, colored icon instance by component name, falling back to
 // icon/placeholder. Returns null if no icon component exists in the file.
-function makeIcon(iconName, fgVar, iconSizeVar, filled) {
+function makeIcon(iconName, fgVar, iconSizeVar) {
   let iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === iconName);
   if (!iconComp) iconComp = figma.root.findOne(n => n.type === "COMPONENT" && n.name === "icon/placeholder");
   if (!iconComp) return null;
-  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar, filled);
+  return styleIconInstance(iconComp.createInstance(), fgVar, iconSizeVar);
 }
 
 function createIconSlot(comp, slotName, fgVar, iconSizeVar, propName) {

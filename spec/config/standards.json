@@ -131,7 +131,7 @@
           "surface-3": "{palette.neutral.80}",
           "on-surface": "{palette.neutral.10}",
           "on-surface-variant": "{palette.neutral.30}",
-          "surface-inverse": "{fill.neutral.20}",
+          "surface-inverse": "{fill.primary.800}",
           "on-surface-inverse": "{palette.neutral.95}",
           "inverse-primary": "{palette.primary.300}",
           "scrim": "rgba(0, 0, 0, 0.3)"
@@ -203,7 +203,7 @@
           "surface-3": "{palette.neutral.30}",
           "on-surface": "{palette.neutral.90}",
           "on-surface-variant": "{palette.neutral.80}",
-          "surface-inverse": "{fill.neutral.90}",
+          "surface-inverse": "{fill.primary.100}",
           "on-surface-inverse": "{palette.neutral.20}",
           "inverse-primary": "{palette.primary.600}",
           "scrim": "rgba(0, 0, 0, 0.5)"

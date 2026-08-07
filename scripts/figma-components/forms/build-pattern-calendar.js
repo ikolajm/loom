@@ -6,7 +6,7 @@
 // =============================================================================
 
 function buildPatternCalendar(lookups, defaultMode, page) {
-  const { semColors, semRadius, primSpacing } = lookups;
+  const { semColors, semRadius, primSpacing, primIconSize } = lookups;
   const config = CONFIG.components.calendar;
   const colors = config.variants.default;
   const md = config.sizes.md;
@@ -45,14 +45,35 @@ function buildPatternCalendar(lookups, defaultMode, page) {
   header.fills = [];
 
   const fgVar = semColors[colors.fg];
+
+  const navIconVar = primIconSize[md['nav-icon']];
+  const addChevron = (dir) => {
+    const comp = figma.root.findOne(n => n.type === 'COMPONENT' && n.name === `icon/chevron-${dir}`);
+    if (!comp) return;
+    const inst = comp.createInstance();
+    inst.name = `nav-${dir}`;
+    if (navIconVar) { inst.setBoundVariable('width', navIconVar); inst.setBoundVariable('height', navIconVar); }
+    if (fgVar) {
+      const vecs = inst.findAll(n => n.type === 'VECTOR' || n.type === 'BOOLEAN_OPERATION' || n.type === 'LINE' || n.type === 'ELLIPSE' || n.type === 'RECTANGLE');
+      const paint = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }, 'color', fgVar)];
+      for (const vec of vecs) { vec.strokes = paint; vec.fills = []; }
+    }
+    header.appendChild(inst);
+  };
+
+  addChevron('left');
+
   const monthText = figma.createText();
   monthText.name = 'month-label';
   monthText.characters = 'April 2026';
-  applyTextStyle(monthText, 'title', 'md');
+  const [headerFamily, headerTier] = (md['header-text'] || 'action/md').split('/');
+  applyTextStyle(monthText, headerFamily, headerTier);
   if (fgVar) monthText.fills = [figma.variables.setBoundVariableForPaint(
     { type: 'SOLID', color: { r: 0.9, g: 0.9, b: 0.9 } }, 'color', fgVar
   )];
   header.appendChild(monthText);
+
+  addChevron('right');
   cal.appendChild(header);
   header.layoutSizingHorizontal = 'FILL';
 
@@ -75,7 +96,12 @@ function buildPatternCalendar(lookups, defaultMode, page) {
   row.primaryAxisAlignItems = 'SPACE_BETWEEN';
   row.fills = [];
 
-  const cellHeightPath = resolveHeight(md['cell-size']);
+  // Day cells have no size token by design — in code they are flex-1 + aspect-square, so
+  // the row's width divided by seven IS the cell size. Derived here for the same reason:
+  // a fixed value drifts from the container the moment either width or padding changes.
+  const padScale = /\{scale\.(\d+)\}/.exec(md['x-padding'] || '');
+  const padPx = padScale ? Number(padScale[1]) * 4 : 0;
+  const cellPx = Math.floor((parsePx(md.width) - padPx * 2) / 7);
   const dayRadVar = semRadius[md['day-radius']];
 
   for (const day of days) {
@@ -87,9 +113,7 @@ function buildPatternCalendar(lookups, defaultMode, page) {
     cell.primaryAxisSizingMode = 'FIXED';
     cell.counterAxisSizingMode = 'FIXED';
 
-    const hVar = cellHeightPath ? primSpacing[cellHeightPath] : null;
-    if (hVar) { cell.setBoundVariable('width', hVar); cell.setBoundVariable('height', hVar); }
-    else cell.resize(32, 32);
+    cell.resize(cellPx, cellPx);
 
     if (dayRadVar) { cell.setBoundVariable('topLeftRadius', dayRadVar); cell.setBoundVariable('topRightRadius', dayRadVar); cell.setBoundVariable('bottomLeftRadius', dayRadVar); cell.setBoundVariable('bottomRightRadius', dayRadVar); }
 

@@ -68,8 +68,6 @@ function buildPatternDropdown(lookups, defaultMode, page) {
   const items = ['Edit', 'Duplicate', 'Archive', 'Delete'];
   const fgVar = semColors[colors.fg];
   const hoverBgVar = semColors[colors['hover-bg']];
-  const fontSize = parsePx(md['font-size']);
-  const lineHeight = parsePx(md['line-height']);
 
   // Item height
   const itemHeightPath = resolveHeight(md['item-height']);
@@ -102,7 +100,7 @@ function buildPatternDropdown(lookups, defaultMode, page) {
     const text = figma.createText();
     text.name = 'label';
     text.characters = items[i];
-    applyTextStyle(text, 'action', sizeName);
+    applyTextStyle(text, ...((md.text || 'body/' + sizeName).split('/')));
     if (fgVar) text.fills = [figma.variables.setBoundVariableForPaint(
       { type: 'SOLID', color: { r: 0.1, g: 0.1, b: 0.1 } }, 'color', fgVar
     )];

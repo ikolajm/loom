@@ -12,21 +12,21 @@ const containerSizeMap: Record<string, string> = {
 };
 
 const inputSizeMap: Record<string, string> = {
-  sm: 'h-bar-sm px-3 text-[16px] leading-[24px]',
-  md: 'h-bar-md px-4 text-[18px] leading-[28px]',
-  lg: 'h-bar-lg px-6 text-[20px] leading-[28px]',
+  sm: 'h-bar-sm px-3 text-input-md',
+  md: 'h-bar-md px-4 text-input-lg',
+  lg: 'h-bar-lg px-6 text-title-md',
 };
 
 const itemSizeMap: Record<string, string> = {
-  sm: 'h-nav-item-sm px-3 gap-2 text-[14px] leading-[20px]',
-  md: 'h-nav-item-md px-4 gap-3 text-[14px] leading-[20px]',
-  lg: 'h-nav-item-lg px-4 gap-3 text-[16px] leading-[24px]',
+  sm: 'h-nav-item-sm px-3 gap-2 text-action-md',
+  md: 'h-nav-item-md px-4 gap-3 text-action-md',
+  lg: 'h-nav-item-lg px-4 gap-3 text-action-lg',
 };
 
 const groupLabelSizeMap: Record<string, string> = {
-  sm: '[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:leading-[14px]',
-  md: '[&_[cmdk-group-heading]]:text-[12px] [&_[cmdk-group-heading]]:leading-[16px]',
-  lg: '[&_[cmdk-group-heading]]:text-[12px] [&_[cmdk-group-heading]]:leading-[16px]',
+  sm: '[&_[cmdk-group-heading]]:text-label-sm',
+  md: '[&_[cmdk-group-heading]]:text-label-md',
+  lg: '[&_[cmdk-group-heading]]:text-label-md',
 };
 
 const iconSizeMap: Record<string, string> = {
@@ -95,7 +95,7 @@ const CommandPaletteGroup = forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-on-surface-variant [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.02em]',
+      'overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-on-surface-variant [&_[cmdk-group-heading]]:uppercase',
       groupLabelSizeMap[size],
       className,
     )}

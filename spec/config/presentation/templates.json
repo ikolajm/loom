@@ -33,7 +33,7 @@
     "description": "Elevated container for interactive component testing. Contains a 'Try Me!' button and a component instance. Padding is hardcoded — specific to preview layout needs, not a design system spacing decision.",
     "container": {
       "background": "layout/surface-1",
-      "border": "color/primary/primary",
+      "border": "color/surface/on-surface",
       "border-style": "dashed",
       "border-dash": 8,
       "border-width": "border-width/bw-2",
@@ -44,11 +44,13 @@
       "y-padding-bottom": "68px"
     },
     "try-me-button": {
-      "$note": "Uses the project primary (color/primary/primary), so the preview reads as the consumer's own. Absolutely positioned bottom-right of interactive preview.",
-      "$icon-rule": "Icon color matches foreground (color/primary/on-primary).",
+      "$note": "Monochrome on purpose — it is chrome around a specimen, not a specimen. Absolutely positioned bottom-right of interactive preview.",
+      "$icon-rule": "Icon color matches foreground (color/surface/on-surface).",
       "label": "figma.layout.typography.defaults.try-me-label",
-      "background": "color/primary/primary",
-      "foreground": "color/primary/on-primary",
+      "background": "color/surface/surface",
+      "foreground": "color/surface/on-surface",
+      "border": "color/surface/on-surface",
+      "border-width": "border-width/bw-1",
       "icon": "icon/mouse-pointer-click",
       "shadow": "effects/shadow-2",
       "height": "height/ch-3",

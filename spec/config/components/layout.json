@@ -46,24 +46,17 @@
       }
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "font-size": "14px", "line-height": "20px" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "font-size": "14px", "line-height": "20px" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.3}", "font-size": "16px", "line-height": "24px" }
+      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "text": "body/sm" },
+      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.2}", "text": "body/sm" },
+      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.3}", "text": "body/md" }
     },
     "default": { "variant": "default", "size": "md" }
   },
   "sheet": {
     "$catalog": { "dependencies": ["cn", "button"] },
-    "$note": "Overlay panel that slides in from an edge. Bottom sheet (modal with drag handle) and side drawer (left/right). Shares dialog's overlay/scrim model. Dismiss via scrim click, escape, or drag-down (bottom). Top corners rounded for bottom sheet, no radius for side drawers (edge-to-edge).",
+    "$note": "Overlay panel anchored to one edge — top, bottom, left or right. Shares dialog's overlay/scrim model; dismiss via scrim click, escape or the close control. Corners round on the exposed edges only. **This is a sheet, not a drawer.** A drawer is a mobile affordance: a drag handle, a swipe-to-dismiss gesture, and momentum. None of that is here and none of it is planned — it needs touch-gesture handling this catalog does not do, and a component that half-implements it teaches the wrong thing. There is deliberately no drag-handle token: the handle is the affordance that would promise the gesture, so declaring one without the behaviour is the ambiguity, not the cure.",
     "variants": {
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
-    },
-    "handle": {
-      "$note": "Drag handle for bottom sheet. Centered at top of sheet.",
-      "bg": "color/outline/outline",
-      "width": "{scale.10}",
-      "height": "{scale.1}",
-      "radius": "radius/pill"
     },
     "sizes": {
       "sm":   { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
@@ -78,7 +71,7 @@
   },
 
   "alert-dialog": {
-    "$note": "Stricter dialog variant for destructive or critical confirmations. No dismiss on click-outside or escape — user must take an explicit action (confirm or cancel). Shares dialog's visual styling but enforces modal behavior. Use for delete confirmations, irreversible actions, data loss warnings.",
+    "$note": "Stricter dialog variant for destructive or critical confirmations. No dismiss on click-outside or escape — user must take an explicit action (confirm or cancel). Shares dialog's visual styling but enforces modal behavior. Use for delete confirmations, irreversible actions, data loss warnings. **Kept separate from `dialog` deliberately**, after weighing a fold into a prop: Radix ships these as two primitives with different ARIA roles — `alertdialog` versus `dialog` — which screen readers announce differently, and the focus trap and no-dismiss behaviour are native to the primitive rather than layered on. A `required` flag on Dialog would have to swap the underlying primitive anyway, so the fold trades two honest components for one component with a hidden mode switch. The exports are the cost; the role is the reason.",
     "variants": {
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
     },

@@ -29,15 +29,15 @@ const iconSize: Record<string, string> = {
 };
 
 const headingSize: Record<string, string> = {
-  sm: 'text-[16px] leading-[24px]',
-  md: 'text-[20px] leading-[28px]',
-  lg: 'text-[24px] leading-[32px]',
+  sm: 'text-title-sm',
+  md: 'text-title-md',
+  lg: 'text-title-lg',
 };
 
 const descriptionSize: Record<string, string> = {
-  sm: 'text-[14px] leading-[20px]',
-  md: 'text-[16px] leading-[24px]',
-  lg: 'text-[18px] leading-[28px]',
+  sm: 'text-body-sm',
+  md: 'text-body-md',
+  lg: 'text-body-lg',
 };
 
 type EmptyStateProps = React.HTMLAttributes<HTMLDivElement>
@@ -55,7 +55,7 @@ const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     return (
       <div ref={ref} className={cn(emptyStateVariants({ variant, size }), className)} {...props}>
         {icon && <span className={cn('text-on-surface-variant shrink-0 [&>svg]:size-full', iconSize[s])}>{icon}</span>}
-        {heading && <h3 className={cn('font-semibold tracking-[-0.01em] text-on-surface', headingSize[s])}>{heading}</h3>}
+        {heading && <h3 className={cn('font-semibold  text-on-surface', headingSize[s])}>{heading}</h3>}
         {description && <p className={cn('text-on-surface-variant', descriptionSize[s])}>{description}</p>}
         {action}
         {children}

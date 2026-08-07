@@ -201,15 +201,13 @@ const BUILDERS = {
       },
       {
         name: 'extended',
-        description: 'Extended input components (slider, input-otp, combobox, file-upload, rating, time-picker, search-bar)',
+        description: 'Extended input components (slider, input-otp, combobox, file-upload, time-picker)',
         customScripts: [
           'forms/build-slider.js',
           'forms/build-input-otp.js',
           'forms/build-pattern-combobox.js',
           'forms/build-pattern-file-upload.js',
-          'forms/build-pattern-rating.js',
           'forms/build-pattern-time-picker.js',
-          'forms/build-pattern-search-bar.js'
         ]
       },
       {
@@ -269,7 +267,7 @@ const BUILDERS = {
     ]
   },
   'data-display': {
-    description: 'Data Display page (avatar, kbd + list-item/accordion/collapsible/avatar-group/number/relative-time pattern mocks)',
+    description: 'Data Display page (avatar, kbd + list-item/accordion/avatar-group pattern mocks)',
     pageName: 'Data Display',
     config: { components: dataDisplayConfig, layout },
     components: [
@@ -279,10 +277,7 @@ const BUILDERS = {
       'data-display/build-avatar.js',
       'data-display/build-pattern-list-item.js',
       'data-display/build-pattern-accordion.js',
-      'data-display/build-pattern-collapsible.js',
       'data-display/build-pattern-avatar-group.js',
-      'data-display/build-pattern-number.js',
-      'data-display/build-pattern-relative-time.js'
     ]
   },
   'navigation': {

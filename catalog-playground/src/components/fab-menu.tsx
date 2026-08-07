@@ -60,7 +60,7 @@ const fabMenuStackGap: Record<string, string> = {
   lg: 'gap-3',
 };
 
-const FAB_LABEL_CLASSES = 'bg-surface-2 text-on-surface px-2 py-1 rounded-component font-medium text-[12px] leading-[16px] tracking-[0.01em]';
+const FAB_LABEL_CLASSES = 'bg-surface-2 text-on-surface px-2 py-1 rounded-component font-medium text-action-sm';
 
 type FabMenuSize = 'sm' | 'md' | 'lg';
 

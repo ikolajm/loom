@@ -4,15 +4,15 @@ import { forwardRef, createContext, useContext } from 'react';
 import { cn } from './cn';
 
 const tableCellSize: Record<string, string> = {
-  sm: 'px-3 py-1 text-[14px] leading-[20px]',
-  md: 'px-4 py-2 text-[14px] leading-[20px]',
-  lg: 'px-6 py-3 text-[16px] leading-[24px]',
+  sm: 'px-3 py-1 text-body-sm',
+  md: 'px-4 py-2 text-body-sm',
+  lg: 'px-6 py-3 text-body-md',
 };
 
 const tableHeadSize: Record<string, string> = {
-  sm: 'px-3 py-1 text-[14px] leading-[20px]',
-  md: 'px-4 py-2 text-[14px] leading-[20px]',
-  lg: 'px-6 py-3 text-[16px] leading-[24px]',
+  sm: 'px-3 py-1 text-body-sm',
+  md: 'px-4 py-2 text-body-sm',
+  lg: 'px-6 py-3 text-body-md',
 };
 
 type TableSize = 'sm' | 'md' | 'lg';

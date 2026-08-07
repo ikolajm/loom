@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const fabVariants = cva(
-  'inline-flex items-center justify-center font-medium tracking-[0.01em] interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center font-medium interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
@@ -13,9 +13,9 @@ const fabVariants = cva(
         'sm': 'size-fab-sm rounded-card shadow-[var(--shadow-2)]',
         'md': 'size-fab-md rounded-card shadow-[var(--shadow-3)]',
         'lg': 'size-fab-lg rounded-card shadow-[var(--shadow-3)]',
-        'ext-sm': 'h-fab-sm px-3 gap-2 rounded-card shadow-[var(--shadow-2)] text-[12px] leading-[16px]',
-        'ext-md': 'h-fab-md px-4 gap-2 rounded-card shadow-[var(--shadow-3)] text-[14px] leading-[20px]',
-        'ext-lg': 'h-fab-lg px-5 gap-3 rounded-card shadow-[var(--shadow-3)] text-[16px] leading-[24px]',
+        'ext-sm': 'h-fab-sm px-3 gap-2 rounded-card shadow-[var(--shadow-2)] text-action-sm',
+        'ext-md': 'h-fab-md px-4 gap-2 rounded-card shadow-[var(--shadow-3)] text-action-md',
+        'ext-lg': 'h-fab-lg px-5 gap-3 rounded-card shadow-[var(--shadow-3)] text-action-lg',
       },
     },
     defaultVariants: {

@@ -1,4 +1,4 @@
-const { filterSizes } = require('./helpers');
+const { filterSizes, textRoleClass } = require('./helpers');
 
 function generateCombobox(name, config, meta) {
   const itemSizes = config.item?.sizes ? filterSizes(config.item.sizes) : {};
@@ -14,8 +14,8 @@ function generateCombobox(name, config, meta) {
     if (px) classes.push(`px-${px[1]}`);
     const gap = sz.gap?.match(/\{scale\.(\d+)\}/);
     if (gap) classes.push(`gap-${gap[1]}`);
-    if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-    if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
+    const itemRole = textRoleClass(sz.text);
+    if (itemRole) classes.push(itemRole);
     itemEntries[tier] = classes.join(' ');
   }
 
