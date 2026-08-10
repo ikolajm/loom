@@ -54,7 +54,7 @@ The right response is to **build the project-owned characterization layer**. The
 - **Dashboards:** substrate may be ~80% of the design surface. Atoms compose into screens; characterization is minimal because clarity beats wow. Awwwards energy is the wrong target; effective state management and information density are the right ones.
 - **Marketing / portfolio sites:** substrate is ~20% of the design surface. The rest is characterization. The site exists to make you *feel* something about the work; that's accomplished by texture, motion, personality, surprise — none of which the substrate provides.
 
-Tokens-driven systems that try to do both end up tuned for neither. This is the production observation behind Loom v2's first-class marketing primitives + picker: a project pulls the substrate plus only the catalog atoms it needs, and authors its characterization on top.
+Tokens-driven systems that try to do both end up tuned for neither. That question is now settled in practice, and the answer was not a separate marketing-tuned scaffold: Loom v2 resolved it with first-class marketing primitives plus a picker, so a project pulls the substrate and only the catalog atoms it needs, then authors its characterization on top. One catalog, selective consumption — not two generators to keep in sync.
 
 ## How to plan for the characterization work
 
@@ -62,6 +62,6 @@ When scoping a marketing or portfolio build that uses a tokens-driven design sys
 
 1. Day 1: scaffold the substrate, get the foundation up. This is fast.
 2. Then: list the characterization atoms the project needs — mono accents, decoration SVGs, per-section media, layout treatments. Expect 15–25 of them for a portfolio.
-3. Build them in context as the page demands them, not speculatively.
+3. Build them in context as the page demands them, not speculatively. The ownership-lifecycle rule behind this — when an override belongs in the consuming project versus back in the substrate — is in [`docs/gotchas.md`](../gotchas.md).
 4. Per-section design passes after atoms exist. Each section is its own composition.
 5. The "is this Awwwards-worthy yet" question lives in the characterization layer's progress, never in the substrate's.
