@@ -41,9 +41,10 @@
       }
     },
     "sizes": {
-      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-radius": "radius/component", "text": "action/md", "icon-size": "icon/icon-2" },
-      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "text": "action/md", "icon-size": "icon/icon-2" },
-      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-radius": "radius/component", "text": "action/lg", "icon-size": "icon/icon-3" }
+      "$constant": { "item-radius": "radius/component" },
+      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "text": "action/md", "icon-size": "icon/icon-2" },
+      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/md", "icon-size": "icon/icon-2" },
+      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/lg", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -90,9 +91,10 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/bottom-bar-sm", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
-      "md": { "height": "height/bottom-bar-md", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
-      "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "gap": "{scale.1}", "icon-size": "icon/icon-3" }
+      "$constant": { "gap": "{scale.1}" },
+      "sm": { "height": "height/bottom-bar-sm", "icon-size": "icon/icon-2" },
+      "md": { "height": "height/bottom-bar-md", "icon-size": "icon/icon-2" },
+      "lg": { "$exception": "lg exists for completeness but bottom nav rarely exceeds md height. Touch target already met at md.", "height": "72px", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -139,9 +141,10 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "item-size": "height/control-sm", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md": { "item-size": "height/control-md", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg": { "item-size": "height/control-lg", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
+      "$constant": { "radius": "radius/component" },
+      "sm": { "item-size": "height/control-sm", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md": { "item-size": "height/control-md", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
+      "lg": { "item-size": "height/control-lg", "gap": "{scale.2}", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -211,9 +214,10 @@
       "text-transform": "uppercase"
     },
     "sizes": {
-      "sm": { "max-width": "480px", "radius": "radius/modal", "input-text": "input/md", "input-x-padding": "{scale.3}", "input-height": "height/bar-sm", "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-text": "action/md", "group-text": "label/sm", "icon-size": "icon/icon-1" },
-      "md": { "max-width": "560px", "radius": "radius/modal", "input-text": "input/lg", "input-x-padding": "{scale.4}", "input-height": "height/bar-md", "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/md", "group-text": "label/md", "icon-size": "icon/icon-2" },
-      "lg": { "max-width": "640px", "radius": "radius/modal", "input-text": "title/md", "input-x-padding": "{scale.6}", "input-height": "height/bar-lg", "item-height": "height/nav-item-lg", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/lg", "group-text": "label/md", "icon-size": "icon/icon-2" }
+      "$constant": { "radius": "radius/modal" },
+      "sm": { "max-width": "480px", "input-text": "input/md", "input-x-padding": "{scale.3}", "input-height": "height/bar-sm", "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-text": "action/md", "group-text": "label/sm", "icon-size": "icon/icon-1" },
+      "md": { "max-width": "560px", "input-text": "input/lg", "input-x-padding": "{scale.4}", "input-height": "height/bar-md", "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/md", "group-text": "label/md", "icon-size": "icon/icon-2" },
+      "lg": { "max-width": "640px", "input-text": "title/md", "input-x-padding": "{scale.6}", "input-height": "height/bar-lg", "item-height": "height/nav-item-lg", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/lg", "group-text": "label/md", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   }

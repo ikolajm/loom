@@ -47,9 +47,10 @@
       }
     },
     "sizes": {
-      "sm": { "gap": "{scale.3}", "slide-radius": "radius/card", "arrow-offset": "{scale.2}", "dots-y-offset": "{scale.3}" },
-      "md": { "gap": "{scale.4}", "slide-radius": "radius/card", "arrow-offset": "{scale.3}", "dots-y-offset": "{scale.4}" },
-      "lg": { "gap": "{scale.6}", "slide-radius": "radius/card", "arrow-offset": "{scale.4}", "dots-y-offset": "{scale.6}" }
+      "$constant": { "slide-radius": "radius/card" },
+      "sm": { "gap": "{scale.3}", "arrow-offset": "{scale.2}", "dots-y-offset": "{scale.3}" },
+      "md": { "gap": "{scale.4}", "arrow-offset": "{scale.3}", "dots-y-offset": "{scale.4}" },
+      "lg": { "gap": "{scale.6}", "arrow-offset": "{scale.4}", "dots-y-offset": "{scale.6}" }
     },
     "default": { "variant": "default", "size": "md" }
   },

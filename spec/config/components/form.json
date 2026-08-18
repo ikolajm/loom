@@ -17,9 +17,10 @@
     },
     "width": "280px",
     "sizes": {
-      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input", "icon-size": "icon/icon-3" }
+      "$constant": { "gap": "{scale.2}", "radius": "radius/input" },
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "icon-size": "icon/icon-3" }
     }
   },
 
@@ -45,9 +46,10 @@
     "$note": "Extends text-field but replaces fixed height with min-height. No icon slots — trailing/leading icons don't apply to multi-line input.",
     "$exception": "Textarea min-heights are hardcoded — content-area minimums specific to multi-line input, not derivable from sizing primitives.",
     "sizes": {
-      "sm": { "min-height": "80px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/input" },
-      "md": { "min-height": "120px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input" },
-      "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/input" }
+      "$constant": { "gap": "{scale.2}", "radius": "radius/input" },
+      "sm": { "min-height": "80px", "x-padding": "{scale.3}", "y-padding": "{scale.2}" },
+      "md": { "min-height": "120px", "x-padding": "{scale.4}", "y-padding": "{scale.3}" },
+      "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}" }
     },
     "resize": "vertical",
     "default": { "state": "default", "size": "md" }
@@ -97,9 +99,10 @@
     },
     "$exception": "Switch track dimensions are hardcoded as a cohesive set — width:height ratio is intentional and should not drift independently via primitives.",
     "sizes": {
-      "sm": { "width": "36px", "height": "20px", "radius": "radius/pill" },
-      "md": { "width": "44px", "height": "24px", "radius": "radius/pill" },
-      "lg": { "width": "52px", "height": "28px", "radius": "radius/pill" }
+      "$constant": { "radius": "radius/pill" },
+      "sm": { "width": "36px", "height": "20px" },
+      "md": { "width": "44px", "height": "24px" },
+      "lg": { "width": "52px", "height": "28px" }
     },
     "default": { "active": "false", "size": "md" }
   },
@@ -138,9 +141,10 @@
       "default": { "track-bg": "color/surface/surface-1", "fill-bg": "color/primary/primary", "thumb-bg": "color/primary/primary" }
     },
     "sizes": {
-      "sm": { "track-height": "{scale.1}", "thumb-size": "16px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
-      "md": { "track-height": "{scale.1}", "thumb-size": "20px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
-      "lg": { "track-height": "{scale.2}", "thumb-size": "24px", "track-radius": "radius/pill", "thumb-radius": "radius/pill" }
+      "$constant": { "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
+      "sm": { "track-height": "{scale.1}", "thumb-size": "16px" },
+      "md": { "track-height": "{scale.1}", "thumb-size": "20px" },
+      "lg": { "track-height": "{scale.2}", "thumb-size": "24px" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -164,9 +168,10 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-2" },
-      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-3" },
-      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2", "icon-size": "icon/icon-4" }
+      "$constant": { "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2" },
+      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
+      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "icon-size": "icon/icon-3" },
+      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "icon-size": "icon/icon-4" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -186,9 +191,10 @@
     },
     "$exception": "OTP cells are square — width equals height. Monospace-like letter-spacing ensures centered digits. Cell sizes are hardcoded to maintain square proportions.",
     "sizes": {
-      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "radius": "radius/input", "text": "title/sm", "border-width": "border-width/bw-1" },
-      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "radius": "radius/input", "text": "title/md", "border-width": "border-width/bw-1" },
-      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "radius": "radius/input", "text": "title/lg", "border-width": "border-width/bw-2" }
+      "$constant": { "radius": "radius/input" },
+      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "text": "title/sm", "border-width": "border-width/bw-1" },
+      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "text": "title/md", "border-width": "border-width/bw-1" },
+      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "text": "title/lg", "border-width": "border-width/bw-2" }
     },
     "default": { "state": "default", "size": "md" }
   },
@@ -257,10 +263,11 @@
       "text-transform": "none"
     },
     "sizes": {
-      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/sm", "nav-height": "16px", "day-text": "action/sm", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/md", "nav-height": "20px", "day-text": "action/sm", "day-radius": "radius/component", "nav-icon": "icon/icon-1" },
-      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "radius": "radius/card", "header-text": "action/md", "nav-height": "20px", "day-text": "action/md", "day-radius": "radius/component", "nav-icon": "icon/icon-2" },
-      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "radius": "radius/card", "header-text": "action/lg", "nav-height": "24px", "day-text": "action/lg", "day-radius": "radius/component", "nav-icon": "icon/icon-2" }
+      "$constant": { "radius": "radius/card", "day-radius": "radius/component" },
+      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "header-text": "action/sm", "nav-height": "16px", "day-text": "action/sm", "nav-icon": "icon/icon-1" },
+      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "header-text": "action/md", "nav-height": "20px", "day-text": "action/sm", "nav-icon": "icon/icon-1" },
+      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "header-text": "action/md", "nav-height": "20px", "day-text": "action/md", "nav-icon": "icon/icon-2" },
+      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "header-text": "action/lg", "nav-height": "24px", "day-text": "action/lg", "nav-icon": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
   },

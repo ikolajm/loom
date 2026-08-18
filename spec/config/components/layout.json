@@ -7,9 +7,10 @@
       "flush":    { "bg": "transparent", "fg": "color/surface/on-surface", "border": "none", "shadow": "effects/shadow-0" }
     },
     "sizes": {
-      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}", "radius": "radius/card" },
-      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/card" },
-      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/card" }
+      "$constant": { "radius": "radius/card" },
+      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}" },
+      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}" },
+      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -59,9 +60,10 @@
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
     },
     "sizes": {
-      "sm":   { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
-      "md":   { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
-      "lg":   { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" }
+      "$constant": { "radius": "radius/modal" },
+      "sm":   { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}" },
+      "md":   { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}" },
+      "lg":   { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}" }
     },
     "default": { "variant": "default", "size": "md" }
   },
@@ -76,9 +78,10 @@
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
     },
     "sizes": {
-      "sm": { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
-      "md": { "max-width": "480px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
-      "lg": { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" }
+      "$constant": { "radius": "radius/modal" },
+      "sm": { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}" },
+      "md": { "max-width": "480px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}" },
+      "lg": { "max-width": "560px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}" }
     },
     "default": { "variant": "default", "size": "md" }
   },

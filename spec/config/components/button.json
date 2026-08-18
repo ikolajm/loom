@@ -28,9 +28,10 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-3" }
+      "$constant": { "radius": "radius/component" },
+      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
+      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "icon-size": "icon/icon-3" }
     },
     "icon-sizes": {
       "$note": "Square sizing for icon-only mode (iconOnly prop). No padding — icon centers via flexbox. Touch target met at all sizes.",
@@ -70,9 +71,10 @@
     },
     "sizes": {
       "$note": "Type is not declared here — it comes from the label/{tier} ramp (10/12/14), which the Figma builder has always bound to and which code now reads too. The font-size and line-height keys that used to sit on each tier were dead once code switched to the ramp, and they did not ramp anyway: sm and md both declared 10px/14px, so md differed from sm only in padding. Icons stay at 12/12/16 — against the label ramp that is 120%/100%/114% of the font and never more than 86% of the line box, where the old lg pairing put a 16px icon in 16px of leading.",
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-0" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon": "icon/icon-1" }
+      "$constant": { "gap": "{scale.1}", "radius": "radius/component" },
+      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.", "icon": "icon/icon-0" },
+      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "icon": "icon/icon-0" },
+      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "icon": "icon/icon-1" }
     },
     "default": { "variant": "filled", "state": "default", "size": "md" }
   },
@@ -117,9 +119,10 @@
       "text-transform": "none"
     },
     "sizes": {
-      "sm": { "size": "height/fab-sm", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "md": { "size": "height/fab-md", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
-      "lg": { "size": "height/fab-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
+      "$constant": { "radius": "radius/card" },
+      "sm": { "size": "height/fab-sm", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
+      "md": { "size": "height/fab-md", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
+      "lg": { "size": "height/fab-lg", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
     },
     "extended": {
       "$note": "Extended FAB adds a label. Allowed at all sizes incl. sm (sm uses compact 12px label typography).",
@@ -196,9 +199,10 @@
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
     "sizes": {
-      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "radius": "radius/component", "icon-size": "icon/icon-2" }
+      "$constant": { "radius": "radius/component" },
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" }
     },
     "default": { "state": "unpressed", "size": "md" }
   },
@@ -227,9 +231,10 @@
       }
     },
     "sizes": {
-      "sm": { "height": "height/control-sm", "radius": "radius/component" },
-      "md": { "height": "height/control-md", "radius": "radius/component" },
-      "lg": { "height": "height/control-lg", "radius": "radius/component" }
+      "$constant": { "radius": "radius/component" },
+      "sm": { "height": "height/control-sm" },
+      "md": { "height": "height/control-md" },
+      "lg": { "height": "height/control-lg" }
     },
     "default": { "variant": "segmented", "size": "md" }
   }

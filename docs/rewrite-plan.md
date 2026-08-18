@@ -99,7 +99,25 @@ deliberate, not backlog inertia.
 
 - [ ] **Thin the components** — surviving atoms become a primitive import with layer
       classes; the appearance-only entries stop being components
-- [ ] **Size axis** — a default plus one opt-in, not a universal three
+- [x] **Size axis** — **not cut; the ADR's reasoning did not survive wider evidence.**
+      The decision rested on four `size="sm"` uses across two dashboards. Across all
+      seven consumers, paperboy and party-wipe use `sm`/`md`/`lg`/`xl` heavily — on
+      components hand-built on Loom's tokens, since neither holds a Loom atom. Given a
+      blank page and this substrate, the full ladder is the shape reached for. The
+      emitted-CSS argument also dissolved once component classes were settled on
+      `[data-size]` modifiers, which cost one selector per tier rather than 3x the classes.
+
+      Retargeting it at shared spacing ladders failed too: `x-padding`, `y-padding` and
+      `gap` each have 8-9 distinct ladders and components mix across them freely, so a
+      family reference produced a 46% override rate — indirection that makes the config
+      harder to read, not easier.
+
+      What shipped instead is the narrow, measured win: **38 declarations that repeated
+      the same value in every tier** are hoisted to `sizes.$constant`, expanded back at
+      load so no generator changed. `radius` alone was declared identically three times
+      in 25 of the 26 components that set it. Tier blocks now hold only what ramps, and
+      the one component that genuinely ramps its radius is visible instead of buried.
+      Verified by byte-identical catalog output
 - [ ] **`node scripts/sync.js`** — fold `setup.sh` and `scripts/refresh-test.sh` into the
       Node pipeline they already shell out to. All the logic is in `resolve-picks.js` and
       the orchestrator; the shell is glue

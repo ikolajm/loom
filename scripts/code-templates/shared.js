@@ -10,6 +10,37 @@ const path = require('path');
 // See scripts/config-paths.js for why the generator no longer writes a tracked path.
 const { loadConfig: load } = require('../config-paths');
 
+/**
+ * Expand `sizes.$constant` back into every tier.
+ *
+ * A key that carries the same value in every tier says nothing about size — `radius` was
+ * declared three identical times in 25 of the 26 components that set it. Hoisted into
+ * `$constant`, the tier blocks hold only what actually ramps, and the one component that
+ * genuinely ramps its radius stops hiding among twenty-five that do not.
+ *
+ * Expansion happens at load so every downstream generator still sees fully-populated
+ * tiers and nothing else had to learn about this. A value declared on a tier wins, which
+ * is what makes `$constant` a default rather than an override.
+ */
+function expandSizeConstants(componentConfig) {
+  for (const entry of Object.values(componentConfig)) {
+    if (!entry || typeof entry !== 'object') continue;
+    const sizes = entry.sizes;
+    const constant = sizes && sizes.$constant;
+    if (!constant) continue;
+    for (const [tier, cfg] of Object.entries(sizes)) {
+      if (tier.startsWith('$') || !cfg || typeof cfg !== 'object') continue;
+      for (const [k, v] of Object.entries(constant)) {
+        if (!(k in cfg)) cfg[k] = v;
+      }
+    }
+    delete sizes.$constant;
+  }
+  return componentConfig;
+}
+
+const loadComponents = (rel) => expandSizeConstants(load(rel));
+
 function loadAllConfigs() {
   return {
     standards: load('standards.json'),
@@ -18,14 +49,14 @@ function loadAllConfigs() {
     typography: load('base/typography.json'),
     colors: load('base/colors.json'),
     effects: load('base/effects.json'),
-    buttonConfig: load('components/button.json'),
-    formConfig: load('components/form.json'),
-    feedbackConfig: load('components/feedback.json'),
-    dataDisplayConfig: load('components/data-display.json'),
-    layoutConfig: load('components/layout.json'),
-    navigationConfig: load('components/navigation.json'),
-    compositeConfig: load('components/composite.json'),
-    motionConfig: load('components/motion.json'),
+    buttonConfig: loadComponents('components/button.json'),
+    formConfig: loadComponents('components/form.json'),
+    feedbackConfig: loadComponents('components/feedback.json'),
+    dataDisplayConfig: loadComponents('components/data-display.json'),
+    layoutConfig: loadComponents('components/layout.json'),
+    navigationConfig: loadComponents('components/navigation.json'),
+    compositeConfig: loadComponents('components/composite.json'),
+    motionConfig: loadComponents('components/motion.json'),
   };
 }
 
@@ -458,6 +489,7 @@ function formatDisplayName(name) {
 }
 
 module.exports = {
+  expandSizeConstants,
   loadAllConfigs,
   colorToClass,
   scaleToValue,
