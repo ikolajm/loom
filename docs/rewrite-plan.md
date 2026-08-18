@@ -71,8 +71,20 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
       real duplication to collapse (`[&_tr:hover]:bg-surface-1` and friends). Swapping the
       rest belongs to the thinning pass below, not here — the classes exist now so the
       portable consumer has them, since `shadow-[var(--shadow-2)]` is Tailwind-only syntax
-- [ ] **Print block** — `print-color-adjust: exact`, page-break behavior on surfaces and
-      tables. Belongs in the layer, not re-derived per project
+- [x] **Print block** — two halves. `tokens.css` forces the light roles under
+      `@media print` for both `:root` and `[data-theme="dark"]`, so a document prints as a
+      document whatever the app is showing and whether or not the viewer has toggled;
+      everything downstream reads the roles, so tones, treatments and surfaces need no
+      print-aware branch. `loom.css` carries the structure: `print-color-adjust: exact`
+      on the fills that *are* the information (`.treat-filled`, `.treat-dot` — a filled
+      badge reading OVERDUE must not print as bare text), `break-inside: avoid` on
+      surfaces and rows, shadows off, hover shading off, and
+      `thead { display: table-header-group }` so a long table repeats its header instead
+      of leaving every page after the first as unlabelled columns.
+
+      The structure block sits **outside** `@layer components` on purpose: layered, a
+      `shadow-lg` or `hover:bg-*` utility would outrank the print override and survive
+      onto the page. Print is the one place the layer ordering has to invert
 - [ ] **Flattened per-theme emit** — one stylesheet per theme with color roles resolved,
       for engines without custom-property support. Only color roles vary by theme;
       spacing, radius and transitions are theme-invariant

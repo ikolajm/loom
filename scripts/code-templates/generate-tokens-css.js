@@ -323,6 +323,66 @@ function buildSection10_TypographyPresets() {
  * The link reads `--tone-text`, so it takes a tone when one is set and falls back to the
  * brand color when none is. That is the same composition the treatments use.
  */
+/**
+ * Print structure — what survives the page break.
+ *
+ * The color half lives in tokens.css, which forces the light roles under `@media print`.
+ * This is the rest: fills that carry meaning have to actually render, and containers have
+ * to break sensibly.
+ *
+ * `print-color-adjust: exact` is scoped to the classes whose fill IS the information — a
+ * filled badge reading "OVERDUE" prints as bare text without it, and on a statement that
+ * is a defect, not a rendering preference. It is deliberately not applied to surfaces:
+ * page-wide plates should drop out and save the toner, which is the browser default and
+ * the right one.
+ *
+ * `display: table-header-group` is the rule that makes a long table readable on paper —
+ * without it the header prints once and every page after the first is unlabelled columns.
+ *
+ * This block is deliberately NOT inside `@layer components`. Unlayered rules outrank every
+ * layer, which is what print needs: layered, a `shadow-lg` or `hover:bg-*` utility would
+ * beat the print override and survive onto the page. Print is the one place the layer
+ * ordering has to invert.
+ */
+function buildSectionPrintStructure() {
+  return `@media print {
+  .treat-filled,
+  .treat-dot {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .surface-1,
+  .surface-2,
+  .surface-3 {
+    break-inside: avoid;
+  }
+
+  .elevate-0,
+  .elevate-1,
+  .elevate-2,
+  .elevate-3 {
+    box-shadow: none;
+  }
+
+  .table thead {
+    display: table-header-group;
+  }
+
+  .table tr {
+    break-inside: avoid;
+  }
+
+  .table tbody tr:hover {
+    background-color: transparent;
+  }
+
+  .link {
+    text-decoration: underline;
+  }
+}`;
+}
+
 function buildSection17_SurfacesTableLink() {
   // Surface level and elevation are independent axes, not one scale. The catalog proves
   // it: bg-surface-1 pairs with shadow-1, shadow-2 and shadow-3 in different atoms, so a
@@ -741,6 +801,25 @@ function header(name, note) {
 }
 
 /** Custom properties only: :root and the alternate-mode block. Portable. */
+/**
+ * Print forces the light roles, whatever the app is showing.
+ *
+ * A document is a document. `defaultMode` decides what the screen opens in; it should not
+ * decide that an invoice arrives as a full-bleed dark page — and `print-color-adjust:
+ * exact` would make that worse, insisting the browser actually render the dark ground
+ * instead of dropping it as it would by default.
+ *
+ * Both `:root` and `[data-theme="dark"]` are overridden, so this holds whichever mode is
+ * the default and whether or not the viewer has toggled. It redefines the same custom
+ * properties the light block already emits, so nothing downstream — tones, treatments,
+ * surfaces — needs a print-aware branch: they read the roles, and the roles changed.
+ */
+function buildSectionPrintRoles() {
+  const lines = buildSection2_ColorRoles('light');
+  if (!lines.length) return '';
+  return `@media print {\n  :root,\n  [data-theme="dark"] {\n${indent(lines, 2)}\n  }\n}`;
+}
+
 function generateTokens() {
   const defaultMode = colors['default-mode'] || 'light';
   const altMode = defaultMode === 'dark' ? 'light' : 'dark';
@@ -769,6 +848,8 @@ function generateTokens() {
     `:root {\n${indent(rootSections.flat())}\n}`,
     '',
     buildSection9_AltMode(altMode),
+    '',
+    buildSectionPrintRoles(),
     ''
   ].join('\n');
 }
@@ -808,6 +889,8 @@ function generateLayer() {
     `@layer components {\n${indent(layered.split('\n'))}\n}`,
     '',
     buildSection14_Animations(),
+    '',
+    buildSectionPrintStructure(),
     ''
   ].join('\n');
 }
