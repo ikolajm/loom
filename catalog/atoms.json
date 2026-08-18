@@ -3,7 +3,6 @@
   "button": [
     "badge",
     "button",
-    "fab",
     "fab-menu",
     "toggle",
     "toggle-group"
@@ -15,37 +14,25 @@
     "date-picker",
     "file-upload",
     "form-field",
-    "helper-text",
-    "input",
     "input-otp",
-    "label",
     "radio",
     "select",
     "slider",
     "switch",
-    "textarea",
     "time-picker"
   ],
   "layout": [
     "alert-dialog",
-    "card",
     "dialog",
     "separator",
-    "sheet",
-    "table",
-    "toolbar"
+    "sheet"
   ],
   "feedback": [
-    "banner",
     "context-menu",
-    "dot",
     "dropdown-menu",
-    "empty-state",
     "hover-card",
     "popover",
     "progress-bar",
-    "skeleton",
-    "spinner",
     "toast",
     "tooltip"
   ],
@@ -53,19 +40,14 @@
     "accordion",
     "avatar",
     "avatar-group",
-    "kbd",
-    "list-item",
     "relative-time"
   ],
   "navigation": [
-    "bottom-nav",
-    "breadcrumbs",
     "command-palette",
     "navigation-menu",
     "pagination",
     "sidebar",
-    "tabs",
-    "top-bar"
+    "tabs"
   ],
   "composite": [
     "carousel",

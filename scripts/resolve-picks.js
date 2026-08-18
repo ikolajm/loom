@@ -25,6 +25,15 @@ if (!picksPath || !catalogDir) {
   process.exit(1);
 }
 
+// Atoms whose appearance became a class. Naming the replacement matters more than a fuzzy
+// match: "table — did you mean tabs?" sends someone looking for a component that was never
+// the answer, when the answer is one class away.
+const MOVED_TO_CLASS = new Set([
+  'banner', 'bottom-nav', 'breadcrumbs', 'card', 'dot', 'empty-state', 'fab',
+  'helper-text', 'input', 'kbd', 'label', 'list-item', 'skeleton', 'spinner', 'table',
+  'textarea', 'toolbar', 'top-bar',
+]);
+
 function fail(lines) {
   console.error('');
   for (const line of lines) console.error(line);
@@ -121,10 +130,29 @@ for (const pick of picks) visit(pick, null);
 
 if (unknown.size) {
   const lines = [`ERROR: ${unknown.size === 1 ? 'unknown atom' : `${unknown.size} unknown atoms`} in ${picksPath}`, ''];
+  let anyMoved = false;
   for (const [name, declaredBy] of unknown) {
-    const hits = suggest(name);
     const origin = declaredBy ? ` (declared as a dependency of "${declaredBy}")` : '';
+    if (MOVED_TO_CLASS.has(name)) {
+      anyMoved = true;
+      lines.push(`  "${name}"${origin} — now a class, not a component: .${name} in loom.components.css`);
+      continue;
+    }
+    const hits = suggest(name);
     lines.push(`  "${name}"${origin}${hits.length ? ` — did you mean: ${hits.join(', ')}?` : ''}`);
+  }
+  if (anyMoved) {
+    lines.push(
+      '',
+      'Those carried no behavior, so their appearance moved into the class layer — which is',
+      'why they now work in a template or a printed page as well as in React. Drop them from',
+      'loom-picks.json and use the class:',
+      '',
+      '  <div class="card" data-size="md" data-variant="default">…</div>',
+      '',
+      'Sizes ride on data-size, named looks on data-variant, color composes from the tone and',
+      'treatment classes. Your installed copies keep working until you delete them.'
+    );
   }
   lines.push('', `Valid ids: ${path.join(catalogDir, 'atoms.json')} (${validIds.length} atoms, grouped by category)`);
   fail(lines);

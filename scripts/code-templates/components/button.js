@@ -31,37 +31,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center${typo ? ' ' + typo : ''} interactive control',
-  {
-    variants: {
-      variant: {
-${treatments.map((k) => `        ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
-      },
-      color: {
-${colorKeys.map((k) => `        ${k}: '${toneClass[k]}',`).join('\n')}
-      },
-      size: {
-${Object.entries(allSizeEntries).map(([k, v]) => `        '${k}': '${v}',`).join('\n')}
-      },
+const buttonVariants = cva('button interactive control', {
+  variants: {
+    variant: {
+${treatments.map((k) => `      ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
     },
-    defaultVariants: {
-      variant: '${dflt.variant || 'filled'}',
-      color: '${dflt.color || 'primary'}',
-      size: '${dflt.size || 'md'}',
+    color: {
+${colorKeys.map((k) => `      ${k}: '${toneClass[k]}',`).join('\n')}
     },
-  }
-);
-
-/** Icon sizing per size tier — applied to icon wrapper spans */
-const buttonIconSize: Record<string, string> = {
-${Object.entries(allIconSizes).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
-};
+  },
+  defaultVariants: {
+    variant: '${dflt.variant || 'filled'}',
+    color: '${dflt.color || 'primary'}',
+  },
+});
 
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
-  & Omit<VariantProps<typeof buttonVariants>, 'size'>
+  & VariantProps<typeof buttonVariants>
   & {
     size?: ButtonSize;
     asChild?: boolean;
@@ -82,27 +70,27 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant, color, size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     const resolvedSize = iconOnly ? \`icon-\${size}\` : size;
-    const iconCls = buttonIconSize[size];
     const isDisabled = disabled || loading;
     const effectiveLeadingIcon = loading ? <LoadingSpinner /> : leadingIcon;
 
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, color, size: resolvedSize as any }), className)}
+        className={cn(buttonVariants({ variant, color }), className)}
+        data-size={resolvedSize}
         disabled={isDisabled}
         aria-busy={loading || undefined}
         {...props}
       >
         {iconOnly ? (
-          <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>
+          <span className={'${ICON_SLOT_CLASS}'}>
             {loading ? <LoadingSpinner /> : children}
           </span>
         ) : (
           <>
-            {effectiveLeadingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{effectiveLeadingIcon}</span>}
+            {effectiveLeadingIcon && <span className={'${ICON_SLOT_CLASS}'}>{effectiveLeadingIcon}</span>}
             <Slottable>{children}</Slottable>
-            {trailingIcon && <span className={cn('${ICON_SLOT_CLASS}', iconCls)}>{trailingIcon}</span>}
+            {trailingIcon && <span className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>}
           </>
         )}
       </Comp>
@@ -111,7 +99,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-export { Button, buttonVariants, buttonIconSize };
+export { Button, buttonVariants };
 `;
 }
 

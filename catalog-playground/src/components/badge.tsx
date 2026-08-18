@@ -4,41 +4,26 @@ import { Slot } from '@radix-ui/react-slot';
 import { X } from 'lucide-react';
 import { cn } from './cn';
 
-const badgeVariants = cva(
-  'inline-flex items-center justify-center',
-  {
-    variants: {
-      variant: {
-        'filled': 'treat-filled',
-        'outline': 'treat-outline',
-      },
-      state: {
-        default: 'tone-primary-soft',
-        neutral: 'tone-neutral-soft',
-        destructive: 'tone-error-soft',
-        success: 'tone-success-soft',
-        warning: 'tone-warning-soft',
-        info: 'tone-info-soft',
-      },
-      size: {
-        sm: 'px-1 py-[2px] gap-1 text-label-sm rounded-component',
-        md: 'px-2 py-1 gap-1 text-label-md rounded-component',
-        lg: 'px-3 py-1 gap-1 text-label-lg rounded-component',
-      },
+const badgeVariants = cva('badge', {
+  variants: {
+    variant: {
+      'filled': 'treat-filled',
+      'outline': 'treat-outline',
     },
-    defaultVariants: {
-      variant: 'filled',
-      state: 'default',
-      size: 'md',
+    state: {
+      default: 'tone-primary-soft',
+      neutral: 'tone-neutral-soft',
+      destructive: 'tone-error-soft',
+      success: 'tone-success-soft',
+      warning: 'tone-warning-soft',
+      info: 'tone-info-soft',
     },
-  }
-);
-
-const badgeIconSize: Record<string, string> = {
-  sm: 'size-icon-0',
-  md: 'size-icon-0',
-  lg: 'size-icon-1',
-};
+  },
+  defaultVariants: {
+    variant: 'filled',
+    state: 'default',
+  },
+});
 
 const badgeSegmentPad: Record<string, string> = {
   sm: 'px-1 py-[2px]',
@@ -68,14 +53,13 @@ const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-cen
 
 const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
-    const iconCls = badgeIconSize[size];
-    const computedClasses = badgeVariants({ variant, state, size });
+    const computedClasses = badgeVariants({ variant, state });
 
     const content = (
       <>
-        {leadingIcon && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{leadingIcon}</span>}
+        {leadingIcon && <span className={'icon-slot'}>{leadingIcon}</span>}
         {children}
-        {trailingIcon && !onRemove && <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}>{trailingIcon}</span>}
+        {trailingIcon && !onRemove && <span className={'icon-slot'}>{trailingIcon}</span>}
       </>
     );
 
@@ -86,7 +70,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
         onClick={onRemove}
         aria-label="Remove"
       >
-        <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}><X /></span>
+        <span className={'icon-slot'}><X /></span>
       </button>
     ) : null;
 
@@ -95,7 +79,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
       return (
         <Slot
           ref={ref}
-          className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)}
+          className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)} data-size={size}
           {...props}
         >
           <>
@@ -114,7 +98,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
       const segPad = badgeSegmentPad[size];
       const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 control';
       return (
-        <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} {...props}>
+        <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} data-size={size} {...props}>
           <button
             type="button"
             className={cn(segmentBase, 'rounded-l-[inherit]', segPad)}
@@ -128,7 +112,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
             onClick={onRemove}
             aria-label="Remove"
           >
-            <span className={cn('shrink-0 [&>svg]:size-full', iconCls)}><X /></span>
+            <span className={'icon-slot'}><X /></span>
           </button>
         </span>
       );
@@ -140,7 +124,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
         <button
           ref={ref as React.Ref<HTMLButtonElement>}
           type="button"
-          className={cn(computedClasses, INTERACTIVE_CLASSES, className)}
+          className={cn(computedClasses, INTERACTIVE_CLASSES, className)} data-size={size}
           onClick={onClick}
           {...props}
         >
@@ -151,7 +135,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
 
     // span (plain or onRemove only)
     return (
-      <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, className)} {...props}>
+      <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, className)} data-size={size} {...props}>
         {content}
         {closeButton}
       </span>
@@ -160,4 +144,4 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
 );
 Badge.displayName = 'Badge';
 
-export { Badge, badgeVariants, badgeIconSize };
+export { Badge, badgeVariants };

@@ -141,8 +141,27 @@ deliberate, not backlog inertia.
       churn-prone half. A project that owns its own components takes the first and skips
       the second, which makes the tokens tier a file boundary rather than a paragraph.
       Four stylesheets now: 486 / 477 / 773 / 272 lines
-- [ ] **Thin the components** — surviving atoms become a primitive import with layer
-      classes; the appearance-only entries stop being components
+- [x] **Thin the components.** Catalog 62 -> 44. Eighteen appearance-only atoms deleted;
+      `button` and `badge` kept as thin wrappers.
+
+      **The classification was wrong and inspection caught it.** `carousel`, `dialog` and
+      `sheet` all import `Button` — deleting it would have broken three surviving
+      behavior components. `button` was on the appearance list because it was sorted by
+      dependency (`@radix-ui/react-slot` looked trivial) rather than by what it does:
+      `Slot`/`Slottable` is `asChild` composition, which no class can express. Same for
+      `badge`. Both now map props onto classes and pass `data-size` — button went 101
+      lines to 82, and its size and icon ladders left the JS entirely.
+
+      Two ladders that existed twice are now once: `--icon-size` is set by every size tier
+      and read by a single `.icon-slot` rule, replacing the per-atom `buttonIconSize` /
+      `badgeIconSize` lookup tables.
+
+      **`resolve-picks.js` names the replacement.** A stale pick used to fuzzy-match —
+      "table — did you mean tabs?" sends someone hunting a component that was never the
+      answer. It now says `.table in loom.components.css` and prints the markup shape.
+      jmi-finance and jmi-fitness each have three stale picks; my-loom-app has 22. Their
+      installed copies keep working until deleted, which is the shadcn model behaving as
+      designed rather than a breakage
 - [x] **Size axis** — **not cut; the ADR's reasoning did not survive wider evidence.**
       The decision rested on four `size="sm"` uses across two dashboards. Across all
       seven consumers, paperboy and party-wipe use `sm`/`md`/`lg`/`xl` heavily — on

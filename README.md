@@ -57,22 +57,22 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 ## What's in the catalog
 
-62 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
+44 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
 
-> **This is what ships today, not where it is going.** The class-layer rewrite moves appearance out of components and into CSS, which reduces this catalog to the entries that carry behavior. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
+Everything here **carries behavior** — focus traps, portals, keyboard navigation, positioning, or a composition contract CSS cannot express. Appearance-only components were removed: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` now, which is why they work in a Django template and a printed invoice as well as in React. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
 
-**Two kinds, one catalog.** Every manifest carries a `kind`: **38 atoms** and **24 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
+**Two kinds, one catalog.** Every manifest carries a `kind`: **26 atoms** and **18 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
 
 | Group | Atoms |
 |-------|-------|
-| **Buttons** | button, badge, dot, fab, fab-menu, toggle, toggle-group |
-| **Forms** | input, select, textarea, checkbox, radio, switch, slider, combobox, date-picker, calendar, time-picker, file-upload, input-otp, label, helper-text, form-field |
-| **Layout** | card, dialog, alert-dialog, sheet, table, separator, toolbar |
-| **Feedback** | toast, banner, tooltip, popover, dropdown-menu, context-menu, hover-card, skeleton, spinner, progress-bar, empty-state |
-| **Data display** | avatar, avatar-group, list-item, accordion, kbd, relative-time |
-| **Navigation** | top-bar, sidebar, tabs, bottom-nav, breadcrumbs, pagination, navigation-menu, command-palette |
-| **Composite** | stepper, carousel, tree-view |
-| **Motion** | reveal, stagger, count-up, scroll-progress |
+| **Buttons** | badge, button, fab-menu, toggle, toggle-group |
+| **Forms** | calendar, checkbox, combobox, date-picker, file-upload, form-field, input-otp, radio, select, slider, switch, time-picker |
+| **Layout** | alert-dialog, dialog, separator, sheet |
+| **Feedback** | context-menu, dropdown-menu, hover-card, popover, progress-bar, toast, tooltip |
+| **Data display** | accordion, avatar, avatar-group, relative-time |
+| **Navigation** | command-palette, navigation-menu, pagination, sidebar, tabs |
+| **Composite** | carousel, stepper, tree-view |
+| **Motion** | count-up, reveal, scroll-progress, stagger |
 
 The motion atoms are **zero-dependency** — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no animation library. Interactive primitives that genuinely warrant a library use one (carousel → embla, date-picker → Radix); simple atoms don't.
 

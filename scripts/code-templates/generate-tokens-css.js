@@ -408,6 +408,32 @@ const CSS_TOKEN = (v, prefix) => {
 };
 
 /** One component's shape rules: base, per-size, per-variant. */
+/**
+ * Sub-parts. A schema key of the form `<part>-<prop>` describes a child, not the element
+ * the class is on — `heading-text` is the heading's type role, not the container's. Those
+ * emit as `.<component>-<part>` so the part is nameable in markup without the class
+ * guessing which element carries it (`.empty-state h3` would be wrong the moment someone
+ * uses a div).
+ *
+ * Generic on purpose: `stepper`, `pagination` and `sidebar` declare the same shape of key
+ * and can use this when their internals get named, rather than each inventing a scheme.
+ */
+const PART_PROPS = new Set(['text', 'fg', 'size', 'height', 'gap', 'x-padding', 'y-padding', 'radius', 'width']);
+
+function splitParts(keys) {
+  const parts = {};
+  for (const k of keys) {
+    const i = k.lastIndexOf('-');
+    if (i < 1) continue;
+    const part = k.slice(0, i);
+    const prop = k.slice(i + 1);
+    if (!PART_PROPS.has(prop)) continue;
+    if (part === 'icon' && prop === 'size') continue; // the container's --icon-size
+    (parts[part] = parts[part] || []).push([k, prop]);
+  }
+  return parts;
+}
+
 function buildComponentClass(name, cfg, textFamily) {
   if (!cfg) return '';
   const out = [];
@@ -461,7 +487,7 @@ function buildComponentClass(name, cfg, textFamily) {
   const shared = perTier.length
     ? perTier[0].filter((line) => perTier.every((d) => d.includes(line)))
     : [];
-  const base = [...decls(constant), ...shared];
+  const base = [...(BASE_LAYOUT[name] || []), ...decls(constant), ...shared];
   if (base.length) out.push(`.${name} {`, ...base.map((l) => `  ${l}`), '}', '');
 
   tiers.forEach((t, i) => {
@@ -470,9 +496,60 @@ function buildComponentClass(name, cfg, textFamily) {
     out.push(`.${name}[data-size="${t}"] {`, ...d.map((l) => `  ${l}`), '}', '');
   });
 
+  // Icon-only mode is a second size ladder in the schema (`icon-sizes`), square rather
+  // than padded. It rides the same attribute so a caller sets one thing.
+  const iconSizes = cfg['icon-sizes'] || {};
+  for (const [t, c2] of Object.entries(iconSizes)) {
+    if (t.startsWith('$') || !c2 || typeof c2 !== 'object') continue;
+    const d = decls({ ...c2 });
+    if (d.length) out.push(`.${name}[data-size="icon-${t}"] {`, ...d.map((l) => `  ${l}`), '}', '');
+  }
+
+  // --- sub-parts ---
+  const allKeys = new Set();
+  for (const t of tiers) for (const k of Object.keys(sizes[t] || {})) if (!k.startsWith('$')) allKeys.add(k);
+  const parts = splitParts(allKeys);
+  // An `icon` part reads the container's --icon-size rather than restating each tier: the
+  // container already ramps it, and one rule beats three that say the same thing.
+  const hasIconPart = Object.keys(cfg.variants || {}).some((v) =>
+    Object.keys(cfg.variants[v] || {}).some((k) => k === 'icon-fg'));
+  if (hasIconPart) {
+    out.push(`.${name}-icon {`, '  width: var(--icon-size);', '  height: var(--icon-size);', '  flex-shrink: 0;', '}', '');
+  }
+  for (const [part, propKeys] of Object.entries(parts)) {
+    const sel = `.${name}-${part}`;
+    tiers.forEach((t) => {
+      const d = [];
+      for (const [key, prop] of propKeys) {
+        const v = (sizes[t] || {})[key];
+        if (v == null) continue;
+        if (prop === 'text') {
+          const k = `--type-${String(v).replace('/', '-')}`;
+          d.push(`font-size: var(${k}-size);`, `line-height: var(${k}-line);`,
+                 `font-weight: var(${k}-weight);`, `letter-spacing: var(${k}-tracking);`);
+        } else if (prop === 'size') {
+          const sz = CSS_TOKEN(v, String(v).startsWith('icon/') ? '' : 'height-');
+          d.push(`width: ${sz};`, `height: ${sz};`);
+        } else if (prop === 'gap') { const g = CSS_SPACE(v); if (g) d.push(`gap: ${g};`); }
+        else if (prop === 'x-padding') { const g = CSS_SPACE(v); if (g) d.push(`padding-inline: ${g};`); }
+        else if (prop === 'y-padding') { const g = CSS_SPACE(v); if (g) d.push(`padding-block: ${g};`); }
+        else if (prop === 'radius') d.push(`border-radius: ${CSS_TOKEN(v, 'radius-')};`);
+        else if (prop === 'height') d.push(`height: ${CSS_TOKEN(v, 'height-')};`);
+        else if (prop === 'width') { const g = CSS_SPACE(v); d.push(`width: ${g || CSS_TOKEN(v, 'height-')};`); }
+      }
+      if (d.length) out.push(`.${name}[data-size="${t}"] ${sel} {`, ...d.map((l) => `  ${l}`), '}', '');
+    });
+  }
+
   const variants = cfg.variants || {};
   for (const [vname, v] of Object.entries(variants)) {
     if (vname.startsWith('$') || !v || typeof v !== 'object') continue;
+    for (const [vk, vv] of Object.entries(v)) {
+      const i = vk.lastIndexOf('-');
+      if (i < 1 || vk.slice(i + 1) !== 'fg' || vk === 'fg') continue;
+      const c = CSS_COLOR(vv);
+      if (c) out.push(`.${name}[data-variant="${vname}"] .${name}-${vk.slice(0, i)} {`, `  color: ${c};`, '}', '');
+    }
     const d = [];
     const bg = CSS_COLOR(v.bg);
     const fg = CSS_COLOR(v.fg);
@@ -508,7 +585,7 @@ const CELL_SIZED = new Set(['table']);
 
 const SUB_PART_KEYS = new Set([
   'rail-width', 'item-height', 'item-x-padding', 'item-gap', 'item-radius',
-  'indicator-size', 'connector-width', 'label-text', 'heading-text', 'description-text',
+  'indicator-size', 'connector-width', 'label-text',
   'item-size',
 ]);
 
@@ -544,6 +621,12 @@ function componentPlan() {
   return { emit, skipped };
 }
 
+// Layout a component class must carry because it is the shape, not a choice: the schema
+// describes spacing between children and says nothing about the axis they sit on.
+const BASE_LAYOUT = {
+  'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
+};
+
 function buildSectionComponentClasses() {
   const { emit, skipped } = componentPlan();
   const parts = [
@@ -557,6 +640,19 @@ function buildSectionComponentClasses() {
     ...skipped.subParts.map((x) => ` *   ${x}`),
     ' */',
   ];
+  // Every component that ramps an icon sets --icon-size; this is the one rule that reads
+  // it, so the ladder lives in the CSS alone rather than also in a JS lookup per atom.
+  parts.push(`.icon-slot {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex-shrink: 0;
+}
+
+.icon-slot > svg {
+  width: 100%;
+  height: 100%;
+}
+`);
   for (const c of emit) parts.push(buildComponentClass(c.name, c.cfg, c.textFamily));
   return parts.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
 }

@@ -156,6 +156,6 @@ no token.
 
 ---
 
-All 62 components are available in the catalog; projects pick the subset they need
+All 44 components are available in the catalog; projects pick the subset they need
 (see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md)). The full pick list is generated to
 [`catalog/atoms.json`](../catalog/atoms.json).

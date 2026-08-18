@@ -3,31 +3,20 @@ import { useEffect, useRef, useState } from 'react';
 import type { GalleryStory } from './shell';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
-import { Dot } from '@/components/dot';
-import { Banner } from '@/components/banner';
-import { Spinner } from '@/components/spinner';
-import { Skeleton } from '@/components/skeleton';
 import { ProgressBar } from '@/components/progress-bar';
-import { EmptyState } from '@/components/empty-state';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/tooltip';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/popover';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/hover-card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut } from '@/components/dropdown-menu';
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut } from '@/components/context-menu';
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastAction, ToastClose } from '@/components/toast';
-import { FAB } from '@/components/fab';
 import { FabMenu, FabAction } from '@/components/fab-menu';
 import { Toggle } from '@/components/toggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/toggle-group';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/dialog';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/sheet';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/alert-dialog';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/table';
 import { Separator } from '@/components/separator';
-import { Toolbar } from '@/components/toolbar';
-import { Input } from '@/components/input';
-import { Textarea } from '@/components/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/select';
 import { Checkbox } from '@/components/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/radio';
@@ -37,22 +26,15 @@ import { Combobox } from '@/components/combobox';
 import { DatePicker } from '@/components/date-picker';
 import { Calendar } from '@/components/calendar';
 import { InputOTP } from '@/components/input-otp';
-import { Label } from '@/components/label';
-import { HelperText } from '@/components/helper-text';
 import { FormField } from '@/components/form-field';
 import { FileUpload, FileUploadItem } from '@/components/file-upload';
 import { TimePicker, type TimeValue } from '@/components/time-picker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/avatar';
 import { AvatarGroup } from '@/components/avatar-group';
-import { ListItem } from '@/components/list-item';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/accordion';
-import { Kbd } from '@/components/kbd';
 import { RelativeTime } from '@/components/relative-time';
-import { TopBar } from '@/components/top-bar';
 import { Sidebar, SidebarItem } from '@/components/sidebar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/tabs';
-import { BottomNav, BottomNavItem } from '@/components/bottom-nav';
-import { Breadcrumbs, BreadcrumbItem, BreadcrumbSeparator } from '@/components/breadcrumbs';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from '@/components/pagination';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/navigation-menu';
 import { CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPaletteEmpty, CommandPaletteGroup, CommandPaletteItem, CommandPaletteSeparator, CommandPaletteShortcut } from '@/components/command-palette';
@@ -63,7 +45,7 @@ import { Reveal } from '@/components/reveal';
 import { Stagger } from '@/components/stagger';
 import { CountUp } from '@/components/count-up';
 import { ScrollProgress } from '@/components/scroll-progress';
-import { Home, BarChart3, Users, Settings, Bell, Menu, ChevronRight } from 'lucide-react';
+import { Home, BarChart3, Users, Settings } from 'lucide-react';
 
 const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>;
 const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>;
@@ -78,7 +60,6 @@ const TREATMENTS = ['filled', 'outline', 'ghost'] as const;
 const COLORS = ['primary', 'secondary', 'destructive', 'success', 'warning', 'neutral'] as const;
 const SIZES = ['sm', 'md', 'lg'] as const;
 const BADGE_STATES = ['default', 'neutral', 'destructive', 'success', 'warning', 'info'] as const;
-const DOT_STATES = ['default', 'destructive', 'success', 'warning', 'info'] as const;
 const TOAST_VARIANTS = ['default', 'success', 'warning', 'error', 'info'] as const;
 
 const treeSample: TreeNodeData[] = [
@@ -168,12 +149,6 @@ function SegmentedExample() {
     </ToggleGroup>
   );
 }
-function BannerDismissExample() {
-  const [show, setShow] = useState(true);
-  return show
-    ? <div className="w-[460px]"><Banner variant="success" onDismiss={() => setShow(false)}>Saved. Click the × to dismiss.</Banner></div>
-    : <Button size="sm" variant="outline" color="neutral" onClick={() => setShow(true)}>Restore banner</Button>;
-}
 
 // --- Forms stateful examples ---
 function SelectExample() {
@@ -231,9 +206,18 @@ function TimePickerExample() {
 function FieldCascadeExample({ error }: { error?: boolean }) {
   return (
     <FormField error={error} className="w-72">
-      <Label htmlFor="email">Email</Label>
-      <Input id="email" placeholder="you@example.com" defaultValue={error ? 'not-an-email' : ''} />
-      <HelperText>{error ? 'Enter a valid email address.' : 'We never share your email.'}</HelperText>
+      <label className="label" data-size="md" htmlFor="email">Email</label>
+      <input
+        id="email"
+        className="input control"
+        data-size="md"
+        aria-invalid={error || undefined}
+        placeholder="you@example.com"
+        defaultValue={error ? 'not-an-email' : ''}
+      />
+      <span className="helper-text" data-size="md">
+        {error ? 'Enter a valid email address.' : 'We never share your email.'}
+      </span>
     </FormField>
   );
 }
@@ -363,52 +347,12 @@ export const STORIES: GalleryStory[] = [
     ],
   },
   {
-    name: 'Dot',
-    category: 'Feedback',
-    description: 'Standalone status/severity indicator. Composes into badges, alerts, list items, headings.',
-    sections: [
-      { label: 'states', content: DOT_STATES.map((s) => <span key={s} className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state={s} />{s}</span>) },
-      { label: 'sizes', content: SIZES.map((s) => <Dot key={s} size={s} />) },
-      { label: 'composed', content: [<span key="1" className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--doc-frame-fg)' }}><Dot state="success" /> Online</span>, <Badge key="2" state="warning"><Dot state="warning" className="mr-1" />Pending</Badge>] },
-    ],
-  },
-  {
-    name: 'Banner',
-    category: 'Feedback',
-    description: 'Inline status/severity strip (consolidates the old alert). Severity variant × size, optional leading icon, action slot, stateless dismiss.',
-    sections: [
-      { label: 'variants', content: (['info', 'success', 'warning', 'error'] as const).map((v) => <div key={v} className="w-[460px]"><Banner variant={v}>This is a {v} banner.</Banner></div>) },
-      { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-[460px]"><Banner size={s}>Banner at {s} size.</Banner></div>) },
-      { label: 'leading icon', content: <div className="w-[460px]"><Banner variant="info" leadingIcon={<Star />}>Heads up — a new version is available.</Banner></div> },
-      { label: 'action slot', content: <div className="w-[460px]"><Banner variant="warning" leadingIcon={<Star />} action={<Button size="sm" variant="outline" color="neutral">Review</Button>}>Your trial ends in 3 days.</Banner></div> },
-      { label: 'dismissible', content: <BannerDismissExample /> },
-    ],
-  },
-  {
     name: 'Toast',
     category: 'Feedback',
     description: 'Transient notification. Variant × size, optional action and close X. Radix-backed — opens into a fixed viewport rather than inline.',
     sections: [
       { label: 'variants (click to open)', content: <ToastExample variants={[...TOAST_VARIANTS]} /> },
       { label: 'sizes (click to open)', content: <ToastExample sizes={[...SIZES]} /> },
-    ],
-  },
-  {
-    name: 'Spinner',
-    category: 'Feedback',
-    description: 'Indeterminate loading indicator. variant (default/muted/inherit) × size.',
-    sections: [
-      { label: 'sizes', content: SIZES.map((s) => <Spinner key={s} size={s} />) },
-      { label: 'variants', content: (['default', 'muted', 'inherit'] as const).map((v) => <Spinner key={v} variant={v} />) },
-    ],
-  },
-  {
-    name: 'Skeleton',
-    category: 'Feedback',
-    description: 'Loading placeholder. Shape presets (text/avatar/card); defaults to a full-width text line.',
-    sections: [
-      { label: 'default (text line)', content: <div className="w-64"><Skeleton /></div> },
-      { label: 'shapes', content: (['text', 'avatar', 'card'] as const).map((s) => <div key={s} className="w-64"><Skeleton shape={s} /></div>) },
     ],
   },
   {
@@ -419,31 +363,6 @@ export const STORIES: GalleryStory[] = [
       { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-64"><ProgressBar size={s} value={60} /></div>) },
       { label: 'variants', content: (['default', 'success', 'warning', 'error'] as const).map((v) => <div key={v} className="w-64"><ProgressBar variant={v} value={60} /></div>) },
       { label: 'values', content: [0, 35, 70, 100].map((v) => <div key={v} className="w-64"><ProgressBar value={v} /></div>) },
-    ],
-  },
-  {
-    name: 'EmptyState',
-    category: 'Feedback',
-    description: 'Zero-data placeholder. Optional icon, heading, description and action slot; every slot is independent, so a heading-only state is valid.',
-    sections: [
-      { label: 'full (icon + heading + description + action)', content: (
-        <div className="w-[380px]">
-          <EmptyState
-            icon={<Users />}
-            heading="No members yet"
-            description="Invite someone to collaborate and they will show up here."
-            action={<Button size="sm">Invite a member</Button>}
-          />
-        </div>
-      ) },
-      { label: 'heading + description only', content: (
-        <div className="w-[380px]"><EmptyState heading="Nothing to review" description="You are all caught up." /></div>
-      ) },
-      { label: 'sizes', content: SIZES.map((s) => (
-        <div key={s} className="w-[380px]">
-          <EmptyState size={s} icon={<Users />} heading={`Size ${s}`} description="Icon, heading and description all scale with the size." />
-        </div>
-      )) },
     ],
   },
   {
@@ -550,15 +469,6 @@ export const STORIES: GalleryStory[] = [
     ],
   },
   {
-    name: 'FAB',
-    category: 'Actions',
-    description: 'Floating action button. Condensed scale; extended adds a label at any size.',
-    sections: [
-      { label: 'sizes', content: SIZES.map((s) => <FAB key={s} size={s} icon={<Plus />} />) },
-      { label: 'extended', content: [<FAB key="1" size="sm" icon={<Plus />} label="New" />, <FAB key="2" size="md" icon={<Plus />} label="Create" />, <FAB key="3" size="lg" icon={<Plus />} label="Create new" />] },
-    ],
-  },
-  {
     name: 'FabMenu',
     category: 'Actions',
     description: 'FAB that expands into a vertical action stack (M3 speed-dial). Labels track component radius.',
@@ -585,47 +495,6 @@ export const STORIES: GalleryStory[] = [
       { label: 'spaced', content: <ToggleGroup variant="spaced" type="single" defaultValue="center"><ToggleGroupItem value="left">Left</ToggleGroupItem><ToggleGroupItem value="center">Center</ToggleGroupItem><ToggleGroupItem value="right">Right</ToggleGroupItem></ToggleGroup> },
       { label: 'multi-select', content: <ToggleGroup type="multiple"><ToggleGroupItem value="bold">Bold</ToggleGroupItem><ToggleGroupItem value="italic">Italic</ToggleGroupItem><ToggleGroupItem value="underline">Underline</ToggleGroupItem></ToggleGroup> },
       { label: 'sizes', content: SIZES.map((s) => <ToggleGroup key={s} type="single" size={s}><ToggleGroupItem value="a">A</ToggleGroupItem><ToggleGroupItem value="b">B</ToggleGroupItem><ToggleGroupItem value="c">C</ToggleGroupItem></ToggleGroup>) },
-    ],
-  },
-  {
-    name: 'Card',
-    category: 'Layout',
-    description: 'Surface container. variant (default/elevated/outline/flush) × size. flush sits level with the surface — no chrome — and takes borders/padding back when a use needs them.',
-    sections: [
-      { label: 'variants', content: (['default', 'elevated', 'outline', 'flush'] as const).map((v) => (
-        <Card key={v} variant={v} className="w-52">
-          <CardHeader><CardTitle>{v}</CardTitle><CardDescription>Card description text.</CardDescription></CardHeader>
-          <CardContent className="text-sm">Body content goes here.</CardContent>
-        </Card>
-      )) },
-      { label: 'sizes', content: (['sm', 'md', 'lg'] as const).map((s) => (
-        <Card key={s} size={s} variant="outline" className="w-40"><CardContent className="text-sm">size={s}</CardContent></Card>
-      )) },
-      { label: 'flush + override (borders / edge-to-edge media)', content: (
-        <Card variant="flush" className="w-52 border border-outline p-0 overflow-hidden">
-          <div className="h-20 w-full bg-primary" />
-          <CardContent className="px-4 py-3 text-sm">Flush card, given a border + edge-to-edge media via className.</CardContent>
-        </Card>
-      ) },
-    ],
-  },
-  {
-    name: 'Toolbar',
-    category: 'Layout',
-    description: 'Horizontal container for grouped actions — buttons, toggles, separators. Sizes to content.',
-    sections: [
-      { label: 'default', content: (
-        <Toolbar className="w-fit">
-          <Button variant="ghost" color="neutral" size="sm" iconOnly><Star /></Button>
-          <Button variant="ghost" color="neutral" size="sm">Bold</Button>
-          <Button variant="ghost" color="neutral" size="sm">Italic</Button>
-          <Separator orientation="vertical" className="h-6" />
-          <Toggle size="sm">Wrap</Toggle>
-        </Toolbar>
-      ) },
-      { label: 'sizes', content: SIZES.map((s) => (
-        <Toolbar key={s} size={s} className="w-fit"><Button variant="ghost" color="neutral" size="sm">A</Button><Button variant="ghost" color="neutral" size="sm">B</Button></Toolbar>
-      )) },
     ],
   },
   {
@@ -695,28 +564,6 @@ export const STORIES: GalleryStory[] = [
       ) },
     ],
   },
-  {
-    name: 'Table',
-    category: 'Layout',
-    description: 'Data table. Size set once on <Table>, cascades to cells via context; per-cell size overrides.',
-    sections: [
-      { label: 'size=sm (cells inherit)', content: (
-        <Table size="sm" className="w-80">
-          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Role</TableHead></TableRow></TableHeader>
-          <TableBody>
-            <TableRow><TableCell>Ada</TableCell><TableCell>Engineer</TableCell></TableRow>
-            <TableRow><TableCell>Grace</TableCell><TableCell>Lead</TableCell></TableRow>
-          </TableBody>
-        </Table>
-      ) },
-      { label: 'size=lg', content: (
-        <Table size="lg" className="w-80">
-          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Role</TableHead></TableRow></TableHeader>
-          <TableBody><TableRow><TableCell>Ada</TableCell><TableCell>Engineer</TableCell></TableRow></TableBody>
-        </Table>
-      ) },
-    ],
-  },
 
   // === Inputs (Forms group) ===
   {
@@ -726,25 +573,6 @@ export const STORIES: GalleryStory[] = [
     sections: [
       { label: 'default', content: <FieldCascadeExample /> },
       { label: 'error (border + helper cascade)', content: <FieldCascadeExample error /> },
-    ],
-  },
-  {
-    name: 'Input',
-    category: 'Inputs',
-    description: 'Text input (text-field base). state (default/error) × size; error also cascades from FormField.',
-    sections: [
-      { label: 'sizes', content: SIZES.map((s) => <Input key={s} size={s} placeholder={`size ${s}`} className="w-48" />) },
-      { label: 'error state (explicit)', content: <Input state="error" defaultValue="invalid" className="w-48" /> },
-      { label: 'disabled', content: <Input disabled placeholder="Disabled" className="w-48" /> },
-    ],
-  },
-  {
-    name: 'Textarea',
-    category: 'Inputs',
-    description: 'Multi-line input. min-height per size; vertical resize. Error cascades from FormField.',
-    sections: [
-      { label: 'sizes', content: SIZES.map((s) => <Textarea key={s} size={s} placeholder={`size ${s}`} className="w-56" />) },
-      { label: 'error', content: <Textarea state="error" defaultValue="Too short" className="w-56" /> },
     ],
   },
   {
@@ -851,31 +679,12 @@ export const STORIES: GalleryStory[] = [
     ],
   },
   {
-    name: 'ListItem',
-    category: 'Data Display',
-    description: 'Three-slot row shell (leading / content / trailing). default / bordered × sm–lg. No internal text styling — slots fill it.',
-    sections: [
-      { label: 'variants', content: (['default', 'bordered'] as const).map((v) => <div key={v} className="w-72"><ListItem variant={v} leading={<Star />} trailing={<Arrow />}>List item — {v}</ListItem></div>) },
-      { label: 'sizes', content: SIZES.map((s) => <div key={s} className="w-72"><ListItem size={s} leading={<Star />}>Size {s}</ListItem></div>) },
-      { label: 'leading avatar', content: <div className="w-72"><ListItem leading={<Avatar size="sm"><AvatarFallback>JI</AvatarFallback></Avatar>} trailing={<Kbd>⏎</Kbd>}>Jacob Ikola</ListItem></div> },
-    ],
-  },
-  {
     name: 'Accordion',
     category: 'Data Display',
     description: 'Collapsible section group (mutual exclusion when type=single). default / filled. Chevron rotates on open.',
     sections: [
       { label: 'single (default)', content: <div className="w-80"><Accordion type="single" collapsible defaultValue="a"><AccordionItem value="a"><AccordionTrigger>What is Loom?</AccordionTrigger><AccordionContent>A token-driven design-system generator.</AccordionContent></AccordionItem><AccordionItem value="b"><AccordionTrigger>How are atoms picked?</AccordionTrigger><AccordionContent>Via loom-picks.json; setup.sh syncs the resolved set.</AccordionContent></AccordionItem></Accordion></div> },
       { label: 'filled', content: <div className="w-80"><Accordion type="single" collapsible variant="filled"><AccordionItem value="a"><AccordionTrigger>Section one</AccordionTrigger><AccordionContent>Filled surface, no border.</AccordionContent></AccordionItem><AccordionItem value="b"><AccordionTrigger>Section two</AccordionTrigger><AccordionContent>Second panel.</AccordionContent></AccordionItem></Accordion></div> },
-    ],
-  },
-  {
-    name: 'Kbd',
-    category: 'Data Display',
-    description: 'Keyboard shortcut key cap. Inline element; combos compose with a gap.',
-    sections: [
-      { label: 'sizes', content: SIZES.map((s) => <Kbd key={s} size={s}>⌘K</Kbd>) },
-      { label: 'combination', content: <span className="inline-flex items-center gap-1"><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></span> },
     ],
   },
   {
@@ -887,29 +696,6 @@ export const STORIES: GalleryStory[] = [
       { label: 'future', content: <RelativeTimeExample offsetMs={3 * 24 * 60 * 60 * 1000} /> },
       { label: 'weeks ago', content: <RelativeTimeExample offsetMs={-3 * 7 * 24 * 60 * 60 * 1000} /> },
       { label: 'numeric=always', content: <RelativeTimeExample offsetMs={-30 * 60 * 1000} numeric="always" /> },
-    ],
-  },
-  {
-    name: 'TopBar',
-    category: 'Navigation',
-    description: 'App header bar — title + nav/action icons. default (border) vs elevated (shadow). Container only; content is composed.',
-    sections: [
-      { label: 'variants', content: (['default', 'elevated'] as const).map((v) => (
-        <TopBar key={v} variant={v} className="w-[460px]">
-          <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Menu"><Menu /></Button>
-          <span className="font-semibold">Dashboard</span>
-          <div className="ml-auto flex items-center gap-1">
-            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Notifications"><Bell /></Button>
-            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Settings"><Settings /></Button>
-          </div>
-        </TopBar>
-      )) },
-      { label: 'sizes', content: SIZES.map((s) => (
-        <TopBar key={s} size={s} className="w-[460px]">
-          <Button iconOnly variant="ghost" color="inherit" size={s} aria-label="Menu"><Menu /></Button>
-          <span className="font-semibold">{s.toUpperCase()}</span>
-        </TopBar>
-      )) },
     ],
   },
   {
@@ -965,59 +751,6 @@ export const STORIES: GalleryStory[] = [
             <TabsTrigger size={s} value="b">Second</TabsTrigger>
           </TabsList>
         </Tabs>
-      )) },
-    ],
-  },
-  {
-    name: 'BottomNav',
-    category: 'Navigation',
-    description: 'Mobile bottom bar — 3–5 destinations, always labeled. Active item uses primary.',
-    sections: [
-      { label: 'default', content: (
-        <BottomNav className="w-[400px]">
-          <BottomNavItem active icon={<Home size={20} />}>Home</BottomNavItem>
-          <BottomNavItem icon={<BarChart3 size={20} />}>Stats</BottomNavItem>
-          <BottomNavItem icon={<Bell size={20} />}>Alerts</BottomNavItem>
-          <BottomNavItem icon={<Settings size={20} />}>Settings</BottomNavItem>
-        </BottomNav>
-      ) },
-      { label: 'sizes', content: SIZES.map((s) => (
-        <BottomNav key={s} size={s} className="w-[400px]">
-          <BottomNavItem active icon={<Home size={18} />}>Home</BottomNavItem>
-          <BottomNavItem icon={<Users size={18} />}>Team</BottomNavItem>
-        </BottomNav>
-      )) },
-    ],
-  },
-  {
-    name: 'Breadcrumbs',
-    category: 'Navigation',
-    description: 'Page-hierarchy trail. BreadcrumbSeparator renders / by default; pass children (e.g. a chevron) to override. Current page is plain text, not a link.',
-    sections: [
-      { label: 'default (/ separator)', content: (
-        <Breadcrumbs>
-          <BreadcrumbItem>Home</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>Library</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem current>Data display</BreadcrumbItem>
-        </Breadcrumbs>
-      ) },
-      { label: 'custom separator', content: (
-        <Breadcrumbs>
-          <BreadcrumbItem>Home</BreadcrumbItem>
-          <BreadcrumbSeparator><ChevronRight className="size-3.5" /></BreadcrumbSeparator>
-          <BreadcrumbItem>Settings</BreadcrumbItem>
-          <BreadcrumbSeparator><ChevronRight className="size-3.5" /></BreadcrumbSeparator>
-          <BreadcrumbItem current>Profile</BreadcrumbItem>
-        </Breadcrumbs>
-      ) },
-      { label: 'sizes', content: SIZES.map((s) => (
-        <Breadcrumbs key={s} size={s}>
-          <BreadcrumbItem>Home</BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem current>{s}</BreadcrumbItem>
-        </Breadcrumbs>
       )) },
     ],
   },
