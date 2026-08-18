@@ -59,6 +59,8 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 62 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view:
 
+> **This is what ships today, not where it is going.** The class-layer rewrite moves appearance out of components and into CSS, which reduces this catalog to the entries that carry behavior. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
+
 **Two kinds, one catalog.** Every manifest carries a `kind`: **38 atoms** and **24 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
 
 | Group | Atoms |
