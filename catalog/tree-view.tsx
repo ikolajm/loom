@@ -76,7 +76,7 @@ function TreeNode({ node, size = 'md', depth, selectedId, onSelect }: {
         className={cn(
           'flex items-center w-full cursor-pointer transition-colors',
           'hover:bg-surface-1 hover:text-on-surface',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'control',
           itemSize[size],
           isSelected ? 'bg-primary-container text-on-primary-container' : 'text-on-surface',
         )}

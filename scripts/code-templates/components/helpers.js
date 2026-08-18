@@ -130,8 +130,7 @@ function buildCvaString(varName, config, meta) {
     // Text inputs should use text cursor, not pointer, and match Select placeholder color
     const isTextInput = ['input', 'textarea'].includes(meta.element) && !meta.inputType;
     if (isTextInput) base.push('cursor-text placeholder:text-on-surface-variant');
-    base.push('focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none');
-    base.push('disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed');
+    base.push('control');
   }
   const baseStr = base.filter(Boolean).join(' ');
 

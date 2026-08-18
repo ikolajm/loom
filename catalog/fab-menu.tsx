@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const fabMenuTriggerVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive control',
   {
     variants: {
       variant: {
@@ -23,7 +23,7 @@ const fabMenuTriggerVariants = cva(
 );
 
 const fabMenuActionVariants = cva(
-  'inline-flex items-center justify-center interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive control',
   {
     variants: {
       variant: {

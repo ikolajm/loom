@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "button",
   "description": "Floating action button — primary screen action. Single variant by design. Extended mode adds a text label next to the icon. Positioning is consumer responsibility.",
-  "version": "7049ea9ee359",
+  "version": "5afbffc7c1ed",
   "dependencies": [
     "cn"
   ],

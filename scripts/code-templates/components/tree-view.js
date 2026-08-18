@@ -117,7 +117,7 @@ function TreeNode({ node, size = '${config.default?.size || 'md'}', depth, selec
         className={cn(
           'flex items-center w-full cursor-pointer transition-colors',
           'hover:bg-surface-1 hover:text-on-surface',
-          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          'control',
           itemSize[size],
           isSelected ? 'bg-${selectedBg} text-${selectedFg}' : 'text-on-surface',
         )}

@@ -4,7 +4,7 @@ import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center font-medium interactive focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center interactive control',
   {
     variants: {
       variant: {

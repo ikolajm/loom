@@ -8,7 +8,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const selectTriggerVariants = cva(
-  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
+  'flex items-center justify-between w-full interactive cursor-pointer control data-[placeholder]:text-on-surface-variant',
   {
     variants: {
       state: {

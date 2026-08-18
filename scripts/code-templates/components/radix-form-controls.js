@@ -35,7 +35,7 @@ import { Check } from 'lucide-react';
 import { cn } from './cn';
 
 const checkboxVariants = cva(
-  'peer shrink-0 cursor-pointer ${radius} border border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary',
+  'peer shrink-0 cursor-pointer ${radius} border border-outline transition-colors control data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary',
   {
     variants: {
       size: {
@@ -101,7 +101,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const switchVariants = cva(
-  'peer inline-flex shrink-0 cursor-pointer items-center rounded-pill transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-1',
+  'peer inline-flex shrink-0 cursor-pointer items-center rounded-pill transition-colors control data-[state=checked]:bg-primary data-[state=unchecked]:bg-surface-1',
   {
     variants: {
       size: {
@@ -169,7 +169,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const radioItemVariants = cva(
-  'aspect-square cursor-pointer rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:border-primary',
+  'aspect-square cursor-pointer rounded-full border-2 border-outline transition-colors control data-[state=checked]:border-primary',
   {
     variants: {
       size: {
@@ -260,7 +260,7 @@ const Slider = forwardRef<React.ComponentRef<typeof SliderPrimitive.Root>, Slide
         <SliderPrimitive.Track className={cn('relative w-full grow cursor-pointer overflow-hidden rounded-pill bg-surface-1', s.track)}>
           <SliderPrimitive.Range className="absolute h-full bg-primary" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className={cn('block cursor-pointer rounded-full bg-primary transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', s.thumb)} />
+        <SliderPrimitive.Thumb className={cn('block cursor-pointer rounded-full bg-primary transition-colors control', s.thumb)} />
       </SliderPrimitive.Root>
     );
   }
@@ -287,7 +287,7 @@ import { cn } from './cn';
 import { useFieldError } from './form-field';
 
 const selectTriggerVariants = cva(
-  'flex items-center justify-between w-full interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed data-[placeholder]:text-on-surface-variant',
+  'flex items-center justify-between w-full interactive cursor-pointer control data-[placeholder]:text-on-surface-variant',
   {
     variants: {
       state: {

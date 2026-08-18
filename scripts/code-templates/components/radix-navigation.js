@@ -127,8 +127,8 @@ const TabsTrigger = forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'h-full ${typo} cursor-pointer transition-colors',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'h-full${typo ? ' ' + typo : ''} cursor-pointer transition-colors',
+      'control',
       'text-on-surface-variant hover:text-on-surface',
       'data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary',
       triggerPaddingMap[size],
@@ -143,7 +143,7 @@ const TabsContent = forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content ref={ref} className={cn('mt-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', className)} {...props} />
+  <TabsPrimitive.Content ref={ref} className={cn('mt-4 control', className)} {...props} />
 ));
 TabsContent.displayName = 'TabsContent';
 
@@ -213,7 +213,7 @@ const AccordionTrigger = forwardRef<
       ref={ref}
       className={cn(
         'flex flex-1 items-center justify-between font-medium cursor-pointer transition-all',
-        'hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'hover:bg-surface-2 control',
         '[&[data-state=open]>svg]:rotate-180',
         triggerSize[size],
         className,

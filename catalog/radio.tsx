@@ -6,7 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const radioItemVariants = cva(
-  'aspect-square cursor-pointer rounded-full border-2 border-outline transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-(--opacity-disabled) data-[state=checked]:border-primary',
+  'aspect-square cursor-pointer rounded-full border-2 border-outline transition-colors control data-[state=checked]:border-primary',
   {
     variants: {
       size: {

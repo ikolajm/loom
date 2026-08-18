@@ -52,8 +52,14 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
       gains `info`, badge gains `secondary`. No vendor prefix — the first segment already
       names the dimension, and Loom's output is the only design layer in a consuming
       project, so there is no second stylesheet to collide with
-- [ ] **The rest of the element list** — surfaces, form-control states and validity,
-      tables, links. This list is closeable; a component list is not
+- [x] **Form-control states and validity** — `.control` in `loom.css`: focus ring,
+      ARIA-driven validity, disabled. Validity keys off `aria-invalid`, which has to be
+      right for assistive tech anyway, so styling cannot drift from it; it re-points
+      `--tone-border` and `--tone-text` rather than setting colors, so an invalid control
+      keeps its treatment. 52 hardcoded utility strings across 18 generator files
+      collapsed into one class — 37 focus rings, 15 disabled pairs
+- [ ] **The rest of the element list** — surfaces, tables, links. This list is closeable;
+      a component list is not
 - [ ] **Print block** — `print-color-adjust: exact`, page-break behavior on surfaces and
       tables. Belongs in the layer, not re-derived per project
 - [ ] **Flattened per-theme emit** — one stylesheet per theme with color roles resolved,

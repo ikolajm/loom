@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const labelVariants = cva(
-  'flex items-center font-medium',
+  'flex items-center',
   {
     variants: {
       state: {

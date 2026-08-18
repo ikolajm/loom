@@ -73,7 +73,7 @@ const PaginationLink = forwardRef<HTMLAnchorElement, PaginationLinkProps>(
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         'inline-flex items-center justify-center font-medium interactive cursor-pointer',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'control',
         isActive ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-1',
         itemSizeMap[size],
         className,

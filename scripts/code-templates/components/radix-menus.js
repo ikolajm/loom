@@ -112,7 +112,7 @@ const ${prefix}Item = forwardRef<
     ref={ref}
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'control',
       'data-[highlighted]:${hoverBg} data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       itemSizeMap[size],
       inset && 'pl-8',
@@ -131,7 +131,7 @@ const ${prefix}CheckboxItem = forwardRef<
     ref={ref}
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'control',
       'data-[highlighted]:${hoverBg} data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       insetItemSizeMap[size],
       className,
@@ -155,7 +155,7 @@ const ${prefix}RadioItem = forwardRef<
     ref={ref}
     className={cn(
       'relative flex items-center gap-2 select-none interactive cursor-pointer',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'control',
       'data-[highlighted]:${hoverBg} data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:cursor-not-allowed',
       insetItemSizeMap[size],
       className,

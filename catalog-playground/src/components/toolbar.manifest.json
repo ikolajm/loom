@@ -3,7 +3,7 @@
   "kind": "pattern",
   "category": "layout",
   "description": "Horizontal flex container for grouped actions — houses buttons, toggles, separators, dropdowns. Children render as-is.",
-  "version": "c6f69fbf3a44",
+  "version": "8cb2dce2c8e9",
   "dependencies": [
     "cn"
   ],

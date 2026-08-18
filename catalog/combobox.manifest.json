@@ -3,7 +3,7 @@
   "kind": "pattern",
   "category": "form",
   "description": "",
-  "version": "beca6311ed1e",
+  "version": "90b1bcd22b5d",
   "dependencies": [
     "cn",
     "form-field",

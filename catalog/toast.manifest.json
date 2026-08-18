@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "feedback",
   "description": "",
-  "version": "0480681d4e12",
+  "version": "3fe3598bf1fd",
   "dependencies": [
     "cn"
   ],

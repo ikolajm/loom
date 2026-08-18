@@ -205,7 +205,7 @@ const FileUploadItem = forwardRef<HTMLDivElement, FileUploadItemProps>(
               type="button"
               onClick={onRemove}
               aria-label={`Remove ${name}`}
-              className="inline-flex items-center justify-center rounded-component p-1 text-on-surface-variant interactive transition-opacity opacity-(--opacity-muted) hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="inline-flex items-center justify-center rounded-component p-1 text-on-surface-variant interactive transition-opacity opacity-(--opacity-muted) hover:opacity-100 control"
             >
               <X className="size-icon-1" />
             </button>

@@ -199,7 +199,7 @@ function generateCompoundSubs(name, config, meta) {
       { sub: 'TableCell', el: 'td', classes: 'px-4 py-2 align-middle' },
     ],
     'BottomNav': [
-      { sub: 'BottomNavItem', el: 'button', classes: 'flex flex-1 flex-col items-center justify-center gap-0.5 h-full px-3 interactive cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant', extraProps: 'active?: boolean; icon?: React.ReactNode;', activeClasses: 'text-primary' },
+      { sub: 'BottomNavItem', el: 'button', classes: 'flex flex-1 flex-col items-center justify-center gap-0.5 h-full px-3 interactive cursor-pointer transition-colors control text-on-surface-variant', extraProps: 'active?: boolean; icon?: React.ReactNode;', activeClasses: 'text-primary' },
     ],
     'Breadcrumbs': [
       { sub: 'BreadcrumbItem', el: 'span', classes: 'text-on-surface-variant hover:text-on-surface cursor-pointer', extraProps: 'current?: boolean;', activeClasses: 'text-on-surface font-medium cursor-default' },

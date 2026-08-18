@@ -3,7 +3,7 @@
   "kind": "pattern",
   "category": "navigation",
   "description": "",
-  "version": "0dfa21b77d23",
+  "version": "ce12f8a70583",
   "dependencies": [
     "cn"
   ],

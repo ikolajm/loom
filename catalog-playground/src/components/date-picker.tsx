@@ -48,8 +48,8 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
             disabled={disabled}
             className={cn(
               'flex items-center justify-between w-full border border-outline-subtle bg-surface text-on-surface rounded-input interactive cursor-pointer',
-              'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-              'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+              'control',
+              'control',
               triggerSizeMap[size],
               isError && 'border-error',
               className,

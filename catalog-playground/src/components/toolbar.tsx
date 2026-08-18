@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const toolbarVariants = cva(
-  'flex items-center font-normal',
+  'flex items-center',
   {
     variants: {
       variant: {

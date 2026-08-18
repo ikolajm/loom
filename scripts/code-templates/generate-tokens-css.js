@@ -278,6 +278,59 @@ function buildSection10_TypographyPresets() {
  * the container end of it. One table now covers both, and covers the pairs neither
  * component had bothered to declare.
  */
+/**
+ * Control states — focus, validity, disabled.
+ *
+ * Validity keys off `aria-invalid`, not off a class the author has to keep in sync with
+ * it. The attribute has to be right anyway for assistive tech, so styling from it means
+ * the two cannot drift; a `.tone-error`-style opt-in would have made "we forgot the
+ * class" a permanent category of bug. It re-points the tone properties rather than
+ * setting colors directly, so an invalid control keeps whatever treatment it had.
+ *
+ * The focus ring consumes `--focus-ring-width/-offset/-color`, which were defined in the
+ * token set and read by nothing — every atom hardcoded `ring-2 ring-ring` instead, so
+ * changing the tokens changed no pixel. `outline` rather than a box-shadow ring: it takes
+ * no layout space, follows border-radius, and `outline-offset` is what the offset token
+ * was describing all along.
+ *
+ * Disabled lives here rather than in `.interactive` because it is not a pointer concern —
+ * checkbox, radio, switch and slider are disable-able and carry no `.interactive`. The
+ * three spellings are all present because Radix marks non-native controls with
+ * `data-disabled` and `aria-disabled` where a native control gets `:disabled`.
+ * `pointer-events` is deliberately not set: native `:disabled` already blocks interaction,
+ * and suppressing events would also kill the hover that shows a tooltip explaining why
+ * the control is disabled.
+ */
+function buildSection16_ControlStates() {
+  return `/* === Control States === */
+.control {
+  transition-property: color, background-color, border-color, outline-color, opacity;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: var(--easing);
+}
+
+.control:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.control[aria-invalid="true"] {
+  --tone-border: var(--error);
+  --tone-text: var(--error);
+}
+
+.control[aria-invalid="true"]:focus-visible {
+  outline-color: var(--error);
+}
+
+.control:disabled,
+.control[aria-disabled="true"],
+.control[data-disabled] {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}`;
+}
+
 function buildSection15_Tones() {
   const defaultMode = colors['default-mode'] || 'light';
   const groups = colors.roles[defaultMode] || {};
@@ -361,10 +414,11 @@ function buildSection11_InteractiveStates() {
   opacity: 0.16;
 }
 
+/* Only the pointer half. Opacity and cursor belong to .control, which every atom
+   carrying .interactive also carries — checked by the interactive-implies-control
+   verify check. Suppressing pointer events is a pointer concern and stays here. */
 .interactive:disabled,
 .interactive[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
   pointer-events: none;
 }`;
 }
@@ -640,6 +694,8 @@ function generateLayer() {
     buildSection11_InteractiveStates(),
     '',
     buildSection15_Tones(),
+    '',
+    buildSection16_ControlStates(),
   ].join('\n');
 
   return [

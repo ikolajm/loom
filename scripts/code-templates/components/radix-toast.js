@@ -95,8 +95,8 @@ const ToastAction = forwardRef<
     className={cn(
       'inline-flex shrink-0 items-center justify-center rounded-component px-3 py-1 text-action-sm',
       'ring-1 ring-inset ring-current/20 interactive cursor-pointer',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',
+      'control',
+      'control',
       className,
     )}
     {...props}
@@ -112,7 +112,7 @@ const ToastClose = forwardRef<
     ref={ref}
     className={cn(
       'shrink-0 rounded-component p-1 interactive cursor-pointer opacity-(--opacity-muted) hover:opacity-100 transition-opacity',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'control',
       className,
     )}
     toast-close=""

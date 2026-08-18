@@ -53,7 +53,7 @@ const ToggleGroupItem = forwardRef<
       ref={ref}
       className={cn(
         'inline-flex items-center justify-center font-medium interactive cursor-pointer',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'control',
         'data-[state=off]:text-on-surface-variant data-[state=on]:bg-primary-container data-[state=on]:text-on-primary-container',
         itemSizeMap[size],
         itemVariantClass[variant],

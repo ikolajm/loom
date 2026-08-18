@@ -3,7 +3,7 @@
   "kind": "pattern",
   "category": "composite",
   "description": "",
-  "version": "2b3627fc8be5",
+  "version": "8384826ef61f",
   "dependencies": [
     "button",
     "cn"

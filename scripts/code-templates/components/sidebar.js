@@ -96,7 +96,7 @@ ${Object.entries(itemSize).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
 const SidebarItem = forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'> & { active?: boolean; icon?: React.ReactNode; size?: 'sm' | 'md' | 'lg'; }>(
   ({ active = false, icon, size = '${dfltSize}', className, children, ...props }, ref) => (
     <button ref={ref} type="button" className={cn(
-      'flex items-center w-full rounded-${itemRadius} font-medium cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none text-on-surface-variant hover:bg-surface-1 hover:text-on-surface group-[.is-rail]:justify-center group-[.is-rail]:px-0',
+      'flex items-center w-full rounded-${itemRadius} font-medium cursor-pointer transition-colors control text-on-surface-variant hover:bg-surface-1 hover:text-on-surface group-[.is-rail]:justify-center group-[.is-rail]:px-0',
       sidebarItemSize[size],
       active && 'bg-primary-container text-on-primary-container',
       className

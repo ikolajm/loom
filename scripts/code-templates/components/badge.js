@@ -77,7 +77,7 @@ import { X } from 'lucide-react';
 import { cn } from './cn';
 
 const badgeVariants = cva(
-  'inline-flex items-center justify-center ${typo}',
+  'inline-flex items-center justify-center${typo ? ' ' + typo : ''}',
   {
     variants: {
       variant: {
@@ -123,8 +123,8 @@ type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
     trailingIcon?: React.ReactNode;
   };
 
-const INTERACTIVE_CLASSES = 'interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
-const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-center rounded-component p-0.5 interactive opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+const INTERACTIVE_CLASSES = 'interactive cursor-pointer control';
+const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-center rounded-component p-0.5 interactive opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer control';
 
 const Badge = forwardRef<HTMLElement, BadgeProps>(
   ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
@@ -172,7 +172,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
     // ref is narrowed per branch — a polymorphic span/button ref can't be expressed at the type level.
     if (interactive && onRemove) {
       const segPad = badgeSegmentPad[size];
-      const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+      const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 control';
       return (
         <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} {...props}>
           <button

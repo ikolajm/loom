@@ -65,7 +65,7 @@ const AccordionTrigger = forwardRef<
       ref={ref}
       className={cn(
         'flex flex-1 items-center justify-between font-medium cursor-pointer transition-all',
-        'hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+        'hover:bg-surface-2 control',
         '[&[data-state=open]>svg]:rotate-180',
         triggerSize[size],
         className,

@@ -428,14 +428,23 @@ function getComponentRegistry(configs) {
 
 // --- Typography extraction ---
 
+/**
+ * Base typography classes for an atom.
+ *
+ * `font-weight` and `letter-spacing` are deliberately NOT emitted. Every atom that
+ * declares typography also lands a `text-{family}-{tier}` ramp class through its size
+ * variant, and the ramp already carries both — so emitting them here put two sources on
+ * one element. That was invisible while the ramp was unlayered and outranked the
+ * utilities; in `@layer components` the utilities win, and a schema's font-weight would
+ * quietly outrank the type ramp it sits on. If an atom needs a different weight, it needs
+ * a different text role.
+ *
+ * `text-transform` stays: no ramp tier declares it, so there is nothing to conflict with.
+ */
 function buildTypographyClasses(config) {
   const typo = config.typography;
   if (!typo) return '';
   const classes = [];
-  const fw = fontWeightToClass(typo['font-weight']);
-  if (fw) classes.push(fw);
-  const ls = letterSpacingToClass(typo['letter-spacing']);
-  if (ls) classes.push(ls);
   if (typo['text-transform'] && typo['text-transform'] !== 'none') {
     classes.push(typo['text-transform']);
   }

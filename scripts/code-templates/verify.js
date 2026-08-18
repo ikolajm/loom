@@ -129,6 +129,28 @@ function checkPlaygroundParity(atoms) {
 }
 
 // --- manifest-deps --------------------------------------------------------
+// --- interactive-implies-control ---------------------------------------------
+// `.interactive` carries only the pointer half of the disabled state (pointer-events);
+// the opacity and cursor live on `.control`. That split is safe exactly while every atom
+// using one also uses the other — otherwise a disabled control renders at full opacity
+// with a normal cursor and nothing says why. The layer cannot enforce it, so this does.
+function checkInteractiveImpliesControl(atoms) {
+  const failures = [];
+  const cls = (src, name) => new RegExp(`(?:^|[\\s'"\`])${name}(?:[\\s'"\`]|$)`, 'm').test(src);
+  let checked = 0;
+  for (const name of atoms) {
+    const tsx = path.join(CATALOG, `${name}.tsx`);
+    if (!fs.existsSync(tsx)) continue;
+    const src = fs.readFileSync(tsx, 'utf8');
+    if (!cls(src, 'interactive')) continue;
+    checked++;
+    if (!cls(src, 'control')) {
+      failures.push(`${name} — uses .interactive without .control, so its disabled state loses opacity and cursor`);
+    }
+  }
+  return { failures, note: `${checked} atoms using .interactive` };
+}
+
 function checkManifestDeps(atoms) {
   const failures = [];
   for (const name of atoms) {
@@ -443,6 +465,7 @@ function verify() {
     ['doc-counts', checkDocCounts(atoms)],
     ['playground-parity', checkPlaygroundParity(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
+    ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

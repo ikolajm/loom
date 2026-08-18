@@ -3,7 +3,7 @@
   "kind": "pattern",
   "category": "form",
   "description": "",
-  "version": "b385a3968dfd",
+  "version": "40c778141a76",
   "dependencies": [
     "calendar",
     "cn",

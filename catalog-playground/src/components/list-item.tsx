@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from './cn';
 
 const listItemVariants = cva(
-  'flex items-center interactive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+  'flex items-center interactive cursor-pointer control',
   {
     variants: {
       variant: {

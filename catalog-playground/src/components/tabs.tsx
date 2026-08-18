@@ -44,8 +44,8 @@ const TabsTrigger = forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'h-full font-medium cursor-pointer transition-colors',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'h-full cursor-pointer transition-colors',
+      'control',
       'text-on-surface-variant hover:text-on-surface',
       'data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary',
       triggerPaddingMap[size],
@@ -60,7 +60,7 @@ const TabsContent = forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content ref={ref} className={cn('mt-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', className)} {...props} />
+  <TabsPrimitive.Content ref={ref} className={cn('mt-4 control', className)} {...props} />
 ));
 TabsContent.displayName = 'TabsContent';
 

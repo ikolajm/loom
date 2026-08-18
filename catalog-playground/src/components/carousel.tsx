@@ -75,7 +75,7 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
         aria-roledescription="carousel"
         tabIndex={0}
         onKeyDown={onKeyDown}
-        className={cn('flex flex-col gap-4 rounded-card focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none', className)}
+        className={cn('flex flex-col gap-4 rounded-card control', className)}
         {...props}
       >
         <div className="relative">

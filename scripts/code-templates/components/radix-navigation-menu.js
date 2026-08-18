@@ -77,7 +77,7 @@ const NavigationMenuTrigger = forwardRef<
       'group inline-flex items-center justify-center gap-1.5 rounded-component font-medium',
       'text-on-surface interactive cursor-pointer',
       'hover:bg-surface-1 data-[state=open]:bg-surface-1',
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'control',
       triggerSizeMap[size],
       className,
     )}
@@ -117,7 +117,7 @@ const NavigationMenuLink = forwardRef<
     ref={ref}
     className={cn(
       'block select-none rounded-component px-3 py-2 text-on-surface no-underline transition-colors cursor-pointer',
-      'hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      'hover:bg-surface-2 focus-visible:bg-surface-2 control',
       'data-[active]:bg-surface-2 data-[active]:font-medium',
       className,
     )}

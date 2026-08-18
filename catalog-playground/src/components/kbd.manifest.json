@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "data-display",
   "description": "",
-  "version": "48501c98b4e2",
+  "version": "2bfc10f9f9cb",
   "dependencies": [
     "cn"
   ],
