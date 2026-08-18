@@ -435,17 +435,40 @@ function buildComponentClass(name, cfg, textFamily) {
     if (src.radius) d.push(`border-radius: ${CSS_TOKEN(src.radius, 'radius-')};`);
     if (src.height) d.push(`height: ${CSS_TOKEN(src.height, 'height-')};`);
     if (src['min-height']) d.push(`min-height: ${CSS_TOKEN(src['min-height'], 'height-')};`);
+    // A square: one token driving both axes (dot, spinner, the icon-only fab).
+    if (src.size) {
+      const sz = CSS_TOKEN(src.size, src.size.startsWith('icon/') ? '' : 'height-');
+      d.push(`width: ${sz};`, `height: ${sz};`);
+    }
+    if (src.width) d.push(`width: ${CSS_SPACE(src.width) || CSS_TOKEN(src.width, 'height-')};`);
+    if (src['min-width']) d.push(`min-width: ${CSS_SPACE(src['min-width']) || CSS_TOKEN(src['min-width'], 'height-')};`);
+    if (src['line-height']) d.push(`line-height: ${CSS_SPACE(src['line-height']) || src['line-height']};`);
+    if (src['border-width']) d.push(`border-width: ${CSS_TOKEN(src['border-width'], '')};`);
+    if (src.shadow) d.push(`box-shadow: ${CSS_TOKEN(src.shadow, '')};`);
+    // Icon size travels as a property rather than a descendant rule: the class must not
+    // assume what element holds the icon. The atom's icon slot reads it, and so can a
+    // consumer marking up by hand.
+    const icon = src['icon-size'] || src.icon;
+    if (icon) d.push(`--icon-size: ${CSS_TOKEN(icon, '')};`);
     return d;
   };
 
-  const base = decls(constant);
-  out.push(`.${name} {`, ...base.map((l) => `  ${l}`), '}', '');
+  // `$constant` is already expanded into every tier by the config loader, so re-detect
+  // what does not vary and lift it to the base rule. Without this each tier restates the
+  // radius and gap it shares with the others, which is the repetition the layer exists to
+  // remove — in the file a person reads, not just in the minified output.
+  const perTier = tiers.map((t) => decls({ ...sizes[t], $tier: t }));
+  const shared = perTier.length
+    ? perTier[0].filter((line) => perTier.every((d) => d.includes(line)))
+    : [];
+  const base = [...decls(constant), ...shared];
+  if (base.length) out.push(`.${name} {`, ...base.map((l) => `  ${l}`), '}', '');
 
-  for (const t of tiers) {
-    const d = decls({ ...sizes[t], $tier: t });
-    if (!d.length) continue;
+  tiers.forEach((t, i) => {
+    const d = perTier[i].filter((line) => !shared.includes(line));
+    if (!d.length) return;
     out.push(`.${name}[data-size="${t}"] {`, ...d.map((l) => `  ${l}`), '}', '');
-  }
+  });
 
   const variants = cfg.variants || {};
   for (const [vname, v] of Object.entries(variants)) {
@@ -467,25 +490,74 @@ function buildComponentClass(name, cfg, textFamily) {
 // The type family is declared in the component registry, not the schema — one place,
 // already the source the atoms read. Looked up by the registry's `key` so a component
 // class and its atom cannot disagree about which role they are on.
-function textFamilyByKey() {
+//
+// The registry also decides which components get a class at all. Three appearance-only
+// entries declare no sizes and no variants — `avatar-group`, `form-field`, `separator`.
+// A class for them would be an empty rule carrying a name, which is worse than a utility.
+// Four more declare sub-part vocabularies this emitter deliberately does not invent
+// selectors for: `sidebar` (rail-width, item-height, item-x-padding, item-gap,
+// item-radius), `stepper` (indicator-size, connector-width, label-text), `empty-state`
+// (heading-text, description-text) and `pagination` (item-size). Naming a component's
+// internals is a design decision per component, not a loop, so they are skipped and
+// reported rather than half-emitted.
+// `table` is excluded for a different reason than the others: its size keys are real, but
+// they describe the *cells*. Emitting `.table[data-size="md"] { padding-inline: ... }`
+// would pad the table element and leave every cell untouched. Its tiers are handled with
+// the rest of the table rules, which already own `th` and `td`.
+const CELL_SIZED = new Set(['table']);
+
+const SUB_PART_KEYS = new Set([
+  'rail-width', 'item-height', 'item-x-padding', 'item-gap', 'item-radius',
+  'indicator-size', 'connector-width', 'label-text', 'heading-text', 'description-text',
+  'item-size',
+]);
+
+const APPEARANCE_ONLY = new Set([
+  'badge', 'banner', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'dot', 'empty-state',
+  'fab', 'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
+  'separator', 'sidebar', 'skeleton', 'spinner', 'stepper', 'table', 'textarea',
+  'toolbar', 'top-bar', 'avatar-group',
+]);
+
+function componentPlan() {
   const { loadAllConfigs, getComponentRegistry } = require('./shared');
   const reg = getComponentRegistry(loadAllConfigs());
-  const map = {};
+  const emit = [];
+  const skipped = { empty: [], subParts: [] };
   for (const meta of Object.values(reg)) {
-    if (meta && meta.key && meta.textFamily) map[meta.key] = meta.textFamily;
+    if (!meta || !meta.key || !APPEARANCE_ONLY.has(meta.key)) continue;
+    const cfg = (meta.source || {})[meta.baseKey || meta.key] || {};
+    const sizes = cfg.sizes || {};
+    const keys = new Set(Object.keys(sizes.$constant || {}));
+    for (const t of Object.keys(sizes)) {
+      if (t.startsWith('$') || !sizes[t] || typeof sizes[t] !== 'object') continue;
+      for (const k of Object.keys(sizes[t])) if (!k.startsWith('$')) keys.add(k);
+    }
+    const hasVariants = Object.keys(cfg.variants || {}).length > 0;
+    if (CELL_SIZED.has(meta.key)) continue;
+    if (!keys.size && !hasVariants) { skipped.empty.push(meta.key); continue; }
+    const sub = [...keys].filter((k) => SUB_PART_KEYS.has(k));
+    if (sub.length) { skipped.subParts.push(`${meta.key} (${sub.join(', ')})`); continue; }
+    emit.push({ name: meta.key, cfg, textFamily: meta.textFamily });
   }
-  return map;
+  emit.sort((a, b) => a.name.localeCompare(b.name));
+  return { emit, skipped };
 }
 
 function buildSectionComponentClasses() {
-  const layout = load('components/layout.json');
-  const buttons = load('components/button.json');
-  const form = load('components/form.json');
-  const fam = textFamilyByKey();
-  const parts = ['/* === Components === */'];
-  parts.push(buildComponentClass('card', layout.card, fam.card));
-  parts.push(buildComponentClass('badge', buttons.badge, fam.badge));
-  parts.push(buildComponentClass('input', form['text-field'], fam.input));
+  const { emit, skipped } = componentPlan();
+  const parts = [
+    '/* === Components ===',
+    ' *',
+    ' * Shape only. Color composes: a tone class sets the fill, `.control` carries focus and',
+    ' * validity, `.surface-N` and `.elevate-N` carry plane and lift.',
+    ' *',
+    ` * No class emitted for: ${skipped.empty.join(', ')} — nothing declared to carry.`,
+    ' * No class emitted for these until their internals are named:',
+    ...skipped.subParts.map((x) => ` *   ${x}`),
+    ' */',
+  ];
+  for (const c of emit) parts.push(buildComponentClass(c.name, c.cfg, c.textFamily));
   return parts.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
 }
 
@@ -540,6 +612,24 @@ function buildSection17_SurfacesTableLink() {
     .map((n) => `.elevate-${n} {\n  box-shadow: var(--shadow-${n});\n}\n`)
     .join('\n');
 
+  return `/* === Surfaces === */
+${surfaces}
+/* === Elevation === */
+${elevations}
+/* === Link === */
+.link {
+  color: var(--tone-text, var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.link:hover {
+  text-decoration-thickness: var(--bw-2);
+}`;
+}
+
+/** The table's own rules. Lives with the components, not the primitives. */
+function buildSectionTable() {
   const t = (layoutComponents.table || {});
   const v = (t.variants && t.variants.default) || {};
   const role = (p, fallback) => {
@@ -553,11 +643,26 @@ function buildSection17_SurfacesTableLink() {
   const headerWeight = (typo.header && typo.header['font-weight']) || 500;
   const cellWeight = (typo.cell && typo.cell['font-weight']) || 400;
 
-  return `/* === Surfaces === */
-${surfaces}
-/* === Elevation === */
-${elevations}
-/* === Table === */
+  // Cell sizing. The schema's tiers describe th/td, not the table element — padding on
+  // `.table[data-size]` would pad the frame and leave the cells untouched.
+  const cellTiers = Object.entries(t.sizes || {})
+    .filter(([tier, cfg]) => !tier.startsWith('$') && cfg && typeof cfg === 'object')
+    .map(([tier, cfg]) => {
+      const d = [];
+      const x = CSS_SPACE(cfg['x-padding']);
+      const y = CSS_SPACE(cfg['y-padding']);
+      if (x) d.push(`  padding-inline: ${x};`);
+      if (y) d.push(`  padding-block: ${y};`);
+      if (cfg.text) {
+        const k = `--type-${String(cfg.text).replace('/', '-')}`;
+        d.push(`  font-size: var(${k}-size);`, `  line-height: var(${k}-line);`);
+      }
+      return d.length ? `.table[data-size="${tier}"] :is(th, td) {\n${d.join('\n')}\n}` : '';
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+  return `/* === Table === */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -596,16 +701,7 @@ ${elevations}
   font-weight: ${cellWeight};
 }
 
-/* === Link === */
-.link {
-  color: var(--tone-text, var(--primary));
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.link:hover {
-  text-decoration-thickness: var(--bw-2);
-}`;
+${cellTiers}`;
 }
 
 function buildSection16_ControlStates() {
@@ -935,7 +1031,7 @@ function buildSection12_TailwindTheme() {
 //
 // Keyframes ride with the layer, not the bridge — `@keyframes` is portable CSS. Only the
 // `--animate-*` registration that names them is Tailwind's, and that stays in the bridge.
-const FILES = ['tokens.css', 'loom.css', 'loom.tailwind.css'];
+const FILES = ['tokens.css', 'loom.css', 'loom.components.css', 'loom.tailwind.css'];
 
 function header(name, note) {
   return `/**
@@ -1028,8 +1124,6 @@ function generateLayer() {
     buildSection16_ControlStates(),
     '',
     buildSection17_SurfacesTableLink(),
-    '',
-    buildSectionComponentClasses(),
   ].join('\n');
 
   return [
@@ -1040,6 +1134,30 @@ function generateLayer() {
     buildSection14_Animations(),
     '',
     buildSectionPrintStructure(),
+    ''
+  ].join('\n');
+}
+
+/**
+ * Named components. Portable.
+ *
+ * Split from loom.css because the two answer different questions. loom.css is what you
+ * compose with — type roles, tones, treatments, control states, surfaces, elevation. This
+ * file is what those compose *into*, and it is the larger and more churn-prone half. A
+ * consumer who wants the substrate and owns their own components takes loom.css and skips
+ * this one; that is the tokens tier, now expressible as a file rather than a paragraph.
+ */
+function generateComponents() {
+  const layered = [
+    buildSectionTable(),
+    '',
+    buildSectionComponentClasses(),
+  ].join('\n');
+
+  return [
+    header('loom.components.css', 'Named component classes — shape only; compose with the tones, treatments and control states in loom.css, which must load first.'),
+    '',
+    `@layer components {\n${indent(layered.split('\n'))}\n}`,
     ''
   ].join('\n');
 }
@@ -1061,6 +1179,7 @@ function generate() {
   return {
     'tokens.css': generateTokens(),
     'loom.css': generateLayer(),
+    'loom.components.css': generateComponents(),
     'loom.tailwind.css': generateTailwind(),
   };
 }
@@ -1084,4 +1203,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateTailwind, FILES };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES };

@@ -83,7 +83,7 @@ echo "Substrate:"
 TOKENS_TMP="$(mktemp -d)"
 trap 'rm -rf "$TOKENS_TMP"' EXIT
 node "$LOOM_ROOT/scripts/code-templates/orchestrator.js" --only tokens --output "$TOKENS_TMP" >/dev/null
-for f in tokens.css loom.css loom.tailwind.css; do
+for f in tokens.css loom.css loom.components.css loom.tailwind.css; do
   cp "$TOKENS_TMP/$f" "$SRC/$f"
   echo "  + src/$f"
 done
@@ -115,5 +115,6 @@ echo ""
 echo "Note: the stylesheets are auto-wired into globals.css by init.sh — nothing to do."
 echo "Only if you bootstrapped globals.css yourself, add (after the tailwindcss import):"
 echo "  @import \"../tokens.css\";          /* values — plain CSS */"
-echo "  @import \"../loom.css\";            /* class layer — plain CSS */"
+echo "  @import \"../loom.css\";            /* primitives — plain CSS */"
+echo "  @import \"../loom.components.css\"; /* named components — plain CSS */"
 echo "  @import \"../loom.tailwind.css\";   /* Tailwind v4 only */"

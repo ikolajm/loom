@@ -30,6 +30,7 @@ spec/config/local/
 # writing your brand into it is the feature rather than a leak into a committed file.
 catalog-playground/src/tokens.css
 catalog-playground/src/loom.css
+catalog-playground/src/loom.components.css
 catalog-playground/src/loom.tailwind.css
 
 # Logs / env / OS

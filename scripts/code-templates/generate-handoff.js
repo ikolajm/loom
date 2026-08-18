@@ -83,6 +83,9 @@ loom.css                         ← plain CSS, portable
 ├── .interactive { }             ← Hover/active/focus/disabled states
 └── @keyframes { }               ← Animation definitions
 
+loom.components.css              ← plain CSS, portable; named component classes
+└── .card / .badge / .button ...  ← shape only; compose with the classes above
+
 loom.tailwind.css                ← Tailwind v4 only; a non-Tailwind build drops it silently
 ├── @utility { }                 ← Semantic spacing shorthands
 └── @theme inline { }            ← Token vocabulary → Tailwind utilities
@@ -90,7 +93,7 @@ loom.tailwind.css                ← Tailwind v4 only; a non-Tailwind build drop
 
 ## File Inventory
 
-### tokens.css · loom.css · loom.tailwind.css (DO NOT EDIT)
+### tokens.css · loom.css · loom.components.css · loom.tailwind.css (DO NOT EDIT)
 Regenerable from the Loom configs. Import in globals.css **in that order** — the bridge
 reads what the first two define. Drop loom.tailwind.css and every token-derived utility
 stops resolving without an error, because an unknown utility is not a build failure.

@@ -72,7 +72,7 @@ echo ""
 # --- Validate ---
 # The tokens tier writes stylesheets and tokens.json into src/ and touches nothing else,
 # so it does not require src/app/ — it does not assume Next.js, or a React app at all.
-for f in tokens.css loom.css loom.tailwind.css; do
+for f in tokens.css loom.css loom.components.css loom.tailwind.css; do
   [ -f "$GEN_DIR/$f" ] || { echo "ERROR: $f not found in $GEN_DIR — run the orchestrator first."; exit 1; }
 done
 if [ "$TIER" = "tokens" ]; then
@@ -89,6 +89,7 @@ if [ "$TIER" = "tokens" ]; then
   echo "[1/2] Copying stylesheets..."
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
   cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
+  cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
   cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
   echo "[2/2] Copying tokens.json..."
@@ -103,7 +104,8 @@ if [ "$TIER" = "tokens" ]; then
   echo ""
   echo "Wire the stylesheets into your global CSS, in this order:"
   echo "  @import \\"../tokens.css\\";          /* custom properties — plain CSS */"
-  echo "  @import \\"../loom.css\\";            /* class layer — plain CSS */"
+  echo "  @import \\"../loom.css\\";            /* primitives — plain CSS */"
+  echo "  @import \\"../loom.components.css\\"; /* named components — optional, plain CSS */"
   echo "  @import \\"../loom.tailwind.css\\";   /* Tailwind v4 only — skip if you are not on it */"
   echo ""
   echo "The first two run anywhere CSS runs. loom.tailwind.css is @theme/@utility at-rules;"
@@ -129,6 +131,7 @@ mkdir -p "$SRC_DIR/providers"
 echo "[2/7] Copying stylesheets..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
+cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
 cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
 # --- Step 3: globals.css ---

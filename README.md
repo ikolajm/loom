@@ -114,7 +114,7 @@ See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference.
 
 ```bash
 npm run configs      # spec/answers.json → spec/config/local/  (git-ignored)
-npm run generate     # → React catalog (catalog/) + the three stylesheets + tokens.json
+npm run generate     # → React catalog (catalog/) + the four stylesheets + tokens.json
 npm run figma        # → Figma plugin scripts (paste into the Figma console)
 ```
 
@@ -122,7 +122,16 @@ npm run figma        # → Figma plugin scripts (paste into the Figma console)
 
 Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
 
-`generate` emits three stylesheets, and only one is framework-bound: **`tokens.css`** (custom properties), **`loom.css`** (the class layer — type ramp, interactive states, keyframes), and **`loom.tailwind.css`** (the `@theme inline` bridge and `@utility` shorthands, Tailwind v4 only). Import them in that order; a non-Tailwind build skips the third rather than silently dropping it.
+`generate` emits four stylesheets, and only one is framework-bound:
+
+| File | Holds | Portable |
+|---|---|---|
+| `tokens.css` | custom properties — color roles, spacing, radius, type role values | yes |
+| `loom.css` | what you compose with — type ramp, tones, treatments, control states, surfaces, elevation, links, keyframes, print rules | yes |
+| `loom.components.css` | what they compose into — named component classes, shape only | yes |
+| `loom.tailwind.css` | the `@theme inline` bridge and `@utility` shorthands | Tailwind v4 only |
+
+Import them in that order. A non-Tailwind build skips the last rather than silently dropping it, and a project that owns its own components can skip `loom.components.css` too.
 
 Alongside them, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 
@@ -132,7 +141,7 @@ Alongside them, `generate` emits **`tokens.json`** — the same token values as 
 
 | Tier | You get | Use when |
 |------|---------|----------|
-| **tokens** | the three stylesheets + `tokens.json`, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values. This is the only tier a non-web runtime can take: [`native/`](native/README.md) is this tier, consumed through the NativeWind preset |
+| **tokens** | the four stylesheets + `tokens.json`, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values. This is the only tier a non-web runtime can take: [`native/`](native/README.md) is this tier, consumed through the NativeWind preset |
 | **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`, a `/preview` route), the core dependencies, and the atoms you pick | You want the components too. This is what the quickstart below installs |
 
 The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
@@ -140,11 +149,11 @@ The `/preview` route belongs to the **catalog** tier: it renders the token subst
 Both tiers are first-class on web:
 
 ```bash
-./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes the three stylesheets + src/tokens.json, nothing else
+./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes the four stylesheets + src/tokens.json, nothing else
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet — both are plain CSS and need no build step — then add `loom.tailwind.css` after the `tailwindcss` import if you are on Tailwind. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet — both are plain CSS and need no build step — add `loom.components.css` if you want the named component classes, and `loom.tailwind.css` after the `tailwindcss` import if you are on Tailwind. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
@@ -177,7 +186,7 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 #    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
 Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
@@ -223,7 +232,7 @@ spec/                  Single source of truth
   answers.example.json ← committed template — copy to answers.json (git-ignored) and edit
 
 scripts/               The two codegen pipelines
-  code-templates/      ← React catalog + the three stylesheets + scaffold
+  code-templates/      ← React catalog + the four stylesheets + scaffold
   figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts
   resolve-picks.js     ← the picker's dependency resolver

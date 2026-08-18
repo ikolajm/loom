@@ -114,10 +114,33 @@ deliberate, not backlog inertia.
       card's padding tier and its type tier cannot disagree. The family comes from the
       component registry, the same source the atoms read.
 
-- [ ] **Component classes — remaining 22.** The emitter handles shape, sizes, variants and
-      type; the fan-out is a loop over the registry. Known awkward cases: four entries
-      (`input`, `separator`, `skeleton`, `avatar-group`) have no size tiers, and `sidebar`
-      declares eight size keys against `dot`'s one
+- [x] **Component classes — fan-out.** 19 classes emitted from the registry. Not the loop
+      it looked like: 19 of the 26 appearance-only entries were covered once the emitter
+      learned seven more generic keys (`size`, `width`, `min-width`, `line-height`,
+      `border-width`, `shadow`, `icon-size` — the last as a `--icon-size` property rather
+      than a descendant rule, so the class does not assume what element holds the icon).
+
+      **Seven are deliberately not emitted, and the file says so.** `form-field`,
+      `separator` and `avatar-group` declare nothing — a class for them is an empty rule
+      carrying a name, worse than a utility. `sidebar`, `stepper`, `empty-state` and
+      `pagination` declare sub-part vocabularies (`item-height`, `indicator-size`,
+      `heading-text`, `item-size`); naming a component's internals is a design decision
+      per component, not a loop, so they wait. `table` is excluded for a third reason: its
+      size keys describe cells, so they emit as `.table[data-size] :is(th, td)` alongside
+      the other table rules — on the element element they would have padded the frame and
+      left every cell untouched.
+
+      Two repetition fixes fell out: declarations identical across all tiers are lifted to
+      the base rule (`$constant` is expanded by the loader before the emitter sees it, so
+      it had to be re-detected), and the four card variants no longer each restate their
+      shared color.
+
+- [x] **Split the layer into legible files.** `loom.css` is what you compose with — type
+      roles, tones, treatments, control states, surfaces, elevation, links, keyframes,
+      print. `loom.components.css` is what those compose into, and is the larger,
+      churn-prone half. A project that owns its own components takes the first and skips
+      the second, which makes the tokens tier a file boundary rather than a paragraph.
+      Four stylesheets now: 486 / 477 / 773 / 272 lines
 - [ ] **Thin the components** — surviving atoms become a primitive import with layer
       classes; the appearance-only entries stop being components
 - [x] **Size axis** — **not cut; the ADR's reasoning did not survive wider evidence.**
