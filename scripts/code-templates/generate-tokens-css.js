@@ -238,6 +238,33 @@ function buildSection9_AltMode(modeName) {
   return `[data-theme="${modeName}"] {\n${indent(lines)}\n}`;
 }
 
+/**
+ * Type roles as custom properties.
+ *
+ * The ramp is the only source of type, but a class cannot apply another class — so a
+ * component class that needs `body/md` would have to restate its font-size and
+ * line-height, which is two sources and the drift we have been removing all week. These
+ * properties give both consumers one source: `.text-body-md` reads them, and so does
+ * `.card[data-size="md"]`, which means a card's padding tier and its type tier cannot
+ * disagree.
+ */
+function buildSectionTypeRoleVars() {
+  const lines = ['/* === Type Role Values === */'];
+  for (const [family, def] of Object.entries(typography.textStyles)) {
+    for (const tier of ['sm', 'md', 'lg']) {
+      const t = def[tier];
+      if (!t) continue;
+      const k = `--type-${family}-${tier}`;
+      lines.push(`${k}-family: var(--font-${def.font});`);
+      lines.push(`${k}-size: ${t.size};`);
+      lines.push(`${k}-line: ${t['line-height']};`);
+      lines.push(`${k}-weight: ${def.weight};`);
+      lines.push(`${k}-tracking: ${def['letter-spacing'] && def['letter-spacing'] !== '0' ? def['letter-spacing'] : 'normal'};`);
+    }
+  }
+  return lines;
+}
+
 function buildSection10_TypographyPresets() {
   const lines = ['/* === Text Style Families === */'];
   const tiers = ['sm', 'md', 'lg'];
@@ -249,14 +276,13 @@ function buildSection10_TypographyPresets() {
       const tierDef = def[tier];
       if (!tierDef) continue;
 
+      const k = `--type-${family}-${tier}`;
       lines.push(`.text-${family}-${tier} {`);
-      lines.push(`  font-family: var(${fontVar});`);
-      lines.push(`  font-size: ${tierDef.size};`);
-      lines.push(`  line-height: ${tierDef['line-height']};`);
-      lines.push(`  font-weight: ${def.weight};`);
-      if (def['letter-spacing'] && def['letter-spacing'] !== '0') {
-        lines.push(`  letter-spacing: ${def['letter-spacing']};`);
-      }
+      lines.push(`  font-family: var(${k}-family);`);
+      lines.push(`  font-size: var(${k}-size);`);
+      lines.push(`  line-height: var(${k}-line);`);
+      lines.push(`  font-weight: var(${k}-weight);`);
+      lines.push(`  letter-spacing: var(${k}-tracking);`);
       lines.push('}');
       lines.push('');
     }
@@ -344,6 +370,125 @@ function buildSection10_TypographyPresets() {
  * beat the print override and survive onto the page. Print is the one place the layer
  * ordering has to invert.
  */
+/**
+ * Component classes — shape only.
+ *
+ * A component class carries what makes the thing that thing: padding, radius, gap, the
+ * dimensions that ramp, and the type role. Color composition is NOT included — a badge
+ * takes `.tone-error-soft .treat-filled`, a control takes `.control`. Folding a default
+ * tone into `.badge` would re-couple the axes that were just separated, and the terser
+ * call site is not worth losing the property that adding a tone is one rule.
+ *
+ * The exception is a named variant vocabulary with no equivalent in the layer. `card`
+ * declares default/elevated/outline/flush as combinations of background, border and
+ * shadow; there is no border class to compose from, and the four names are a deliberate
+ * design vocabulary rather than a mechanical product of two axes. Those become
+ * `[data-variant]` modifiers on the class.
+ *
+ * Sizes ride on `[data-size]` rather than a class per tier. The atoms already emit that
+ * attribute and the table already reads it, so it costs one selector per tier instead of
+ * multiplying the class count by three.
+ */
+const CSS_SPACE = (v) => {
+  if (v == null) return null;
+  const m = String(v).match(/^\{scale\.(\d+)\}$/);
+  if (m) return `var(--space-${m[1]})`;
+  return /^\d/.test(String(v)) ? String(v) : null;
+};
+const CSS_COLOR = (v) => {
+  if (!v || v === 'none') return null;
+  if (v === 'transparent') return 'transparent';
+  if (v === 'currentColor') return 'currentColor';
+  return `var(--${String(v).split('/').pop()})`;
+};
+const CSS_TOKEN = (v, prefix) => {
+  if (!v || typeof v !== 'string') return null;
+  const tail = v.split('/').pop();
+  return `var(--${prefix}${tail})`;
+};
+
+/** One component's shape rules: base, per-size, per-variant. */
+function buildComponentClass(name, cfg, textFamily) {
+  if (!cfg) return '';
+  const out = [];
+  const sizes = cfg.sizes || {};
+  const constant = sizes.$constant || {};
+  const tiers = Object.keys(sizes).filter((t) => !t.startsWith('$') && sizes[t] && typeof sizes[t] === 'object');
+
+  const decls = (src) => {
+    const d = [];
+    // `text: "body/sm"` binds this tier to a type role through the shared properties, so
+    // the padding tier and the type tier cannot drift apart at a call site.
+    const role = src.text ? String(src.text).replace('/', '-') : (textFamily && src.$tier ? `${textFamily}-${src.$tier}` : null);
+    if (role) {
+      const k = `--type-${role}`;
+      d.push(`font-family: var(${k}-family);`, `font-size: var(${k}-size);`,
+             `line-height: var(${k}-line);`, `font-weight: var(${k}-weight);`,
+             `letter-spacing: var(${k}-tracking);`);
+    }
+    const x = CSS_SPACE(src['x-padding']);
+    const y = CSS_SPACE(src['y-padding']);
+    const gap = CSS_SPACE(src.gap);
+    if (x) d.push(`padding-inline: ${x};`);
+    if (y) d.push(`padding-block: ${y};`);
+    if (gap) d.push(`gap: ${gap};`);
+    if (src.radius) d.push(`border-radius: ${CSS_TOKEN(src.radius, 'radius-')};`);
+    if (src.height) d.push(`height: ${CSS_TOKEN(src.height, 'height-')};`);
+    if (src['min-height']) d.push(`min-height: ${CSS_TOKEN(src['min-height'], 'height-')};`);
+    return d;
+  };
+
+  const base = decls(constant);
+  out.push(`.${name} {`, ...base.map((l) => `  ${l}`), '}', '');
+
+  for (const t of tiers) {
+    const d = decls({ ...sizes[t], $tier: t });
+    if (!d.length) continue;
+    out.push(`.${name}[data-size="${t}"] {`, ...d.map((l) => `  ${l}`), '}', '');
+  }
+
+  const variants = cfg.variants || {};
+  for (const [vname, v] of Object.entries(variants)) {
+    if (vname.startsWith('$') || !v || typeof v !== 'object') continue;
+    const d = [];
+    const bg = CSS_COLOR(v.bg);
+    const fg = CSS_COLOR(v.fg);
+    const border = CSS_COLOR(v.border);
+    if (bg) d.push(`background-color: ${bg};`);
+    if (fg) d.push(`color: ${fg};`);
+    d.push(border ? `border: var(--bw-1) solid ${border};` : 'border: 0;');
+    if (v.shadow) d.push(`box-shadow: ${CSS_TOKEN(v.shadow, '')};`);  // tail is already 'shadow-N'
+    out.push(`.${name}[data-variant="${vname}"] {`, ...d.map((l) => `  ${l}`), '}', '');
+  }
+
+  return out.join('\n');
+}
+
+// The type family is declared in the component registry, not the schema — one place,
+// already the source the atoms read. Looked up by the registry's `key` so a component
+// class and its atom cannot disagree about which role they are on.
+function textFamilyByKey() {
+  const { loadAllConfigs, getComponentRegistry } = require('./shared');
+  const reg = getComponentRegistry(loadAllConfigs());
+  const map = {};
+  for (const meta of Object.values(reg)) {
+    if (meta && meta.key && meta.textFamily) map[meta.key] = meta.textFamily;
+  }
+  return map;
+}
+
+function buildSectionComponentClasses() {
+  const layout = load('components/layout.json');
+  const buttons = load('components/button.json');
+  const form = load('components/form.json');
+  const fam = textFamilyByKey();
+  const parts = ['/* === Components === */'];
+  parts.push(buildComponentClass('card', layout.card, fam.card));
+  parts.push(buildComponentClass('badge', buttons.badge, fam.badge));
+  parts.push(buildComponentClass('input', form['text-field'], fam.input));
+  return parts.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd();
+}
+
 function buildSectionPrintStructure() {
   return `@media print {
   .treat-filled,
@@ -839,6 +984,8 @@ function generateTokens() {
     [],
     buildSection7_TypographyFonts(),
     [],
+    buildSectionTypeRoleVars(),
+    [],
     buildSection8_ZIndex()
   ];
 
@@ -881,6 +1028,8 @@ function generateLayer() {
     buildSection16_ControlStates(),
     '',
     buildSection17_SurfacesTableLink(),
+    '',
+    buildSectionComponentClasses(),
   ].join('\n');
 
   return [

@@ -97,6 +97,27 @@ These are the ones that *do* depend on the layer — a component cannot shed its
 appearance until there is a class to shed it to. Ordering them after the layer work is
 deliberate, not backlog inertia.
 
+- [~] **Component classes — first slice done: `card`, `badge`, `input`.** Shape only:
+      padding, radius, gap, height and the type role, on `[data-size]` modifiers. Color
+      composition stays out — a badge takes `.tone-error-soft .treat-filled`, an input
+      takes `.control`. Folding a default tone into `.badge` would re-couple the axes
+      just separated, and the shorter call site is not worth losing "adding a tone is one
+      rule". The exception is a named vocabulary with no layer equivalent: `card`'s
+      default/elevated/outline/flush are background + border + shadow combinations with
+      no border class to compose from, so they became `[data-variant]` modifiers.
+
+      **What the slice forced, and it was the point of slicing.** A class cannot apply
+      another class, so a component class needing `body/md` would have restated font-size
+      and line-height — two sources for type, the exact drift removed three branches ago.
+      Type roles are now also emitted as custom properties (`--type-body-md-size` and
+      friends); `.text-body-md` reads them and so does `.card[data-size="md"]`, so a
+      card's padding tier and its type tier cannot disagree. The family comes from the
+      component registry, the same source the atoms read.
+
+- [ ] **Component classes — remaining 22.** The emitter handles shape, sizes, variants and
+      type; the fan-out is a loop over the registry. Known awkward cases: four entries
+      (`input`, `separator`, `skeleton`, `avatar-group`) have no size tiers, and `sidebar`
+      declares eight size keys against `dot`'s one
 - [ ] **Thin the components** — surviving atoms become a primitive import with layer
       classes; the appearance-only entries stop being components
 - [x] **Size axis** — **not cut; the ADR's reasoning did not survive wider evidence.**
