@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "button",
   "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
-  "version": "27dcae24a84e",
+  "version": "22e2cc45c91d",
   "dependencies": [
     "cn"
   ],

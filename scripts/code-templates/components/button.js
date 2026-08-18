@@ -3,9 +3,9 @@ const { filterSizes, extractIconSizes, buildSizeStylesWithText } = require('./he
 
 function generateButton(name, config, meta) {
   // Orthogonal model: variant (treatment) and color are independent axes.
-  // Treatments consume per-color CSS vars (--v-bg/fg/text/border) set by the color axis.
+  // Treatments consume the tone properties (--tone-bg/fg/text/border) set by the tone class.
   const treatments = config.treatments || ['filled', 'outline', 'ghost'];
-  const { colorNames: colorKeys, varClass } = buildColorVars(config.colors || {});
+  const { colorNames: colorKeys, toneClass } = buildColorVars(config.colors || {});
   const sizes = filterSizes(config.sizes);
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
   const iconSizesConfig = filterSizes(config['icon-sizes'] || {});
@@ -24,8 +24,8 @@ function generateButton(name, config, meta) {
 
   const allIconSizes = { ...iconSizes, ...iconOnlyIconSizes };
 
-  // Independent axes: `variant` carries the treatment consumer-classes; `color` sets the
-  // CSS vars they read. CVA concatenates both — color sets --v-*, treatment consumes them.
+  // Independent axes: `variant` carries a treatment class, `color` carries a tone class.
+  // Both are plain classes from loom.css — the tone sets --tone-*, the treatment reads it.
   return `import { forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
@@ -39,7 +39,7 @@ const buttonVariants = cva(
 ${treatments.map((k) => `        ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
       },
       color: {
-${colorKeys.map((k) => `        ${k}: '${varClass[k]}',`).join('\n')}
+${colorKeys.map((k) => `        ${k}: '${toneClass[k]}',`).join('\n')}
       },
       size: {
 ${Object.entries(allSizeEntries).map(([k, v]) => `        '${k}': '${v}',`).join('\n')}

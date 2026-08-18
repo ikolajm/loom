@@ -161,44 +161,60 @@ function colorToVar(colorPath) {
 
 /**
  * Catalog-wide treatment vocabulary for orthogonal atoms. A treatment is a fixed consumer
- * of the per-color CSS vars (--v-bg/--v-fg for the solid fill, --v-text/--v-border for the
- * line/text). The color axis sets those vars; the treatment reads them — so variant and color
- * are independent CVA axes (no N×M compound matrix). Shared by Button (filled/outline/ghost)
- * and Badge (filled/outline/dot); each atom picks the treatments it exposes via `treatments`.
+ * of the tone custom properties (--tone-bg/--tone-fg for the solid fill, --tone-text and
+ * --tone-border for the line and label). The tone sets those properties; the treatment
+ * reads them — so treatment and tone stay independent axes with no N×M matrix.
+ *
+ * Both halves are now plain classes emitted into loom.css by generate-tokens-css.js. They
+ * used to be Tailwind arbitrary-property strings built here (`[--v-bg:var(--primary)]`
+ * consumed by `bg-[color:var(--v-bg)]`), which meant the orthogonal model — the one idea
+ * in this catalog not available off the shelf — only worked inside a Tailwind build.
  */
 const TREATMENT_CLASSES = {
-  filled: 'bg-[color:var(--v-bg)] text-[color:var(--v-fg)]',
-  outline: 'bg-transparent border border-[color:var(--v-border)] text-[color:var(--v-text)]',
-  ghost: 'bg-transparent text-[color:var(--v-text)]',
-  dot: 'bg-[color:var(--v-border)]',
+  filled: 'treat-filled',
+  outline: 'treat-outline',
+  ghost: 'treat-ghost',
+  dot: 'treat-dot',
 };
 
 /**
- * Build the per-color CSS-variable declaration classes for an orthogonal atom.
- * Each color is declared ONCE as { bg, fg, text, border } token paths; this emits the
- * Tailwind arbitrary-property classes that set --v-bg/--v-fg/--v-text/--v-border on the
- * element. The treatment classes (TREATMENT_CLASSES) then consume them.
+ * Map an atom's declared color entry onto a tone class from loom.css.
  *
- * Returns { colorNames, varClass } where varClass[name] is the declaration string.
- * Axis-name-agnostic — the caller names the CVA dimension ('color' for Button, 'state' for Badge).
+ * The tone vocabulary belongs to the color system, not to the atom: every family carries
+ * `X`/`on-X` and `X-container`/`on-X-container`, so a fill reading the base roles is
+ * `.tone-{family}` and one reading the containers is `.tone-{family}-soft`. That is what
+ * button and badge had been expressing separately — button naming the base set `primary`
+ * and `destructive`, badge naming the container set `default` and `destructive` — and it
+ * is why the same word meant two different fills depending on which atom you were in.
+ *
+ * Derived from the token paths already in the schema, so no schema change is needed and
+ * an atom keeps its own prop vocabulary. Returns { colorNames, toneClass }.
  */
 function buildColorVars(colorsCfg) {
   const colorNames = Object.keys(colorsCfg).filter((k) => !k.startsWith('$'));
-  const varClass = {};
+  const toneClass = {};
   for (const name of colorNames) {
     const c = colorsCfg[name] || {};
-    const parts = [];
-    const bg = colorToVar(c.bg);
-    const fg = colorToVar(c.fg);
-    const text = colorToVar(c.text);
-    const border = colorToVar(c.border);
-    if (bg) parts.push(`[--v-bg:${bg}]`);
-    if (fg) parts.push(`[--v-fg:${fg}]`);
-    if (text) parts.push(`[--v-text:${text}]`);
-    if (border) parts.push(`[--v-border:${border}]`);
-    varClass[name] = parts.join(' ');
+    if (c.bg === 'transparent' && c.fg === 'currentColor') {
+      toneClass[name] = 'tone-inherit';
+      continue;
+    }
+    const role = String(c.bg || '').split('/').pop();
+    const family = String(c.bg || '').split('/')[1];
+    if (!role || !family) {
+      throw new Error(`Cannot derive a tone for color "${name}": bg is "${c.bg}".`);
+    }
+    if (role === family) toneClass[name] = `tone-${family}`;
+    else if (role === `${family}-container`) toneClass[name] = `tone-${family}-soft`;
+    else {
+      throw new Error(
+        `Cannot derive a tone for color "${name}": bg "${c.bg}" is neither the base role ` +
+          `nor the container of family "${family}". Tones are emitted per family from ` +
+          `colors.json; a one-off fill has no class to land on.`
+      );
+    }
   }
-  return { colorNames, varClass };
+  return { colorNames, toneClass };
 }
 
 function buildSizeStyles(sizes) {

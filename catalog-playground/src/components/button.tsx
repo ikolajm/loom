@@ -8,18 +8,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        filled: 'bg-[color:var(--v-bg)] text-[color:var(--v-fg)]',
-        outline: 'bg-transparent border border-[color:var(--v-border)] text-[color:var(--v-text)]',
-        ghost: 'bg-transparent text-[color:var(--v-text)]',
+        filled: 'treat-filled',
+        outline: 'treat-outline',
+        ghost: 'treat-ghost',
       },
       color: {
-        primary: '[--v-bg:var(--primary)] [--v-fg:var(--on-primary)] [--v-text:var(--primary)] [--v-border:var(--primary)]',
-        secondary: '[--v-bg:var(--secondary)] [--v-fg:var(--on-secondary)] [--v-text:var(--secondary)] [--v-border:var(--secondary)]',
-        destructive: '[--v-bg:var(--error)] [--v-fg:var(--on-error)] [--v-text:var(--error)] [--v-border:var(--error)]',
-        success: '[--v-bg:var(--success)] [--v-fg:var(--on-success)] [--v-text:var(--success)] [--v-border:var(--success)]',
-        warning: '[--v-bg:var(--warning)] [--v-fg:var(--on-warning)] [--v-text:var(--warning)] [--v-border:var(--warning)]',
-        neutral: '[--v-bg:var(--neutral)] [--v-fg:var(--on-neutral)] [--v-text:var(--on-surface)] [--v-border:var(--outline)]',
-        inherit: '[--v-fg:currentColor] [--v-text:currentColor] [--v-border:currentColor]',
+        primary: 'tone-primary',
+        secondary: 'tone-secondary',
+        destructive: 'tone-error',
+        success: 'tone-success',
+        warning: 'tone-warning',
+        neutral: 'tone-neutral',
+        inherit: 'tone-inherit',
       },
       size: {
         'sm': 'h-control-sm px-3 py-1 gap-1 rounded-component text-action-sm',

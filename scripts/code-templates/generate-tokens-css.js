@@ -262,6 +262,73 @@ function buildSection10_TypographyPresets() {
   return lines.join('\n');
 }
 
+/**
+ * Tone x treatment — the orthogonal color axis, as CSS.
+ *
+ * A tone declares four custom properties; a treatment consumes them. Adding a tone or a
+ * treatment is one rule, not an N*M matrix — the same orthogonality the CVA version had,
+ * with the Tailwind arbitrary-property syntax (`[--v-bg:var(--primary)]`) dropped, since
+ * that spelling only works inside a Tailwind build.
+ *
+ * The vocabulary comes from the color roles, not from what button and badge happened to
+ * declare. Those two disagreed: button's colors read the base roles, badge's read the
+ * containers, and each named them differently (`destructive` vs `error`, `default` vs
+ * `primary`). Every family in the system carries both `X`/`on-X` and
+ * `X-container`/`on-X-container`, so the two are one axis — intensity — and `-soft` is
+ * the container end of it. One table now covers both, and covers the pairs neither
+ * component had bothered to declare.
+ */
+function buildSection15_Tones() {
+  const defaultMode = colors['default-mode'] || 'light';
+  const groups = colors.roles[defaultMode] || {};
+  // A family qualifies when it carries the full four-role set. That is the contract a
+  // tone needs; anything short of it would emit a rule with holes in it.
+  const families = Object.keys(groups).filter((g) => {
+    const r = groups[g];
+    return r && [g, `on-${g}`, `${g}-container`, `on-${g}-container`].every((k) => k in r);
+  });
+
+  const lines = ['/* === Tones === */'];
+  for (const f of families) {
+    // text/border stay at base intensity in both: an outline treatment draws the brand
+    // line and reads the brand label whether its fill is solid or soft.
+    const edge = f === 'neutral'
+      ? ['  --tone-text: var(--on-surface);', '  --tone-border: var(--outline);']
+      : [`  --tone-text: var(--${f});`, `  --tone-border: var(--${f});`];
+    lines.push(`.tone-${f} {`, `  --tone-bg: var(--${f});`, `  --tone-fg: var(--on-${f});`, ...edge, '}', '');
+    lines.push(`.tone-${f}-soft {`, `  --tone-bg: var(--${f}-container);`, `  --tone-fg: var(--on-${f}-container);`, ...edge, '}', '');
+  }
+
+  // Inherit is not a color family — it reads whatever ink the parent set, which is how an
+  // icon button embedded in a colored surface (a banner dismiss) takes that surface's
+  // foreground instead of a tone of its own.
+  lines.push(
+    '.tone-inherit {',
+    '  --tone-bg: transparent;',
+    '  --tone-fg: currentColor;',
+    '  --tone-text: currentColor;',
+    '  --tone-border: currentColor;',
+    '}',
+    ''
+  );
+
+  lines.push('/* === Treatments === */');
+  lines.push('.treat-filled {', '  background-color: var(--tone-bg);', '  color: var(--tone-fg);', '}', '');
+  lines.push(
+    '.treat-outline {',
+    '  background-color: transparent;',
+    '  border: var(--bw-1) solid var(--tone-border);',
+    '  color: var(--tone-text);',
+    '}',
+    ''
+  );
+  lines.push('.treat-ghost {', '  background-color: transparent;', '  color: var(--tone-text);', '}', '');
+  // The dot mark has no text of its own — it is the border colour rendered as a fill.
+  lines.push('.treat-dot {', '  background-color: var(--tone-border);', '}');
+
+  return lines.join('\n');
+}
+
 function buildSection11_InteractiveStates() {
   return `/* === Interactive States === */
 .interactive {
@@ -571,6 +638,8 @@ function generateLayer() {
     buildSection10_TypographyPresets(),
     '',
     buildSection11_InteractiveStates(),
+    '',
+    buildSection15_Tones(),
   ].join('\n');
 
   return [

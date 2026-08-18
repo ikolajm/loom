@@ -5,7 +5,7 @@ function generateBadge(name, config, meta) {
   // Orthogonal axes (independent, no compound matrix — shared with Button via buildColorVars):
   // variant = treatment (filled/outline/dot) consuming per-state CSS vars; state sets those vars.
   const treatments = config.treatments || ['filled', 'outline'];
-  const { colorNames: stateNames, varClass } = buildColorVars(config.colors || {});
+  const { colorNames: stateNames, toneClass } = buildColorVars(config.colors || {});
 
   // Text-bearing sizes
   const sizes = filterSizes(config.sizes || {});
@@ -84,7 +84,7 @@ const badgeVariants = cva(
 ${treatments.map(v => `        '${v}': '${TREATMENT_CLASSES[v]}',`).join('\n')}
       },
       state: {
-${stateNames.map(s => `        ${s}: '${varClass[s]}',`).join('\n')}
+${stateNames.map(s => `        ${s}: '${toneClass[s]}',`).join('\n')}
       },
       size: {
 ${Object.entries(sizeClasses).map(([k, v]) => `        ${k}: '${v}',`).join('\n')}

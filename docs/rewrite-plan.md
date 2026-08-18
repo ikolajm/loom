@@ -35,8 +35,23 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
       four that differed keep rendering as they do today. `fab-menu` emitted the same
       duplication from config and now emits a weight utility only when no text role
       carries one
-- [ ] **Treatment × tone** — extend `.interactive` into the axes the component schemas
-      already declare, emitted from `spec/config/components/*.json`
+- [x] **Treatment × tone** — `.tone-{family}` / `.tone-{family}-soft` and `.treat-filled`
+      / `-outline` / `-ghost` / `-dot` emitted into `loom.css`. Fifteen tones and four
+      treatments, still orthogonal, and no longer Tailwind-only: the axis was already
+      custom properties, just spelled as arbitrary-property utilities
+      (`[--v-bg:var(--primary)]` consumed by `bg-[color:var(--tone-bg)]`), a syntax that
+      exists only inside a Tailwind build.
+
+      The vocabulary comes from the color roles rather than from the two atoms that had
+      an axis. Those disagreed: button's fills read the base roles, badge's read the
+      containers, and each named them separately — so `destructive` meant a solid error
+      fill in one and a soft container fill in the other. Every family carries both, so
+      that is one axis (intensity) and `-soft` is its container end. Button and badge now
+      map their own prop names onto shared tones, derived from the token paths already in
+      their schemas, so neither atom's public API changed. Coverage grew for free: button
+      gains `info`, badge gains `secondary`. No vendor prefix — the first segment already
+      names the dimension, and Loom's output is the only design layer in a consuming
+      project, so there is no second stylesheet to collide with
 - [ ] **The rest of the element list** — surfaces, form-control states and validity,
       tables, links. This list is closeable; a component list is not
 - [ ] **Print block** — `print-color-adjust: exact`, page-break behavior on surfaces and

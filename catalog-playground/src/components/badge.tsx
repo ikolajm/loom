@@ -9,16 +9,16 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        'filled': 'bg-[color:var(--v-bg)] text-[color:var(--v-fg)]',
-        'outline': 'bg-transparent border border-[color:var(--v-border)] text-[color:var(--v-text)]',
+        'filled': 'treat-filled',
+        'outline': 'treat-outline',
       },
       state: {
-        default: '[--v-bg:var(--primary-container)] [--v-fg:var(--on-primary-container)] [--v-text:var(--primary)] [--v-border:var(--primary)]',
-        neutral: '[--v-bg:var(--neutral-container)] [--v-fg:var(--on-neutral-container)] [--v-text:var(--neutral)] [--v-border:var(--neutral)]',
-        destructive: '[--v-bg:var(--error-container)] [--v-fg:var(--on-error-container)] [--v-text:var(--error)] [--v-border:var(--error)]',
-        success: '[--v-bg:var(--success-container)] [--v-fg:var(--on-success-container)] [--v-text:var(--success)] [--v-border:var(--success)]',
-        warning: '[--v-bg:var(--warning-container)] [--v-fg:var(--on-warning-container)] [--v-text:var(--warning)] [--v-border:var(--warning)]',
-        info: '[--v-bg:var(--info-container)] [--v-fg:var(--on-info-container)] [--v-text:var(--info)] [--v-border:var(--info)]',
+        default: 'tone-primary-soft',
+        neutral: 'tone-neutral-soft',
+        destructive: 'tone-error-soft',
+        success: 'tone-success-soft',
+        warning: 'tone-warning-soft',
+        info: 'tone-info-soft',
       },
       size: {
         sm: 'px-1 py-[2px] gap-1 text-label-sm rounded-component',
