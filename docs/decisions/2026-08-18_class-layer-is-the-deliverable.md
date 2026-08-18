@@ -42,13 +42,14 @@ traps, portals, keyboard navigation, positioning. Everything that was appearance
 with a component wrapper around it becomes a class or an element default. CVA
 stays, on that smaller surface, doing variant selection for behavior wrappers.
 
-The layer is consumed in three modes:
+The layer is consumed in two modes:
 
 | Mode | Surface | What ships |
 |---|---|---|
 | Live vars | Vite, Django, Next, static sites, headless Chrome | the layer, runtime theming |
-| Resolved | engines without custom-property support | the layer, vars flattened per theme at build |
 | Data | email, React Native | `tokens.json`, values inlined |
+
+*A third "resolved" mode was specified here and later cut — see the appends.*
 
 ## Options rejected
 
@@ -98,11 +99,6 @@ close to 1:1 with the catalog.
   Outlook's Word engine, and Gmail's apps mangle or strip `<style>`. Email is
   mode 3: `tokens.json`, resolved at build, inlined as `style=""`. The portable
   claim is about the token vocabulary, not one artifact.
-
-- **The layer must be authored to be resolvable.** Runtime `[data-theme]`
-  variable swapping is mode 1 only. Mode 2 needs a build step emitting a
-  flattened stylesheet per theme, which constrains how the layer is written —
-  not something bolted on afterward.
 
 - **Documents need print rules in the layer.** Backgrounds drop by default in
   print; `print-color-adjust: exact` plus page-break behavior on surfaces and
@@ -189,4 +185,25 @@ close to 1:1 with the catalog.
   `size="sm"`, one `variant="filled"` (the default), no use of the color axis or
   of `lg` — two consumers, both dashboards, so directional and not conclusive.
   **Decision: cut the size axis to a default plus one opt-in.**
+
+- **2026-08-18** — **The "resolved" mode is cut.** It was specified above as the
+  layer with its variables flattened per theme, for engines without
+  custom-property support, and it was never built.
+
+  No consumer exists. Nothing under `~/jmi-projects` uses puppeteer, playwright,
+  wkhtmltopdf, weasyprint, pdfkit, jspdf, react-pdf, Electron or a WebView; no
+  project generates a document at all. Nor is the population plausible in
+  general: custom properties have shipped in every major browser since roughly
+  2017, and the headless browser that would render a PDF supports them fully.
+  The realistic consumer was wkhtmltopdf, a WebKit fork from 2012.
+
+  It was invented to complete a table. Three modes read as a survey of the
+  possibility space, and the middle row was the one with no name behind it. The
+  cost was not the unwritten emitter — it was the consequence entry above, "the
+  layer must be authored to be resolvable," which shaped how the layer got
+  written for a return that could never arrive.
+
+  **Do not re-propose without naming the consumer first.** A flattened emit is a
+  permanent second output to keep in sync with the first, and a second output
+  that ships to nobody drifts from the one that does.
 

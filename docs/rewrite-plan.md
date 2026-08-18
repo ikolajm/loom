@@ -85,9 +85,11 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
       The structure block sits **outside** `@layer components` on purpose: layered, a
       `shadow-lg` or `hover:bg-*` utility would outrank the print override and survive
       onto the page. Print is the one place the layer ordering has to invert
-- [ ] **Flattened per-theme emit** — one stylesheet per theme with color roles resolved,
-      for engines without custom-property support. Only color roles vary by theme;
-      spacing, radius and transitions are theme-invariant
+- ~~**Flattened per-theme emit**~~ — **cut, not done.** It had no consumer: no project
+      here generates a document, and custom properties have been universal in browsers
+      since 2017, so the population it served was wkhtmltopdf and nothing else. It existed
+      to make a three-row table look complete. The reasoning and the do-not-re-propose
+      condition are in the ADR appends
 
 ## The cuts
 

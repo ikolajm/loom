@@ -15,11 +15,11 @@ one source. A small set of **React components** covers what CSS cannot express �
 focus traps, portals, keyboard navigation, positioning — copied into your project
 rather than installed from it (the shadcn model: own the files, no upstream sync).
 
-**Where it runs.** Anything with a modern CSS engine takes the layer directly and
-themes live. Engines without custom properties take a flattened build, one
-stylesheet per theme. Email and React Native take `tokens.json` — the same values
-as plain data — because no stylesheet survives Outlook's Word engine or a runtime
-with no CSS at all.
+**Where it runs.** Anything with a CSS engine takes the layer directly and themes
+live — Vite, Django, Next, static sites, and the headless browser that renders a
+PDF. Email and React Native take `tokens.json` — the same values as plain data —
+because no stylesheet survives Outlook's Word engine or a runtime with no CSS at
+all.
 
 Loom started as a personal engine for spinning up consistent projects. It is open
 source for the model.
