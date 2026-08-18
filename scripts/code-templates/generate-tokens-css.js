@@ -498,11 +498,30 @@ function buildSection12_TailwindTheme() {
 }
 
 // --- Assembly ---
-function generate() {
+// Three files, because only one of them is framework-bound. tokens.css and loom.css are
+// plain CSS and run wherever CSS runs — a Vite app, a Django template, headless Chrome
+// printing an invoice. loom.tailwind.css carries the `@theme inline` bridge and the
+// `@utility` blocks, which are Tailwind v4 at-rules: a non-Tailwind consumer drops them
+// silently, so shipping them inside tokens.css made the tokens tier's "assumes nothing
+// about your framework" claim false for every consumer that was not on Tailwind.
+//
+// Keyframes ride with the layer, not the bridge — `@keyframes` is portable CSS. Only the
+// `--animate-*` registration that names them is Tailwind's, and that stays in the bridge.
+const FILES = ['tokens.css', 'loom.css', 'loom.tailwind.css'];
+
+function header(name, note) {
+  return `/**
+ * ${name} — generated, do not edit. Regenerate from spec/config/.
+ *
+ * ${note}
+ */`;
+}
+
+/** Custom properties only: :root and the alternate-mode block. Portable. */
+function generateTokens() {
   const defaultMode = colors['default-mode'] || 'light';
   const altMode = defaultMode === 'dark' ? 'light' : 'dark';
 
-  // Sections 1-8 in :root
   const rootSections = [
     buildSection1_ColorPalette(),
     [],
@@ -521,60 +540,68 @@ function generate() {
     buildSection8_ZIndex()
   ];
 
-  const rootBlock = `:root {\n${indent(rootSections.flat())}\n}`;
-
-  // Section 9: alternate mode
-  const altModeBlock = buildSection9_AltMode(altMode);
-
-  // Sections 10-14: standalone
-  const typographyBlock = buildSection10_TypographyPresets();
-  const interactiveBlock = buildSection11_InteractiveStates();
-  const tailwindBlock = buildSection12_TailwindTheme();
-  const spacingUtilities = buildSection13_SpacingUtilities();
-  const animations = buildSection14_Animations();
-
-  const header = `/**
- * tokens.css — Generated design system tokens
- * Source: spec/config/
- * Default mode: ${defaultMode}
- *
- * Do not edit manually — regenerate from config.
- */`;
-
   return [
-    header,
+    header('tokens.css', `Design token values. Default mode: ${defaultMode}; \`[data-theme="${altMode}"]\` overrides the color roles. No framework at-rules — this file is plain CSS.`),
     '',
-    rootBlock,
+    `:root {\n${indent(rootSections.flat())}\n}`,
     '',
-    altModeBlock,
-    '',
-    typographyBlock,
-    '',
-    interactiveBlock,
-    '',
-    spacingUtilities,
-    '',
-    animations,
-    '',
-    tailwindBlock,
+    buildSection9_AltMode(altMode),
     ''
   ].join('\n');
+}
+
+/** The class layer: type ramp, interactive states, keyframes. Portable. */
+function generateLayer() {
+  return [
+    header('loom.css', 'The class layer — type ramp, interactive states, keyframes. Reads the custom properties from tokens.css, which must load first. Plain CSS.'),
+    '',
+    buildSection10_TypographyPresets(),
+    '',
+    buildSection11_InteractiveStates(),
+    '',
+    buildSection14_Animations(),
+    ''
+  ].join('\n');
+}
+
+/** The Tailwind v4 bridge: @theme inline and @utility. Not portable. */
+function generateTailwind() {
+  return [
+    header('loom.tailwind.css', 'Tailwind v4 only — `@theme inline` maps the token vocabulary onto Tailwind utilities, and `@utility` declares the semantic spacing shorthands. A non-Tailwind build drops both silently; skip this file there and use the custom properties directly.'),
+    '',
+    buildSection13_SpacingUtilities(),
+    '',
+    buildSection12_TailwindTheme(),
+    ''
+  ].join('\n');
+}
+
+/** @returns {{'tokens.css': string, 'loom.css': string, 'loom.tailwind.css': string}} */
+function generate() {
+  return {
+    'tokens.css': generateTokens(),
+    'loom.css': generateLayer(),
+    'loom.tailwind.css': generateTailwind(),
+  };
 }
 
 // --- CLI ---
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const output = generate();
+  const files = generate();
 
   if (args.includes('--stdout')) {
-    process.stdout.write(output);
+    process.stdout.write(FILES.map((f) => files[f]).join('\n'));
   } else {
-    const outputPath = args.includes('--output')
+    const outputDir = args.includes('--output')
       ? args[args.indexOf('--output') + 1]
-      : path.resolve(__dirname, '../../tokens.css');
-    fs.writeFileSync(outputPath, output);
-    console.log(`tokens.css: ${output.length} chars → ${outputPath}`);
+      : path.resolve(__dirname, '../..');
+    for (const name of FILES) {
+      const outputPath = path.join(outputDir, name);
+      fs.writeFileSync(outputPath, files[name]);
+      console.log(`${name}: ${files[name].length} chars → ${outputPath}`);
+    }
   }
 }
 
-module.exports = { generate };
+module.exports = { generate, generateTokens, generateLayer, generateTailwind, FILES };

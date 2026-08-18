@@ -5,8 +5,8 @@
 #   Reads <project-dir>/loom-picks.json, resolves each picked atom's manifest
 #   `dependencies` transitively, and copies only the resolved atoms (+ cn) into
 #   <project-dir>/src/components/. Atoms are project-owned after install — edit
-#   freely; re-run setup.sh to resync. The token substrate (tokens.css) is
-#   generated fresh from spec/ and delivered to <project-dir>/src/tokens.css.
+#   freely; re-run setup.sh to resync. The token substrate (tokens.css, loom.css,
+#   loom.tailwind.css) is generated fresh from spec/ and delivered to <project-dir>/src/.
 #
 #   An atom you have edited locally is SKIPPED, not overwritten, and named in the
 #   summary. --force overwrites it. "Edited" is decided by re-hashing the installed
@@ -83,8 +83,10 @@ echo "Substrate:"
 TOKENS_TMP="$(mktemp -d)"
 trap 'rm -rf "$TOKENS_TMP"' EXIT
 node "$LOOM_ROOT/scripts/code-templates/orchestrator.js" --only tokens --output "$TOKENS_TMP" >/dev/null
-cp "$TOKENS_TMP/tokens.css" "$SRC/tokens.css"
-echo "  + src/tokens.css"
+for f in tokens.css loom.css loom.tailwind.css; do
+  cp "$TOKENS_TMP/$f" "$SRC/$f"
+  echo "  + src/$f"
+done
 
 echo "Done → $DEST"
 
@@ -110,6 +112,8 @@ echo ""
 echo "Next — install the packages these atoms import (once):"
 echo "  npm install $NPM_DEPS"
 echo ""
-echo "Note: tokens.css is auto-wired into globals.css by init.sh — nothing to do."
+echo "Note: the stylesheets are auto-wired into globals.css by init.sh — nothing to do."
 echo "Only if you bootstrapped globals.css yourself, add (after the tailwindcss import):"
-echo "  @import \"../tokens.css\";   /* from src/app/globals.css; needs Tailwind v4 */"
+echo "  @import \"../tokens.css\";          /* values — plain CSS */"
+echo "  @import \"../loom.css\";            /* class layer — plain CSS */"
+echo "  @import \"../loom.tailwind.css\";   /* Tailwind v4 only */"

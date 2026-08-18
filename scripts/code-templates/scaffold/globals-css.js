@@ -1,11 +1,18 @@
 /**
  * Generates globals.css for the downstream project.
- * Imports Tailwind + tokens, sets base body styles, scrollbar, selection.
+ * Imports Tailwind + the three token files, sets base body styles, scrollbar, selection.
+ *
+ * Import order is load-bearing. tokens.css defines the custom properties; loom.css reads
+ * them; loom.tailwind.css maps them onto Tailwind utilities. Drop loom.tailwind.css and
+ * every token-derived utility class stops resolving — silently, since an unknown utility
+ * is not an error.
  */
 
 function generate(configs) {
   return `@import "tailwindcss";
 @import "../tokens.css";
+@import "../loom.css";
+@import "../loom.tailwind.css";
 
 body {
   background: var(--surface);

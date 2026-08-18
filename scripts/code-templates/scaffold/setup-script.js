@@ -1,7 +1,7 @@
 /**
  * Generates init.sh — the one-time project bootstrap for the Loom app shell + token
  * substrate. Deliberately atom-agnostic: it installs only what does NOT depend on a
- * specific atom (ThemeProvider, globals, root layout, tokens.css, core deps).
+ * specific atom (ThemeProvider, globals, root layout, the three stylesheets, core deps).
  *
  * Atoms are a separate, repeatable step — the catalog sync at the repo root
  * (`./setup.sh <project>`), which resolves loom-picks.json. Two commands, two jobs:
@@ -42,7 +42,7 @@ function generate() {
 #
 # Usage: ./scaffold/init.sh <frontend-dir> [--tokens]
 #   (default)  catalog tier — app shell + substrate + core deps + starter picker
-#   --tokens   tokens tier  — tokens.css + tokens.json and nothing else
+#   --tokens   tokens tier  — the three stylesheets + tokens.json and nothing else
 # Run from the generated/ directory. Idempotent.
 
 set -euo pipefail
@@ -70,9 +70,11 @@ echo "Target: $FRONTEND_DIR"
 echo ""
 
 # --- Validate ---
-# The tokens tier writes two files into src/ and touches nothing else, so it does not
-# require src/app/ — it does not assume Next.js, or a React app at all.
-[ -f "$GEN_DIR/tokens.css" ] || { echo "ERROR: tokens.css not found in $GEN_DIR — run the orchestrator first."; exit 1; }
+# The tokens tier writes stylesheets and tokens.json into src/ and touches nothing else,
+# so it does not require src/app/ — it does not assume Next.js, or a React app at all.
+for f in tokens.css loom.css loom.tailwind.css; do
+  [ -f "$GEN_DIR/$f" ] || { echo "ERROR: $f not found in $GEN_DIR — run the orchestrator first."; exit 1; }
+done
 if [ "$TIER" = "tokens" ]; then
   [ -d "$SRC_DIR" ] || { echo "ERROR: $SRC_DIR not found — expected a project with a src/ directory."; exit 1; }
 else
@@ -84,8 +86,10 @@ fi
 # provider and a route, and installs four packages. A consumer who wants Loom's design
 # decisions as values and owns their own components should get none of that.
 if [ "$TIER" = "tokens" ]; then
-  echo "[1/2] Copying tokens.css..."
+  echo "[1/2] Copying stylesheets..."
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
+  cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
+  cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
   echo "[2/2] Copying tokens.json..."
   if [ -f "$GEN_DIR/tokens.json" ]; then
@@ -97,8 +101,13 @@ if [ "$TIER" = "tokens" ]; then
   echo ""
   echo "=== Tokens ready ==="
   echo ""
-  echo "Wire the stylesheet into your global CSS, after the tailwindcss import:"
-  echo "  @import \\"../tokens.css\\";   /* needs Tailwind v4 */"
+  echo "Wire the stylesheets into your global CSS, in this order:"
+  echo "  @import \\"../tokens.css\\";          /* custom properties — plain CSS */"
+  echo "  @import \\"../loom.css\\";            /* class layer — plain CSS */"
+  echo "  @import \\"../loom.tailwind.css\\";   /* Tailwind v4 only — skip if you are not on it */"
+  echo ""
+  echo "The first two run anywhere CSS runs. loom.tailwind.css is @theme/@utility at-rules;"
+  echo "a non-Tailwind build drops them without an error, so omit it rather than debug it."
   echo ""
   echo "tokens.json is the same data with no CSS runtime — for a native or non-web consumer."
   echo "No atoms were installed. To take them too, re-run without --tokens."
@@ -115,8 +124,12 @@ echo "[1/7] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/providers"
 
 # --- Step 2: Token substrate ---
-echo "[2/7] Copying tokens.css..."
+# Three files: values, class layer, Tailwind bridge. globals.css (step 3) imports all
+# three in that order — the bridge reads what the first two define.
+echo "[2/7] Copying stylesheets..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
+cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
+cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
 # --- Step 3: globals.css ---
 echo "[3/7] Writing globals.css..."

@@ -24,12 +24,14 @@ const registry = getComponentRegistry(configs);
 // --- Generator modules ---
 const GENERATORS = {
   'tokens': {
-    description: 'tokens.css',
+    description: 'tokens.css + loom.css + loom.tailwind.css (values, class layer, Tailwind bridge)',
     run: (outputDir) => {
-      const { generate } = require('./generate-tokens-css');
-      const output = generate();
-      fs.writeFileSync(path.join(outputDir, 'tokens.css'), output);
-      console.log('  tokens.css');
+      const { generate, FILES } = require('./generate-tokens-css');
+      const files = generate();
+      for (const name of FILES) {
+        fs.writeFileSync(path.join(outputDir, name), files[name]);
+        console.log(`  ${name}`);
+      }
     },
   },
   'tokens-json': {

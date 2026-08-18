@@ -67,7 +67,7 @@ ${familyRows.join('\n')}
 ## Token Architecture
 
 \`\`\`
-tokens.css
+tokens.css                       ← plain CSS, portable
 ├── :root { }                    ← CSS custom properties (${defaultMode} mode values)
 │   ├── Color palette primitives
 │   ├── Semantic color roles
@@ -76,16 +76,24 @@ tokens.css
 │   ├── Effects${shadowsFlat ? ' (shadows: none — flat style)' : ''}
 │   ├── Typography font families
 │   └── Z-index
-├── [data-theme="${defaultMode === 'dark' ? 'light' : 'dark'}"] { }     ← Alternate mode overrides
+└── [data-theme="${defaultMode === 'dark' ? 'light' : 'dark'}"] { }     ← Alternate mode overrides
+
+loom.css                         ← plain CSS, portable
 ├── .text-{family}-{size} { }   ← Text style family classes (6 families × 3 tiers)
 ├── .interactive { }             ← Hover/active/focus/disabled states
-└── @theme inline { }            ← Tailwind v4 integration
+└── @keyframes { }               ← Animation definitions
+
+loom.tailwind.css                ← Tailwind v4 only; a non-Tailwind build drops it silently
+├── @utility { }                 ← Semantic spacing shorthands
+└── @theme inline { }            ← Token vocabulary → Tailwind utilities
 \`\`\`
 
 ## File Inventory
 
-### tokens.css (DO NOT EDIT)
-Regenerable from the Loom configs. Import in globals.css.
+### tokens.css · loom.css · loom.tailwind.css (DO NOT EDIT)
+Regenerable from the Loom configs. Import in globals.css **in that order** — the bridge
+reads what the first two define. Drop loom.tailwind.css and every token-derived utility
+stops resolving without an error, because an unknown utility is not a build failure.
 
 ### components/ (YOURS TO MODIFY)
 ${componentRows.length} component scaffolds. Variant/size class maps are generated from config.

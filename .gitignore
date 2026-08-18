@@ -29,6 +29,8 @@ spec/config/local/
 # yours (to be useful). It cannot be both. Untracked, `./setup.sh catalog-playground`
 # writing your brand into it is the feature rather than a leak into a committed file.
 catalog-playground/src/tokens.css
+catalog-playground/src/loom.css
+catalog-playground/src/loom.tailwind.css
 
 # Logs / env / OS
 *.log
