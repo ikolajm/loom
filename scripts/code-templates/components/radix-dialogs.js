@@ -96,7 +96,7 @@ const DialogTitle = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title ref={ref} className={cn('text-title-md font-semibold', className)} {...props} />
+  <DialogPrimitive.Title ref={ref} className={cn('text-title-md', className)} {...props} />
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
@@ -180,7 +180,7 @@ const AlertDialogTitle = forwardRef<
   React.ComponentRef<typeof AlertDialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Title ref={ref} className={cn('text-title-md font-semibold', className)} {...props} />
+  <AlertDialogPrimitive.Title ref={ref} className={cn('text-title-md', className)} {...props} />
 ));
 AlertDialogTitle.displayName = 'AlertDialogTitle';
 
@@ -295,7 +295,7 @@ const SheetTitle = forwardRef<
   React.ComponentRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <SheetPrimitive.Title ref={ref} className={cn('text-title-md font-semibold', className)} {...props} />
+  <SheetPrimitive.Title ref={ref} className={cn('text-title-md', className)} {...props} />
 ));
 SheetTitle.displayName = 'SheetTitle';
 

@@ -550,14 +550,33 @@ function generateTokens() {
   ].join('\n');
 }
 
-/** The class layer: type ramp, interactive states, keyframes. Portable. */
+/**
+ * The class layer: type ramp, interactive states, keyframes. Portable.
+ *
+ * The classes go in `@layer components`, which Tailwind orders below `utilities` — so
+ * `<h3 class="text-title-md font-bold">` lets `font-bold` win. Unlayered they beat every
+ * utility instead, which is not a style preference: it silently voided overrides authors
+ * had written. `carousel.js` still carries a wrapper div added because `.interactive`'s
+ * `position: relative` outranked an `absolute` on the same element.
+ *
+ * Keyframes stay outside the layer — `@keyframes` is not a style rule and cascade layers
+ * do not apply to it; wrapping it changes nothing and reads as though it might.
+ *
+ * A non-Tailwind consumer gets a bare `@layer components` with no other layers declared,
+ * which is valid CSS and orders the layer before all unlayered rules. That is the same
+ * relationship Tailwind produces, so the file behaves consistently in both.
+ */
 function generateLayer() {
-  return [
-    header('loom.css', 'The class layer — type ramp, interactive states, keyframes. Reads the custom properties from tokens.css, which must load first. Plain CSS.'),
-    '',
+  const layered = [
     buildSection10_TypographyPresets(),
     '',
     buildSection11_InteractiveStates(),
+  ].join('\n');
+
+  return [
+    header('loom.css', 'The class layer — type ramp and interactive states in `@layer components` so utilities override them, plus keyframes. Reads the custom properties from tokens.css, which must load first. Plain CSS.'),
+    '',
+    `@layer components {\n${indent(layered.split('\n'))}\n}`,
     '',
     buildSection14_Animations(),
     ''

@@ -176,7 +176,7 @@ const ${prefix}Label = forwardRef<
   React.ComponentRef<typeof ${prefix}Primitive.Label>,
   React.ComponentPropsWithoutRef<typeof ${prefix}Primitive.Label> & { inset?: boolean }
 >(({ className, inset, ...props }, ref) => (
-  <${prefix}Primitive.Label ref={ref} className={cn('px-2 py-1.5 text-body-sm font-semibold text-on-surface-variant', inset && 'pl-8', className)} {...props} />
+  <${prefix}Primitive.Label ref={ref} className={cn('px-2 py-1.5 text-body-sm text-on-surface-variant', inset && 'pl-8', className)} {...props} />
 ));
 ${prefix}Label.displayName = '${prefix}Label';
 

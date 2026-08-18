@@ -20,9 +20,16 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
 
 ## The layer
 
-- [ ] **Layer the classes** — move `.text-*` and `.interactive` into `@layer components`
-      so Tailwind utilities override them. This is a rendering change, not a file
-      change: unlayered, they currently beat every utility
+- [x] **Layer the classes** — `.text-*` and `.interactive` moved into `@layer components`
+      so Tailwind utilities override them. Unlayered they beat every utility, which had
+      voided ten authored overrides across nine components: `font-semibold` on dialog,
+      alert-dialog, sheet and card titles, on menu and select labels, `leading-none` on
+      the card title, `font-medium` on the toast action. All ten were deleted rather than
+      activated — the ramp owns weight and leading, so a component that wants a different
+      weight is asking for a different role. Six were no-ops against the ramp anyway; the
+      four that differed keep rendering as they do today. `fab-menu` emitted the same
+      duplication from config and now emits a weight utility only when no text role
+      carries one
 - [ ] **Treatment × tone** — extend `.interactive` into the axes the component schemas
       already declare, emitted from `spec/config/components/*.json`
 - [ ] **The rest of the element list** — surfaces, form-control states and validity,

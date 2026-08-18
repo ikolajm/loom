@@ -32,10 +32,14 @@ function generateFabMenu(name, config, meta) {
   if (labelPy) labelClasses.push(labelPy);
   const labelRad = radiusToClass(labelCfg.radius);
   if (labelRad) labelClasses.push(`rounded-${labelRad}`);
+  // The ramp owns weight. A text role carries a font-weight already, so emitting a
+  // font-* utility beside it is a duplicate — and once the layer is layered the utility
+  // wins, which would let a schema's font-weight silently outrank the type ramp it sits
+  // on. Emit the weight only when there is no role to carry it.
   const fwMap = { 400: 'font-normal', 500: 'font-medium', 600: 'font-semibold', 700: 'font-bold' };
-  if (labelCfg['font-weight'] && fwMap[labelCfg['font-weight']]) labelClasses.push(fwMap[labelCfg['font-weight']]);
   const labelRole = textRoleClass(labelCfg.text);
   if (labelRole) labelClasses.push(labelRole);
+  else if (labelCfg['font-weight'] && fwMap[labelCfg['font-weight']]) labelClasses.push(fwMap[labelCfg['font-weight']]);
   if (labelCfg['letter-spacing'] && labelCfg['letter-spacing'] !== '0') labelClasses.push(`tracking-[${labelCfg['letter-spacing']}]`);
   const labelClassStr = labelClasses.join(' ');
 

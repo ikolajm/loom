@@ -93,7 +93,7 @@ const ToastAction = forwardRef<
   <ToastPrimitive.Action
     ref={ref}
     className={cn(
-      'inline-flex shrink-0 items-center justify-center rounded-component px-3 py-1 text-action-sm font-medium',
+      'inline-flex shrink-0 items-center justify-center rounded-component px-3 py-1 text-action-sm',
       'ring-1 ring-inset ring-current/20 interactive cursor-pointer',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
       'disabled:opacity-(--opacity-disabled) disabled:cursor-not-allowed',

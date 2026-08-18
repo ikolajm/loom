@@ -116,8 +116,10 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
 
           {showArrows && (
             <>
-              {/* Wrapper carries the absolute position — Button's .interactive utility forces
-                  position:relative, so positioning the Button directly via className is overridden. */}
+              {/* Wrapper carries the absolute position. This was required when .interactive was
+                  unlayered and its position:relative outranked an absolute on the same
+                  element; in @layer components it no longer is. Kept because it works and
+                  collapsing it is an untested restructure, not because the constraint holds. */}
               <div className={cn('absolute top-1/2 z-10 -translate-y-1/2', arrowLeft[size])}>
                 <Button
                   variant="ghost"

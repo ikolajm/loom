@@ -186,7 +186,7 @@ function generateCompoundSubs(name, config, meta) {
   const subs = {
     'Card': [
       { sub: 'CardHeader', el: 'div', classes: 'flex flex-col gap-1.5' },
-      { sub: 'CardTitle', el: 'h3', classes: 'text-title-md font-semibold leading-none' },
+      { sub: 'CardTitle', el: 'h3', classes: 'text-title-md' },
       { sub: 'CardDescription', el: 'p', classes: 'text-body-sm text-on-surface-variant' },
       { sub: 'CardContent', el: 'div', classes: '' },
       { sub: 'CardFooter', el: 'div', classes: 'flex items-center gap-2' },

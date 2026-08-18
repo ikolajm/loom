@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "layout",
   "description": "",
-  "version": "5ed1e088b64f",
+  "version": "918f894f03a8",
   "dependencies": [
     "button",
     "cn"
