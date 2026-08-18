@@ -25,7 +25,7 @@ function generate(answers, standards, mappings) {
   }
 
   return {
-    $note: `Semantic sizing mappings only. Primitives live in config/standards.json → sizing. All values reference standard primitive tokens. Component heights resolve through semantic roles (component-height/<role>/<tier>) — atoms name a role, the archetype picks the ladder.`,
+    $note: `Semantic sizing mappings only. Primitives live in config/standards.json → sizing. All values reference standard primitive tokens. Component heights resolve through semantic roles (component-height/<role>/<tier>) — atoms name a role, controlHeight picks the ladder.`,
 
     "border-radius": edgesMapping['semantic-radius'],
     "component-height": heightMapping['semantic-height']

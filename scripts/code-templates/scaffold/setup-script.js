@@ -11,16 +11,15 @@
 
 const { applyPins } = require('../npm-pins');
 
-// The pick-list written when the answers file named no productType. Two atoms, enough
-// to prove the sync works; the consumer edits from there.
-const FALLBACK_PICKS = ['button', 'card'];
+// The starter pick-list. Two atoms, enough to prove the sync works; the consumer edits
+// from there. It used to be seeded from the productType archetype's curated list —
+// that supplier was cut with productType, and a seed nobody could predict was worth
+// less than a pair anyone can read.
+const STARTER_PICKS = ['button', 'card'];
 
-function generate(picks = null) {
-  const starterPicks = picks?.length ? picks : FALLBACK_PICKS;
-  const picksBlock = starterPicks.map((p) => `      "${p}"`).join(',\n');
-  const picksNote = picks?.length
-    ? `Seeded from your productType archetype — ${starterPicks.length} atoms. Cut what you do not need.`
-    : 'A starter pair. Add the atoms you need.';
+function generate() {
+  const picksBlock = STARTER_PICKS.map((p) => `      "${p}"`).join(',\n');
+  const picksNote = 'A starter pair. Add the atoms you need.';
 
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
   // Pins come from npm-pins.js, the same map setup.sh's printed line resolves through;
@@ -170,7 +169,7 @@ ${picksBlock}
   }
 }
 PICKS
-  echo "  created loom-picks.json (${starterPicks.length} starter picks — edit, then run setup.sh)"
+  echo "  created loom-picks.json (${STARTER_PICKS.length} starter picks — edit, then run setup.sh)"
 else
   echo "  loom-picks.json already exists — left as-is"
 fi

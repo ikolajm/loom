@@ -137,7 +137,7 @@ function buildSection5_Sizing() {
     lines.push(`--${token}: ${val};`);
   }
 
-  // Component height semantic — role → ladder, picked by the archetype's controlHeight.
+  // Component height semantic — role → ladder, picked by the controlHeight answer.
   lines.push('');
   lines.push('/* === Component Height Semantic === */');
   for (const [role, tiers] of Object.entries(sizing['component-height'])) {

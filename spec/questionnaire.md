@@ -36,7 +36,6 @@ not Loom's "look"):
 ```json
 {
   "projectName": "acme-dashboard",
-  "productType": "dashboard",
   "styleDirection": "clean",
   "defaultMode": "dark",
   "primary": "#1E90FF",
@@ -68,11 +67,10 @@ not Loom's "look"):
 | `controlHeight` | no | `compact` · `standard` · `touch` | `standard` | height of buttons, inputs, rows, bars |
 | `defaultMode` | no | `dark` · `light` | `dark` | which color mode loads first |
 | `projectName` | no | string | `null` | metadata only |
-| `productType` | no | see list below | `null` | Tier 2 defaults + starter atom picks |
 | `styleDirection` | no | see list below | `null` | Tier 2 defaults |
 
 Omit any optional key entirely — the generator falls back to the default above,
-**unless `productType` or `styleDirection` supplies one first** (see the section below).
+**unless `styleDirection` supplies one first** (see the section below).
 A value outside the allowed set fails loudly (e.g. `Unknown edges: "round". Valid: none, sharp, soft`).
 
 ## Colors
@@ -104,8 +102,8 @@ pick from [`parity-safe-fonts.json`](parity-safe-fonts.json). Off-list fonts are
 ## The five look-and-feel answers, in plain terms
 
 These are the ones that need taste. Each is a word, not a number — Loom turns it into the
-actual scale. **You can skip all five** and let `productType` / `styleDirection` supply
-them (next section).
+actual scale. **You can skip four of the five** and let `styleDirection` supply them
+(next section). `controlHeight` is not one of them — see below.
 
 - **`edges`** — how rounded corners are. `none` is square, `sharp` is a slight round,
   `soft` is generous. Applies to buttons, cards, inputs, everything.
@@ -120,40 +118,35 @@ them (next section).
 - **`controlHeight`** — how tall the things you click are: buttons, inputs, list rows, menu
   items, nav bars. `compact` is for dense pointer-driven screens, `standard` is the desktop
   norm, and `touch` holds every one of them at or above the 44px minimum a finger needs.
-  **Answer `touch` if the product ships to a phone** — nothing else in the questionnaire
-  enforces that floor.
+  **If the product ships to a phone, answer `touch`.** Nothing infers this. Height is
+  ergonomics, not style, so `styleDirection` does not supply it and no default will
+  discover it for you — omit the key and you get `standard`, which is a 40px tap target.
 
-If you are not sure, answer `productType` instead and let the archetype pick these for you.
-`controlHeight` is the one field `styleDirection` does **not** supply: height is ergonomics,
-not style, so it comes from `productType` or from you.
+## Intent field — `styleDirection`
 
-## Intent fields — `productType`, `styleDirection`
-
-These answer the four implementation questions above **for you**, so you can skip the two
-that need taste and a mockup (`density`, `typeScale`) and answer one that anyone can
-(`productType`). Each maps to Tier 2 values in
+This answers the four style questions above **for you**, so you can skip the two that need
+taste and a mockup (`density`, `typeScale`). It maps to Tier 2 values in
 [`direction-mappings.json`](direction-mappings.json).
 
 **Precedence — general to specific, more specific wins:**
 
-    productType  <  styleDirection  <  the value you write
+    styleDirection  <  the value you write
 
 A value you write is **never** overridden. Omit `edges` / `density` / `shadowDepth` /
-`typeScale` / `controlHeight` to let intent supply them; the built-in defaults apply only
-when nothing else does. This matters because the two blocks genuinely conflict: `dashboard` sets
-`type-scale: compact` while its own first style-suggestion `clean` sets `standard`, so
-`clean` wins. `npm run configs` prints each resolved value with the layer that supplied it.
+`typeScale` to let `styleDirection` supply them; the built-in defaults apply only when
+nothing else does. `npm run configs` prints each resolved value with the layer that
+supplied it.
 
-`productType` also seeds the starter `loom-picks.json` that `init.sh` writes, from the
-archetype's curated pick-list — a starting point to cut down, not a fixed set.
+There was a second intent field, `productType`, supplying the same four values plus
+`controlHeight` and a starter pick-list. Two suppliers for one value meant the resolved
+scale could not be stated without running the generator and reading which layer won — and
+the blocks genuinely conflicted, `dashboard` saying `type-scale: compact` against its own
+suggested `clean` saying `standard`. It was cut. An answers file that still names it fails
+with a message saying what to set instead; it is refused rather than ignored, because
+ignoring it would silently drop a phone product from the touch ladder.
 
-**`productType`** — `dashboard` · `marketing` · `e-commerce` · `content` · `admin` ·
-`consumer-mobile` · `portfolio` · `game` · `documentation` · `social` · `other`
-
-`other` is valid and maps to no archetype — it supplies nothing, and the fields it would
-have filled fall through to `styleDirection` or the defaults. Any name outside these lists
-fails loudly. `projectName` remains metadata only: it travels with the config for
-provenance and changes no token.
+`projectName` remains metadata only: it travels with the config for provenance and changes
+no token.
 
 **`styleDirection`** — the intended visual philosophy (reference points in parens):
 `clean` (Linear, Notion) · `soft` (Material, Stripe) · `bold` (Spotify, Framer) ·

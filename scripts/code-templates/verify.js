@@ -14,7 +14,6 @@
  *   playground-parity — the playground's synced copies match what the generator emits
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
- *   archetype-picks   — every archetype's curated pick-list names a real atom
  *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
  *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
  *   composited-contrast — the same pairs still clear 3:1 after the muted opacity role
@@ -236,42 +235,13 @@ function checkTouchTarget() {
     }
   }
 
-  // The archetypes that promise a touch surface must actually resolve to that ladder;
-  // a mobile archetype pointing at `standard` would pass every check above and still
-  // ship 40px controls, which is the exact defect this item was filed for.
-  for (const name of ['consumer-mobile', 'social']) {
-    const archetype = mappings['product-type'][name];
-    if (archetype && archetype['control-height'] !== 'touch') {
-      failures.push(`product-type.${name} — resolves control-height "${archetype['control-height']}", not "touch"`);
-    }
-  }
+  // What is NOT checked here: that a phone product actually answers `touch`. The
+  // archetypes used to promise it — consumer-mobile and social resolved control-height
+  // to the touch ladder, and this check held them to it. Both went with productType, so
+  // the floor is now the answerer's to hold. The ladder above is still verified; nothing
+  // verifies that anyone selects it.
 
   return { failures, note: `${checked} touch-ladder tiers against ${min}px` };
-}
-
-// --- archetype-picks -------------------------------------------------------
-// Each `product-type` archetype in direction-mappings.json curates an atom pick-list,
-// which now seeds a consumer's starter loom-picks.json. The names are hand-written
-// against the catalog and drifted once already: all ten listed `icon-button`, `chip`,
-// `text-input` and `alert`, absent since the v2 consolidation, and every one would have
-// written an unresolvable pick into a consumer's project. Same failure as the
-// hand-maintained mirror two checks up — fail the run rather than re-check by hand.
-function checkArchetypePicks(atoms) {
-  const known = new Set(atoms);
-  const mappings = readJson('spec/direction-mappings.json');
-  const archetypes = Object.entries(mappings['product-type']).filter(([name]) => !name.startsWith('$'));
-
-  const failures = [];
-  let picks = 0;
-  for (const [name, cfg] of archetypes) {
-    for (const pick of cfg.components || []) {
-      picks++;
-      if (!known.has(pick)) {
-        failures.push(`product-type.${name} — picks "${pick}", which is not in the catalog`);
-      }
-    }
-  }
-  return { failures, note: `${picks} picks across ${archetypes.length} archetypes` };
 }
 
 // --- contrast ---------------------------------------------------------------
@@ -474,7 +444,6 @@ function verify() {
     ['playground-parity', checkPlaygroundParity(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['base-config-provenance', checkBaseConfigProvenance()],
-    ['archetype-picks', checkArchetypePicks(atoms)],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],
     ['composited-contrast', checkCompositedContrast()],

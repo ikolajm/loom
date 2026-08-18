@@ -108,7 +108,6 @@ function loadAnswers(args) {
   return {
     // Tier 1 — intent; resolveIntent() turns these into Tier 2 values below
     projectName: args.projectName || null,
-    productType: args.productType || null,
     styleDirection: args.styleDirection || null,
     defaultMode: args.defaultMode || 'dark',
     // Tier 2 — implementation (drives config generation)
@@ -117,14 +116,17 @@ function loadAnswers(args) {
     accent: args.accent || null,
     heading: args.heading || 'Inter',
     body: args.body || 'Inter',
-    // The four archetype-derivable keys are deliberately left absent when no flag was
-    // passed. Defaulting them here (`args.edges || 'sharp'`) made every flagless run
-    // look like an explicit answer, so the archetype could never win. The fallback is
-    // the last layer of resolveIntent(), which produces the same values it used to.
+    // The Tier 2 keys are deliberately left absent when no flag was passed. Defaulting
+    // them here (`args.edges || 'sharp'`) made every flagless run look like an explicit
+    // answer, so styleDirection could never win. The fallback is the last layer of
+    // resolveIntent(), which produces the same values it used to.
     ...(args.edges ? { edges: args.edges } : {}),
     ...(args.density ? { density: args.density } : {}),
     ...(args.shadowDepth ? { shadowDepth: args.shadowDepth } : {}),
-    ...(args.typeScale ? { typeScale: args.typeScale } : {})
+    ...(args.typeScale ? { typeScale: args.typeScale } : {}),
+    // controlHeight has no intent supplier — it is answered or it defaults, so the CLI
+    // path needs its own flag or it is unreachable outside an answers file.
+    ...(args.controlHeight ? { controlHeight: args.controlHeight } : {})
   };
 }
 
@@ -165,7 +167,6 @@ function main() {
 
   console.log('=== Design System Config Generator ===');
   if (answers.projectName) console.log(`Project: ${answers.projectName}`);
-  if (answers.productType) console.log(`Product Type: ${answers.productType}`);
   if (answers.styleDirection) console.log(`Style Direction: ${answers.styleDirection}`);
   console.log(`Default Mode: ${answers.defaultMode || 'dark'}`);
   console.log(`Primary: ${answers.primary}`);
@@ -173,8 +174,8 @@ function main() {
   console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
   console.log(`Fonts: ${answers.heading || 'Inter'} / ${answers.body || 'Inter'}`);
   warnOffParitySafeFonts(answers);
-  // Each Tier 2 value with the layer that supplied it — an archetype-derived value and
-  // a hand-written one are indistinguishable in the output, so the run log says which.
+  // Each Tier 2 value with the layer that supplied it — an intent-derived value and a
+  // hand-written one are indistinguishable in the output, so the run log says which.
   for (const key of Object.keys(TIER2_KEYS)) {
     console.log(`${key}: ${answers[key]}  (from ${sources[key]})`);
   }
