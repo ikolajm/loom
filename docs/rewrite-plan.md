@@ -17,6 +17,11 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
 - [x] **Emit split** — `tokens.css` (values), `loom.css` (class layer), and
       `loom.tailwind.css` (`@theme inline` + `@utility`). Only the third is
       framework-bound, which makes the tokens tier's portability claim true
+- [x] **Figma components cut** — `scripts/figma-components` and `scripts/figma-icons`
+      deleted; primitives, semantics, styles and layout kept. Pulled ahead of the layer
+      work because it depended on none of it: `npm run figma` is a separate entry point
+      and nothing under `code-templates/` or `generate-configs/` referenced those
+      directories. The step list went 32 → 17
 
 ## The layer
 
@@ -42,8 +47,10 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
 
 ## The cuts
 
-- [ ] **`scripts/figma-components`** — its own branch. Keep primitives, semantics,
-      styles, layout, icons; Figma mirrors the token half, which is the half it can hold
+These are the ones that *do* depend on the layer — a component cannot shed its
+appearance until there is a class to shed it to. Ordering them after the layer work is
+deliberate, not backlog inertia.
+
 - [ ] **Thin the components** — surviving atoms become a primitive import with layer
       classes; the appearance-only entries stop being components
 - [ ] **Size axis** — a default plus one opt-in, not a universal three
