@@ -183,13 +183,13 @@ Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Go
 
 ### Apply the Figma scripts
 
-`npm run figma` writes 32 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`31` step scripts (each a self-contained async IIFE). To build the Figma file:
+`npm run figma` writes 17 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`16` step scripts (each a self-contained async IIFE). They build **variables, text styles, effect styles and the page layout** — the token half. Figma does not receive components: it has no notion of a class, so the class layer has no representation there, and a Figma component was only ever a snapshot of one combination rather than the rule that generates it ([why](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md)). Build the components you need from the variables. To build the Figma file:
 
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
-3. Paste the step scripts **`01` → `31` in numeric order**. Re-running a single page later only needs its own step script re-pasted.
+3. Paste the step scripts **`01` → `16` in numeric order**. Re-running one later only needs its own step script re-pasted.
 
-**Build into a fresh Figma file, or clear it first.** Component pages clear and rebuild themselves on re-paste, but the variable/style steps (`01`–`16`) are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
+**Build into a fresh Figma file, or clear it first.** The steps are *not* idempotent — re-pasting them onto a file that already has Loom variables creates duplicate collections. Before a full rebuild on a used file, paste this reset into the console first:
 
 ```js
 // Clear variable collections
@@ -224,7 +224,7 @@ spec/                  Single source of truth
 
 scripts/               The two codegen pipelines
   code-templates/      ← React catalog + the three stylesheets + scaffold
-  figma-*/             ← Figma variables / styles / components
+  figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts
   resolve-picks.js     ← the picker's dependency resolver
   setup.sh             ← (repo root) installs picked atoms into a project

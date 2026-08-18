@@ -31,40 +31,6 @@ function pxToNumber(val) {
   return parseFloat(val);
 }
 
-/**
- * Map numeric font weight to Figma style name for font loading.
- * Default mapping covers most Google Fonts. Only add overrides for fonts
- * with non-standard style names. Figma's loadFontAsync will throw if a
- * style name is wrong — add the font to FONT_WEIGHT_OVERRIDES when that happens.
- */
-const FONT_WEIGHT_OVERRIDES = {
-  "JetBrains Mono": { 600: "Medium" },
-  "Inter": { 600: "Semi Bold" },
-  "Cinzel": { 500: "Regular", 600: "Bold" },
-};
-
-function weightToStyleName(familyName, weight) {
-  const overrides = FONT_WEIGHT_OVERRIDES[familyName];
-  if (overrides && overrides[weight]) return overrides[weight];
-  if (weight >= 700) return 'Bold';
-  if (weight >= 600) return 'SemiBold';
-  if (weight >= 500) return 'Medium';
-  return 'Regular';
-}
-
-/**
- * Parse em-based letter-spacing to Figma percentage format.
- * "-0.02em" at 48px = -0.02 * 48 = -0.96px
- * Figma letterSpacing uses { value: N, unit: "PIXELS" } or { value: N, unit: "PERCENT" }
- * We'll use PERCENT since em is relative: -0.02em = -2%
- */
-function parseLetterSpacing(lsValue) {
-  if (!lsValue || lsValue === "0") return { value: 0, unit: "PERCENT" };
-  const num = parseFloat(lsValue);
-  // em → percent: -0.02em = -2%
-  return { value: num * 100, unit: "PERCENT" };
-}
-
 // --- Pipeline ---
 const typoPrimitives = buildLookup("primitives.typography");
 const tiers = ['sm', 'md', 'lg'];

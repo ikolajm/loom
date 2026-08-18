@@ -5,7 +5,13 @@
  * Single entry point for producing all Figma Plugin API scripts.
  * Produces:
  *   00_shared-utils.js  — paste first, defines all helper functions globally
- *   01-30 step scripts  — slim files with just CONFIG + logic, wrapped in IIFE
+ *   01-16 step scripts  — slim files with just CONFIG + logic, wrapped in IIFE
+ *
+ * Figma receives the token half: variables, text styles, effect styles, and the page
+ * layout that holds them. It does not receive components. Figma has no notion of a
+ * class, so the class layer has no representation here — and a Figma component was
+ * only ever a snapshot of one combination, not the rule that generates it. See
+ * docs/decisions/2026-08-18_class-layer-is-the-deliverable.md.
  *
  * Usage:
  *   node scripts/assemble-figma.js                    — writes to generated/figma-scripts/
@@ -30,18 +36,8 @@ const sizing = load('base/sizing.json');
 const typography = load('base/typography.json');
 const effects = load('base/effects.json');
 const layout = load('presentation/layout.json');
-const templates = load('presentation/templates.json');
-const colorPalette = load('figma/color-palette.json');
-const buttonConfig = load('components/button.json');
-const formConfig = load('components/form.json');
-const layoutConfig = load('components/layout.json');
-const feedbackConfig = load('components/feedback.json');
-const dataDisplayConfig = load('components/data-display.json');
-const navigationConfig = load('components/navigation.json');
-const compositeConfig = load('components/composite.json');
 
 const defaultMode = layout['default-mode'] || 'light';
-const { ICONS } = require('./figma-icons/orchestrator');
 
 // --- Shared Utils Assembly ---
 
@@ -51,13 +47,8 @@ function buildSharedUtils() {
     path.join(SCRIPTS_DIR, 'figma-primitives/_shared.js'),
     // Semantic helpers
     path.join(SCRIPTS_DIR, 'figma-semantics/_shared.js'),
-    // Component helpers
-    path.join(SCRIPTS_DIR, 'figma-components/utils/lookups.js'),
-    path.join(SCRIPTS_DIR, 'figma-components/utils/resolvers.js'),
-    path.join(SCRIPTS_DIR, 'figma-components/utils/frames.js'),
-    path.join(SCRIPTS_DIR, 'figma-components/utils/reflow.js'),
-    path.join(SCRIPTS_DIR, 'figma-components/utils/builders/standard.js'),
-    path.join(SCRIPTS_DIR, 'figma-components/utils/builders/toggle.js'),
+    // Font resolution + weight mapping, used by the text-styles step
+    path.join(SCRIPTS_DIR, 'figma-styles/_shared.js'),
   ];
 
   // Read and strip comments from each source
@@ -88,9 +79,8 @@ function buildSharedUtils() {
   throw new Error('Cannot resolve color value: "' + value + '"');
 }`;
 
-  // weightToStyleName is now included via resolvers.js (with FONT_WEIGHT_OVERRIDES).
-  // Alias with swapped arg order: text-styles calls weightToStyleName(familyName, weight),
-  // resolvers defines fontStyle(weight, familyName).
+  // text-styles calls weightToStyleName(familyName, weight); figma-styles/_shared.js
+  // defines fontStyle(weight, familyName). Alias with the arguments swapped.
   combined += `\n\nfunction weightToStyleName(familyName, weight) { return fontStyle(weight, familyName); }`;
 
   // Make the bundle re-runnable in a persistent console. The Figma plugin
@@ -101,11 +91,6 @@ function buildSharedUtils() {
   // lets a re-paste redefine cleanly. Function-internal declarations are
   // indented, so they're untouched and stay block-scoped.
   combined = combined.replace(/^(const|let)\b/gm, 'var');
-
-  // Deduplicate: buildLookup and bLookup are the same function.
-  // The component utils use bLookup, semantic/style/layout use buildLookup.
-  // Both are defined — no conflict since they have different names.
-  // Just ensure both exist.
 
   return `// =============================================================================
 // Shared Figma Plugin API Utilities
@@ -225,82 +210,6 @@ function buildAllSteps() {
     const pipelineMarker = template.indexOf('// --- Pipeline ---');
     if (pipelineMarker !== -1) template = template.slice(pipelineMarker);
     steps.push(slim('16_layout', `${jsonLine('CONFIG', layout)}\n${template}`));
-  }
-
-  // --- Templates + Core Page ---
-  // These use the component orchestrator's assembly logic for custom scripts
-  const compOrch = require('./figma-components/orchestrator');
-
-  // Templates: use the orchestrator but strip shared utils, keep custom builders
-  {
-    const scripts = compOrch.assembleScript('templates');
-    for (const s of scripts) {
-      let code = s.script;
-      code = code.replace(/^\(async \(\) => \{/, '').replace(/\}\)\(\)$/, '');
-      const utilsStart = code.indexOf('// --- INLINED UTILS ---');
-      const customStart = code.indexOf('// --- CUSTOM BUILDERS ---');
-      const pageStart = code.indexOf('// --- PAGE SCRIPT ---');
-      if (utilsStart !== -1 && pageStart !== -1) {
-        if (customStart !== -1) {
-          code = code.slice(0, utilsStart) + code.slice(customStart);
-        } else {
-          code = code.slice(0, utilsStart) + code.slice(pageStart);
-        }
-      }
-      steps.push(slim('17_templates', code.trim()));
-    }
-  }
-
-  // Core page
-  {
-    const scripts = compOrch.assembleScript('core-page');
-    for (const s of scripts) {
-      let code = s.script;
-      code = code.replace(/^\(async \(\) => \{/, '').replace(/\}\)\(\)$/, '');
-      const utilsStart = code.indexOf('// --- INLINED UTILS ---');
-      const buildStart = code.indexOf('// --- BUILD SCRIPT ---');
-      if (utilsStart !== -1 && buildStart !== -1) {
-        code = code.slice(0, utilsStart) + code.slice(buildStart);
-      }
-      steps.push(slim('18_core-page', code.trim()));
-    }
-  }
-
-  // --- Component Pages ---
-  const componentPages = [
-    { name: 'buttons', num: 19 },
-    { name: 'forms', num: null },
-    { name: 'layout-page', num: null },
-    { name: 'feedback', num: null },
-    { name: 'data-display', num: null },
-    { name: 'navigation', num: null },
-    { name: 'composite', num: null },
-  ];
-
-  let stepNum = 19;
-  for (const page of componentPages) {
-    const scripts = compOrch.assembleScript(page.name);
-    for (const s of scripts) {
-      let code = s.script;
-      // Remove IIFE wrapper
-      code = code.replace(/^\(async \(\) => \{/, '').replace(/\}\)\(\)$/, '');
-      // Remove shared utils but keep custom builders
-      const utilsStart = code.indexOf('// --- INLINED UTILS ---');
-      const customStart = code.indexOf('// --- CUSTOM BUILDERS ---');
-      const pageStart = code.indexOf('// --- PAGE SCRIPT ---');
-      if (utilsStart !== -1 && pageStart !== -1) {
-        if (customStart !== -1) {
-          // Has custom builders — strip from INLINED UTILS to CUSTOM BUILDERS, keep rest
-          code = code.slice(0, utilsStart) + code.slice(customStart);
-        } else {
-          // No custom builders — strip from INLINED UTILS to PAGE SCRIPT
-          code = code.slice(0, utilsStart) + code.slice(pageStart);
-        }
-      }
-      const scriptName = scripts.length === 1 ? page.name : s.name;
-      steps.push(slim(`${String(stepNum).padStart(2, '0')}_${scriptName}`, code.trim()));
-      stepNum++;
-    }
   }
 
   return steps;
