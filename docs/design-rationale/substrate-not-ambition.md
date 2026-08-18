@@ -8,7 +8,8 @@ The Awwwards-tier energy lives elsewhere. Anyone scaffolding a token-driven desi
 
 - A coherent color palette with role tokens (surface, on-surface, primary, outline, etc.)
 - A consistent type scale across display/title/body/label
-- 30–60 atom components — Button, Input, Select, Dialog, Card, etc. — built on the tokens
+- A CSS class layer built on those tokens — buttons, form controls, surfaces, tables, links — carrying corners, focus rings, hover and disabled states as named decisions
+- A small set of React components for what CSS cannot reach — dialogs, popovers, comboboxes
 - Sensible defaults for spacing, radii, motion, focus rings
 - Reasonable dark mode
 - Theme-swap discipline

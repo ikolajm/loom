@@ -1,33 +1,57 @@
 # Loom
 
-A token-driven design system generator. One config source produces two synchronized outputs — a **Figma file** (variables, styles, components) and a **React component catalog** (62 components on a shared token foundation) — so the design surface and the code surface never drift from each other.
+Loom generates a **design substrate** from one config file: a token set and a CSS
+class layer that carry a brand's corners, focus rings, hover feel, surfaces and
+states as named decisions instead of per-project choices.
 
-Loom started as a personal engine for spinning up consistent design systems across projects. It's open source for the model: a single source of truth feeding two codegen pipelines, with a catalog you copy components *from* rather than depend *on* (the shadcn approach — own the files, no upstream sync).
+The coherence is the product. Tokens name the values; the class layer names the
+combinations, which is the part a values-only system cannot carry and the reason
+everything built on Loom looks like one hand made it — a Next app, a Vite app, a
+Django template and a generated invoice included.
+
+Two things ride along. **Figma** takes the same substrate as variables, text
+styles and effect styles, so the design surface and the code surface read from
+one source. A small set of **React components** covers what CSS cannot express —
+focus traps, portals, keyboard navigation, positioning — copied into your project
+rather than installed from it (the shadcn model: own the files, no upstream sync).
+
+**Where it runs.** Anything with a modern CSS engine takes the layer directly and
+themes live. Engines without custom properties take a flattened build, one
+stylesheet per theme. Email and React Native take `tokens.json` — the same values
+as plain data — because no stylesheet survives Outlook's Word engine or a runtime
+with no CSS at all.
+
+Loom started as a personal engine for spinning up consistent projects. It is open
+source for the model.
 
 ---
 
 ## The idea in one diagram
 
 ```
-                    spec/config/         ← single source of truth
-                  (tokens + component schemas)
-                          │
-            ┌─────────────┴─────────────┐
-            ▼                           ▼
-   Figma pipeline                 Code pipeline
-   scripts/assemble-figma.js      scripts/code-templates/orchestrator.js
-            │                           │
-            ▼                           ▼
-   Figma variables /            catalog/  →  62 React components
-   styles / components          + tokens.css substrate
-   (paste into plugin console)  + per-atom manifests
-                                        │
-                                        ▼
-                              consuming project
-                              (pick a subset, own the copies)
+                        spec/answers.json
+                                │
+                                ▼
+                          spec/config/         ← single source of truth
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+   tokens.css              class layer             tokens.json
+   + Figma variables,      appearance, states,     plain values, no var()
+   text & effect styles    interaction feel        email, React Native
+        │                       │
+        └───────────┬───────────┘
+                    ▼
+            behavior components
+            React, only where CSS cannot reach
+            (focus traps, portals, keyboard nav, positioning)
+                    │
+                    ▼
+             consuming project
+             (copy what you need, own the copies)
 ```
 
-Change a value in `spec/config/` → regenerate → **both** the Figma file and the code catalog update. The two pipelines read the same JSON, so a brand color or a component spec is defined once.
+Change a value in `spec/answers.json` → regenerate → every output moves together, because they read the same JSON. Figma takes the token half as variables and styles; the class layer is CSS-only, since Figma has no notion of a class.
 
 ---
 
