@@ -61,7 +61,7 @@ interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
 const Table = forwardRef<HTMLTableElement, TableProps>(
   ({ size = '${defaultSize}', className, ...props }, ref) => (
     <TableSizeContext.Provider value={size}>
-      <table ref={ref} className={cn('w-full caption-bottom border-collapse text-sm', className)} data-size={size} {...props} />
+      <table ref={ref} className={cn('table', className)} data-size={size} {...props} />
     </TableSizeContext.Provider>
   )
 );
@@ -69,21 +69,21 @@ Table.displayName = 'Table';
 
 const TableHeader = forwardRef<HTMLTableSectionElement, React.ComponentPropsWithoutRef<'thead'>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('${headerFg}', className)} {...props} />
+    <thead ref={ref} className={cn(className)} {...props} />
   )
 );
 TableHeader.displayName = 'TableHeader';
 
 const TableBody = forwardRef<HTMLTableSectionElement, React.ComponentPropsWithoutRef<'tbody'>>(
   ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={cn('${rowFg} [&_tr]:transition-colors [&_tr:hover]:bg-surface-1 [&_tr:last-child]:border-0', className)} {...props} />
+    <tbody ref={ref} className={cn(className)} {...props} />
   )
 );
 TableBody.displayName = 'TableBody';
 
 const TableRow = forwardRef<HTMLTableRowElement, React.ComponentPropsWithoutRef<'tr'>>(
   ({ className, ...props }, ref) => (
-    <tr ref={ref} className={cn('border-b ${border}', className)} {...props} />
+    <tr ref={ref} className={cn(className)} {...props} />
   )
 );
 TableRow.displayName = 'TableRow';
@@ -91,7 +91,7 @@ TableRow.displayName = 'TableRow';
 const TableHead = forwardRef<HTMLTableCellElement, React.ComponentPropsWithoutRef<'th'> & { size?: TableSize }>(
   ({ size, className, ...props }, ref) => {
     const ctxSize = useContext(TableSizeContext);
-    return <th ref={ref} className={cn('text-left align-middle ${headerWeight}', tableHeadSize[size ?? ctxSize], className)} {...props} />;
+    return <th ref={ref} className={cn(tableHeadSize[size ?? ctxSize], className)} {...props} />;
   }
 );
 TableHead.displayName = 'TableHead';
@@ -99,7 +99,7 @@ TableHead.displayName = 'TableHead';
 const TableCell = forwardRef<HTMLTableCellElement, React.ComponentPropsWithoutRef<'td'> & { size?: TableSize }>(
   ({ size, className, ...props }, ref) => {
     const ctxSize = useContext(TableSizeContext);
-    return <td ref={ref} className={cn('align-middle ${cellWeight}', tableCellSize[size ?? ctxSize], className)} {...props} />;
+    return <td ref={ref} className={cn(tableCellSize[size ?? ctxSize], className)} {...props} />;
   }
 );
 TableCell.displayName = 'TableCell';

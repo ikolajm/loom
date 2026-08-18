@@ -58,8 +58,19 @@ One branch per group. Tick the boxes in the same commit that satisfies them.
       `--tone-border` and `--tone-text` rather than setting colors, so an invalid control
       keeps its treatment. 52 hardcoded utility strings across 18 generator files
       collapsed into one class — 37 focus rings, 15 disabled pairs
-- [ ] **The rest of the element list** — surfaces, tables, links. This list is closeable;
-      a component list is not
+- [x] **Surfaces, table, link** — `.surface-1/2/3`, `.elevate-0..3`, `.table`, `.link`.
+      Surface and elevation are separate axes because the catalog uses them separately:
+      `bg-surface-1` pairs with shadow-1, -2 and -3 in different atoms, so a class
+      bundling them would be wrong two times in three. The table is ruled, rows shade on
+      hover, and its colors, rule and text weights come from its own schema rather than
+      being hardcoded in the layer. `.link` reads `--tone-text` with a brand fallback, so
+      it composes with tones the way treatments do.
+
+      **Not yet adopted by the atoms.** The ~30 atoms still carry `bg-surface-1` and
+      `shadow-[var(--shadow-2)]` utilities; only `table` was migrated, because it had
+      real duplication to collapse (`[&_tr:hover]:bg-surface-1` and friends). Swapping the
+      rest belongs to the thinning pass below, not here — the classes exist now so the
+      portable consumer has them, since `shadow-[var(--shadow-2)]` is Tailwind-only syntax
 - [ ] **Print block** — `print-color-adjust: exact`, page-break behavior on surfaces and
       tables. Belongs in the layer, not re-derived per project
 - [ ] **Flattened per-theme emit** — one stylesheet per theme with color roles resolved,

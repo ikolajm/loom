@@ -31,6 +31,9 @@ const sizing = load('base/sizing.json');
 const typography = load('base/typography.json');
 const effects = load('base/effects.json');
 const standards = load('standards.json');
+// The table's colors, rules and text weights are declared in its own schema; the layer
+// reads them so the schema stays the source rather than becoming decoration.
+const layoutComponents = load('components/layout.json');
 
 // --- Helpers ---
 function resolveScaleRef(val) {
@@ -301,6 +304,105 @@ function buildSection10_TypographyPresets() {
  * and suppressing events would also kill the hover that shows a tooltip explaining why
  * the control is disabled.
  */
+/**
+ * Surfaces, table, link.
+ *
+ * A surface names a background plane; `.elevate-N` names how far off it something sits.
+ * They are separate because the catalog uses them separately. The shadow tokens already
+ * resolve to `none` under `shadowDepth: flat`, so `.elevate-N` references them
+ * unconditionally and the questionnaire answer decides whether anything renders — no
+ * branch here. Border is not bundled either: a surface class travels with a border in
+ * only a handful of atoms, so an outlined container stays a separate decision.
+ *
+ * The table is ruled — horizontal separators only, no outer frame — so a consumer can add
+ * a full border later without first removing one. Rows shade on hover. Descendant
+ * selectors here rather than a class per element: nobody should have to class every `tr`,
+ * and the alternative is the `[&_tr:hover]:bg-surface-1` arbitrary-variant soup this
+ * replaces.
+ *
+ * The link reads `--tone-text`, so it takes a tone when one is set and falls back to the
+ * brand color when none is. That is the same composition the treatments use.
+ */
+function buildSection17_SurfacesTableLink() {
+  // Surface level and elevation are independent axes, not one scale. The catalog proves
+  // it: bg-surface-1 pairs with shadow-1, shadow-2 and shadow-3 in different atoms, so a
+  // class bundling them would be wrong two times in three. Same orthogonality as tone and
+  // treatment — one class says which plane, the other says how far off it.
+  const surfaces = [1, 2, 3]
+    .map((n) => `.surface-${n} {\n  background-color: var(--surface-${n});\n}\n`)
+    .join('\n');
+  const elevations = [0, 1, 2, 3]
+    .map((n) => `.elevate-${n} {\n  box-shadow: var(--shadow-${n});\n}\n`)
+    .join('\n');
+
+  const t = (layoutComponents.table || {});
+  const v = (t.variants && t.variants.default) || {};
+  const role = (p, fallback) => {
+    const r = String(v[p] || '').split('/').pop();
+    return r ? `var(--${r})` : fallback;
+  };
+  const headerFg = role('header-fg', 'var(--on-surface-variant)');
+  const rowFg = role('row-fg', 'var(--on-surface)');
+  const ruleColor = role('border', 'var(--outline)');
+  const typo = t.typography || {};
+  const headerWeight = (typo.header && typo.header['font-weight']) || 500;
+  const cellWeight = (typo.cell && typo.cell['font-weight']) || 400;
+
+  return `/* === Surfaces === */
+${surfaces}
+/* === Elevation === */
+${elevations}
+/* === Table === */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  caption-side: bottom;
+}
+
+.table thead {
+  color: ${headerFg};
+}
+
+.table tbody {
+  color: ${rowFg};
+}
+
+.table tr {
+  border-bottom: var(--bw-1) solid ${ruleColor};
+  transition: background-color var(--transition-fast) var(--easing);
+}
+
+.table tbody tr:last-child {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background-color: var(--surface-1);
+}
+
+.table th {
+  text-align: left;
+  vertical-align: middle;
+  font-weight: ${headerWeight};
+}
+
+.table td {
+  vertical-align: middle;
+  font-weight: ${cellWeight};
+}
+
+/* === Link === */
+.link {
+  color: var(--tone-text, var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.link:hover {
+  text-decoration-thickness: var(--bw-2);
+}`;
+}
+
 function buildSection16_ControlStates() {
   return `/* === Control States === */
 .control {
@@ -696,6 +798,8 @@ function generateLayer() {
     buildSection15_Tones(),
     '',
     buildSection16_ControlStates(),
+    '',
+    buildSection17_SurfacesTableLink(),
   ].join('\n');
 
   return [
