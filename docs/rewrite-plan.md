@@ -97,7 +97,7 @@ These are the ones that *do* depend on the layer — a component cannot shed its
 appearance until there is a class to shed it to. Ordering them after the layer work is
 deliberate, not backlog inertia.
 
-- [~] **Component classes — first slice done: `card`, `badge`, `input`.** Shape only:
+- [x] **Component classes — first slice: `card`, `badge`, `input`.** Shape only:
       padding, radius, gap, height and the type role, on `[data-size]` modifiers. Color
       composition stays out — a badge takes `.tone-error-soft .treat-filled`, an input
       takes `.control`. Folding a default tone into `.badge` would re-couple the axes
@@ -181,6 +181,17 @@ deliberate, not backlog inertia.
       in 25 of the 26 components that set it. Tier blocks now hold only what ramps, and
       the one component that genuinely ramps its radius is visible instead of buried.
       Verified by byte-identical catalog output
+- [ ] **Name the internals of `sidebar`, `stepper` and `pagination`.** The fan-out skipped
+      them because each declares a sub-part vocabulary (`rail-width`, `item-height`,
+      `indicator-size`, `connector-width`, `label-text`, `item-size`) and naming a
+      component's internals is a design decision per component, not a loop. The mechanism
+      exists — `empty-state` proved it, and any `<part>-<prop>` key emits
+      `.<component>-<part>`. Nothing is broken meanwhile: all three still ship as atoms.
+
+      `form-field`, `separator` and `avatar-group` are **not** on this list. They declare
+      nothing, so a class for them would be an empty rule carrying a name. They stay
+      atoms, and that is finished rather than deferred.
+
 - [ ] **`node scripts/sync.js`** — fold `setup.sh` and `scripts/refresh-test.sh` into the
       Node pipeline they already shell out to. All the logic is in `resolve-picks.js` and
       the orchestrator; the shell is glue
