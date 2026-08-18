@@ -165,3 +165,28 @@ close to 1:1 with the catalog.
   framework-bound). That split is the first cut and is worth doing on its own
   merits, independent of the rest of the rewrite.
 
+- **2026-08-18** — Scoping how much variance the system should offer. The
+  **intake is already the compact form** — `answers.json` is fourteen keys, one
+  required, and the five look-and-feel answers are words rather than numbers
+  (`density`, `typeScale`, `edges`, `shadowDepth`, `controlHeight`), with
+  `styleDirection` seeded from named references. Reducing there would cut the
+  part that works. The variance sits in two places the questionnaire does not
+  surface.
+
+  **Two suppliers for one value.** Precedence runs `productType <
+  styleDirection < explicit`, with eleven product types and ten style directions
+  filling the same four fields — 110 archetype pairs, and the questionnaire
+  documents its own conflict (`dashboard` sets `typeScale: compact`, its own
+  suggested `clean` sets `standard`). Nothing can state what a project received
+  without running `npm run configs` and reading which layer won. **Decision:
+  collapse to one intent supplier.** This breaks `answers.json`, so it lands
+  before the emit split.
+
+  **Axes hidden behind props.** 48 entries declare sizes, 147 size variants
+  across the catalog, button alone 3 treatments × 7 colors × 3 sizes. As props
+  the cost is invisible; as emitted CSS it is 63 button classes before anything
+  else. Measured consumption across the two projects that install atoms: four
+  `size="sm"`, one `variant="filled"` (the default), no use of the color axis or
+  of `lg` — two consumers, both dashboards, so directional and not conclusive.
+  **Decision: cut the size axis to a default plus one opt-in.**
+
