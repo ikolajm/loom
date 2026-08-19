@@ -72,7 +72,7 @@ function generateBadge(name, config, meta) {
 
   return `import { forwardRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { Slot } from '@radix-ui/react-slot';
+import { Slot, Slottable } from '@radix-ui/react-slot';
 import { X } from 'lucide-react';
 import { cn } from './cn';
 
@@ -129,6 +129,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
 
     const closeButton = onRemove ? (
       <button
+        key="close"
         type="button"
         className={CLOSE_BUTTON_CLASSES}
         onClick={onRemove}
@@ -146,10 +147,18 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
           className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)} data-size={size}
           {...props}
         >
-          <>
-            {content}
-            {closeButton}
-          </>
+          {/* Spelled out rather than reusing the shared content, and an array rather than a
+              fragment. Slot locates the consumer's element through Slottable, and finds
+              it with React.Children.toArray — which flattens arrays but not fragments.
+              Wrapped in one, and with no Slottable to find at all, Slot cloned the
+              fragment and put className on it: React warns and drops it, so asChild
+              rendered the consumer's element carrying none of the badge's classes. */}
+          {[
+            leadingIcon && <span key="lead" className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>,
+            <Slottable key="label">{children}</Slottable>,
+            trailingIcon && !onRemove && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
+            closeButton,
+          ]}
         </Slot>
       );
     }

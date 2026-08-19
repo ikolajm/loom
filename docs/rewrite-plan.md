@@ -351,9 +351,31 @@ off as verified statically; both were wrong the moment a page was looked at. One
       `BASE_RULES`, a key that stops matching a class name, a sized class with no display
       and no reason, `.icon-slot` losing its display, and the sub-parts losing theirs
 
-- [ ] **Look at the fixed page.** Everything above is only verified statically — the
-      emitted rules were read, not watched. The preview canvas's control row was re-boxed
-      to suit `.input` being full width, and that has not been seen either
+- [x] **Look at the fixed page.** Walked the playground and the canvas. Icons, badges,
+      control chrome, the invalid state and the re-boxed control row all read correctly.
+      One defect left: the `asChild (anchor)` button rendered jarringly large.
+
+- [x] **`asChild` applied no classes at all.** Not a sizing bug — Radix `Slot` locates the
+      consumer's element through `Slottable` using `React.Children.toArray`, which flattens
+      arrays but **not** fragments. Wrapped in a `<>`, `Slot` saw one unrecognised child,
+      cloned the fragment itself and set `className` on it; React warns and drops it. So
+      the `<a>` rendered with no `display`, no size, and a raw 24-viewBox svg at intrinsic
+      size. Both templates pass an array now.
+
+      `badge` had the same bug and worse — it imported `Slot` without `Slottable` at all,
+      so `badge asChild` had never applied classes either. No story exercises it, which is
+      why it went unseen. This one predates the class layer: `0e4547a^` has the identical
+      fragment.
+
+      **Left alone deliberately: `asChild` + `iconOnly` together.** That mode wraps children
+      in `span.icon-slot`, which becomes Slot's only child, so the classes land on the span
+      and the consumer's element nests inside it. No story hits it, and the fix is not
+      mechanical — the span exists to read `--icon-size`, so removing it means deciding how
+      an icon is sized without one. A design call on component internals, parked visibly
+      rather than guessed at
+
+- [ ] **Re-look at the anchor button.** The `asChild` fix is statically verified only —
+      the generated output was read, not watched
 
 ## Consumers
 

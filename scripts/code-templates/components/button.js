@@ -87,11 +87,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             {loading ? <LoadingSpinner /> : children}
           </span>
         ) : (
-          <>
-            {effectiveLeadingIcon && <span className={'${ICON_SLOT_CLASS}'}>{effectiveLeadingIcon}</span>}
-            <Slottable>{children}</Slottable>
-            {trailingIcon && <span className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>}
-          </>
+          // An array, not a fragment. Slot finds Slottable with React.Children.toArray,
+          // which flattens arrays but not fragments — wrapped in one, Slot saw a single
+          // unrecognised child, cloned the fragment itself and put className on it. React
+          // warns and drops it, so asChild rendered the consumer's element with none of
+          // the button's classes: no display, no size, and a raw svg at intrinsic size.
+          [
+            effectiveLeadingIcon && <span key="lead" className={'${ICON_SLOT_CLASS}'}>{effectiveLeadingIcon}</span>,
+            <Slottable key="label">{children}</Slottable>,
+            trailingIcon && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
+          ]
         )}
       </Comp>
     );
