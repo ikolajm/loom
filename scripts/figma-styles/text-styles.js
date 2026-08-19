@@ -36,7 +36,7 @@ const typoPrimitives = buildLookup("primitives.typography");
 const tiers = ['sm', 'md', 'lg'];
 
 // Authoritative font-parity check + index (substitutes Inter for fonts this Figma lacks).
-await reportFontParity(CONFIG.families);
+await reportFontParity(CONFIG.families, CONFIG.textStyles);
 
 // Collect unique font+weight combinations for loading
 const fontsToLoad = new Set();

@@ -295,15 +295,44 @@ found by running rather than reading (a dead `data-size`, seventeen vanished cla
 failing playground sync, a starter pick naming a deleted atom), these are the last places
 the same failure can hide.
 
-- [ ] **Paste the Figma scripts once.** `npm run figma` emits 17 scripts and they all
-      parse, but nothing has run against the Plugin API since the component pipeline was
-      cut. Step 14 is the one to watch: it now pulls `resolveFamily`, `reportFontParity`
-      and `weightToStyleName` from `figma-styles/_shared.js`, a file that did not exist
-      this morning
-- [ ] **Open the preview canvas in a browser.** Its HTML has been cross-checked against
-      the emitted CSS, but no page has been looked at. Every visual claim rests on the
-      rules being present, not on them looking right — tone × treatment composing, the
-      ruled table, focus rings finally consuming `--focus-ring-*`, print forcing light
+- [x] **Paste the Figma scripts once.** All 17 run. Step 14 was indeed the one to watch,
+      though not for the reason predicted — the `_shared.js` move was fine, and it died on
+      `The font "Space Mono SemiBold" could not be loaded`.
+
+      **A family being available says nothing about the weight you want.** `ensureFontIndex`
+      kept only `f.fontName.family` from `listAvailableFontsAsync()` and discarded the
+      style, so `fontStyle()` had to guess a style name and let `loadFontAsync` throw when
+      the guess was wrong. `FONT_WEIGHT_OVERRIDES` was the workaround and it is a list of
+      the four families someone had already crashed on — its own comment said to add a
+      family after `loadFontAsync` "tells you about it by throwing". Space Mono ships
+      Regular and Bold only against a ramp asking 400/500/600/700, so 600 threw and 500
+      was next behind it. `reportFontParity` had reported `✓ Space Mono` three lines
+      earlier, because it checked the family and not the weights.
+
+      **The fix is parity, not a new policy.** Google Fonts answers
+      `Space+Mono:wght@400;500;600;700` with a 200 and silently serves 400 and 700 only,
+      so CSS font matching already resolves 600 → Bold and 500 → Regular on the page.
+      Figma was the only side that refused to build rather than falling back. `fontStyle()`
+      now snaps to the nearest weight the family ships — ties heavier, italics excluded —
+      and the override table stays, checked first, as the way to pin a choice deliberately
+      unlike the browser's. `reportFontParity` now reports the ramp's weights.
+
+      Verified in node against representative style sets rather than in the app: Space Mono
+      400/500/600/700 → Regular/Regular/Bold/Bold, Inter 600 → Semi Bold, Playfair 600 →
+      SemiBold. Nothing had to be cleaned up in the Figma file — the font-load loop runs
+      before the first `createTextStyle()`, so it threw having created nothing.
+
+      Consequence of the brand rather than of the bug: with Space Mono on both heading and
+      body, the four-weight ramp collapses to two. `display` and `title` both land on Bold
+      and differ only in size; `body`, `input`, `action` and `label` all land on Regular.
+      True on the page as well as in Figma
+- [x] **Open the preview canvas in a browser.** Done, and it paid for itself twice over —
+      the findings below are both things no amount of reading the CSS would have shown.
+      What held up: focus rings consume `--focus-ring-*` and render correctly, disabled
+      dims and blocks the cursor, the surface ladder is monotonic in both themes, tone ×
+      treatment composes, the ruled table is right. Elevation renders as nothing, which is
+      correct — `shadowDepth` is `flat` in this brand — but it does mean the canvas cannot
+      demonstrate `.elevate-*` at all until a brand with depth is loaded
 
 ## The box model
 
