@@ -200,6 +200,67 @@ function checkClassCoverage() {
 // idea of the set drifts, so it must not read that set from the emitter alone.
 const CELL_SIZED_NAMES = new Set(['table']);
 
+// --- variant-keys ---------------------------------------------------------------
+// Every key a variant declares is either consumed by the emitter or parked here by name.
+//
+// A declared key vanishing has now happened three times: `item-x-padding` split wrong and
+// the sidebar's item padding never emitted; `rail-width` was read as a part and nearly
+// styled an element that does not exist; and `border-bottom` / `border-right` /
+// `border-top` were dropped by a variant emitter that only ever read `border` — so the
+// app header lost its bottom rule and the sidebar its right one, replaced by `border: 0`,
+// which removes rather than omits. That last one was found by hand-porting a consumer off
+// the atom, months after it shipped.
+//
+// The parked list is the point. A key the emitter cannot yet express is fine; a key that
+// disappears without anyone noticing is not. Adding a new key to a schema fails here until
+// it is either handled or parked with the others.
+const CONSUMED_VARIANT_KEYS = new Set(['bg', 'fg', 'border', 'shadow',
+  'border-top', 'border-right', 'border-bottom', 'border-left']);
+
+const UNCONSUMED_VARIANT_KEYS = {
+  'hover-bg': 'hover is a state, and the layer has no state hook on a variant yet',
+  'active-bg': 'same as hover-bg',
+  'from': 'a gradient start; the layer emits no gradients',
+  'overlay': 'a scrim colour, which belongs to whatever renders the scrim',
+  'track-bg': 'progress/slider internals — the parts are not named yet',
+  'fill-bg': 'same as track-bg',
+  'thumb-bg': 'same as track-bg',
+  'indicator': 'tabs internals — not named yet',
+  'indicator-width': 'same as indicator',
+  'gap': 'declared on a variant, but gap ramps per size; the size block already emits it',
+};
+
+function checkVariantKeys() {
+  const configs = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite']
+    .map((g) => {
+      const f = path.join(ROOT, `spec/config/components/${g}.json`);
+      return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    });
+
+  const failures = [];
+  let seen = 0;
+  for (const src of configs) {
+    for (const [name, cfg] of Object.entries(src)) {
+      if (!cfg || typeof cfg !== 'object') continue;
+      for (const [vname, v] of Object.entries(cfg.variants || {})) {
+        if (vname.startsWith('$') || !v || typeof v !== 'object') continue;
+        for (const k of Object.keys(v)) {
+          if (k.startsWith('$')) continue;
+          seen++;
+          if (CONSUMED_VARIANT_KEYS.has(k)) continue;
+          if (k.endsWith('-fg') && k !== 'fg') continue;       // the sub-part colour path
+          if (UNCONSUMED_VARIANT_KEYS[k]) continue;            // parked, with a stated reason
+          failures.push(`${name}.${vname}.${k} — the variant emitter does not read this key, so it is silently dropped. Handle it, or park it in UNCONSUMED_VARIANT_KEYS with the reason`);
+        }
+      }
+    }
+  }
+  return {
+    failures,
+    note: `${seen} variant keys, ${Object.keys(UNCONSUMED_VARIANT_KEYS).length} parked as unconsumed`,
+  };
+}
+
 // --- phantom-parts ------------------------------------------------------------
 // A schema key that is itself a property must never be read as `<part>-<prop>`.
 //
@@ -636,6 +697,7 @@ function verify() {
     ['class-coverage', checkClassCoverage()],
     ['class-box-model', checkClassBoxModel()],
     ['phantom-parts', checkPhantomParts()],
+    ['variant-keys', checkVariantKeys()],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

@@ -474,9 +474,21 @@ off as verified statically; both were wrong the moment a page was looked at. One
       directly; then it read the wrong end of a descendant selector. Both times it was found
       by using the output, not by running the check
 
-- [ ] **Look at the trimmed gallery.** Five stories and a rebuilt shell, verified only by
-      typecheck and the checks — not watched. The shell's nav items are the first thing in
-      the repo to use `.sidebar-item` as a consumer would
+- [x] **Look at the trimmed gallery.** Reads correctly.
+
+- [x] **Directional borders, found by starting the hand-port.** `top-bar` declares
+      `border-bottom`, `sidebar` declares `border-right`, `bottom-nav` declares
+      `border-top` — and the variant emitter read only `border`, so all five were dropped
+      and replaced with `border: 0`, which removes rather than omits. The app header lost
+      its bottom rule and the sidebar its right one. Surfaced by comparing what
+      `top-bar.tsx` drew against what `.top-bar` draws, which is exactly the test the
+      hand-port exists to be. `npm run diff-emit` reported the fix as `+4 -0`.
+
+      Guarded by `variant-keys`: every key a variant declares is consumed or parked by name
+      in `UNCONSUMED_VARIANT_KEYS` with a reason. Ten are parked. This is the third time a
+      declared key vanished silently, after `item-x-padding` and `rail-width`
+
+
 
 ## Consumers
 

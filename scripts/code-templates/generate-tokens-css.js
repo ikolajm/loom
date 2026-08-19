@@ -623,7 +623,20 @@ function buildComponentClass(name, cfg, textFamily) {
     const border = CSS_COLOR(v.border);
     if (bg) d.push(`background-color: ${bg};`);
     if (fg) d.push(`color: ${fg};`);
+    // A variant may rule one edge rather than all four: `border-bottom` on top-bar,
+    // `border-right` on sidebar, `border-top` on bottom-nav. Only `border` was read, so
+    // all five declarations were dropped — and the fallback is `border: 0`, which does not
+    // merely omit the rule, it removes it. The app header lost its bottom rule and the
+    // sidebar its right one, in the same move that was supposed to preserve appearance.
+    // Found by hand-porting a consumer off the atom, which is what that exercise is for.
+    const sides = ['top', 'right', 'bottom', 'left']
+      .map((side) => [side, v[`border-${side}`]])
+      .filter(([, raw]) => raw !== undefined);
     d.push(border ? `border: var(--bw-1) solid ${border};` : 'border: 0;');
+    for (const [side, raw] of sides) {
+      const c = CSS_COLOR(raw);   // `"none"` resolves to nothing; the border: 0 above covers it
+      if (c) d.push(`border-${side}: var(--bw-1) solid ${c};`);
+    }
     if (v.shadow) d.push(`box-shadow: ${CSS_TOKEN(v.shadow, '')};`);  // tail is already 'shadow-N'
     out.push(`.${name}[data-variant="${vname}"] {`, ...d.map((l) => `  ${l}`), '}', '');
   }

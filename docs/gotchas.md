@@ -265,6 +265,26 @@ would entrench the class instead of deleting it. `phantom-parts` exists to name 
 cause, because a check that catches the right failure with the wrong diagnosis sends you
 to fix the wrong thing.
 
+### A variant can rule one edge, and only `border` was being read
+
+`top-bar` declares `"border-bottom": "color/outline/outline"`. `sidebar` declares
+`border-right`, `bottom-nav` declares `border-top`. The variant emitter read `v.border` and
+nothing else, so all five declarations were dropped — and the fallback is not silence, it
+is `border: 0`, which actively removes the rule. The app header lost its bottom border and
+the sidebar its right one, in the same rewrite whose premise was that appearance had moved
+somewhere safe.
+
+It was found by hand-porting a consumer off `top-bar.tsx`, comparing what the atom drew
+against what the class draws. Nothing else would have: the schema was right, the class was
+present, `class-coverage` passed, and a missing 1px rule is not what anyone notices on a
+gallery page.
+
+**A declared key disappearing is now a three-time pattern** — `item-x-padding` split wrong,
+`rail-width` was read as a part, `border-bottom` was never read. `variant-keys` in
+verify.js is the guard: every key a variant declares is either consumed or parked by name
+in `UNCONSUMED_VARIANT_KEYS` with a reason. Ten are parked today. A key the emitter cannot
+express yet is fine; a key that vanishes without anyone noticing is not.
+
 ### The deliverable is gitignored, so review it with `npm run diff-emit`
 
 `generated/` holds literal hex from whichever brand is active — the same reason
