@@ -564,29 +564,32 @@ function buildComponentClass(name, cfg, textFamily) {
   return out.join('\n');
 }
 
-// The type family is declared in the component registry, not the schema — one place,
-// already the source the atoms read. Looked up by the registry's `key` so a component
-// class and its atom cannot disagree about which role they are on.
+// The component classes are enumerated from the SCHEMAS, not from the component registry.
 //
-// The registry also decides which components get a class at all. Three appearance-only
-// entries declare no sizes and no variants — `avatar-group`, `form-field`, `separator`.
-// A class for them would be an empty rule carrying a name, which is worse than a utility.
-// Four more declare sub-part vocabularies this emitter deliberately does not invent
-// selectors for: `sidebar` (rail-width, item-height, item-x-padding, item-gap,
-// item-radius), `stepper` (indicator-size, connector-width, label-text), `empty-state`
-// (heading-text, description-text) and `pagination` (item-size). Naming a component's
-// internals is a design decision per component, not a loop, so they are skipped and
-// reported rather than half-emitted.
-// `table` is excluded for a different reason than the others: its size keys are real, but
-// they describe the *cells*. Emitting `.table[data-size="md"] { padding-inline: ... }`
-// would pad the table element and leave every cell untouched. Its tiers are handled with
-// the rest of the table rules, which already own `th` and `td`.
+// They were read from the registry until dropping the eighteen appearance-only atoms
+// emptied it — and every class those atoms had become vanished with their registry entry.
+// The emit went from 19 classes to 4 in one commit, silently: nothing failed, because the
+// classes had no consumer inside this repo yet. The whole point of the deletion was that
+// the appearance had moved somewhere safe, and the enumeration source made that false.
+//
+// The schema is the right source. It survives the component, which is exactly the property
+// wanted: `card` has no .tsx any more and must still emit `.card`.
+// `table` is excluded for a different reason than the rest: its size keys describe the
+// *cells*, so they emit as `.table[data-size] :is(th, td)` with the other table rules.
+// Padding on the table element would pad the frame and leave every cell untouched.
 const CELL_SIZED = new Set(['table']);
 
+// Layout a component class must carry because it is the shape, not a choice: the schema
+// describes spacing between children and says nothing about the axis they sit on.
+const BASE_LAYOUT = {
+  'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
+};
+
+// Sub-part vocabularies. A component declaring one describes its internals, and naming
+// those is a design decision per component rather than a loop — so it waits, visibly.
 const SUB_PART_KEYS = new Set([
   'rail-width', 'item-height', 'item-x-padding', 'item-gap', 'item-radius',
-  'indicator-size', 'connector-width', 'label-text',
-  'item-size',
+  'indicator-size', 'connector-width', 'label-text', 'item-size',
 ]);
 
 const APPEARANCE_ONLY = new Set([
@@ -596,14 +599,33 @@ const APPEARANCE_ONLY = new Set([
   'toolbar', 'top-bar', 'avatar-group',
 ]);
 
+const TEXT_FAMILY = {
+  badge: 'label', banner: 'body', 'bottom-nav': 'label', breadcrumbs: 'body',
+  button: 'action', card: 'body', 'empty-state': 'body', fab: 'action',
+  'helper-text': 'label', input: 'input', kbd: 'label', label: 'action',
+  'list-item': 'body', spinner: null, dot: null, skeleton: 'body', table: 'body',
+  textarea: 'input', toolbar: 'body', 'top-bar': 'title',
+};
+
+// Schema key -> class name, where they differ. `input` is styled by the shared
+// `text-field` foundation the form controls all reference.
+const SCHEMA_KEY = { input: 'text-field' };
+
 function componentPlan() {
-  const { loadAllConfigs, getComponentRegistry } = require('./shared');
-  const reg = getComponentRegistry(loadAllConfigs());
+  const sources = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite']
+    .map((g) => load(`components/${g}.json`));
+  const find = (key) => {
+    const k = SCHEMA_KEY[key] || key;
+    for (const src of sources) if (src[k]) return src[k];
+    return null;
+  };
+
   const emit = [];
   const skipped = { empty: [], subParts: [] };
-  for (const meta of Object.values(reg)) {
-    if (!meta || !meta.key || !APPEARANCE_ONLY.has(meta.key)) continue;
-    const cfg = (meta.source || {})[meta.baseKey || meta.key] || {};
+  for (const name of [...APPEARANCE_ONLY].sort()) {
+    const cfg = find(name);
+    if (!cfg) { skipped.empty.push(name); continue; }
+    if (CELL_SIZED.has(name)) continue;
     const sizes = cfg.sizes || {};
     const keys = new Set(Object.keys(sizes.$constant || {}));
     for (const t of Object.keys(sizes)) {
@@ -611,21 +633,13 @@ function componentPlan() {
       for (const k of Object.keys(sizes[t])) if (!k.startsWith('$')) keys.add(k);
     }
     const hasVariants = Object.keys(cfg.variants || {}).length > 0;
-    if (CELL_SIZED.has(meta.key)) continue;
-    if (!keys.size && !hasVariants) { skipped.empty.push(meta.key); continue; }
+    if (!keys.size && !hasVariants) { skipped.empty.push(name); continue; }
     const sub = [...keys].filter((k) => SUB_PART_KEYS.has(k));
-    if (sub.length) { skipped.subParts.push(`${meta.key} (${sub.join(', ')})`); continue; }
-    emit.push({ name: meta.key, cfg, textFamily: meta.textFamily });
+    if (sub.length) { skipped.subParts.push(`${name} (${sub.join(', ')})`); continue; }
+    emit.push({ name, cfg, textFamily: TEXT_FAMILY[name] });
   }
-  emit.sort((a, b) => a.name.localeCompare(b.name));
   return { emit, skipped };
 }
-
-// Layout a component class must carry because it is the shape, not a choice: the schema
-// describes spacing between children and says nothing about the axis they sit on.
-const BASE_LAYOUT = {
-  'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
-};
 
 function buildSectionComponentClasses() {
   const { emit, skipped } = componentPlan();
@@ -1299,4 +1313,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY };

@@ -13,9 +13,10 @@ const themeProvider = require('./theme-provider');
 const layout = require('./layout');
 const setupScript = require('./setup-script');
 
-// preview-page.tsx is a static asset (no config interpolation) — copied verbatim
-// into generated/scaffold/, then placed at src/app/preview/page.tsx by init.sh.
-const previewPage = fs.readFileSync(path.join(__dirname, 'preview-page.tsx'), 'utf8');
+// preview-page.tsx is generated: its ramps, roles, type list, spacing steps and radius
+// names come from the configs, so the page cannot list a token set the build does not
+// have. It used to be a static asset, which meant every token added to the system was a
+// token the verification page silently stopped covering.
 
 function generate(configs, outputDir) {
   const scaffoldDir = path.join(outputDir, 'scaffold');
@@ -25,7 +26,7 @@ function generate(configs, outputDir) {
     { name: 'globals.css', content: globalsCss.generate(configs) },
     { name: 'ThemeProvider.tsx', content: themeProvider.generate(configs) },
     { name: 'layout.tsx', content: layout.generate(configs) },
-    { name: 'preview-page.tsx', content: previewPage },
+    { name: 'preview-page.tsx', content: require('../generate-preview').generate() },
     { name: 'init.sh', content: setupScript.generate(), executable: true },
   ];
 

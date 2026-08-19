@@ -151,6 +151,55 @@ function checkInteractiveImpliesControl(atoms) {
   return { failures, note: `${checked} atoms using .interactive` };
 }
 
+// --- class-coverage -----------------------------------------------------------
+// Every appearance-only component must either emit a class or be on a stated skip list.
+//
+// This exists because seventeen of them silently stopped emitting. The emitter used to
+// enumerate from the component registry, so deleting the eighteen appearance-only atoms
+// deleted the classes those atoms had become — `.card`, `.input`, `.kbd` and fourteen
+// more — in the same commit whose premise was that the appearance had moved somewhere
+// safe. Every check passed, both builds passed, because nothing inside this repo used
+// the classes yet. The regression was found by a person looking at a page.
+//
+// A schema is not a class until something renders it, and nothing here renders them —
+// so the guard is that the emitter's own accounting adds up: emitted plus skipped equals
+// the full set, and each emitted name is actually present in the output it produced.
+function checkClassCoverage() {
+  const { componentPlan, APPEARANCE_ONLY, generateComponents } =
+    require('./generate-tokens-css');
+  const { emit, skipped } = componentPlan();
+  const css = generateComponents();
+
+  const failures = [];
+  const emitted = new Set(emit.map((c) => c.name));
+  const skippedNames = new Set([
+    ...skipped.empty,
+    ...skipped.subParts.map((x) => x.split(' ')[0]),
+  ]);
+
+  for (const name of APPEARANCE_ONLY) {
+    const accounted = emitted.has(name) || skippedNames.has(name) || CELL_SIZED_NAMES.has(name);
+    if (!accounted) {
+      failures.push(`${name} — neither emitted as a class nor listed as skipped; it has fallen out of the emitter silently`);
+    }
+  }
+
+  for (const name of emitted) {
+    if (!new RegExp(`^\\s*\\.${name}[ \\[]`, 'm').test(css)) {
+      failures.push(`${name} — planned for emission but no .${name} rule is in loom.components.css`);
+    }
+  }
+
+  return {
+    failures,
+    note: `${emitted.size} emitted, ${skippedNames.size + CELL_SIZED_NAMES.size} accounted for as skipped`,
+  };
+}
+
+// Kept here rather than imported: the point of the check is to notice when the emitter's
+// idea of the set drifts, so it must not read that set from the emitter alone.
+const CELL_SIZED_NAMES = new Set(['table']);
+
 function checkManifestDeps(atoms) {
   const failures = [];
   for (const name of atoms) {
@@ -466,6 +515,7 @@ function verify() {
     ['playground-parity', checkPlaygroundParity(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
+    ['class-coverage', checkClassCoverage()],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

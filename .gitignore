@@ -31,6 +31,7 @@ spec/config/local/
 catalog-playground/src/tokens.css
 catalog-playground/src/loom.css
 catalog-playground/src/loom.components.css
+catalog-playground/src/app/preview/
 catalog-playground/src/loom.tailwind.css
 
 # Logs / env / OS

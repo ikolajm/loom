@@ -1,4 +1,10 @@
 @import "tailwindcss";
+
+/* The preview route is generated at prebuild and git-ignored, and Tailwind v4's automatic
+   source detection skips anything .gitignore covers — so without this the page renders
+   with none of its utilities and no error anywhere. Declared explicitly rather than
+   un-ignoring the file, which would put generated output back under version control. */
+@source "./preview";
 @import "../tokens.css";
 @import "../loom.css";
 @import "../loom.components.css";

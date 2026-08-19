@@ -64,6 +64,16 @@ const GENERATORS = {
       return generate(registry, outputDir, configs);
     },
   },
+  'preview': {
+    description: 'preview-page.tsx (the substrate canvas, standalone — for a surface that mounts it directly)',
+    run: (outputDir) => {
+      const { generate } = require('./generate-preview');
+      const dir = path.join(outputDir, 'app', 'preview');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'page.tsx'), generate());
+      console.log('  app/preview/page.tsx');
+    },
+  },
   'scaffold': {
     description: 'scaffold/ (init.sh, globals.css, ThemeProvider, layout)',
     run: (outputDir) => {

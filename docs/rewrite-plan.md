@@ -198,9 +198,38 @@ deliberate, not backlog inertia.
 
 ## The surface
 
-- [ ] **One preview canvas** — ramps above roles, then type, spacing, radius, and a strip
-      proving treatment × tone, surface elevation, control states and small-size type.
-      Replaces the split between the scaffolded `/preview` page and the playground gallery
+- [x] **One preview canvas.** Generated token half (ramps, roles, type, spacing, radius —
+      read from the configs, so the page cannot list a token set the build does not have)
+      plus a hand-written class strip showing tone × treatment, surface × elevation,
+      control states, sizes and the table. The strip is the class layer's only
+      documentation, and it is markup you can copy into a template, not React-only prose.
+
+      It is **not** a merge of the foundation page and the gallery — that item was written
+      when the catalog was 62 appearance-heavy components and both showed appearance. The
+      gallery now renders 40 behavior components, a different job. What was missing was a
+      surface for the classes: before this branch, nothing anywhere rendered a single one.
+
+      The page is self-contained (local `data-theme`, no ThemeProvider), so the same
+      generated file mounts in the playground and in a scaffolded consumer.
+
+      **Two bugs only looking at it could have found.**
+
+      *Tailwind never scanned the page.* Its automatic source detection skips anything
+      `.gitignore` covers, and the generated route is git-ignored — so the page rendered
+      with none of its utilities and nothing failed. Fixed with an explicit `@source`
+      rather than by tracking generated output.
+
+      *Seventeen component classes had silently stopped being emitted.* The emitter
+      enumerated from the component registry, and dropping the eighteen appearance-only
+      atoms emptied it — so `.card`, `.input`, `.kbd` and fourteen more vanished with the
+      atoms they were supposed to replace. Four classes shipped where nineteen should
+      have. It now enumerates from the schemas, which survive the component: `card` has no
+      `.tsx` any more and must still emit `.card`.
+
+      A `class-coverage` check now guards it: every appearance-only component must either
+      emit a class or appear on a stated skip list, and every planned class must actually
+      be present in the output. Confirmed against both failure shapes — a component
+      dropping out of the emitter, and one planned but not written
 - [ ] **Consumer refresh loop** — `/preview` in a project renders whatever substrate was
       last copied in; refreshing means returning here and re-running the sync. If the
       preview surface is the point, that round trip is the friction to remove

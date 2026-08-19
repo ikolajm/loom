@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ../scripts/code-templates/orchestrator.js --only tokens --output src",
+    "predev": "node ../scripts/code-templates/orchestrator.js --only tokens --output src && node ../scripts/code-templates/orchestrator.js --only preview --output src",
     "dev": "next dev",
-    "prebuild": "node ../scripts/code-templates/orchestrator.js --only tokens --output src",
+    "prebuild": "node ../scripts/code-templates/orchestrator.js --only tokens --output src && node ../scripts/code-templates/orchestrator.js --only preview --output src",
     "build": "next build",
     "start": "next start"
   },
