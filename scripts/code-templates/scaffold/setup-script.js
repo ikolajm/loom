@@ -90,19 +90,43 @@ fi
 # Everything below this block is the catalog tier: it writes a stylesheet, a layout, a
 # provider and a route, and installs four packages. A consumer who wants Loom's design
 # decisions as values and owns their own components should get none of that.
+# --- The refresh loop, available to either tier -------------------------------
+# A shell function rather than a step, because it used to sit below the tokens tier's
+# exit and only the catalog tier ever ran it. That is backwards: the tokens tier is
+# for a consumer who owns their own components and takes only the substrate, and that is
+# the consumer whose copy goes stale most quietly — once the stylesheets are copied,
+# nothing in their project references Loom at all.
+add_loom_sync() {
+  LOOM_REL="$(node -e "console.log(require('path').relative('$FRONTEND_DIR', '$SCRIPT_DIR/../..'))")"
+  node - "$FRONTEND_DIR/package.json" "$LOOM_REL" <<'SCRIPTJS'
+  const fs = require('fs');
+  const [, , pkgPath, loomRel] = process.argv;
+  if (!fs.existsSync(pkgPath)) { console.log('  no package.json — skipped'); process.exit(0); }
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.scripts = pkg.scripts || {};
+  if (pkg.scripts['loom:sync']) { console.log('  loom:sync already present — left as-is'); process.exit(0); }
+  pkg.scripts['loom:sync'] = 'node ' + loomRel + '/scripts/sync.js .';
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
+  console.log('  added "loom:sync": "node ' + loomRel + '/scripts/sync.js ."');
+SCRIPTJS
+}
+
 if [ "$TIER" = "tokens" ]; then
-  echo "[1/2] Copying stylesheets..."
+  echo "[1/3] Copying stylesheets..."
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
   cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
   cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
   cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
-  echo "[2/2] Copying tokens.json..."
+  echo "[2/3] Copying tokens.json..."
   if [ -f "$GEN_DIR/tokens.json" ]; then
     cp "$GEN_DIR/tokens.json" "$SRC_DIR/tokens.json"
   else
     echo "  tokens.json not found in $GEN_DIR — skipped (run the orchestrator to emit it)"
   fi
+
+  echo "[3/3] Adding the loom:sync script..."
+  add_loom_sync
 
   echo ""
   echo "=== Tokens ready ==="
@@ -118,6 +142,8 @@ if [ "$TIER" = "tokens" ]; then
   echo ""
   echo "tokens.json is the same data with no CSS runtime — for a native or non-web consumer."
   echo "No atoms were installed. To take them too, re-run without --tokens."
+  echo ""
+  echo "Refresh whenever the brand changes in the Loom repo:  npm run loom:sync"
   exit 0
 fi
 
@@ -205,18 +231,7 @@ fi
 # that cannot start without a sibling repo present is a worse failure than a stale
 # stylesheet, and it is discovered by whoever clones this next rather than by you.
 echo "[8/8] Adding the loom:sync script..."
-LOOM_REL="$(node -e "console.log(require('path').relative('$FRONTEND_DIR', '$SCRIPT_DIR/../..'))")"
-node - "$FRONTEND_DIR/package.json" "$LOOM_REL" <<'SCRIPTJS'
-const fs = require('fs');
-const [, , pkgPath, loomRel] = process.argv;
-if (!fs.existsSync(pkgPath)) { console.log('  no package.json — skipped'); process.exit(0); }
-const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-pkg.scripts = pkg.scripts || {};
-if (pkg.scripts['loom:sync']) { console.log('  loom:sync already present — left as-is'); process.exit(0); }
-pkg.scripts['loom:sync'] = 'node ' + loomRel + '/scripts/sync.js .';
-fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
-console.log('  added "loom:sync": "node ' + loomRel + '/scripts/sync.js ."');
-SCRIPTJS
+add_loom_sync
 
 echo ""
 echo "=== App shell ready ==="

@@ -496,11 +496,50 @@ off as verified statically; both were wrong the moment a page was looked at. One
       stylesheets, corrected imports and pruned picks, and both build. (my-loom-app was a
       create-next-app scratch project from June and was deleted rather than wired.) The
       change is in their working trees; it is theirs to commit
-- [ ] **Hand-port jmi-finance and jmi-fitness** off their pre-layer atoms — `table.tsx`,
-      `empty-state.tsx`, `top-bar.tsx`, four call-site files each. `badge.tsx` is current
-      and stays. Nothing auto-syncs by design, so this is manual — and it is the real test
-      of whether the layer covers what those apps actually needed. It also clears a live
-      regression: those stale copies use `.interactive` without `.control`, so a disabled
-      control in them renders at full opacity with a normal cursor
+- [x] **Hand-port jmi-finance and jmi-fitness.** Both off `table.tsx`, `empty-state.tsx`
+      and `top-bar.tsx`; three call-site files each, both build and lint clean. `badge.tsx`
+      stays and was resynced — it was 19 lines stale, which was the `asChild` fix.
+
+      The class coverage was 1:1. `.table` already carried everything the atom did, so the
+      port is plain `<table className="table" data-size="sm">` with real `thead`/`tr`/`th`
+      elements; `.empty-state` plus `.empty-state-heading` and `-description` replaced the
+      prop API; `<TopBar>` became `<header className="top-bar">`. No class was found
+      missing — which, given the exercise exists to find gaps, is the result worth stating.
+
+      **It did find one, before a single line was ported:** `top-bar` declares
+      `border-bottom` in its schema and the class emitted `border: 0`. Fixed in the
+      directional-border item above.
+
+      **One deliberate visual change to look at.** `.table tr` rules with `--outline`
+      because the schema says `"border": "color/outline/outline"`; `table.tsx` drew
+      `border-outline-subtle`. In this brand's dark theme that is `#a09692` against
+      `#524a47` — the row rules get considerably lighter. The class follows the schema and
+      the atom was the one that deviated, so the question is which is right, not whether
+      the port is faithful
+
+
+- [x] **The tokens tier had no refresh loop.** `init.sh` writes `loom:sync` into the
+      project's `package.json` at step 8 — and the tokens tier exits at step 2. So the only
+      tier that ever got the pull side was the catalog tier, which also requires `src/app/`
+      and therefore Next.js.
+
+      That is backwards. The tokens tier is for a consumer who owns their own components
+      and takes only the substrate — the consumer whose copy goes stale most quietly,
+      because once the stylesheets are copied nothing in their project references Loom at
+      all. It is also the tier that fits every consumer there now: jmi-finance and
+      jmi-fitness are Vite apps holding `badge` and `cn`, so the catalog tier was never
+      available to them, and neither has a `loom:sync` script. Resyncing them meant running
+      the sync from this repo, which is exactly the round trip the refresh-loop item was
+      written to remove.
+
+      Now a shell function called by both tiers. Verified by running `--tokens` against a
+      throwaway project: four stylesheets, `tokens.json`, and the script.
+
+- [ ] **Give jmi-finance and jmi-fitness the refresh loop.** Neither has `loom:sync`.
+      `./scaffold/init.sh <dir> --tokens` is idempotent and adds it — it also drops
+      `tokens.json` in, which those two do not need today but an invoice or email template
+      generator would read. Held until the hand-port lands in their history, so the two
+      changes stay separable
+
 - [ ] **Scaffold into a handful of ported projects** — the broader test of the substrate
       against apps that did not grow up with it
