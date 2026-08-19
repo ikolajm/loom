@@ -111,10 +111,12 @@ const CLASS_STRIP = `
           Focus, validity and disabled come from one class. Validity keys off
           <code> aria-invalid</code>, so styling cannot drift from what a screen reader reads.
         </p>
+        {/* Each field is boxed by its wrapper, not by itself: .input is width:100%, the
+            way the atom it replaced was, so a bare row of them would stack. */}
         <div className="flex flex-wrap items-end gap-3">
-          <input className="input control" data-size="md" placeholder="focus me" />
-          <input className="input control" data-size="md" aria-invalid defaultValue="invalid" />
-          <input className="input control" data-size="md" disabled defaultValue="disabled" />
+          <div className="w-56"><input className="input control" data-size="md" placeholder="focus me" /></div>
+          <div className="w-56"><input className="input control" data-size="md" aria-invalid defaultValue="invalid" /></div>
+          <div className="w-56"><input className="input control" data-size="md" disabled defaultValue="disabled" /></div>
         </div>
       </Section>
 

@@ -519,7 +519,7 @@ function buildComponentClass(name, cfg, textFamily) {
   const shared = perTier.length
     ? perTier[0].filter((line) => perTier.every((d) => d.includes(line)))
     : [];
-  const base = [...(BASE_LAYOUT[name] || []), ...decls(constant), ...shared];
+  const base = [...(BASE_RULES[name] || []), ...decls(constant), ...shared];
   if (base.length) out.push(`.${name} {`, ...base.map((l) => `  ${l}`), '}', '');
 
   tiers.forEach((t, i) => {
@@ -557,7 +557,8 @@ function buildComponentClass(name, cfg, textFamily) {
   const hasIconPart = Object.keys(cfg.variants || {}).some((v) =>
     Object.keys(cfg.variants[v] || {}).some((k) => k === 'icon-fg'));
   if (hasIconPart) {
-    out.push(`.${name}-icon {`, '  width: var(--icon-size);', '  height: var(--icon-size);', '  flex-shrink: 0;', '}', '');
+    out.push(`.${name}-icon {`, '  display: inline-flex;', '  align-items: center;', '  justify-content: center;',
+             '  width: var(--icon-size);', '  height: var(--icon-size);', '  flex-shrink: 0;', '}', '');
   }
   for (const [part, propKeys] of Object.entries(parts)) {
     const sel = `.${name}-${part}`;
@@ -624,8 +625,69 @@ const CELL_SIZED = new Set(['table']);
 
 // Layout a component class must carry because it is the shape, not a choice: the schema
 // describes spacing between children and says nothing about the axis they sit on.
-const BASE_LAYOUT = {
+/**
+ * Declarations the schema cannot express, keyed by class name.
+ *
+ * The emitter only ever knew about the sizing schema. Everything an atom stated in its
+ * cva base string — box model, the chrome of a form control, the dot's pill — was
+ * invisible to it, so the class layer inherited a component's ladder and dropped the box
+ * it ramped. `.button` emitted `gap` while computing `display: block`; `.icon-slot` set
+ * width and height on an inline span, which ignores both; `.input` emitted padding and
+ * height with no border, background or text colour, so a text field rendered as bare text
+ * on the page. Nothing failed: every class was present, which is all `class-coverage`
+ * could see.
+ *
+ * Every line below is recovered from the atom that the class replaced, read out of
+ * `git show 0e4547a^:catalog/<name>.tsx` — the commit before the appearance-only atoms
+ * were dropped. Recovered rather than redesigned on purpose: a faithful restore cannot
+ * break something that rendered correctly before, and a judgement call here could not be
+ * checked in a browser.
+ *
+ * `class-box-model` in verify.js asserts every line reaches the output.
+ */
+const BASE_RULES = {
+  badge: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  banner: ['display: flex;', 'align-items: center;'],
+  'bottom-nav': ['display: flex;', 'align-items: center;', 'justify-content: space-around;', 'width: 100%;'],
+  breadcrumbs: ['display: flex;', 'align-items: center;'],
+  button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  card: ['display: flex;', 'flex-direction: column;'],
+  // `rounded-pill` sat in the cva base, not in the schema, so the dot emitted as a square.
+  dot: ['display: inline-block;', 'flex-shrink: 0;', 'border-radius: var(--radius-pill);'],
   'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
+  fab: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
+  // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
+  // the error role and the field turns red without this rule knowing about validity.
+  // Before, that re-point had no reader on an input — only `.treat-outline` consumes it,
+  // and a text field carries no treatment — so an invalid input was pixel-identical to a
+  // valid one. `--tone-text` is deliberately not read: the atom reddened the border only.
+  input: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'width: 100%;',
+          'background-color: var(--surface);', 'color: var(--on-surface);',
+          'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
+  kbd: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  label: ['display: flex;', 'align-items: center;', 'color: var(--on-surface);'],
+  'list-item': ['display: flex;', 'align-items: center;'],
+  pagination: ['display: flex;', 'align-items: center;', 'justify-content: center;'],
+  sidebar: ['display: flex;', 'flex-direction: column;'],
+  // `animate-pulse` was a Tailwind built-in; a consumer without Tailwind has no such
+  // utility, so the layer has to carry the animation for the class to mean anything.
+  skeleton: ['width: 100%;', 'border-radius: var(--radius-component);',
+             'animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;'],
+  spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  stepper: ['display: flex;', 'align-items: center;', 'width: 100%;'],
+  textarea: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'width: 100%;',
+             'background-color: var(--surface);', 'color: var(--on-surface);',
+             'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
+  toolbar: ['display: flex;', 'align-items: center;'],
+  'top-bar': ['display: flex;', 'align-items: center;'],
+};
+
+// Emitted classes that need no `display`, and why. Anything else missing one is a bug —
+// see `class-box-model`.
+const NO_BOX = {
+  skeleton: 'a plain block; the atom declared no display either',
+  table: 'the element is display: table already',
 };
 
 // Sub-part vocabularies. A component declaring one describes its internals, and naming
@@ -699,7 +761,15 @@ function buildSectionComponentClasses() {
   ];
   // Every component that ramps an icon sets --icon-size; this is the one rule that reads
   // it, so the ladder lives in the CSS alone rather than also in a JS lookup per atom.
+  // `display` is load-bearing, not tidiness: a span is inline, and width and height do
+  // not apply to an inline box. Without it the slot ignored --icon-size entirely and the
+  // svg fell back to its intrinsic size — a 16px icon rendering at 55px and overflowing
+  // the button. It worked inside the atoms only because their flex parent blockified it,
+  // and the parents lost their `display` in the same move.
   parts.push(`.icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--icon-size);
   height: var(--icon-size);
   flex-shrink: 0;
@@ -1060,6 +1130,13 @@ function buildSection14_Animations() {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Consumed by .skeleton. The other keyframes here are named for atoms to reach for;
+   this one the layer uses itself, because a skeleton that does not pulse is a grey bar. */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }`;
 }
 
@@ -1356,4 +1433,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX };

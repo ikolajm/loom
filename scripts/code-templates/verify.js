@@ -200,6 +200,77 @@ function checkClassCoverage() {
 // idea of the set drifts, so it must not read that set from the emitter alone.
 const CELL_SIZED_NAMES = new Set(['table']);
 
+// --- class-box-model ----------------------------------------------------------
+// `class-coverage` asks whether a class exists. This asks whether it declares a box.
+//
+// Both questions had to be asked separately, because every class existed and seventeen
+// of them still rendered wrong. The emitter read the sizing schema and nothing else, so
+// a component's ladder survived the move to a class and the cva base string it ramped
+// did not: `.button` emitted `gap` while computing `display: block`, `.icon-slot` sized
+// an inline span, `.input` emitted padding and height with no border or background.
+// A 16px icon rendered at 55px and a text field rendered as bare text, with every check
+// green — the failures were found by looking at a page, which is the thing this check
+// exists to stop being the only way.
+//
+// Two clauses. The first pins the recovered declarations: BASE_RULES is the record of
+// what each atom stated, so every line of it must reach the output. The second catches
+// the next component to arrive without one — an emitted class either declares a
+// `display` or names why it does not.
+function checkClassBoxModel() {
+  const { componentPlan, generateComponents, BASE_RULES, NO_BOX } =
+    require('./generate-tokens-css');
+  const { emit } = componentPlan();
+  const css = generateComponents();
+
+  const baseRule = (name) => {
+    const m = css.match(new RegExp(`^\\s*\\.${name} \\{([^}]*)\\}`, 'm'));
+    return m ? m[1] : null;
+  };
+
+  const failures = [];
+  let pinned = 0;
+
+  for (const [name, decls] of Object.entries(BASE_RULES)) {
+    const body = baseRule(name);
+    if (body === null) {
+      failures.push(`${name} — BASE_RULES declares ${decls.length} lines for it, but there is no .${name} base rule in the output`);
+      continue;
+    }
+    for (const d of decls) {
+      if (body.includes(d)) pinned++;
+      else failures.push(`${name} — BASE_RULES line "${d}" never reached .${name}; it was recovered from the atom this class replaced, so dropping it is a regression`);
+    }
+  }
+
+  // The invariant, stated as the failure rather than as a list of names: width, height
+  // and gap do nothing on an inline box. So any class that sets one of them, anywhere in
+  // its ladder, has to declare a display somewhere in that same ladder.
+  //
+  // Written against the emitted CSS rather than against `emit`, because the two worst
+  // instances were not component classes at all — `.icon-slot` and the `<name>-icon`
+  // sub-parts are written by the emitter directly and never appear in the plan. A check
+  // that enumerated the plan passed while a 16px icon rendered at 55px.
+  const rules = [...css.matchAll(/^\s*\.([a-z0-9-]+)((?:\[[^\]]*\])*[^{]*)\{([^}]*)\}/gm)];
+  const byClass = new Map();
+  for (const [, name, , body] of rules) {
+    const e = byClass.get(name) || { sized: false, display: false };
+    if (/(^|\s)(width|height|gap):/.test(body)) e.sized = true;
+    if (/(^|\s)display:/.test(body)) e.display = true;
+    byClass.set(name, e);
+  }
+  let boxed = 0;
+  for (const [name, e] of byClass) {
+    if (!e.sized || NO_BOX[name]) continue;
+    if (e.display) { boxed++; continue; }
+    failures.push(`.${name} sets width, height or gap but declares no display — all three are inert on an inline box. Give it one in BASE_RULES, or state in NO_BOX why it needs none`);
+  }
+
+  return {
+    failures,
+    note: `${pinned} recovered declarations pinned, ${boxed} sized classes carry a display, ${Object.keys(NO_BOX).length} excused`,
+  };
+}
+
 function checkManifestDeps(atoms) {
   const failures = [];
   for (const name of atoms) {
@@ -516,6 +587,7 @@ function verify() {
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['class-coverage', checkClassCoverage()],
+    ['class-box-model', checkClassBoxModel()],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

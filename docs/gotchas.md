@@ -171,3 +171,55 @@ npm run configs                                        # your local brand
 ```
 
 **Verify on the emitted artifact, not the config.** The config being right proves nothing about what rendered — check `tokens.css` (or the generated atom) for the value you expect. `sourceOf()` in `config-paths.js` reports which root a file actually came from.
+
+---
+
+## The class layer — a schema describes a ladder, not a box
+
+When the appearance-only atoms became classes, the emitter read the sizing schema and
+nothing else. So each component's ladder survived the move and the cva base string it
+ramped did not — and a cva base is where the box model lived.
+
+Three declarations were doing the work in `button.tsx`:
+
+```
+- 'inline-flex items-center justify-center interactive control'
++ 'button interactive control'
+```
+
+`.button` was emitted with `gap: var(--space-2)` and computed `display: block`. Gap is
+inert on a block container, so the gap did nothing and the label wrapped underneath the
+icon. `.input` was emitted with padding, height and a radius but no border, background or
+text colour — Tailwind's preflight sets `border: 0 solid` and `background-color:
+transparent` on form controls, so a text field rendered as bare text on the page.
+
+The worst of it was one missing line on the icon slot:
+
+```css
+.icon-slot {
+  width: var(--icon-size);   /* ignored */
+  height: var(--icon-size);  /* ignored */
+}
+```
+
+A `<span>` is inline, and **width and height do not apply to an inline box**. The slot
+had worked inside the atoms only because their flex parent blockified it — and the
+parents lost their `display` in the same commit. So `--icon-size` resolved correctly to
+16px, went unread, and the svg fell back to its intrinsic size: a 16px icon rendering at
+55px and overflowing every button and badge that had one.
+
+**None of it failed anything.** Every class existed and was emitted, which is all
+`class-coverage` could see. A class being present and a class being *usable* are two
+questions, and only the first was being asked.
+
+**The fix** — `BASE_RULES` in `generate-tokens-css.js` holds the declarations no schema
+can express, each line recovered from the atom the class replaced rather than redesigned,
+so a faithful restore cannot break what already rendered. `class-box-model` in `verify.js`
+asks the second question, stated as the failure rather than as a list of names: any class
+that sets `width`, `height` or `gap` anywhere in its ladder must declare a `display`
+somewhere in that same ladder, or name itself in `NO_BOX` with a reason.
+
+Write that check against the emitted CSS, not against the emitter's plan. The two worst
+instances — `.icon-slot` and the `<name>-icon` sub-parts — are written by the emitter
+directly and never appear in the plan at all. A first version of the check enumerated the
+plan, passed, and left the 55px icon exactly where it was.

@@ -305,6 +305,56 @@ the same failure can hide.
       rules being present, not on them looking right — tone × treatment composing, the
       ruled table, focus rings finally consuming `--focus-ring-*`, print forcing light
 
+## The box model
+
+The class layer had never rendered a button with an icon or a text field. Both were signed
+off as verified statically; both were wrong the moment a page was looked at. One root cause.
+
+- [x] **Give the classes a box.** The emitter read the sizing schema and nothing else, so
+      each component's ladder survived the move to a class and the cva base string it
+      ramped did not. `.button` emitted `gap` while computing `display: block`. `.input`
+      emitted padding, height and radius with no border, background or text colour —
+      Tailwind's preflight zeroes both on form controls — so a text field rendered as bare
+      text on the page. `.icon-slot` set `width` and `height` on an inline span, which
+      ignores both, so a 16px icon rendered at 55px and overflowed every button and badge
+      carrying one. `.dot` lost its pill, `.skeleton` its width and its pulse,
+      `helper-text` and `label` their text colour.
+
+      `BASE_RULES` is the fix and the record: every line is recovered from the atom the
+      class replaced, read out of `0e4547a^`, rather than redesigned. Faithful restore was
+      the deliberate choice over a better-looking one — it cannot break something that
+      rendered correctly before, and a judgement call here could not be checked in a
+      browser. Two are worth a second look because they were odd in the atom and are odd
+      now: `.input` and `.textarea` carry `justify-content: center`, inert on a real form
+      control but wrong if someone hand-marks-up a `div.input`, and both carry
+      `width: 100%`, which is what the atom did and which makes a bare row of them stack
+
+- [x] **Make an invalid control look invalid.** `.control[aria-invalid="true"]` re-pointed
+      `--tone-border` and `--tone-text` to the error role and nothing read them: only
+      `.treat-outline` consumes those, and a text field carries no treatment. An invalid
+      input was pixel-identical to a valid one. `.input`'s border now reads
+      `var(--tone-border, var(--outline))`, so the re-point lands without the rule knowing
+      anything about validity. `--tone-text` is deliberately still unread on an input — the
+      atom reddened the border only, and red body text in a field is not the convention
+
+- [x] **`class-box-model`.** `class-coverage` asks whether a class exists. Every class did
+      exist, and seventeen still rendered wrong. The new check asks whether it declares a
+      box, stated as the failure rather than as a list of names: any class setting `width`,
+      `height` or `gap` anywhere in its ladder must declare a `display` somewhere in that
+      same ladder, or name itself in `NO_BOX` with a reason. It also pins every recovered
+      `BASE_RULES` line to the output.
+
+      **The first version of it passed while the bug was still there.** It enumerated the
+      emitter's plan, and the two worst instances — `.icon-slot` and the `<name>-icon`
+      sub-parts — are written by the emitter directly and appear in no plan. Rewritten
+      against the emitted CSS. Confirmed against five failure shapes: the emitter dropping
+      `BASE_RULES`, a key that stops matching a class name, a sized class with no display
+      and no reason, `.icon-slot` losing its display, and the sub-parts losing theirs
+
+- [ ] **Look at the fixed page.** Everything above is only verified statically — the
+      emitted rules were read, not watched. The preview canvas's control row was re-boxed
+      to suit `.input` being full width, and that has not been seen either
+
 ## Consumers
 
 - [x] **Wire the synced projects** — jmi-finance and jmi-fitness now carry the four
