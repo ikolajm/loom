@@ -287,12 +287,35 @@ deliberate, not backlog inertia.
       an unknown atom. Nothing caught it — the catalog checks verify what the catalog
       contains, and that list is a string inside a generator
 
+## Not yet seen run
+
+Everything below was verified statically — emitted, parsed, cross-checked against the
+generated CSS. None of it has been watched working. Given that today's regressions were
+found by running rather than reading (a dead `data-size`, seventeen vanished classes, a
+failing playground sync, a starter pick naming a deleted atom), these are the last places
+the same failure can hide.
+
+- [ ] **Paste the Figma scripts once.** `npm run figma` emits 17 scripts and they all
+      parse, but nothing has run against the Plugin API since the component pipeline was
+      cut. Step 14 is the one to watch: it now pulls `resolveFamily`, `reportFontParity`
+      and `weightToStyleName` from `figma-styles/_shared.js`, a file that did not exist
+      this morning
+- [ ] **Open the preview canvas in a browser.** Its HTML has been cross-checked against
+      the emitted CSS, but no page has been looked at. Every visual claim rests on the
+      rules being present, not on them looking right — tone × treatment composing, the
+      ruled table, focus rings finally consuming `--focus-ring-*`, print forcing light
+
 ## Consumers
 
-- [ ] **Wire the three synced projects** — jmi-finance, jmi-fitness and my-loom-app hold a
-      pre-split `globals.css` importing `tokens.css` alone. Two `@import` lines each. No
-      guard was left in `setup.sh` for this: the failure is an unstyled page on first
-      load, which is loud enough for a population of three
-- [ ] **Hand-port jmi-finance and jmi-fitness** off their pre-layer atoms. Nothing
-      auto-syncs by design, so this is manual — and it is the real test of whether the
-      layer covers what those apps actually needed
+- [x] **Wire the synced projects** — jmi-finance and jmi-fitness now carry the four
+      stylesheets, corrected imports and pruned picks, and both build. (my-loom-app was a
+      create-next-app scratch project from June and was deleted rather than wired.) The
+      change is in their working trees; it is theirs to commit
+- [ ] **Hand-port jmi-finance and jmi-fitness** off their pre-layer atoms — `table.tsx`,
+      `empty-state.tsx`, `top-bar.tsx`, four call-site files each. `badge.tsx` is current
+      and stays. Nothing auto-syncs by design, so this is manual — and it is the real test
+      of whether the layer covers what those apps actually needed. It also clears a live
+      regression: those stale copies use `.interactive` without `.control`, so a disabled
+      control in them renders at full opacity with a normal cursor
+- [ ] **Scaffold into a handful of ported projects** — the broader test of the substrate
+      against apps that did not grow up with it
