@@ -227,3 +227,40 @@ Write that check against the emitted CSS, not against the emitter's plan. The tw
 instances — `.icon-slot` and the `<name>-icon` sub-parts — are written by the emitter
 directly and never appear in the plan at all. A first version of the check enumerated the
 plan, passed, and left the 55px icon exactly where it was.
+
+### And key it on the element the rule styles, not the first class in the selector
+
+The second version of that check keyed on the first class it found in a selector. So
+`.sidebar[data-size="sm"] .sidebar-item { height; padding; gap }` was credited to
+`.sidebar`, which has a `display`. Eleven classes were hiding behind that, `.sidebar-item`
+among them — it sets `gap` and had no `display` of its own.
+
+The atoms hid it too, and for a related reason: every sub-part lived inside a flex parent,
+which blockifies its children, so `height` applied and `gap` quietly did not. It only
+surfaced when the gallery shell stopped importing the `Sidebar` atom and hand-marked-up
+`.sidebar-item` the way a consumer would — outside that flex parent, where an inline box
+ignores every dimension you give it.
+
+`SUB_PART_RULES` carries the recovered displays. Declaring one changes nothing inside the
+old flex parents, since a flex item is blockified anyway; it makes the class stand up
+outside them.
+
+### A schema key that is itself a property is not a part
+
+`line-height` ends in `height`. `min-width` and `border-width` end in `width`. The part
+splitter matched the longest known prop suffix and read them as parts `line`, `min` and
+`border`, emitting five classes for elements that do not exist:
+
+```css
+.helper-text[data-size="sm"] .helper-text-line { height: var(--height-16px); }  /* nothing is .helper-text-line */
+.kbd[data-size="sm"] .kbd-min                  { width: 20px; }                 /* nothing is .kbd-min */
+```
+
+Nothing rendered wrong, because `decls()` also puts the real declaration on the element —
+which is exactly why no check and no page could have caught it. `SELF_PROPS` is the guard:
+a key `decls()` consumes is never split.
+
+`class-box-model` does fail on a phantom, but it says "give it a display" — advice that
+would entrench the class instead of deleting it. `phantom-parts` exists to name the actual
+cause, because a check that catches the right failure with the wrong diagnosis sends you
+to fix the wrong thing.

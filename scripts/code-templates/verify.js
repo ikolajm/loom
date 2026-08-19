@@ -200,6 +200,43 @@ function checkClassCoverage() {
 // idea of the set drifts, so it must not read that set from the emitter alone.
 const CELL_SIZED_NAMES = new Set(['table']);
 
+// --- phantom-parts ------------------------------------------------------------
+// A schema key that is itself a property must never be read as `<part>-<prop>`.
+//
+// `line-height` ends in `height`, `min-width` and `border-width` end in `width`, so the
+// part splitter read them as parts `line`, `min` and `border` and emitted
+// `.helper-text-line`, `.label-line`, `.kbd-min`, `.textarea-min` and `.spinner-border` —
+// five classes naming elements that do not exist. Nothing rendered wrong, because the real
+// declaration also lands on the element, so no check and no page could have shown it; it
+// was found by reading the emitted CSS for a different reason.
+//
+// SELF_PROPS is the guard and this check is what keeps it honest. class-box-model happens
+// to fail on a phantom too, but it says "give it a display" — advice that would entrench
+// the class rather than delete it. A check should name the cause it is guarding.
+function checkPhantomParts() {
+  const { generateComponents, SELF_PROPS } = require('./generate-tokens-css');
+  const css = generateComponents();
+
+  // `.<name>-icon` is emitted deliberately by the icon-part path, so `icon` is not a
+  // phantom head even though `icon-size` is a self-prop.
+  const ALLOWED_HEADS = new Set(['icon']);
+  const heads = [...new Set([...SELF_PROPS]
+    .filter((k) => k.includes('-'))
+    .map((k) => k.split('-')[0]))]
+    .filter((h) => !ALLOWED_HEADS.has(h));
+
+  const emitted = new Set([...css.matchAll(/\.([a-z0-9-]+)/g)].map((m) => m[1]));
+  const failures = [];
+  for (const name of emitted) {
+    for (const h of heads) {
+      if (name.endsWith(`-${h}`)) {
+        failures.push(`.${name} — "${h}" is the head of a self-property (${[...SELF_PROPS].filter((k) => k.startsWith(h + '-')).join(', ')}), so this is a property mis-read as a part. Add the key to SELF_PROPS rather than giving the class a box`);
+      }
+    }
+  }
+  return { failures, note: `${heads.length} self-property heads, ${emitted.size} class names` };
+}
+
 // --- class-box-model ----------------------------------------------------------
 // `class-coverage` asks whether a class exists. This asks whether it declares a box.
 //
@@ -250,9 +287,19 @@ function checkClassBoxModel() {
   // instances were not component classes at all — `.icon-slot` and the `<name>-icon`
   // sub-parts are written by the emitter directly and never appear in the plan. A check
   // that enumerated the plan passed while a 16px icon rendered at 55px.
-  const rules = [...css.matchAll(/^\s*\.([a-z0-9-]+)((?:\[[^\]]*\])*[^{]*)\{([^}]*)\}/gm)];
+  //
+  // Keyed on the LAST class in the selector, because the first one is the ancestor.
+  // Written the other way this check passed while `.sidebar[data-size="sm"] .sidebar-item`
+  // set height and gap with no display of its own — the rule got credited to `.sidebar`,
+  // which has one. Eleven classes were hiding behind that, and the hole was found by
+  // hand-marking-up `.sidebar-item` in the gallery shell, not by the check. Second time
+  // this check has been wrong in the direction of passing.
+  const rules = [...css.matchAll(/^\s*(\.[^{]+?)\s*\{([^}]*)\}/gm)];
   const byClass = new Map();
-  for (const [, name, , body] of rules) {
+  for (const [, sel, body] of rules) {
+    const classes = sel.match(/\.([a-z0-9-]+)/g);
+    if (!classes) continue;
+    const name = classes[classes.length - 1].slice(1);
     const e = byClass.get(name) || { sized: false, display: false };
     if (/(^|\s)(width|height|gap):/.test(body)) e.sized = true;
     if (/(^|\s)display:/.test(body)) e.display = true;
@@ -262,7 +309,7 @@ function checkClassBoxModel() {
   for (const [name, e] of byClass) {
     if (!e.sized || NO_BOX[name]) continue;
     if (e.display) { boxed++; continue; }
-    failures.push(`.${name} sets width, height or gap but declares no display — all three are inert on an inline box. Give it one in BASE_RULES, or state in NO_BOX why it needs none`);
+    failures.push(`.${name} sets width, height or gap but declares no display — all three are inert on an inline box. Give it one in BASE_RULES (or SUB_PART_RULES for a sub-part), or state in NO_BOX why it needs none`);
   }
 
   return {
@@ -588,6 +635,7 @@ function verify() {
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['class-coverage', checkClassCoverage()],
     ['class-box-model', checkClassBoxModel()],
+    ['phantom-parts', checkPhantomParts()],
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

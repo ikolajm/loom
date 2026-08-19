@@ -427,6 +427,25 @@ const CSS_TOKEN = (v, prefix) => {
 const PART_PROPS = new Set(['text', 'fg', 'size', 'height', 'gap', 'x-padding', 'y-padding', 'radius', 'width']);
 
 /**
+ * Keys `decls()` consumes as the element's own property, and which therefore can never be
+ * a `<part>-<prop>` pair however much they look like one.
+ *
+ * A compound name ends in a known part-prop: `line-height` ends in `height`, `min-width`
+ * and `border-width` in `width`. So splitParts read them as parts `line`, `min` and
+ * `border` and emitted `.helper-text-line`, `.label-line`, `.kbd-min`, `.textarea-min`
+ * and `.spinner-border` — five classes naming elements that do not exist. Nothing
+ * rendered wrong, because `decls()` also puts the real declaration on the element; the
+ * layer simply carried five names a consumer could reach for and get a stray height from.
+ *
+ * Kept in step with `decls()` by `phantom-parts` in verify.js, which fails if a schema key
+ * that decls() handles is still being split into a part.
+ */
+const SELF_PROPS = new Set([
+  'text', 'x-padding', 'y-padding', 'gap', 'radius', 'height', 'min-height', 'size',
+  'width', 'min-width', 'line-height', 'border-width', 'shadow', 'icon-size', 'icon',
+]);
+
+/**
  * Split `<part>-<prop>` by the longest known prop suffix rather than the last hyphen.
  *
  * `item-x-padding` is the case that matters: split at the last hyphen it becomes part
@@ -437,6 +456,7 @@ function splitParts(keys) {
   const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
   const parts = {};
   for (const k of keys) {
+    if (SELF_PROPS.has(k)) continue;   // a property, not a part
     const prop = props.find((p) => k.endsWith(`-${p}`) && k.length > p.length + 1);
     if (!prop) continue;
     const part = k.slice(0, k.length - prop.length - 1);
@@ -457,6 +477,7 @@ function splitVariantDims(keys, variantNames) {
   const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
   const out = [];
   for (const k of keys) {
+    if (SELF_PROPS.has(k)) continue;   // same reasoning as splitParts
     for (const v of variantNames) {
       if (!k.endsWith(`-${v}`)) continue;
       const prop = k.slice(0, k.length - v.length - 1);
@@ -562,6 +583,8 @@ function buildComponentClass(name, cfg, textFamily) {
   }
   for (const [part, propKeys] of Object.entries(parts)) {
     const sel = `.${name}-${part}`;
+    const base = SUB_PART_RULES[`${name}-${part}`];
+    if (base) out.push(`${sel} {`, ...base.map((l) => `  ${l}`), '}', '');
     tiers.forEach((t) => {
       const d = [];
       for (const [key, prop] of propKeys) {
@@ -688,6 +711,31 @@ const BASE_RULES = {
 const NO_BOX = {
   skeleton: 'a plain block; the atom declared no display either',
   table: 'the element is display: table already',
+};
+
+/**
+ * The same recovery as BASE_RULES, for the sub-part classes.
+ *
+ * A sub-part rule only ever emits the tier dimensions — `height`, `gap`, `padding` — on a
+ * selector like `.sidebar[data-size="sm"] .sidebar-item`. It never emitted a `display`,
+ * and the atoms hid that: every one of these lived inside a flex parent, which blockifies
+ * its children, so height applied and gap did not. Marked up by hand, outside that parent,
+ * they are inline boxes and the dimensions are inert — which is what the gallery shell hit
+ * the moment it stopped importing the Sidebar atom and used `.sidebar-item` directly.
+ *
+ * Recovered from the atom that rendered each part, at the commit before the catalog cut.
+ * A flex item's display is blockified anyway, so declaring it changes nothing inside the
+ * old parents and makes the class stand on its own outside them.
+ */
+const SUB_PART_RULES = {
+  'sidebar-item': ['display: flex;', 'align-items: center;', 'width: 100%;',
+                   'border-radius: var(--radius-component);'],
+  'pagination-item': ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  'stepper-indicator': ['display: flex;', 'align-items: center;', 'justify-content: center;',
+                        'flex-shrink: 0;', 'border-radius: var(--radius-pill);'],
+  // `flex-1 h-px` in the atom — a flex child, so its height applied only because the
+  // parent blockified it. `display: block` is that behaviour, stated.
+  'stepper-connector': ['display: block;', 'flex: 1 1 0%;'],
 };
 
 // Sub-part vocabularies. A component declaring one describes its internals, and naming
@@ -1433,4 +1481,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };

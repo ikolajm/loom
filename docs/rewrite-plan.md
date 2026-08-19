@@ -445,6 +445,35 @@ off as verified statically; both were wrong the moment a page was looked at. One
       Recoverable: git has every deleted atom, and `resolve-picks.js` already names the
       class replacement for a stale pick by design.
 
+- [x] **Give the sub-part classes a box too.** Found by the cut, not by a check.
+      Hand-marking-up `.sidebar-item` in the rebuilt gallery shell exposed that it sets
+      `gap` with no `display` — and `class-box-model` passed it, because the check keyed on
+      the first class in a selector, so `.sidebar[data-size="sm"] .sidebar-item` was
+      credited to `.sidebar`. Eleven classes were behind that hole. The atoms hid it for a
+      related reason: every sub-part sat inside a flex parent, which blockifies children,
+      so height applied and gap silently did not.
+
+      Five of the eleven turned out not to be parts at all. `line-height` ends in `height`,
+      `min-width` and `border-width` end in `width`, so the splitter read them as parts
+      `line`, `min` and `border` and emitted `.helper-text-line`, `.label-line`, `.kbd-min`,
+      `.textarea-min` and `.spinner-border` — classes for elements that do not exist.
+      Nothing rendered wrong, because the real declaration also lands on the element, which
+      is why nothing could have caught it. `SELF_PROPS` now guards it.
+
+      The other four are real parts and got their display recovered from the atom that
+      rendered them, at the commit before the cut: `sidebar-item`, `pagination-item`,
+      `stepper-indicator`, `stepper-connector`.
+
+      Both checks were fixed rather than just satisfied. `class-box-model` now keys on the
+      last class in the selector — the element the rule actually styles — and `phantom-parts`
+      is new, because `class-box-model` catches a phantom but tells you to give it a display,
+      which would entrench the class rather than delete it. Confirmed against both shapes.
+
+      **That is twice this check passed while the bug it was written for was in the tree.**
+      First it enumerated the emitter's plan and missed everything the emitter writes
+      directly; then it read the wrong end of a descendant selector. Both times it was found
+      by using the output, not by running the check
+
 - [ ] **Look at the trimmed gallery.** Five stories and a rebuilt shell, verified only by
       typecheck and the checks — not watched. The shell's nav items are the first thing in
       the repo to use `.sidebar-item` as a consumer would
