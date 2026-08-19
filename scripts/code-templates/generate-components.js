@@ -248,7 +248,11 @@ function generate(registry, outputDir, configs) {
     if (byGroup[g] && !grouped[g]) grouped[g] = byGroup[g].sort();
   }
   fs.writeFileSync(path.join(CATALOG_DIR, 'atoms.json'), JSON.stringify({
-    $note: 'Pickable atoms by group — copy names into loom-picks.json "picks". setup.sh resolves dependencies automatically. Generated from the catalog; do not hand-edit.',
+    $note: 'Pickable atoms by group — copy names into loom-picks.json "picks". The sync resolves dependencies automatically. Generated from the catalog; do not hand-edit.',
+    // Fingerprint of the schemas and templates this catalog was built from, so a sync can
+    // say "these atoms predate your edits" without relying on mtimes, which a checkout
+    // rewrites. See scripts/catalog-stamp.js.
+    $inputs: require('../catalog-stamp').inputHash(),
     ...grouped,
   }, null, 2) + '\n');
   console.log('  atoms.json (pickable atoms by group)');

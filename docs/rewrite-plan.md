@@ -257,9 +257,35 @@ deliberate, not backlog inertia.
       emit a class or appear on a stated skip list, and every planned class must actually
       be present in the output. Confirmed against both failure shapes — a component
       dropping out of the emitter, and one planned but not written
-- [ ] **Consumer refresh loop** — `/preview` in a project renders whatever substrate was
-      last copied in; refreshing means returning here and re-running the sync. If the
-      preview surface is the point, that round trip is the friction to remove
+- [x] **Consumer refresh loop.** `init.sh` now writes a `loom:sync` script into the
+      project's `package.json`, so a consumer refreshes with `npm run loom:sync` from its
+      own directory instead of coming back here. It is written by `init.sh` rather than by
+      hand because that is the only thing that knows the path between the two repos — it
+      was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the
+      sibling layout).
+
+      **Deliberately not wired into `predev`.** The playground does that, but a consumer's
+      dev server that cannot start without a sibling repo present is a worse failure than
+      a stale stylesheet — and it is discovered by whoever clones the project next rather
+      than by the person who set it up.
+
+      **`--refresh` is not the default**, and the reasoning narrowed on inspection: a plain
+      sync already regenerates the whole substrate, so tuning a brand is always current.
+      `--refresh` only rebuilds `catalog/*.tsx`, which only matters when Loom's own
+      templates changed — a flow that has already run `npm run generate`. Defaulting it
+      would also end every consumer sync in `verify`, so refreshing a brand in jmi-finance
+      could fail on a playground story it has never heard of.
+
+      Instead the catalog carries a fingerprint of its inputs (`$inputs` in `atoms.json`,
+      hashed over the component schemas and code templates) and the sync reports a
+      mismatch in one line. Hashed rather than compared by mtime, which a `git checkout`
+      rewrites — a warning that fires on every fresh clone is one people learn to ignore.
+      Confirmed both ways: a schema edit warns, a brand change does not.
+
+      Running the whole thing end to end also caught a live scaffold bug: `STARTER_PICKS`
+      still listed `card`, so **every newly scaffolded project failed its first sync** on
+      an unknown atom. Nothing caught it — the catalog checks verify what the catalog
+      contains, and that list is a string inside a generator
 
 ## Consumers
 

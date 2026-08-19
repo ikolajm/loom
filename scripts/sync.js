@@ -23,6 +23,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { resolvePicks, PickError } = require('./resolve-picks');
 const { checkLocalEdits } = require('./check-local-edits');
+const { inputHash } = require('./catalog-stamp');
 
 const LOOM_ROOT = path.resolve(__dirname, '..');
 const CATALOG = path.join(LOOM_ROOT, 'catalog');
@@ -55,9 +56,25 @@ function main(argv) {
   }
   if (!fs.existsSync(picksPath)) die(`ERROR: ${picksPath} not found`);
 
+  // Staleness is reported, not repaired. Regenerating on every sync would run the whole
+  // pipeline — including a tsc pass over the playground — so a consumer refreshing its
+  // brand could fail on a surface it has never heard of. Saying so costs a line.
+  const stampPath = path.join(CATALOG, 'atoms.json');
+  let stale = false;
+  if (fs.existsSync(stampPath) && !flags.has('--refresh')) {
+    const recorded = JSON.parse(fs.readFileSync(stampPath, 'utf8')).$inputs;
+    stale = recorded !== undefined && recorded !== inputHash();
+  }
+
   console.log('=== Loom sync ===');
   console.log(`Catalog: ${CATALOG}`);
   console.log(`Project: ${project}`);
+  if (stale) {
+    console.log('');
+    console.log('Note: catalog/ was built from older schemas or templates than the ones on disk.');
+    console.log('      The substrate below is always regenerated, so your tokens are current —');
+    console.log('      it is the atoms that may lag. Re-run with --refresh to rebuild them first.');
+  }
 
   let atoms;
   let npmDependencies;

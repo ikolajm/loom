@@ -15,7 +15,12 @@ const { applyPins } = require('../npm-pins');
 // from there. It used to be seeded from the productType archetype's curated list —
 // that supplier was cut with productType, and a seed nobody could predict was worth
 // less than a pair anyone can read.
-const STARTER_PICKS = ['button', 'card'];
+//
+// `card` was the second until it became a class, at which point every freshly scaffolded
+// project failed its first sync on an unknown atom. Nothing caught that: the catalog
+// checks verify what the catalog contains, and this list is a string in a generator.
+// `dialog` replaces it — a real behavior component, which is what the catalog is now.
+const STARTER_PICKS = ['button', 'dialog'];
 
 function generate() {
   const picksBlock = STARTER_PICKS.map((p) => `      "${p}"`).join(',\n');
@@ -122,24 +127,24 @@ fi
 # the sync — cannot take the app shell with it. It used to, and the resulting build
 # failure named a missing provider, which reads like a code defect rather than the
 # consequence of the reset.
-echo "[1/7] Creating app-shell directories..."
+echo "[1/8] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/providers"
 
 # --- Step 2: Token substrate ---
 # Three files: values, class layer, Tailwind bridge. globals.css (step 3) imports all
 # three in that order — the bridge reads what the first two define.
-echo "[2/7] Copying stylesheets..."
+echo "[2/8] Copying stylesheets..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
 cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
 cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
 # --- Step 3: globals.css ---
-echo "[3/7] Writing globals.css..."
+echo "[3/8] Writing globals.css..."
 cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
 # --- Step 4: Theme mechanism + root layout (atom-independent) ---
-echo "[4/7] Writing ThemeProvider + layout..."
+echo "[4/8] Writing ThemeProvider + layout..."
 cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/providers/ThemeProvider.tsx"
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
 
@@ -155,7 +160,7 @@ fi
 # --- Step 5: Foundation preview route (one-time, consumer-owned) ---
 # A /preview route rendering the token substrate (colors, type, spacing, radius)
 # so the consumer can confirm their brand landed. Atom-agnostic. Never overwrites.
-echo "[5/7] Writing /preview route..."
+echo "[5/8] Writing /preview route..."
 if [ ! -f "$SRC_DIR/app/preview/page.tsx" ]; then
   mkdir -p "$SRC_DIR/app/preview"
   cp "$SCRIPT_DIR/preview-page.tsx" "$SRC_DIR/app/preview/page.tsx"
@@ -167,12 +172,12 @@ fi
 # --- Step 6: Core dependencies (atom-agnostic) ---
 # --prefix installs into the target without changing cwd, so every path in this
 # script stays relative to the loom repo — no ordering landmine around a cd.
-echo "[6/7] Installing core dependencies..."
+echo "[6/8] Installing core dependencies..."
 npm install --prefix "$FRONTEND_DIR" ${depString}
 echo "  ${coreDeps.length} core packages installed"
 
 # --- Step 7: Starter loom-picks.json (the input the sync reads) ---
-echo "[7/7] Writing starter loom-picks.json..."
+echo "[7/8] Writing starter loom-picks.json..."
 if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
   cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
 {
@@ -185,16 +190,42 @@ ${picksBlock}
   }
 }
 PICKS
-  echo "  created loom-picks.json (${STARTER_PICKS.length} starter picks — edit, then run setup.sh)"
+  echo "  created loom-picks.json (${STARTER_PICKS.length} starter picks — edit, then run the sync)"
 else
   echo "  loom-picks.json already exists — left as-is"
 fi
 
+# --- Step 8: loom:sync script ------------------------------------------------
+# The round trip used to be one-directional: you tune spec/answers.json in the Loom repo,
+# and this project keeps rendering whatever substrate was last copied in until you go back
+# there and re-run the sync. This puts the pull side in the project.
+#
+# Written here rather than by hand because init.sh is the only thing that knows the path
+# between the two repos — it was invoked with it. Not wired into predev: a dev server
+# that cannot start without a sibling repo present is a worse failure than a stale
+# stylesheet, and it is discovered by whoever clones this next rather than by you.
+echo "[8/8] Adding the loom:sync script..."
+LOOM_REL="$(node -e "console.log(require('path').relative('$FRONTEND_DIR', '$SCRIPT_DIR/../..'))")"
+node - "$FRONTEND_DIR/package.json" "$LOOM_REL" <<'SCRIPTJS'
+const fs = require('fs');
+const [, , pkgPath, loomRel] = process.argv;
+if (!fs.existsSync(pkgPath)) { console.log('  no package.json — skipped'); process.exit(0); }
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+pkg.scripts = pkg.scripts || {};
+if (pkg.scripts['loom:sync']) { console.log('  loom:sync already present — left as-is'); process.exit(0); }
+pkg.scripts['loom:sync'] = 'node ' + loomRel + '/scripts/sync.js .';
+fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
+console.log('  added "loom:sync": "node ' + loomRel + '/scripts/sync.js ."');
+SCRIPTJS
+
 echo ""
 echo "=== App shell ready ==="
 echo ""
-echo "Next — edit loom-picks.json to pick your atoms, then sync (from the loom repo):"
-echo "  npm run sync -- $FRONTEND_DIR"
+echo "Next — edit loom-picks.json to pick your atoms, then sync. From here:"
+echo "  npm run loom:sync"
+echo ""
+echo "Re-run that whenever the brand changes in the Loom repo — it regenerates the token"
+echo "substrate every time and tells you if the atoms have fallen behind."
 `;
 }
 
