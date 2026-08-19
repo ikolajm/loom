@@ -57,22 +57,19 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 ## What's in the catalog
 
-44 components across 8 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
+5 components across 3 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
 
-Everything here **carries behavior** — focus traps, portals, keyboard navigation, positioning, or a composition contract CSS cannot express. Appearance-only components were removed: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` now, which is why they work in a Django template and a printed invoice as well as in React. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
+**The catalog is a worked example, not a component library.** Five references, one per distinct way of wiring something to the class layer: `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix form control. Anything else you need, build — Radix is already the primitive layer, and what Loom uniquely owns is tokens to classes.
 
-**Two kinds, one catalog.** Every manifest carries a `kind`: **26 atoms** and **18 patterns**. An *atom* is a primitive you compose with — one control, one mark, one piece of content (`button`, `input`, `badge`, `avatar`). A *pattern* is an arrangement already composed for you, solving an assembly you would otherwise repeat (`command-palette`, `list-item`, `date-picker`, `form-field`). Both install identically and are equally first-class — the distinction is vocabulary, not a tier, and nothing in the pipeline branches on it. It earns its place by making "does this belong in the catalog?" answerable: an atom justifies itself by being unavoidable, a pattern by saving composition. `cn` is neither and is marked `utility`.
+That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
+
+Everything here **carries behavior** — focus traps, portals, keyboard navigation, or a composition contract CSS cannot express. Appearance is not here at all: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css`, which is why they work in a Django template and a printed invoice as well as in React.
 
 | Group | Atoms |
 |-------|-------|
-| **Buttons** | badge, button, fab-menu, toggle, toggle-group |
-| **Forms** | calendar, checkbox, combobox, date-picker, file-upload, form-field, input-otp, radio, select, slider, switch, time-picker |
-| **Layout** | alert-dialog, dialog, separator, sheet |
-| **Feedback** | context-menu, dropdown-menu, hover-card, popover, progress-bar, toast, tooltip |
-| **Data display** | accordion, avatar, avatar-group, relative-time |
-| **Navigation** | command-palette, navigation-menu, pagination, sidebar, tabs |
-| **Composite** | carousel, stepper, tree-view |
-| **Motion** | count-up, reveal, scroll-progress, stagger |
+| **Buttons** | badge, button |
+| **Forms** | form-field, select |
+| **Layout** | dialog |
 
 The motion atoms are **zero-dependency** — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no animation library. Interactive primitives that genuinely warrant a library use one (carousel → embla, date-picker → Radix); simple atoms don't.
 

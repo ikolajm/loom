@@ -2,13 +2,15 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom does not ship all 44 components by default. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 5 components. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
 The model resolves the playground/production split structurally: the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only picked atom files, with zero playground/stories footprint. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 
 ## Kind: atoms and patterns
 
-Every manifest carries a `kind` — **26 atoms**, **18 patterns**, and `cn` as `utility`. The catalog held both from the start and had one word for them, which is what made "does this earn its place?" hard to answer: the two justify themselves differently.
+Every manifest carries a `kind` — **5 atoms**, **0 patterns**, and `cn` as `utility`.
+
+**The distinction is currently vestigial and the count says so.** It was introduced to make "does this earn its place?" answerable across a 44-component catalog, where an atom justified itself by being unavoidable and a pattern by saving composition. A worked-example set of five does not need a vocabulary for triage. The field stays because manifests carry it and nothing branches on it; if patterns stays at zero, delete the kind rather than keep a word that classifies one thing.
 
 - **atom** — a primitive you compose *with*. One control, one mark, one piece of content: `button`, `input`, `badge`, `avatar`, `label`. An atom earns its place by being unavoidable — you cannot build a form without an input.
 - **pattern** — an arrangement already composed *for* you, solving an assembly a consumer would otherwise repeat: `command-palette`, `list-item`, `date-picker`, `sidebar`. A pattern earns its place by saving composition, and is judged against that bar rather than against inevitability.

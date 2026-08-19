@@ -1,13 +1,14 @@
 'use client';
 import { useState } from 'react';
-import { Sidebar, SidebarItem } from '@/components/sidebar';
-import { ToggleGroup, ToggleGroupItem } from '@/components/toggle-group';
+import { Button } from '@/components/button';
 
 /**
  * Dev gallery shell — renders the presentation/ blocks (frame / header / variant-section) in code,
- * against the --doc-* vars derived from presentation/layout.json. The chrome dogfoods Loom's own
- * Sidebar + ToggleGroup so the catalog browses itself with its own components. One data-theme on the
- * root swaps the doc frame chrome (doc-layout.css) AND every component token (tokens.css) in lockstep.
+ * against the --doc-* vars derived from presentation/layout.json. The chrome is hand-marked-up on
+ * `.sidebar` / `.sidebar-item` from loom.components.css rather than on a Sidebar atom, which is the
+ * point: the catalog is a worked-example set now, and its own shell is built the way a consumer
+ * builds. One data-theme on the root swaps the doc frame chrome (doc-layout.css) AND every component
+ * token (tokens.css) in lockstep.
  * Gallery-first: static variant grids; interactive-preview controls are a later increment.
  */
 
@@ -66,7 +67,7 @@ function VariantSection({ label, content }: { label: string; content: React.Reac
   );
 }
 
-/** The browse shell: dogfooded sidebar (Loom's Sidebar/SidebarItem) + the active frame. */
+/** The browse shell: the sidebar classes, hand-marked-up, + the active frame. */
 export function Gallery({ stories }: { stories: GalleryStory[] }) {
   const [active, setActive] = useState(0);
   // Default to the product's own mode so the catalog opens on "their system at a glance".
@@ -81,24 +82,30 @@ export function Gallery({ stories }: { stories: GalleryStory[] }) {
 
   return (
     <div data-theme={mode} className="flex min-h-screen" style={{ background: 'var(--doc-page-bg)' }}>
-      {/* Sidebar — dogfoods Loom's own Sidebar/SidebarItem (hover + cursor + active states baked in). */}
-      <Sidebar className="shrink-0 sticky top-0 h-screen overflow-y-auto py-6 gap-6">
+      {/* The sidebar classes, marked up by hand — no atom involved. */}
+      <nav
+        className="sidebar shrink-0 sticky top-0 h-screen overflow-y-auto py-6 gap-6"
+        data-size="sm"
+        data-variant="default"
+      >
         <div className="px-2 flex flex-col gap-3">
           <div className="text-sm font-semibold text-on-surface">Loom Catalog</div>
           <p className="text-label-sm text-on-surface-variant leading-snug">
             Rendering the example token set — your brand&apos;s tokens will differ.
           </p>
-          {/* Doc-mode toggle — a real ToggleGroup; swaps the whole gallery via the root data-theme. */}
-          <ToggleGroup
-            type="single"
-            size="sm"
-            value={mode}
-            onValueChange={(v) => v && setMode(v as 'light' | 'dark')}
-            className="self-start"
-          >
-            <ToggleGroupItem value="light">Light</ToggleGroupItem>
-            <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
-          </ToggleGroup>
+          <div className="flex self-start gap-1">
+            {(['light', 'dark'] as const).map((m) => (
+              <Button
+                key={m}
+                size="sm"
+                variant={mode === m ? 'filled' : 'ghost'}
+                color={mode === m ? 'primary' : 'neutral'}
+                onClick={() => setMode(m)}
+              >
+                {m === 'light' ? 'Light' : 'Dark'}
+              </Button>
+            ))}
+          </div>
         </div>
         {Object.entries(byCategory).map(([category, items]) => (
           <div key={category} className="flex flex-col gap-0.5">
@@ -106,13 +113,19 @@ export function Gallery({ stories }: { stories: GalleryStory[] }) {
               {category}
             </div>
             {items.map(({ story: s, index }) => (
-              <SidebarItem key={s.name} size="sm" active={index === active} onClick={() => setActive(index)}>
+              <button
+                key={s.name}
+                type="button"
+                onClick={() => setActive(index)}
+                aria-current={index === active || undefined}
+                className="sidebar-item interactive control w-full rounded-component text-left aria-[current]:bg-primary-container aria-[current]:text-on-primary-container"
+              >
                 {s.name}
-              </SidebarItem>
+              </button>
             ))}
           </div>
         ))}
-      </Sidebar>
+      </nav>
 
       {/* Canvas */}
       <main className="flex-1 overflow-y-auto p-10">

@@ -1,64 +1,15 @@
 {
   "$note": "Pickable atoms by group — copy names into loom-picks.json \"picks\". The sync resolves dependencies automatically. Generated from the catalog; do not hand-edit.",
-  "$inputs": "3da24b37511e",
+  "$inputs": "134d578356e3",
   "button": [
     "badge",
-    "button",
-    "fab-menu",
-    "toggle",
-    "toggle-group"
+    "button"
   ],
   "form": [
-    "calendar",
-    "checkbox",
-    "combobox",
-    "date-picker",
-    "file-upload",
     "form-field",
-    "input-otp",
-    "radio",
-    "select",
-    "slider",
-    "switch",
-    "time-picker"
+    "select"
   ],
   "layout": [
-    "alert-dialog",
-    "dialog",
-    "separator",
-    "sheet"
-  ],
-  "feedback": [
-    "context-menu",
-    "dropdown-menu",
-    "hover-card",
-    "popover",
-    "progress-bar",
-    "toast",
-    "tooltip"
-  ],
-  "data-display": [
-    "accordion",
-    "avatar",
-    "avatar-group",
-    "relative-time"
-  ],
-  "navigation": [
-    "command-palette",
-    "navigation-menu",
-    "pagination",
-    "sidebar",
-    "tabs"
-  ],
-  "composite": [
-    "carousel",
-    "stepper",
-    "tree-view"
-  ],
-  "motion": [
-    "count-up",
-    "reveal",
-    "scroll-progress",
-    "stagger"
+    "dialog"
   ]
 }

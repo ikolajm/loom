@@ -403,8 +403,51 @@ off as verified statically; both were wrong the moment a page was looked at. One
       an icon is sized without one. A design call on component internals, parked visibly
       rather than guessed at
 
-- [ ] **Re-look at the anchor button.** The `asChild` fix is statically verified only —
-      the generated output was read, not watched
+- [x] **Re-look at the anchor button.** Renders correctly.
+
+## The catalog cut
+
+- [x] **`catalog/` is a worked example, not a component library.** 44 components to 5:
+      `button` and `badge` for tone × treatment × `data-size` and `asChild`, `form-field`
+      for the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a
+      Radix form control, plus `cn`. 39 atoms and 33 generator modules deleted.
+
+      **Decided on the measurement, not on taste.** Across every project consuming Loom the
+      atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`. Not
+      one consumer imported a composite, and paperboy and party-wipe — the two heaviest
+      token consumers, ~100 files each — hold no atoms at all. Radix is already the
+      primitive layer; what Loom uniquely owns is tokens to classes.
+
+      Two numbers pointed opposite ways and both were weighed. Churn said the catalog was
+      cheap: over the whole class-layer rewrite `catalog/` was 11% of changed lines and the
+      42 per-atom generators were 2.6% of `scripts/` churn. Size said it was a lot of
+      standing surface: ~11,000 lines across generators, catalog, stories, manifests and
+      playground copies. The cost is latent rather than historical — paid whenever the
+      layer moves and the atoms have to follow, which is what this week was.
+
+      Three lines were priced and each closed over the import graph first, because the last
+      cut deleted `button` while `carousel`, `dialog` and `sheet` imported it. Closure
+      mattered: "drop the thin Radix wrappers" pulls `avatar`, `calendar` and `popover`
+      straight back in, so it is a line with three immediate exceptions rather than a
+      principle.
+
+      **What the cut removed downstream.** The playground's install went from 29 npm
+      packages to 7. `stories.tsx` went 952 lines to 134. The gallery shell no longer
+      imports an atom for its own chrome — it hand-marks-up `.sidebar` / `.sidebar-item`,
+      which is how a consumer would build it.
+
+      **The atom/pattern vocabulary collapsed and the docs say so rather than restating a
+      number.** `kind` now reads 5 atoms, 0 patterns. It existed to make "does this earn its
+      place?" answerable across 44 components; a set of five does not need triage
+      vocabulary. Left in place, flagged in `CATALOG_SPEC.md` — if patterns stays at zero,
+      delete the kind rather than keep a word that classifies one thing.
+
+      Recoverable: git has every deleted atom, and `resolve-picks.js` already names the
+      class replacement for a stale pick by design.
+
+- [ ] **Look at the trimmed gallery.** Five stories and a rebuilt shell, verified only by
+      typecheck and the checks — not watched. The shell's nav items are the first thing in
+      the repo to use `.sidebar-item` as a consumer would
 
 ## Consumers
 
