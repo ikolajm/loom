@@ -29,7 +29,7 @@ function generateSidebar(name, config, meta) {
     // Root: both widths as vars + horizontal padding
     const root = [];
     if (sz.width) root.push(`[--sidebar-w:${sz.width}]`);
-    if (sz['rail-width']) root.push(`[--sidebar-rail-w:${sz['rail-width']}]`);
+    if (sz['width-rail']) root.push(`[--sidebar-rail-w:${sz['width-rail']}]`);
     const rootPx = spacingToClass(sz['x-padding'], 'px');
     if (rootPx) root.push(rootPx);
     sizeStyles[tier] = root.join(' ');

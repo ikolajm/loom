@@ -181,16 +181,30 @@ deliberate, not backlog inertia.
       in 25 of the 26 components that set it. Tier blocks now hold only what ramps, and
       the one component that genuinely ramps its radius is visible instead of buried.
       Verified by byte-identical catalog output
-- [ ] **Name the internals of `sidebar`, `stepper` and `pagination`.** The fan-out skipped
-      them because each declares a sub-part vocabulary (`rail-width`, `item-height`,
-      `indicator-size`, `connector-width`, `label-text`, `item-size`) and naming a
-      component's internals is a design decision per component, not a loop. The mechanism
-      exists — `empty-state` proved it, and any `<part>-<prop>` key emits
-      `.<component>-<part>`. Nothing is broken meanwhile: all three still ship as atoms.
+- [x] **`sidebar`, `stepper` and `pagination` internals.** All three emit now; the catalog
+      is at 25 classes. Less naming than expected — the parts were already named in the
+      schemas (`rail`, `item`, `indicator`, `connector`, `label`), so the generic
+      `<part>-<prop>` mechanism covered them once three defects were fixed.
 
-      `form-field`, `separator` and `avatar-group` are **not** on this list. They declare
-      nothing, so a class for them would be an empty rule carrying a name. They stay
-      atoms, and that is finished rather than deferred.
+      **`item-x-padding` was being dropped silently.** `splitParts` split on the last
+      hyphen, making the part `item-x` and the prop `padding` — not a known prop, so the
+      key vanished. Props contain hyphens; it now matches the longest known prop suffix.
+
+      **Primitive tokens resolved to nothing.** `indicator-size: "height/ch-1"` emitted
+      `var(--height-ch-1)`, which does not exist — the primitive is `--ch-1`. The emitter
+      assumed every value was a semantic role; it now skips the namespace when the tail
+      already carries a primitive scale name.
+
+      **`rail-width` was not a part at all.** `rail` is a sidebar *variant*, so
+      `.sidebar-rail` would have styled an element that does not exist. Renamed to
+      `width-rail`, and the emitter now reads `<prop>-<variant>` as the mirror of
+      `<part>-<prop>` — same property, one variant — emitting
+      `.sidebar[data-size][data-variant="rail"]`. The distinction is not inferable from
+      shape: `rail-width` and `item-height` look identical and mean opposite things, which
+      is exactly how it nearly shipped wrong.
+
+      `SUB_PART_KEYS` is now empty. It stays as the place to park a key the emitter
+      genuinely cannot express, rather than half-emitting a component and saying nothing.
 
 - [x] **`node scripts/sync.js`** — `setup.sh` (115 lines) and `scripts/refresh-test.sh`
       (30) deleted; `npm run sync -- <project>` replaces both, with `--force` and

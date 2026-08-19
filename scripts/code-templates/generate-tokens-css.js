@@ -401,10 +401,16 @@ const CSS_COLOR = (v) => {
   if (v === 'currentColor') return 'currentColor';
   return `var(--${String(v).split('/').pop()})`;
 };
+// Primitive scales are emitted under their own names (`--ch-3`, `--bw-1`, `--br-6`,
+// `--icon-2`); semantic roles get a namespace (`--height-control-md`, `--radius-card`).
+// A schema value can reference either — `height/control-md` is semantic, `height/ch-1` is
+// the primitive underneath it — so the prefix is skipped when the tail already carries a
+// primitive's own scale name.
+const PRIMITIVE_TAIL = /^(ch|bw|br|icon|space|shadow)-/;
 const CSS_TOKEN = (v, prefix) => {
   if (!v || typeof v !== 'string') return null;
   const tail = v.split('/').pop();
-  return `var(--${prefix}${tail})`;
+  return `var(--${PRIMITIVE_TAIL.test(tail) ? '' : prefix}${tail})`;
 };
 
 /** One component's shape rules: base, per-size, per-variant. */
@@ -420,18 +426,44 @@ const CSS_TOKEN = (v, prefix) => {
  */
 const PART_PROPS = new Set(['text', 'fg', 'size', 'height', 'gap', 'x-padding', 'y-padding', 'radius', 'width']);
 
+/**
+ * Split `<part>-<prop>` by the longest known prop suffix rather than the last hyphen.
+ *
+ * `item-x-padding` is the case that matters: split at the last hyphen it becomes part
+ * `item-x`, prop `padding`, which is not a known prop — so the key was dropped and the
+ * sidebar's item padding silently never emitted. Props contain hyphens; parts may too.
+ */
 function splitParts(keys) {
+  const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
   const parts = {};
   for (const k of keys) {
-    const i = k.lastIndexOf('-');
-    if (i < 1) continue;
-    const part = k.slice(0, i);
-    const prop = k.slice(i + 1);
-    if (!PART_PROPS.has(prop)) continue;
+    const prop = props.find((p) => k.endsWith(`-${p}`) && k.length > p.length + 1);
+    if (!prop) continue;
+    const part = k.slice(0, k.length - prop.length - 1);
     if (part === 'icon' && prop === 'size') continue; // the container's --icon-size
     (parts[part] = parts[part] || []).push([k, prop]);
   }
   return parts;
+}
+
+/**
+ * `<prop>-<variant>` is the mirror of `<part>-<prop>`: the same property, in one variant.
+ * The distinction is not inferable from the shape — `rail-width` and `item-height` look
+ * identical and mean opposite things — so the schema spells it prop-first, and a suffix
+ * matching a declared variant name is what tells the two apart. Written the other way it
+ * nearly produced a `.sidebar-rail` class for an element that does not exist.
+ */
+function splitVariantDims(keys, variantNames) {
+  const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
+  const out = [];
+  for (const k of keys) {
+    for (const v of variantNames) {
+      if (!k.endsWith(`-${v}`)) continue;
+      const prop = k.slice(0, k.length - v.length - 1);
+      if (props.includes(prop)) out.push([k, prop, v]);
+    }
+  }
+  return out;
 }
 
 function buildComponentClass(name, cfg, textFamily) {
@@ -508,6 +540,17 @@ function buildComponentClass(name, cfg, textFamily) {
   // --- sub-parts ---
   const allKeys = new Set();
   for (const t of tiers) for (const k of Object.keys(sizes[t] || {})) if (!k.startsWith('$')) allKeys.add(k);
+  // Variant-scoped dimensions: `.x[data-size="md"][data-variant="rail"] { width: … }`.
+  const variantNames = Object.keys(cfg.variants || {}).filter((v) => !v.startsWith('$'));
+  for (const [key, prop, vname] of splitVariantDims(allKeys, variantNames)) {
+    tiers.forEach((t) => {
+      const raw = (sizes[t] || {})[key];
+      if (raw == null) return;
+      const val = CSS_SPACE(raw) || CSS_TOKEN(raw, prop === 'radius' ? 'radius-' : 'height-') || raw;
+      out.push(`.${name}[data-size="${t}"][data-variant="${vname}"] {`, `  ${prop}: ${val};`, '}', '');
+    });
+  }
+
   const parts = splitParts(allKeys);
   // An `icon` part reads the container's --icon-size rather than restating each tier: the
   // container already ramps it, and one rule beats three that say the same thing.
@@ -587,10 +630,10 @@ const BASE_LAYOUT = {
 
 // Sub-part vocabularies. A component declaring one describes its internals, and naming
 // those is a design decision per component rather than a loop — so it waits, visibly.
-const SUB_PART_KEYS = new Set([
-  'rail-width', 'item-height', 'item-x-padding', 'item-gap', 'item-radius',
-  'indicator-size', 'connector-width', 'label-text', 'item-size',
-]);
+// Empty by design. Every sub-part key the catalog declares is now handled generically —
+// this stays as the place to park a key whose shape the emitter genuinely cannot express,
+// rather than half-emitting a component and leaving the gap unstated.
+const SUB_PART_KEYS = new Set([]);
 
 const APPEARANCE_ONLY = new Set([
   'badge', 'banner', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'dot', 'empty-state',

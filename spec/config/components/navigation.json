@@ -42,9 +42,9 @@
     },
     "sizes": {
       "$constant": { "item-radius": "radius/component" },
-      "sm": { "width": "220px", "rail-width": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "text": "action/md", "icon-size": "icon/icon-2" },
-      "md": { "width": "256px", "rail-width": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/md", "icon-size": "icon/icon-2" },
-      "lg": { "width": "300px", "rail-width": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/lg", "icon-size": "icon/icon-3" }
+      "sm": { "width": "220px", "width-rail": "56px", "item-height": "height/nav-item-sm", "x-padding": "{scale.2}", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "text": "action/md", "icon-size": "icon/icon-2" },
+      "md": { "width": "256px", "width-rail": "64px", "item-height": "height/nav-item-md", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/md", "icon-size": "icon/icon-2" },
+      "lg": { "width": "300px", "width-rail": "72px", "item-height": "height/nav-item-lg", "x-padding": "{scale.3}", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "text": "action/lg", "icon-size": "icon/icon-3" }
     },
     "default": { "variant": "default", "size": "md" }
   },
