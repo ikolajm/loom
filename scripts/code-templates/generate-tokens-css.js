@@ -698,7 +698,13 @@ const BASE_RULES = {
   // Before, that re-point had no reader on an input — only `.treat-outline` consumes it,
   // and a text field carries no treatment — so an invalid input was pixel-identical to a
   // valid one. `--tone-text` is deliberately not read: the atom reddened the border only.
-  input: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'width: 100%;',
+  // `justify-content: center` was in both atoms' cva base and is deliberately NOT restored.
+  // It is provably inert on a real <input> or <textarea> — the UA owns the inner editor —
+  // so dropping it cannot change anything that rendered before, which is the same test the
+  // restores had to pass. And it is actively wrong the first time the class meets hand
+  // markup: a Radix Select trigger is a <button> carrying `.input`, and centring its
+  // contents puts the chevron in the middle of the field.
+  input: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
           'background-color: var(--surface);', 'color: var(--on-surface);',
           'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
   kbd: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
@@ -712,7 +718,7 @@ const BASE_RULES = {
              'animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;'],
   spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
   stepper: ['display: flex;', 'align-items: center;', 'width: 100%;'],
-  textarea: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'width: 100%;',
+  textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
   toolbar: ['display: flex;', 'align-items: center;'],
@@ -1093,7 +1099,12 @@ function buildSection11_InteractiveStates() {
   z-index: -1;
 }
 
-.interactive:hover::after {
+/* [data-highlighted] rides the same overlay as hover. It is the convention headless
+   libraries use to mark the keyboard-focused row of a listbox or menu, so without it a
+   list built on .interactive answers the mouse and looks dead to the arrow keys. Not a
+   Radix coupling: the attribute is the shared spelling, not one library's. */
+.interactive:hover::after,
+.interactive[data-highlighted]::after {
   opacity: 0.12;
 }
 

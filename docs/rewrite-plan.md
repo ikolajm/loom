@@ -535,6 +535,39 @@ off as verified statically; both were wrong the moment a page was looked at. One
       Now a shell function called by both tiers. Verified by running `--tokens` against a
       throwaway project: four stylesheets, `tokens.json`, and the script.
 
+- [x] **Select onto the class layer.** It carried 39 of the 48 Tailwind utilities left in
+      the whole catalog; it now carries none. Across all five atoms: 2 token-bridge and 7
+      generic utilities remain, all of them in `dialog` and `button`.
+
+      The trigger is a text field, so it wears `.input` and `.control` — the same pair a
+      hand-marked-up `<input>` wears — and the `cva` and its `state` variant are gone
+      entirely: `.control[aria-invalid]` re-points `--tone-border`, `.input`'s border reads
+      it, so the error styling stopped being a second copy of the layer's logic. Rows are
+      `.list-item .interactive .control`, the label is `.label`.
+
+      **`justify-content: center` is dropped from `.input` and `.textarea`.** Restored
+      faithfully from the atoms, flagged then as worth a second look, and this is the look:
+      it is provably inert on a real `<input>` — the UA owns the inner editor — so removing
+      it cannot change anything that rendered before, which is the same test the restores
+      had to pass. And it is wrong the first time the class meets hand markup: a Select
+      trigger is a `<button>` wearing `.input`, and centring puts the chevron mid-field.
+
+      **`.interactive` now answers to `[data-highlighted]` as well as `:hover`.** Without
+      it a list built on the layer responds to the mouse and looks dead to the arrow keys.
+      Not a Radix coupling — the attribute is the shared spelling across headless
+      libraries, not one library's.
+
+      **The panel is where the class layer stops, and the file shows it.** A Radix popper
+      sizes itself from `--radix-select-trigger-width` and
+      `--radix-select-content-available-height`, custom properties set on the element at
+      runtime. No Loom class can know those names, so the panel reads them itself as plain
+      CSS through `style`. The plane and the lift stay classes. That boundary is the honest
+      answer to "can the catalog be framework-agnostic": the appearance can, the
+      composition-specific layout of a portalled floating element cannot
+
+- [ ] **Look at the rebuilt select.** Trigger, panel, rows, keyboard highlight and the
+      error cascade are verified by typecheck and the checks only
+
 - [ ] **Give jmi-finance and jmi-fitness the refresh loop.** Neither has `loom:sync`.
       `./scaffold/init.sh <dir> --tokens` is idempotent and adds it — it also drops
       `tokens.json` in, which those two do not need today but an invoice or email template

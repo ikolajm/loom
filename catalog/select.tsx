@@ -2,56 +2,49 @@
 
 import { forwardRef } from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from './cn';
 import { useFieldError } from './form-field';
 
-const selectTriggerVariants = cva(
-  'flex items-center justify-between w-full interactive cursor-pointer control data-[placeholder]:text-on-surface-variant',
-  {
-    variants: {
-      state: {
-        default: 'bg-surface text-on-surface border-outline border',
-        error: 'bg-surface text-on-surface border-error border',
-      },
-      size: {
-        sm: 'h-control-sm px-3 py-1 gap-2 rounded-input text-input-sm',
-        md: 'h-control-md px-4 py-2 gap-2 rounded-input text-input-md',
-        lg: 'h-control-lg px-4 py-3 gap-2 rounded-input text-input-lg',
-      },
-    },
-    defaultVariants: {
-      state: 'default',
-      size: 'md',
-    },
-  }
-);
-
 const Select = SelectPrimitive.Root;
 const SelectValue = SelectPrimitive.Value;
 
+type FieldSize = 'sm' | 'md' | 'lg';
+
+// The trigger is a text field, so it wears .input — the same class a hand-marked-up
+// <input> wears — plus .control for focus, validity and disabled. There is no cva and no
+// state variant: .control[aria-invalid] re-points --tone-border and .input's border reads
+// it, so the error styling is the class layer's job rather than a second copy of it here.
 const SelectTrigger = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & VariantProps<typeof selectTriggerVariants>
->(({ state, size, className, children, ...props }, ref) => {
-  // Cascade off FormFieldContext.error unless an explicit state is given.
-  const resolvedState = state ?? (useFieldError() ? 'error' : undefined);
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & { size?: FieldSize }
+>(({ size = 'md', className, children, ...props }, ref) => {
+  const hasError = useFieldError();
   return (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(selectTriggerVariants({ state: resolvedState, size }), className)}
+    className={cn('input control interactive', className)}
+    data-size={size}
+    aria-invalid={hasError || undefined}
+    style={{ justifyContent: 'space-between', cursor: 'pointer' }}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-4 shrink-0 text-on-surface-variant" />
+      <span className="icon-slot" style={{ color: 'var(--on-surface-variant)' }}>
+        <ChevronDown />
+      </span>
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
   );
 });
 SelectTrigger.displayName = 'SelectTrigger';
 
+// The floating panel is where the class layer stops, and the boundary is worth seeing.
+// Its size comes from --radix-select-trigger-width and --radix-select-content-available-
+// height, custom properties Radix sets on this element at runtime. A Loom class cannot
+// know those names, so the panel reads them itself, as plain CSS values through style.
+// Everything the layer does cover -- the plane and the lift -- stays a class.
 const SelectContent = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
@@ -59,15 +52,22 @@ const SelectContent = forwardRef<
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
-      className={cn(
-        'relative z-[var(--z-popover)] max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-input bg-surface-1 text-on-surface border border-outline-subtle shadow-[var(--shadow-2)] animate-fade-in',
-        position === 'popper' && 'translate-y-1',
-        className,
-      )}
+      className={cn('surface-1 elevate-2', className)}
+      style={{
+        position: 'relative',
+        zIndex: 'var(--z-popover)',
+        maxHeight: 'var(--radix-select-content-available-height)',
+        minWidth: 'var(--radix-select-trigger-width)',
+        overflow: 'hidden',
+        color: 'var(--on-surface)',
+        border: 'var(--bw-1) solid var(--outline-subtle)',
+        borderRadius: 'var(--radius-input)',
+        transform: position === 'popper' ? 'translateY(var(--space-1))' : undefined,
+      }}
       position={position}
       {...props}
     >
-      <SelectPrimitive.Viewport className={cn('p-1', position === 'popper' && 'w-full')}>
+      <SelectPrimitive.Viewport style={{ padding: 'var(--space-1)', width: position === 'popper' ? '100%' : undefined }}>
         {children}
       </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>
@@ -75,26 +75,25 @@ const SelectContent = forwardRef<
 ));
 SelectContent.displayName = 'SelectContent';
 
+// A row is .list-item; the hover and keyboard-highlight overlay is .interactive, which
+// answers to [data-highlighted] as well as :hover; opacity and cursor are .control.
 const SelectItem = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & { size?: FieldSize }
+>(({ size = 'sm', className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={cn(
-      'relative flex w-full items-center rounded-component px-3 py-2 pr-8 text-action-sm cursor-pointer select-none',
-      'focus:bg-surface-2 focus:text-on-surface focus:outline-none',
-      'data-[disabled]:opacity-(--opacity-disabled) data-[disabled]:pointer-events-none',
-      className,
-    )}
+    className={cn('list-item interactive control', className)}
+    data-size={size}
+    style={{ borderRadius: 'var(--radius-component)', paddingInlineEnd: 'var(--space-8)', userSelect: 'none' }}
     {...props}
   >
-    <span className="absolute right-2 flex size-4 items-center justify-center">
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    <span className="icon-slot" style={{ position: 'absolute', insetInlineEnd: 'var(--space-2)' }}>
       <SelectPrimitive.ItemIndicator>
-        <Check className="size-4" />
+        <Check />
       </SelectPrimitive.ItemIndicator>
     </span>
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ));
 SelectItem.displayName = 'SelectItem';
@@ -103,7 +102,12 @@ const SelectSeparator = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator ref={ref} className={cn('my-1 h-px bg-outline-subtle', className)} {...props} />
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={className}
+    style={{ height: 'var(--bw-1)', backgroundColor: 'var(--outline-subtle)', marginBlock: 'var(--space-1)' }}
+    {...props}
+  />
 ));
 SelectSeparator.displayName = 'SelectSeparator';
 
@@ -111,14 +115,19 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectLabel = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label ref={ref} className={cn('px-3 py-1.5 text-label-sm text-on-surface-variant', className)} {...props} />
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label> & { size?: FieldSize }
+>(({ size = 'sm', className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn('label', className)}
+    data-size={size}
+    style={{ color: 'var(--on-surface-variant)', paddingInline: 'var(--space-3)', paddingBlock: 'var(--space-1)' }}
+    {...props}
+  />
 ));
 SelectLabel.displayName = 'SelectLabel';
 
 export {
   Select, SelectValue, SelectTrigger, SelectContent,
   SelectItem, SelectSeparator, SelectGroup, SelectLabel,
-  selectTriggerVariants,
 };

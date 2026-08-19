@@ -3,14 +3,13 @@
   "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "67bbef3eb822",
+  "version": "25e52eca020e",
   "dependencies": [
     "cn",
     "form-field"
   ],
   "npmDependencies": [
     "@radix-ui/react-select",
-    "class-variance-authority",
     "lucide-react"
   ],
   "tokens": [

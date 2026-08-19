@@ -1,6 +1,6 @@
 {
   "$note": "Pickable atoms by group — copy names into loom-picks.json \"picks\". The sync resolves dependencies automatically. Generated from the catalog; do not hand-edit.",
-  "$inputs": "7b0ff8bb0790",
+  "$inputs": "bd5aadbf0b8e",
   "button": [
     "badge",
     "button"
