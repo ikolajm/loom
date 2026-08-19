@@ -19,6 +19,7 @@
   },
   "scripts": {
     "configs": "node scripts/generate-configs/index.js --input spec/answers.json",
+    "diff-emit": "node scripts/diff-emit.js",
     "figma": "node scripts/assemble-figma.js",
     "generate": "node scripts/code-templates/orchestrator.js",
     "sync": "node scripts/sync.js"

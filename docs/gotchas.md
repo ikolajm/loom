@@ -264,3 +264,21 @@ a key `decls()` consumes is never split.
 would entrench the class instead of deleting it. `phantom-parts` exists to name the actual
 cause, because a check that catches the right failure with the wrong diagnosis sends you
 to fix the wrong thing.
+
+### The deliverable is gitignored, so review it with `npm run diff-emit`
+
+`generated/` holds literal hex from whichever brand is active — the same reason
+`spec/answers.json` is ignored — so `git diff` reports **nothing** for the four stylesheets
+the class layer actually ships. A change to the emitter is otherwise reviewed by reading
+the emitter and trusting it, which is how five classes for nonexistent elements survived:
+no check failed, no page rendered wrong, and no diff mentioned them.
+
+```
+npm run diff-emit                 # working tree vs HEAD
+npm run diff-emit -- HEAD~3       # vs an older ref
+npm run diff-emit -- --stat       # summary only
+```
+
+It builds a temp worktree at the ref, copies the active brand in so the two sides differ
+only where the *generator* does, emits both, and diffs. Un-ignoring `generated/` would be
+the wrong fix — it would commit your brand to Loom's history.
