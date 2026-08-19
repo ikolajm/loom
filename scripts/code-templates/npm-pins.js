@@ -2,7 +2,7 @@
  * Version pins for packages a consumer installs.
  *
  * Two surfaces tell a consumer what to install — init.sh's core-dep line (scaffold/
- * setup-script.js) and setup.sh's printed line (derived from manifest npmDependencies).
+ * setup-script.js) and sync.js's printed line (derived from manifest npmDependencies).
  * They were independent lists and disagreed on tailwind-merge; this is the one home.
  *
  * Only packages whose wrong version fails SILENTLY belong here. A package that errors

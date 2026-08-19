@@ -4,9 +4,9 @@
  * specific atom (ThemeProvider, globals, root layout, the three stylesheets, core deps).
  *
  * Atoms are a separate, repeatable step — the catalog sync at the repo root
- * (`./setup.sh <project>`), which resolves loom-picks.json. Two commands, two jobs:
+ * (`npm run sync -- <project>`), which resolves loom-picks.json. Two commands, two jobs:
  *   init.sh  → app shell + substrate (once)
- *   setup.sh → picked atoms + token refresh (repeatable)
+ *   npm run sync → picked atoms + token refresh (repeatable)
  */
 
 const { applyPins } = require('../npm-pins');
@@ -22,7 +22,7 @@ function generate() {
   const picksNote = 'A starter pair. Add the atoms you need.';
 
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
-  // Pins come from npm-pins.js, the same map setup.sh's printed line resolves through;
+  // Pins come from npm-pins.js, the same map sync.js's printed line resolves through;
   // the two install surfaces disagreed on tailwind-merge while each held its own literal.
   const coreDeps = applyPins([
     'class-variance-authority',
@@ -38,7 +38,7 @@ function generate() {
 # This is the one-time INIT step: theme mechanism, global stylesheet, root layout,
 # token substrate, and core deps — everything that does NOT depend on a specific atom.
 # Add atoms separately with the catalog sync: from the loom repo, run
-#   ./setup.sh <this-project-dir>
+#   npm run sync -- <this-project-dir>
 #
 # Usage: ./scaffold/init.sh <frontend-dir> [--tokens]
 #   (default)  catalog tier — app shell + substrate + core deps + starter picker
@@ -116,10 +116,10 @@ if [ "$TIER" = "tokens" ]; then
   exit 0
 fi
 
-# --- Step 1: App-shell directories (atoms land separately via setup.sh) ---
+# --- Step 1: App-shell directories (atoms land separately via the sync) ---
 # src/providers/ is deliberately OUTSIDE src/components/. The two installs own disjoint
 # paths so that clearing src/components/ — the obvious way to reset atoms and re-run
-# setup.sh — cannot take the app shell with it. It used to, and the resulting build
+# the sync — cannot take the app shell with it. It used to, and the resulting build
 # failure named a missing provider, which reads like a code defect rather than the
 # consequence of the reset.
 echo "[1/7] Creating app-shell directories..."
@@ -171,12 +171,12 @@ echo "[6/7] Installing core dependencies..."
 npm install --prefix "$FRONTEND_DIR" ${depString}
 echo "  ${coreDeps.length} core packages installed"
 
-# --- Step 7: Starter loom-picks.json (the input setup.sh reads) ---
+# --- Step 7: Starter loom-picks.json (the input the sync reads) ---
 echo "[7/7] Writing starter loom-picks.json..."
 if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
   cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
 {
-  "$schema": "Loom picker — list the atom names you want; setup.sh resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
+  "$schema": "Loom picker — list the atom names you want; the sync resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
   "$picks": "${picksNote}",
   "loom": {
     "picks": [
@@ -194,7 +194,7 @@ echo ""
 echo "=== App shell ready ==="
 echo ""
 echo "Next — edit loom-picks.json to pick your atoms, then sync (from the loom repo):"
-echo "  ./setup.sh $FRONTEND_DIR"
+echo "  npm run sync -- $FRONTEND_DIR"
 `;
 }
 

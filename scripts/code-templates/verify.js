@@ -102,7 +102,7 @@ function checkDocCounts(atoms) {
 // this repo maintains by hand, which is the failure mode two items above it describe.
 function checkPlaygroundParity(atoms) {
   if (!fs.existsSync(PLAYGROUND)) {
-    return { failures: ['catalog-playground is not synced — run: ./setup.sh catalog-playground'], note: 'not synced' };
+    return { failures: ['catalog-playground is not synced — run: npm run sync -- catalog-playground'], note: 'not synced' };
   }
   const failures = [];
   const synced = fs.readdirSync(PLAYGROUND).filter((f) => /\.(tsx|ts|manifest\.json)$/.test(f));
@@ -123,7 +123,7 @@ function checkPlaygroundParity(atoms) {
     const noun = uncovered.length === 1 ? 'atom' : 'atoms';
     failures.push(`${uncovered.length} ${noun} not compiled by the playground: ${uncovered.join(', ')}`);
   }
-  if (failures.length) failures.push('  → resync with: ./setup.sh catalog-playground');
+  if (failures.length) failures.push('  → resync with: npm run sync -- catalog-playground');
 
   return { failures, note: `${synced.length} synced files, ${atoms.length - uncovered.length}/${atoms.length} atoms covered` };
 }

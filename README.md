@@ -178,7 +178,7 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 #    Valid pick ids: catalog/atoms.json (generated) — or the catalog table above.
 
 # 3. From the Loom repo, sync the picked atoms in (re-run anytime to resync):
-./setup.sh ../my-loom-app
+npm run sync -- ../my-loom-app
 
 # 4. Run your app and open /preview to confirm your brand landed:
 #    cd ../my-loom-app && npm run dev   → http://localhost:3000/preview
@@ -186,7 +186,7 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 #    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `setup.sh` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
 Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
@@ -236,7 +236,7 @@ scripts/               The two codegen pipelines
   figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts
   resolve-picks.js     ← the picker's dependency resolver
-  setup.sh             ← (repo root) installs picked atoms into a project
+  scripts/sync.js      ← installs picked atoms + substrate into a project (`npm run sync`)
 
 catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
 catalog-playground/    Next.js app that browses the whole catalog

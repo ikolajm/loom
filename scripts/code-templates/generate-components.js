@@ -102,7 +102,7 @@ function extractAxisKeys(obj) {
 // External npm packages a generated atom imports — the consumer install set.
 // Scans `from '<spec>'`; keeps non-relative specifiers, drops react/react-dom (peer deps
 // a React app already has). Scoped pkgs collapse to @scope/name, subpaths to the package root.
-// Pinned packages carry their range (see npm-pins.js) — setup.sh prints this list verbatim.
+// Pinned packages carry their range (see npm-pins.js) — sync.js prints this list verbatim.
 function extractNpmDeps(src) {
   const deps = new Set();
   const re = /from\s+['"]([^'"]+)['"]/g;

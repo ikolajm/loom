@@ -122,9 +122,9 @@ App-shell bootstrap files — \`init.sh\` wires the atom-agnostic shell into a N
 ./scaffold/init.sh ./path-to-frontend
 
 # 2. Picked atoms + token refresh (repeatable) — from the loom repo root:
-./setup.sh ./path-to-frontend     # reads loom-picks.json
+npm run sync -- ./path-to-frontend     # reads loom-picks.json
 
-# 3. Install the npm deps setup.sh reports, then:
+# 3. Install the npm deps the sync reports, then:
 cd ./path-to-frontend
 npm run dev
 \`\`\`

@@ -125,7 +125,7 @@ if (require.main === module) {
   // Copy answers.json as a receipt — the DNA of this generation. Only for a FULL run:
   // answers.json holds the brand and the project name, and a partial run is how it
   // reaches somewhere it should not be. `--only tokens --output <consumer>/src` is a
-  // real invocation — setup.sh and the playground's prebuild hook both use it — and it
+  // real invocation — sync.js and the playground's prebuild hook both use it — and it
   // was dropping a private answers file into a consumer's source tree, where nothing
   // was ignoring it. A receipt belongs with the artifact set it documents, not beside
   // one file pulled out of it.

@@ -25,7 +25,7 @@ Do not confuse `kind` with the neighbouring `composition` field, which records `
 
 The catalog covers the primitives, the infrastructure, the static catalog, and a zero-dependency motion core; a wider motion remainder is deferred behind a library-adoption decision.
 
-**In the catalog.** Manifest schema, picker, dependency resolution, the `setup.sh` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (easings + spring `linear()` presets), and the **motion core is zero-dependency**: `reveal`, `stagger`, `count-up`, `scroll-progress` — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no `motion` library. Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
+**In the catalog.** Manifest schema, picker, dependency resolution, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (easings + spring `linear()` presets), and the **motion core is zero-dependency**: `reveal`, `stagger`, `count-up`, `scroll-progress` — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no `motion` library. Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
 
 **Deferred — wider motion families.** Spring physics, layout morph, scroll-transform, and text effects sit behind a `motion`-library adoption decision, along with sub-categorization within the motion group and motion-in-Figma resolution. The remainder is gated on a real adoption decision, not scheduled — the zero-dep core covers the common cases without it.
 
@@ -168,7 +168,7 @@ The template pipeline (`scripts/code-templates/orchestrator.js` + the templates 
 | Concern | How it works |
 |---|---|
 | Generation | Orchestrator produces `catalog/[component].tsx` + `[component].manifest.json` (per-atom files) |
-| Install | `setup.sh` reads `loom-picks.json`, resolves dependencies via manifests, copies only the picked subset into the consuming project's `src/components/` |
+| Install | `npm run sync` reads `loom-picks.json`, resolves dependencies via manifests, copies only the picked subset into the consuming project's `src/components/` |
 
 Why templates instead of hand-authored:
 
@@ -206,7 +206,7 @@ loom/
   catalog-playground/             ← Next.js, consuming-project-of-itself
     loom-picks.json               ← picks every catalog atom
     src/
-      components/                 ← populated by setup.sh from catalog/
+      components/                 ← populated by `npm run sync` from catalog/
       gallery/                    ← hand-authored browse harness (shell + stories)
     next.config.ts
     tokens.css                    ← substrate bundle
@@ -214,7 +214,7 @@ loom/
 
 Implications:
 
-- **Dogfooding.** The catalog playground exercises `setup.sh` and the install ceremony every time it refreshes — the same path a downstream consumer runs.
+- **Dogfooding.** The catalog playground exercises `npm run sync` and the install ceremony every time it refreshes — the same path a downstream consumer runs.
 - **No second engineering surface.** It's the consuming-project scaffold pointed at `catalog/`, not a bespoke build.
 
 Costs accepted:
@@ -232,7 +232,7 @@ Hosting is a separate downstream decision. Local-only is fine; a static export (
 Every atom is produced through the same pipeline. The mechanical pieces:
 
 1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
-2. **`setup.sh` rewrite.** Reads `loom-picks.json`, resolves manifest dependencies, copies the picked subset into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
+2. **Install-flow rewrite.** Reads `loom-picks.json`, resolves manifest dependencies, copies the picked subset into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
 3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
 4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself with `loom-picks.json` picking every atom.
 

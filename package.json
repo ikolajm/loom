@@ -1,7 +1,7 @@
 {
   "name": "loom-design-system",
   "version": "2.0.0",
-  "description": "Token-driven design system generator — produces a first-party React component catalog, a CSS token substrate, and a Figma variable/style/component pipeline from a single config source.",
+  "description": "Token-driven design system generator \u2014 produces a first-party React component catalog, a CSS token substrate, and a Figma variable/style/component pipeline from a single config source.",
   "license": "MIT",
   "author": "Jacob Ikola",
   "private": true,
@@ -20,6 +20,7 @@
   "scripts": {
     "configs": "node scripts/generate-configs/index.js --input spec/answers.json",
     "figma": "node scripts/assemble-figma.js",
-    "generate": "node scripts/code-templates/orchestrator.js"
+    "generate": "node scripts/code-templates/orchestrator.js",
+    "sync": "node scripts/sync.js"
   }
 }

@@ -192,9 +192,22 @@ deliberate, not backlog inertia.
       nothing, so a class for them would be an empty rule carrying a name. They stay
       atoms, and that is finished rather than deferred.
 
-- [ ] **`node scripts/sync.js`** — fold `setup.sh` and `scripts/refresh-test.sh` into the
-      Node pipeline they already shell out to. All the logic is in `resolve-picks.js` and
-      the orchestrator; the shell is glue
+- [x] **`node scripts/sync.js`** — `setup.sh` (115 lines) and `scripts/refresh-test.sh`
+      (30) deleted; `npm run sync -- <project>` replaces both, with `--force` and
+      `--refresh`. The two helpers it called are now imported rather than shelled:
+      `resolve-picks.js` and `check-local-edits.js` export functions and keep their CLI,
+      and a resolution failure throws a `PickError` carrying its own report instead of
+      exiting the process, so an in-process caller can render it.
+
+      Verified by running both scripts against identical fixtures and diffing: **the
+      installed file trees are byte-identical**, and the output differs by one banner line.
+      Skip-on-local-edit, `--force` and `--refresh` each exercised.
+
+      It also surfaced a live failure: the **playground's own `loom-picks.json` still
+      listed all 18 dropped atoms**, so its resync had been erroring since the drop branch.
+      `playground-parity` passed throughout because the files were already in place and
+      matched. I had been piping those runs to `/dev/null`, which is why it went unseen —
+      the same reason the class regression survived
 
 ## The surface
 
