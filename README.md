@@ -6,8 +6,9 @@ states as named decisions instead of per-project choices.
 
 The coherence is the product. Tokens name the values; the class layer names the
 combinations, which is the part a values-only system cannot carry and the reason
-everything built on Loom looks like one hand made it — a Next app, a Vite app, a
-Django template and a generated invoice included.
+everything built on Loom looks like one hand made it — a Next app, a Vite app and a
+[printed invoice](docs/examples/invoice/) included, the last with no framework under
+it at all.
 
 Two things ride along. **Figma** takes the same substrate as variables, text
 styles and effect styles, so the design surface and the code surface read from
@@ -16,10 +17,12 @@ focus traps, portals, keyboard navigation, positioning — copied into your proj
 rather than installed from it (the shadcn model: own the files, no upstream sync).
 
 **Where it runs.** Anything with a CSS engine takes the layer directly and themes
-live — Vite, Django, Next, static sites, and the headless browser that renders a
-PDF. Email and React Native take `tokens.json` — the same values as plain data —
-because no stylesheet survives Outlook's Word engine or a runtime with no CSS at
-all.
+live — Vite, Django, Next, static sites, and whatever renders your PDFs. That last
+one is not a browser in disguise: the worked example goes through WeasyPrint, which
+has its own layout implementation, and [`docs/gotchas.md`](docs/gotchas.md) records
+where that shows. Email and React Native take `tokens.json` — the same values as
+plain data — because no stylesheet survives Outlook's Word engine or a runtime with
+no CSS at all.
 
 Loom started as a personal engine for spinning up consistent projects. It is open
 source for the model.
@@ -63,7 +66,7 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
 
-Everything here **carries behavior** — focus traps, portals, keyboard navigation, or a composition contract CSS cannot express. Appearance is not here at all: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css`, which is why they work in a Django template and a printed invoice as well as in React.
+Everything here **carries behavior** — focus traps, portals, keyboard navigation, or a composition contract CSS cannot express. Appearance is not here at all: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why the [printed invoice](docs/examples/invoice/) renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
 
 | Group | Atoms |
 |-------|-------|
@@ -124,11 +127,11 @@ Re-run these any time you change a value in `spec/answers.json` or a component s
 | File | Holds | Portable |
 |---|---|---|
 | `tokens.css` | custom properties — color roles, spacing, radius, type role values | yes |
-| `loom.css` | what you compose with — type ramp, tones, treatments, control states, surfaces, elevation, links, keyframes, print rules | yes |
+| `loom.css` | what you compose with — a document base, type ramp, text color roles, tones, treatments, control states, surfaces, elevation, links, tabular figures, keyframes, print rules | yes |
 | `loom.components.css` | what they compose into — named component classes, shape only | yes |
 | `loom.tailwind.css` | the `@theme inline` bridge and `@utility` shorthands | Tailwind v4 only |
 
-Import them in that order. A non-Tailwind build skips the last rather than silently dropping it, and a project that owns its own components can skip `loom.components.css` too.
+Import them in that order. A non-Tailwind build skips the last rather than silently dropping it, and a project that owns its own components can skip `loom.components.css` too. One thing to know before wiring `loom.css` into an app that already has a stylesheet: it is the only tier that touches bare elements — `box-sizing` and the `body` defaults — so a page not running Tailwind's preflight still gets a background, a text color and the body type role. It sits in `@layer components`, which means preflight loses to it and any utility you type still wins.
 
 Alongside them, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 

@@ -23,15 +23,12 @@ python -m venv .venv && .venv/bin/pip install weasyprint
 It renders against whatever the generator just emitted, not against a copied snapshot.
 Nothing runs it automatically. **The signal is `invoice.css`**: it holds `@page` setup
 and this document's own layout, and nothing else. If a change to the layer makes this
-file need a colour, a weight or a rule back, the layer gave something up.
+file need a color, a weight or a rule back, the layer gave something up.
 
-## What WeasyPrint does and does not do
+## WeasyPrint
 
-- `print-color-adjust: exact` is ignored as an unknown property, and backgrounds print
-  anyway — WeasyPrint has no "economy" mode to opt out of. The OVERDUE badge prints as a
-  real fill here for a different reason than it does in a browser.
-- `box-shadow` is unsupported, so `.elevate-*` is inert in a PDF. Depth has to be carried
-  by rules and surfaces in a document.
-- Custom properties resolve inside `@page` margin boxes — the page context inherits from
-  the root element — so the page counter reads `--on-surface-variant` rather than a hex.
-- `@keyframes` and `isolation` warn and are dropped. Both are app concerns.
+It is not a browser, and the differences bite — `box-shadow` does nothing, so
+`.elevate-*` is inert on paper; `print-color-adjust` is ignored but backgrounds print
+regardless. Both are written up in [`../../gotchas.md`](../../gotchas.md), which is where
+engine traps live. A render here is not a clean-log check: real warnings share the
+channel with `@keyframes` and `isolation` being dropped.

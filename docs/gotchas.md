@@ -302,3 +302,33 @@ npm run diff-emit -- --stat       # summary only
 It builds a temp worktree at the ref, copies the active brand in so the two sides differ
 only where the *generator* does, emits both, and diffs. Un-ignoring `generated/` would be
 the wrong fix — it would commit your brand to Loom's history.
+
+---
+
+## Documents — WeasyPrint is not a browser, and the differences are load-bearing
+
+The portable tier's only non-React consumer is a PDF renderer, and the engine that
+renders it has its own layout implementation rather than a browser's. Four differences
+matter, all found by rendering [`docs/examples/invoice/`](examples/invoice/) rather than
+by reading the CSS.
+
+**`print-color-adjust: exact` is ignored, and backgrounds print anyway.** The class
+layer sets it on `.treat-filled` and `.treat-dot` so a badge reading OVERDUE prints as a
+fill rather than as bare text. WeasyPrint logs it as an unknown property — it has no
+"economy" mode to opt out of, so it always paints backgrounds. The declaration stays
+because it is the browser print path that needs it; the document path gets the same
+result for a different reason. Do not read a correct-looking PDF as proof that the
+property works.
+
+**`box-shadow` is unsupported**, so `.elevate-*` is inert in a document. Depth has to be
+carried by rules and surface levels. A layout that separates two blocks with elevation
+alone renders as one undifferentiated block on paper.
+
+**Custom properties resolve, including inside `@page` margin boxes.** The page context
+inherits from the root element, so a running header or a page counter reads
+`var(--on-surface-variant)` like anything else. A hex in document CSS is a mistake, not
+a workaround — the first invoice carried one for exactly that reason.
+
+**`@keyframes` and `isolation` warn and are dropped.** Both are app concerns and the
+warnings are noise here, but they share the channel with real ones, so a document render
+is not a clean-log check.
