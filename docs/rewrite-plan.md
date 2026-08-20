@@ -568,11 +568,70 @@ off as verified statically; both were wrong the moment a page was looked at. One
 - [ ] **Look at the rebuilt select.** Trigger, panel, rows, keyboard highlight and the
       error cascade are verified by typecheck and the checks only
 
-- [ ] **Give jmi-finance and jmi-fitness the refresh loop.** Neither has `loom:sync`.
-      `./scaffold/init.sh <dir> --tokens` is idempotent and adds it — it also drops
-      `tokens.json` in, which those two do not need today but an invoice or email template
-      generator would read. Held until the hand-port lands in their history, so the two
-      changes stay separable
+- [x] **Give jmi-finance and jmi-fitness the refresh loop.** Both carry `loom:sync` and
+      `tokens.json` now, taken from the scaffold in their own commit after the hand-port
+      landed, so the two changes stay separable in each history.
+
+      **Both are synced from before the document tier.** Their `loom.css` has no document
+      base, no `.surface`, no text roles, no `.numeric`. A re-sync after this lands is what
+      picks those up, and it is not cosmetic: the document base sits in `@layer components`,
+      which outranks Tailwind's preflight, so `body` starts reading `--surface` and
+      `--on-surface` in both apps. Utilities still win over it, which is the point of the
+      layer, so an app that paints `body` with a class is unaffected
+
+## The document tier
+
+- [x] **Build one invoice on the substrate.** Concrete first: a plain HTML file, the four
+      stylesheets, and WeasyPrint. No React, no build step, no Tailwind. It renders — three
+      pages with the table header repeating on every one, the OVERDUE badge printing as a
+      real fill, the print block forcing light roles.
+
+      The finding was the size of the document-specific CSS: **15 lines**, of which only
+      three were substrate gaps and twelve were `@page` setup and this invoice's own layout.
+      That ratio is the answer to whether the substrate serves documents.
+
+- [x] **Close the three gaps the invoice found.** Each had independent evidence of being
+      written twice, which is the bar.
+
+      **A document base.** The portable tier styled no bare element at all — no
+      `body { background; color }` anywhere. Invisible in an app, because Tailwind's
+      preflight was doing it; take the tokens tier into a Django template or a PDF and you
+      get a white page with black text and 203 unused custom properties. Minimal on
+      purpose: `border-box`, and the body defaults. Not a reset library.
+
+      **`.text-on-surface` and `.text-on-surface-variant`.** 42 classes in `loom.css` and
+      not one set a colour on text. Named after the tokens rather than shortened to
+      `.text-muted` so the class a Tailwind consumer already types keeps working when they
+      drop the bridge — paperboy types `text-on-surface-variant` 146 times.
+
+      **`.numeric`, and `.table` right-aligns it.** Split deliberately: tabular figures
+      anywhere, alignment only inside a table, because outside one the layout decides.
+      Written by hand twice before it was a class — jmi-finance's call sites and the
+      invoice's totals block.
+
+      `.surface` came along with them: the base plane had no class while 1, 2 and 3 did,
+      an incomplete ladder every consumer closed by hand.
+
+      Re-rendered against the new layer, the invoice's own CSS is **12 lines and no
+      substrate gaps** — `@page` and its own layout, nothing else.
+
+- [x] **The invoice is a repo artifact** — `docs/examples/invoice/`. Kept because every
+      other consumer of the layer runs through a Tailwind build, so preflight and utilities
+      can cover a gap in the tokens or class tier; this file has nothing to hide behind, and
+      the tier it exercises is the one with the fewest eyes on it.
+
+      It links the three stylesheets out of `generated/` rather than carrying copies, so it
+      renders against whatever the generator just emitted and cannot go stale against it in
+      the way a snapshot would. Nothing runs it automatically and no check watches it — the
+      honest state, stated in its README rather than implied by a green check. The signal is
+      the size of `invoice.css`: if a change to the layer makes this document need a colour
+      or a weight back, the layer gave something up.
+
+      Restoring it turned up one thing the first pass missed: the page-number margin box
+      hardcoded a hex, and it did not have to. Custom properties resolve inside `@page`
+      margin boxes — the page context inherits from the root element — so it reads
+      `--on-surface-variant` like everything else. "No substrate gaps" was measured against
+      the body of the document and not against its `@page` block
 
 - [ ] **Scaffold into a handful of ported projects** — the broader test of the substrate
       against apps that did not grow up with it

@@ -890,13 +890,67 @@ function buildSectionPrintStructure() {
 }`;
 }
 
+/**
+ * The document base, and the two colour roles that had no class.
+ *
+ * Everything else in this file is opt-in: you add a class and something happens. This
+ * section is the exception, and it exists because the portable tier styled no bare element
+ * at all. In an app that never showed, because Tailwind's preflight was doing it. Take the
+ * tokens tier into a Django template, a static page or a PDF and you get a white page with
+ * black text and 203 unused custom properties, and every consumer writes the same four
+ * lines to fix it. Measured on the first real document built this way.
+ *
+ * Minimal on purpose. This is not a reset library: border-box because it is the one line
+ * everyone writes, and the body defaults because the substrate is useless without them.
+ * Layered like the rest, so a consumer's own body rule wins without a specificity fight.
+ *
+ * The two text roles are named after the tokens rather than shortened to something like
+ * `.text-muted`, so that the class a Tailwind consumer already types keeps working when
+ * they drop the bridge. paperboy types `text-on-surface-variant` 146 times.
+ */
+function buildSectionDocumentBase() {
+  return `/* === Document Base === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--type-body-md-family);
+  font-size: var(--type-body-md-size);
+  line-height: var(--type-body-md-line);
+}
+
+/* === Text Colour Roles === */
+.text-on-surface {
+  color: var(--on-surface);
+}
+
+.text-on-surface-variant {
+  color: var(--on-surface-variant);
+}
+
+/* Tabular figures, wherever numbers line up in a column: a table, a totals block, a
+   statement. Alignment is deliberately not here — outside a table the layout decides,
+   and inside one .table right-aligns it, which is the convention money follows. */
+.numeric {
+  font-variant-numeric: tabular-nums;
+}`;
+}
+
 function buildSection17_SurfacesTableLink() {
   // Surface level and elevation are independent axes, not one scale. The catalog proves
   // it: bg-surface-1 pairs with shadow-1, shadow-2 and shadow-3 in different atoms, so a
   // class bundling them would be wrong two times in three. Same orthogonality as tone and
   // treatment — one class says which plane, the other says how far off it.
-  const surfaces = [1, 2, 3]
-    .map((n) => `.surface-${n} {\n  background-color: var(--surface-${n});\n}\n`)
+  // `.surface` is the base plane and had no class while 1, 2 and 3 did — an incomplete
+  // ladder that every consumer closed by hand (paperboy reaches for bg-surface 24 times).
+  const surfaces = ['.surface {\n  background-color: var(--surface);\n}\n']
+    .concat([1, 2, 3].map((n) => `.surface-${n} {\n  background-color: var(--surface-${n});\n}\n`))
     .join('\n');
   const elevations = [0, 1, 2, 3]
     .map((n) => `.elevate-${n} {\n  box-shadow: var(--shadow-${n});\n}\n`)
@@ -970,6 +1024,14 @@ function buildSectionTable() {
 .table tr {
   border-bottom: var(--bw-1) solid ${ruleColor};
   transition: background-color var(--transition-fast) var(--easing);
+}
+
+/* The column modifier. .numeric gives tabular figures anywhere; a table also right-aligns
+   them, because that is where a column of money has to line up on its last digit. Written
+   by hand twice before it was a class — in jmi-finance's call sites and again in the first
+   invoice built on the substrate. */
+.table :is(th, td).numeric {
+  text-align: right;
 }
 
 .table tbody tr:last-child {
@@ -1417,6 +1479,8 @@ function generateTokens() {
  */
 function generateLayer() {
   const layered = [
+    buildSectionDocumentBase(),
+    '',
     buildSection10_TypographyPresets(),
     '',
     buildSection11_InteractiveStates(),

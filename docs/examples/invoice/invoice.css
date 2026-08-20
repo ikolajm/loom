@@ -1,0 +1,12 @@
+/* Everything the substrate does not provide for a printed document. */
+@page {
+  size: Letter;
+  margin: 18mm 16mm 20mm;
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 9pt; color: var(--on-surface-variant); }
+}
+.doc-head    { display: flex; justify-content: space-between; align-items: flex-start; margin-block-end: var(--space-8); }
+.doc-parties { display: flex; gap: var(--space-12); margin-block-end: var(--space-8); }
+.doc-totals  { margin-inline-start: auto; width: 60mm; margin-block-start: var(--space-6); }
+.doc-totals .row   { display: flex; justify-content: space-between; padding-block: var(--space-1); }
+.doc-totals .total { border-top: var(--bw-1) solid var(--outline); margin-block-start: var(--space-2); padding-block-start: var(--space-3); }
+.doc-foot    { margin-block-start: var(--space-12); }

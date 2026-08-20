@@ -207,3 +207,27 @@ close to 1:1 with the catalog.
   permanent second output to keep in sync with the first, and a second output
   that ships to nobody drifts from the one that does.
 
+
+- **2026-08-19** — **The document tier was built, and the "no consumer" premise
+  above is now measured rather than predicted.** The rejection of the resolved
+  mode rested in part on the observation that nothing under `~/jmi-projects`
+  generates a document at all. One does now — `docs/examples/invoice/`, rendered
+  by WeasyPrint from the tokens and class tiers with no React, no build step and
+  no Tailwind — and it confirms the rejection rather than reversing it. Custom
+  properties resolve there in full, including inside `@page` margin boxes, where
+  the page context inherits from the root element. **A flattened emit would have
+  served this document nothing it did not already get.**
+
+  **What the document did find is that the portable tier styled no bare element.**
+  No `body { background; color }` anywhere, and 42 classes of which not one set a
+  colour on text. Invisible in every consumer to date, because Tailwind's preflight
+  was supplying the first and utilities the second. That is the shape of gap this
+  tier will keep having: the apps cannot show it, because the framework they carry
+  covers it.
+
+  **The document base is the layer's one non-opt-in section**, and it is a
+  deliberate exception to the rule that a class does nothing until you type it.
+  Minimal — `border-box` and the body defaults, not a reset library — and layered
+  with everything else, so preflight loses to it and a consumer's own utility still
+  wins. Consumers synced before this change do not have it; a re-sync is what moves
+  `body` onto the roles.

@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../../generated/tokens.css">
+<link rel="stylesheet" href="../../../generated/loom.css">
+<link rel="stylesheet" href="../../../generated/loom.components.css">
+<link rel="stylesheet" href="invoice.css">
+</head>
+<body>
+  <header class="doc-head">
+    <div>
+      <h1 class="text-display-sm">Invoice</h1>
+      <p class="text-body-sm text-on-surface-variant">INV-2049 &middot; issued 12 Aug &middot; due 26 Aug</p>
+    </div>
+    <span class="badge treat-filled tone-error-soft" data-size="md">OVERDUE</span>
+  </header>
+
+  <section class="doc-parties">
+    <div>
+      <p class="label" data-size="sm">From</p>
+      <p class="text-body-md">Ikola Studio<br>114 Bridge St<br>Portland, ME 04101</p>
+    </div>
+    <div>
+      <p class="label" data-size="sm">Bill to</p>
+      <p class="text-body-md">Northgate Coffee Co.<br>882 Marginal Way<br>Portland, ME 04101</p>
+    </div>
+  </section>
+
+  <table class="table" data-size="md">
+    <thead>
+      <tr><th>Description</th><th class="numeric">Qty</th><th class="numeric">Rate</th><th class="numeric">Amount</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Brand identity — discovery and direction</td><td class="numeric">12</td><td class="numeric">$140.00</td><td class="numeric">$1,680.00</td></tr>
+      <tr><td>Design system build</td><td class="numeric">28</td><td class="numeric">$140.00</td><td class="numeric">$3,920.00</td></tr>
+      <tr><td>Site implementation</td><td class="numeric">34</td><td class="numeric">$120.00</td><td class="numeric">$4,080.00</td></tr>
+      <tr><td>Photography direction</td><td class="numeric">6</td><td class="numeric">$120.00</td><td class="numeric">$720.00</td></tr>
+    </tbody>
+  </table>
+
+  <section class="doc-totals">
+    <div class="row"><span class="text-body-md text-on-surface-variant">Subtotal</span><span class="text-body-md numeric">$10,400.00</span></div>
+    <div class="row"><span class="text-body-md text-on-surface-variant">Tax (5.5%)</span><span class="text-body-md numeric">$572.00</span></div>
+    <div class="row total"><span class="text-title-sm">Total due</span><span class="text-title-sm numeric">$10,972.00</span></div>
+  </section>
+
+  <footer class="doc-foot text-body-sm text-on-surface-variant">
+    <p>Payment by transfer within 14 days. Late balances accrue 1.5% monthly.</p>
+  </footer>
+</body></html>
