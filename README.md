@@ -153,7 +153,7 @@ Both tiers are first-class on web:
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet — both are plain CSS and need no build step — add `loom.components.css` if you want the named component classes, and `loom.tailwind.css` after the `tailwindcss` import if you are on Tailwind. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet — both are plain CSS and need no build step, but put your own reset in a layer declared before `components` or it will silently outrank the entire class layer ([why](docs/gotchas.md)) — add `loom.components.css` if you want the named component classes, and `loom.tailwind.css` after the `tailwindcss` import if you are on Tailwind. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 

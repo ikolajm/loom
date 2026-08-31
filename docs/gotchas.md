@@ -332,3 +332,42 @@ a workaround — the first invoice carried one for exactly that reason.
 **`@keyframes` and `isolation` warn and are dropped.** Both are app concerns and the
 warnings are noise here, but they share the channel with real ones, so a document render
 is not a clean-log check.
+
+## The class layer ships in `@layer components`, so any unlayered reset outranks all of it
+
+`loom.css` and `loom.components.css` wrap their contents in `@layer components`.
+Unlayered CSS beats layered CSS **regardless of specificity** — that is the cascade
+working as specified, and it inverts the intuition that a more specific selector wins.
+
+So the reset every project already has:
+
+```css
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+```
+
+outranks `.treat-filled`, `.treat-outline` and every other class Loom ships, on an
+element selector at 0-0-1 against a class at 0-1-0. Buttons render with no background,
+no border and inherited text colour.
+
+The symptom is the problem: nothing errors, the classes are present in the DOM, the
+rules are present in the stylesheet, and the custom properties resolve correctly.
+Reading computed styles on an affected button shows `--tone-bg` holding the right
+colour while `background-color` computes to `rgba(0, 0, 0, 0)`. It reads as "the
+treatment classes are broken."
+
+**Put the reset in a layer declared before `components`.** A consuming project's own
+rules can stay unlayered if it wants them to be the last word:
+
+```
+@layer reset  →  @layer components (Loom)  →  unlayered (your app)
+```
+
+**And establish the order structurally, not with a layer statement.** The
+`@layer reset, components;` form is correct CSS and minifiers drop it as redundant,
+after which precedence silently falls back to first appearance. If the reset block sits
+after the Loom imports in source, removing that one line reverses the whole cascade. A
+reset file that wraps itself in `@layer reset` and is imported before Loom cannot be
+minified into the wrong order.
+
+Found in pb2 (Paperboy v2). The buttons had correct tone and treatment classes and were
+diagnosed twice as a markup problem before anyone looked at the layer.
