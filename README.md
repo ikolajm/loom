@@ -78,9 +78,9 @@ The motion atoms are **zero-dependency** — hand-rolled on `IntersectionObserve
 
 A few architectural choices worth noting:
 
-- **Orthogonal `variant × color`.** Visual treatment (filled / outline / ghost) and color (brand / severity) are independent CVA (class-variance-authority) axes — the color axis sets CSS vars, each treatment consumes them. Adding a color or a treatment is one line, not an N×M matrix. The color axis is opt-in per atom.
+- **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost` / `-dot`) consumes them. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
 - **Atoms are project-owned.** You don't `npm install` Loom. You pick a subset, the files are copied into your project, and you edit them freely — the shadcn model. There's no upstream auto-sync; a manual port-back is the deliberate path when an edit generalizes.
-- **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A scaffolded Loom project looks plain because the personality is yours to add, not because the system is unfinished — see [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md).
+- **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A scaffolded Loom project looks plain because the personality is yours to add, not because the system is unfinished.
 
 ---
 
@@ -88,9 +88,11 @@ A few architectural choices worth noting:
 
 Requires Node ≥ 18.18. **Using Loom in a project? This Quickstart is everything you need** — the architecture spec and the `docs/` folder are internals for *extending* the generator, not for consuming it.
 
-### Browse the catalog
+### Browse the catalog — and the compile gate
 
-The catalog playground is a Next.js app that picks every atom and renders them with prop controls:
+`catalog-playground/` is the generator's compile gate first and a gallery second. It picks every atom, so its build is the only thing that reads the emitted `.tsx` **as code** rather than as text: `npm run generate` ends in `verify.js`, which delegates to this app for `typecheck` (`tsc --noEmit`, `strict` + `noUnusedLocals`), `playground-parity` (the synced copies match what the generator just emitted) and `story-coverage` (every atom is rendered somewhere, so none can change unverifiably). Generated TSX with a syntax error passed every regex-level check twice before this gate existed.
+
+The gallery half is the surface you look at — every atom with prop controls, which is where a visual pass happens:
 
 ```bash
 cd catalog-playground
@@ -188,6 +190,10 @@ npm run sync -- ../my-loom-app
 
 `init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
+**From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: the playground does that, but a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
+
+A sync always regenerates the substrate, so your tokens are current by construction; only `catalog/*.tsx` can lag behind the schemas and templates it was built from. The sync **reports** that in one line rather than repairing it — rebuilding the atoms runs the whole pipeline, including a typecheck over the playground, so refreshing a brand in your project could fail on a surface it has never heard of. Pass `--refresh` when you do want them rebuilt.
+
 Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
 ### Apply the Figma scripts
@@ -239,7 +245,7 @@ scripts/               The two codegen pipelines
   scripts/sync.js      ← installs picked atoms + substrate into a project (`npm run sync`)
 
 catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
-catalog-playground/    Next.js app that browses the whole catalog
+catalog-playground/    Compile gate + gallery — picks every atom; its tsc run is verify.js's typecheck
 native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)
 ```

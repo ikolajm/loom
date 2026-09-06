@@ -39,7 +39,7 @@ Pre-composed molecules (e.g., a stat-trend display combining `CountUp` + caption
 
 ### Marketing characterization is project-owned
 
-Marketing primitives (hero, media, stat, cross-link) are intentionally **not** catalog atoms: they read as project-specific *styling* (characterization), not generalizable *primitives*. Marketing characterization is project-owned, per [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md): the substrate is the foundation; the eye-catching layer is built per-project. A component-gap audit against shadcn confirms the catalog has no missing standard primitives, so the omission leaves no real gap.
+Marketing primitives (hero, media, stat, cross-link) are intentionally **not** catalog atoms: they read as project-specific *styling* (characterization), not generalizable *primitives*. Marketing characterization is project-owned: the substrate is the foundation, and the eye-catching layer is built per-project on top of it. A component-gap audit against shadcn confirms the catalog has no missing standard primitives, so the omission leaves no real gap.
 
 ---
 
@@ -185,7 +185,7 @@ Hand-editing an individual catalog file is allowed for one-off polish, but the t
 
 ## Token bundle: substrate, not picked
 
-Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json` — or from `spec/config/local/base/*.json` when you have run `npm run configs` for your own brand, which is git-ignored and takes precedence (see `scripts/config-paths.js`). Per [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md): tokens are foundation; characterization is project-owned.
+Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json` — or from `spec/config/local/base/*.json` when you have run `npm run configs` for your own brand, which is git-ignored and takes precedence (see `scripts/config-paths.js`). Tokens are foundation; characterization is project-owned.
 
 Motion tokens land with the substrate bundle — easings (`standard` / `decelerate` / `accelerate` / `emphasized`) and spring `linear()` presets sampled from real physics. They shipped before the motion components so the atoms had a stable token foundation, and so a consuming project's animations draw from the substrate rather than hard-coded values.
 
@@ -194,6 +194,8 @@ Motion tokens land with the substrate bundle — easings (`standard` / `decelera
 ## Catalog playground hosting
 
 The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom: its `loom-picks.json` lists the full catalog, and `setup.sh` populates `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
+
+**It is load-bearing, not a demo.** Because it picks everything and compiles under `strict`, its build is the generator's compile gate — `verify.js` delegates `typecheck`, `playground-parity` and `story-coverage` to it, and deliberately re-checks none of what tsc already covers. Both checks were earned: generated TSX with a syntax error passed every other check twice in one session, and `playground-parity` once reported full coverage while nine atoms were rendered nowhere and could not be looked at. Deleting this app would let `npm run generate` report success on output nothing has compiled.
 
 **Its `src/tokens.css` is git-ignored and regenerated on every `npm run dev` / `npm run build`** by a `predev` / `prebuild` hook. That makes the playground a live reflection of whichever config set is active: run it holding your own brand in `spec/config/local/` and the ramps, type and control sizing are yours, so token-source edits can be checked against the whole catalog in one place. A fresh clone with no local set renders Loom's own look. Committing that file would force it to be both canonical enough to review in a diff and local enough to be useful, and it cannot be both — so it is generated, never tracked. Build with `npm run build` rather than `npx next build`; the latter bypasses the hook and fails on a missing import if the file was never generated.
 
@@ -237,6 +239,7 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 2. **Install-flow rewrite.** Reads `loom-picks.json`, resolves manifest dependencies, copies the picked subset into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
 3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
 4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself with `loom-picks.json` picking every atom.
+5. **Staleness stamp.** `generate` writes `$inputs` into `catalog/atoms.json` — a hash over the component schemas and code templates, the two things that decide what `catalog/*.tsx` contains. `sync.js` recomputes it and reports a mismatch. Hashed rather than compared by mtime because `git checkout` rewrites timestamps, so a fresh clone would warn on its first sync and every one after — the kind of false positive that trains people to ignore the message. Token configs are deliberately outside the hash: the substrate regenerates on every sync, so a brand change must not read as a stale catalog. Both sides import [`scripts/catalog-stamp.js`](scripts/catalog-stamp.js) so the definition of "the inputs" cannot drift between the thing that stamps and the thing that checks; the full reasoning is in that file's header rather than mirrored here.
 
 ---
 
@@ -244,10 +247,11 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 
 - **Motion-in-Figma.** The motion core ships code-only. How motion maps into the Figma file (Smart Animate doesn't map cleanly to web motion tokens) is deferred — its own decision, part of the motion remainder.
 - **Wider motion families.** Gated on a `motion`-library adoption decision (see the execution split). The zero-dep core does not force it.
+- **The rebuilt `select` has not been looked at.** Trigger, panel, rows, keyboard highlight and the error cascade are verified by typecheck and the checks only. The regressions this migration did produce — a dead `data-size`, vanished classes, a failing playground sync — were found by running rather than reading, so static verification is not the same as done here.
+- **The substrate has not been scaffolded into apps that did not grow up with it.** `jmi-finance` and `jmi-fitness` were hand-ported; a handful of unrelated projects is the broader test.
 
 ---
 
 ## Cross-references
 
-- [`docs/design-rationale/substrate-not-ambition.md`](docs/design-rationale/substrate-not-ambition.md) — tokens are substrate; characterization is project-owned
 - [`docs/gotchas.md`](docs/gotchas.md) — hard-won traps (Figma API, Tailwind v4, fonts, reduced motion)

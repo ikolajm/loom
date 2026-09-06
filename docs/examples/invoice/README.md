@@ -6,9 +6,24 @@ the catalog, the playground and both ported apps all run through a Tailwind buil
 gap in the tokens or class tier can hide behind preflight and utilities. This file has
 neither to hide behind.
 
-The document base, `.text-on-surface`, `.text-on-surface-variant`, `.numeric` and
-`.surface` were all found by building it — see the document-tier section of
-[`../../rewrite-plan.md`](../../rewrite-plan.md).
+Four things in the layer were found by building this file, each with independent evidence
+of having been written twice — that was the bar for admitting one.
+
+- **A document base.** The portable tier styled no bare element at all. Invisible in an
+  app, because Tailwind's preflight does it; take the tokens tier into a Django template
+  or a PDF and you get a white page, black text and a pile of unused custom properties.
+  `border-box` and the body defaults — not a reset library.
+- **`.text-on-surface` / `.text-on-surface-variant`.** The class layer set a colour on no
+  text anywhere. Named after the tokens rather than shortened to `.text-muted`, so the
+  class a Tailwind consumer already types keeps working when they drop the bridge.
+- **`.numeric`.** Tabular figures anywhere; right-alignment only inside `.table`, because
+  outside one the layout decides. Hand-written twice before it was a class.
+- **`.surface`.** Levels 1, 2 and 3 had classes and the base plane did not — an
+  incomplete ladder every consumer had been closing by hand.
+
+The measurement is the argument. The first render needed 15 lines of document-specific
+CSS, three of which were substrate gaps. With the gaps closed it needs 12, and all of
+them are `@page` setup and this document's own layout.
 
 ## Render it
 

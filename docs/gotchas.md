@@ -35,35 +35,35 @@ Now `bg-surface`, `text-on-surface`, `border-outline-subtle/40` all exist — sa
 
 ---
 
-## Tailwind v4 — two generated-code traps that build green
+## `.interactive` vs Tailwind utilities — resolved by layering, not by wrapping
 
-Both *looked* correct and compiled clean; both only showed up at visual-confirm. This is the standing case for visual-confirm being a non-optional step, not the build passing.
+**Symptom, historically.** Carousel arrows passed `className="absolute …"` through `Button` fell into normal document flow and stacked at the top instead of pinning to the viewport edges. It looked correct and compiled clean; it only showed up at visual-confirm.
 
-### `.interactive` position footgun (resolved)
+**Root cause.** `.interactive` hard-sets `position: relative`. Pass `absolute` through `className` and tailwind-merge keeps both — it *cannot dedupe a custom utility class against a Tailwind position utility*, having no idea `.interactive` also sets `position`. Which one wins is then a pure cascade question, and at the time the class layer shipped **unlayered** while Tailwind v4 puts its utilities in `@layer utilities`. Unlayered styles beat layered ones regardless of source order, so `absolute` was present in the DOM and silently overridden.
 
-**Symptom.** Carousel arrows passed `className="absolute …"` through `Button` fell into normal document flow and stacked at the top instead of pinning to the viewport edges.
+**Resolution.** The class layer moved into `@layer components`, declared before `utilities`, so any Tailwind utility you type now wins over it. The wrap-in-a-positioning-div workaround this section used to prescribe is no longer needed.
 
-**Root cause.** Button's base pulls Loom's `.interactive` utility, which **hard-sets `position: relative`**. When you pass `absolute` via Button's `className`, tailwind-merge keeps it — but tailwind-merge *cannot dedupe a custom utility class (`.interactive`) against a Tailwind position utility (`absolute`)*; it has no idea `.interactive` also sets `position`. Both land in the class list, and the cascade resolves `.interactive`'s `position: relative` as the winner — decisively, not narrowly: `tokens.css` is imported **unlayered** while Tailwind v4 puts its utilities in `@layer utilities`, and unlayered styles beat layered ones regardless of source order. The `absolute` is present in the DOM and silently overridden. General rule: **any base class that sets a CSS property via a custom (non-Tailwind) utility wins over a Tailwind utility for the same property passed through `className`** — tailwind-merge only knows Tailwind's own vocabulary.
+**The part that outlives the fix.** tailwind-merge only ever knows Tailwind's own vocabulary, so it will never dedupe a custom class against a utility setting the same property — layering is the only thing making that harmless. Ship a custom class unlayered, or in a layer declared after `utilities`, and it silently outranks every utility for that property. The same mechanism bites from the other direction with consumer resets: see the last section of this file.
 
-**Fix — wrap, don't override.** Wrap the Button in a plain positioning `<div>`, inside a `relative` viewport:
+## Radix `Slot` — `asChild` silently applies no classes when children are wrapped in a fragment
 
-```tsx
-<div className="relative">              {/* viewport */}
-  <div className="absolute left-2 top-1/2 -translate-y-1/2">
-    <Button iconOnly>…</Button>         {/* keeps its own .interactive position:relative, harmlessly */}
-  </div>
-</div>
-```
+`Slot` locates the consumer's element through `Slottable` using `React.Children.toArray`,
+which flattens **arrays but not fragments**. Wrapped in a `<>`, `Slot` sees one
+unrecognised child, clones the fragment itself and sets `className` on it — React warns
+and drops it. The result renders with no `display`, no size, and a raw 24-viewBox svg at
+intrinsic size. **Pass an array, not a fragment.**
 
-Applies to *any* `.interactive`-based atom you try to position via className.
+This fails silently in the direction that matters: the component renders, so a typecheck
+and a build both pass. `badge` carried the same bug in a worse form — it imported `Slot`
+without `Slottable` at all, so `badge asChild` had never applied classes in any version.
+No story exercised it, which is why it went unseen. Any generated component wiring
+`asChild` needs a story that actually exercises it.
 
-### Custom-keyframe stripping (OPEN — root cause unresolved)
-
-**Symptom.** The `marquee` atom defined a custom `@keyframes marquee` + `--animate-marquee` theme entry (the Tailwind v4 way to register a custom animation utility). In the playground build, Tailwind v4 **kept stripping the keyframes / never emitted `animate-marquee`** — static element, no animation, no error. Built green, did nothing.
-
-**What's strange.** `accordion` uses an identically-shaped pattern (custom `@keyframes` + `--animate-*`) and it **works**. Root cause not isolated — candidates not ruled out: scanner not seeing the utility reference, `@theme` vs `@theme inline` placement, keyframe name collision, playground-specific build order.
-
-**Current call.** `marquee` was pulled from the catalog and deferred to a project with real consuming context (a normal app build, not the playground harness). Revisit there.
+**Parked deliberately: `asChild` + `iconOnly` together.** That mode wraps children in
+`span.icon-slot`, which becomes Slot's only child, so the classes land on the span and the
+consumer's element nests inside it. The fix is not mechanical — the span exists to read
+`--icon-size`, so removing it means deciding how an icon is sized without one. A design
+call on component internals, parked visibly rather than guessed at.
 
 ---
 
@@ -87,7 +87,7 @@ Operational reference for the Figma Plugin API — data formats, gotchas, valida
 - **Shared-utils architecture:** paste the utils bundle once, then run small step scripts that reference globals — 50–70% size reduction per script.
 - Variable IDs are session-specific. Get references in the same script; don't hardcode IDs across runs.
 - Wrap step scripts in async IIFEs (console scope collisions are real).
-- **A Figma deliverable only changes on re-paste.** Regenerating the scripts updates `generated/figma-scripts/`, not any file you already built — an existing Figma file keeps the old variables, styles and components until you re-run the paste. So "the generator is fixed" and "the file is fixed" are separate claims, and only the second one is checkable by looking.
+- **A Figma deliverable only changes on re-paste.** Regenerating the scripts updates `generated/figma-scripts/`, not any file you already built — an existing Figma file keeps the old variables and styles until you re-run the paste. So "the generator is fixed" and "the file is fixed" are separate claims, and only the second one is checkable by looking.
 - **Re-pasting the shared-utils bundle throws `redeclaration of const X` and *silently halts*.** Console scope persists across pastes, and top-level `const`/`let` can't be redeclared — so a second paste of `00` dies at the first collision and every helper below it never reloads (a fix you just made silently won't take). `assemble-figma.js` emits the bundle with top-level `const`/`let` rewritten to `var` so re-pastes redefine cleanly. One exception: the first hop *out of* a `const`-era console session still needs a reload (a `var` can't redeclare an existing `const`).
 
 **Fonts**
@@ -111,20 +111,7 @@ Operational reference for the Figma Plugin API — data formats, gotchas, valida
 | Text style binding | `style.setBoundVariable("fontSize", var)` (fontSize, lineHeight, fontFamily, fontWeight) |
 | Effect style binding | set `boundVariables` on the effect object, reassign array to style |
 | Code syntax | `variable.setVariableCodeSyntax("WEB", "var(--name)")` |
-| Component boolean props | `comp.addComponentProperty(name, 'BOOLEAN', default)` + `node.componentPropertyReferences = { visible: propKey }` |
 | Slash naming = folder grouping | `color/primary/500` groups as `color/ > primary/ > 500` in the Variables panel |
-
----
-
-## Figma — master components resolve variables at the collection's *default* mode
-
-**Symptom.** The same component looked different in two places: the master `template/try-me-button` on the Core page rendered with dark text on a darker purple, while every instance of it inside the doc-page preview frames rendered with light text on a lighter purple. Same component, two appearances — looks like a build bug.
-
-**Root cause.** A node's mode-dependent variables resolve against whatever mode is set on the **frame/page that contains it**, via `setExplicitVariableModeForCollection`. The doc preview frames each call `setDefaultMode(frame, defaultMode)` (the doc layer's `light` mode), so instances inside them resolve `color/primary/on-primary` → the light-mode value. The **master** sat in the "System Components" frame, which never set a mode — so it fell back to the `semantic.color` collection's *own* default mode (`dark`), resolving the same token to a different value. This is invisible as long as the component only uses **mode-independent** paints (a direct hex, or a `layout/*` variable with one mode). It only surfaced when the try-me button was switched from `layout/on-accent` (direct hex, one value everywhere) to `color/primary/on-primary` (a two-mode semantic alias).
-
-**Fix.** Apply the documentation default-mode to *every* frame that holds components — including the masters' container, not just the per-atom preview frames. `build-system-frame.js` now calls `setDefaultMode(sysFrame, defaultMode)` so masters resolve identically to their instances.
-
-**The rule:** any frame that contains components bound to mode-dependent variables must declare its mode explicitly. Don't rely on the collection default — a master in an unmoded frame will silently drift from its instances the moment it uses a multi-mode token.
 
 ---
 
@@ -142,7 +129,9 @@ Google Fonts and Figma's font set are **not 1:1** (Figma = system fonts + a Goog
 - **Code side** — the Google Fonts `<link>` *is* the proof. `layout.tsx` builds the URL from the family name. Self-host by editing the project-owned `layout.tsx`.
 - **Figma side** — `figma.listAvailableFontsAsync()` at paste time is authoritative; any missing family **substitutes Inter** (logged) so the build completes instead of throwing.
 
-Both placements: a soft config-time warning against [`spec/parity-safe-fonts.json`](../spec/parity-safe-fonts.json) (`npm run configs`), and the authoritative Figma preflight (`resolvers.js`: `reportFontParity` / `resolveFamily` / `safeLoadFont`). **Non-standard style names** (`"Semi Bold"` vs `"SemiBold"`) map through `FONT_WEIGHT_OVERRIDES` in `resolvers.js` — `loadFontAsync` throws on a wrong style name, so add the family there when a new font trips it.
+Both placements: a soft config-time warning against [`spec/parity-safe-fonts.json`](../spec/parity-safe-fonts.json) (`npm run configs`), and the authoritative Figma preflight (`scripts/figma-styles/_shared.js`: `reportFontParity` / `resolveFamily` / `safeLoadFont`).
+
+**A family being available says nothing about the weight you want.** `listAvailableFontsAsync()` answers with family *and* style; keeping only the family leaves `fontStyle()` guessing a style name and `loadFontAsync` throwing when the guess is absent. Space Mono ships Regular and Bold against a ramp asking 400/500/600/700 — `reportFontParity` reported the family present three lines before the paste died on the missing 600, because it checked the family and not the weights. `fontStyle()` now snaps to the nearest weight the family actually ships (ties heavier, italics excluded), which is what CSS font matching already does on the page; Figma was the only surface refusing to build rather than falling back. `FONT_WEIGHT_OVERRIDES` is still checked first, now as the way to pin a choice deliberately unlike the browser's rather than as the workaround for a crash.
 
 ---
 

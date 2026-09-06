@@ -2,8 +2,8 @@
 
 **This is where you tell Loom what your product should look like.** You answer up to
 thirteen questions in one small file, and Loom generates the rest: a color system in
-light and dark, a type ramp, spacing, radii, shadows, a React component catalog, and a
-matching Figma file.
+light and dark, a type ramp, spacing, radii, shadows, the CSS class layer built on them,
+and the same values as Figma variables and styles.
 
 **Only one answer is required** — your `primary` brand color. Everything else has a
 sensible default or is derived from what you did answer, so the shortest useful answers
