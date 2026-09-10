@@ -248,11 +248,14 @@ catalog/               Generated output — per-atom .tsx + .manifest.json (stor
 catalog-playground/    Compile gate + gallery — picks every atom; its tsc run is verify.js's typecheck
 native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)
+  pipeline.md          ← the derivation chain: answers.json → every output
 ```
 
 ---
 
 ## How it's built
+
+[`docs/pipeline.md`](docs/pipeline.md) traces the derivation chain end to end — the three commands, how a config file is resolved, what each generator transforms rather than copies, and where a symptom points. Start there to extend the generator or to debug an output that doesn't match the answers.
 
 The full catalog model — surfaces, picker, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
 
