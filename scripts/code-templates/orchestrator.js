@@ -24,7 +24,7 @@ const registry = getComponentRegistry(configs);
 // --- Generator modules ---
 const GENERATORS = {
   'tokens': {
-    description: 'tokens.css + loom.css + loom.tailwind.css (values, class layer, Tailwind bridge)',
+    description: 'tokens.css + loom.css + loom.components.css + loom.tailwind.css (values, class layer, component classes, Tailwind bridge)',
     run: (outputDir) => {
       const { generate, FILES } = require('./generate-tokens-css');
       const files = generate();
