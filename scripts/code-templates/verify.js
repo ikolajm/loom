@@ -454,7 +454,7 @@ function checkBaseConfigProvenance() {
 
 // --- touch-target ----------------------------------------------------------
 // `standards.json` has declared touch-target.min: 44px since v2 and nothing consumed it:
-// it reached tokens.css, tokens.json and the NativeWind preset as a value no atom read,
+// it reached tokens.css as a value no atom read,
 // while the default button shipped at 40px. The semantic height ladder is what makes it
 // reachable, and this is what makes it binding — every tier of every role in the `touch`
 // ladder must sit at or above the minimum, checked against direction-mappings rather than

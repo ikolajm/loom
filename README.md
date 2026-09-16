@@ -20,9 +20,9 @@ rather than installed from it (the shadcn model: own the files, no upstream sync
 live — Vite, Django, Next, static sites, and whatever renders your PDFs. That last
 one is not a browser in disguise: the worked example goes through WeasyPrint, which
 has its own layout implementation, and [`docs/gotchas.md`](docs/gotchas.md) records
-where that shows. Email and React Native take `tokens.json` — the same values as
-plain data — because no stylesheet survives Outlook's Word engine or a runtime with
-no CSS at all.
+where that shows. Email is the one target no stylesheet reaches — Outlook's Word
+engine drops custom properties, so `var()` buys you nothing there. `tokens.css` is
+still the source: it holds the resolved values as literal hex, to be copied in.
 
 Loom started as a personal engine for spinning up consistent projects. It is open
 source for the model.
@@ -37,21 +37,21 @@ source for the model.
                                 ▼
                           spec/config/         ← single source of truth
                                 │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-   tokens.css              class layer             tokens.json
-   + Figma variables,      appearance, states,     plain values, no var()
-   text & effect styles    interaction feel        email, React Native
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-            behavior components
-            React, only where CSS cannot reach
-            (focus traps, portals, keyboard nav, positioning)
-                    │
-                    ▼
-             consuming project
-             (copy what you need, own the copies)
+        ┌───────────────────────┴───────────────────────┐
+        ▼                                               ▼
+   tokens.css                                      class layer
+   + Figma variables,                              appearance, states,
+   text & effect styles                            interaction feel
+        │                                               │
+        └───────────────────────┬───────────────────────┘
+                                ▼
+                        behavior components
+                        React, only where CSS cannot reach
+                        (focus traps, portals, keyboard nav, positioning)
+                                │
+                                ▼
+                         consuming project
+                         (copy what you need, own the copies)
 ```
 
 Change a value in `spec/answers.json` → regenerate → every output moves together, because they read the same JSON. Figma takes the token half as variables and styles; the class layer is CSS-only, since Figma has no notion of a class.
@@ -116,7 +116,7 @@ See [`spec/questionnaire.md`](spec/questionnaire.md) for the full key reference.
 
 ```bash
 npm run configs      # spec/answers.json → spec/config/local/  (git-ignored)
-npm run generate     # → React catalog (catalog/) + the four stylesheets + tokens.json
+npm run generate     # → React catalog (catalog/) + the four stylesheets
 npm run figma        # → Figma plugin scripts (paste into the Figma console)
 ```
 
@@ -148,15 +148,13 @@ One caveat that decides how you wire this up: a minifier drops an `@layer` state
 
 A project that owns its own components can skip `loom.components.css`. Before wiring `loom.css` into an app that already has a stylesheet, know that it is the only file touching bare elements — `box-sizing` and the `body` defaults — so a page with no reset of its own still gets a background, a text color and the body type role. Those sit in `loom.base`, below everything else Loom ships.
 
-Alongside them, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
-
 ### Use Loom in a project
 
 **Two install tiers.** Pick before you start; the difference is what Loom is allowed to put in your project.
 
 | Tier | You get | Use when |
 |------|---------|----------|
-| **tokens** | the four stylesheets + `tokens.json`, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values. This is the only tier a non-web runtime can take: [`native/`](native/README.md) is this tier, consumed through the NativeWind preset |
+| **tokens** | the stylesheets, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values |
 | **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`, a `/preview` route), the core dependencies, and the atoms you pick | You want the components too. This is what the quickstart below installs |
 
 The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
@@ -164,11 +162,11 @@ The `/preview` route belongs to the **catalog** tier: it renders the token subst
 Both tiers are first-class on web:
 
 ```bash
-./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes the four stylesheets + src/tokens.json, nothing else
+./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes the stylesheets, nothing else
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
@@ -259,7 +257,6 @@ scripts/               The two codegen pipelines
 
 catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
 catalog-playground/    Compile gate + gallery — picks every atom; its tsc run is verify.js's typecheck
-native/                React Native / NativeWind bridge — tokens.json + preset (see native/README.md)
 docs/                  Design-system engineering docs (see below)
   pipeline.md          ← the derivation chain: answers.json → every output
 ```

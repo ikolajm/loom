@@ -47,7 +47,7 @@ function generate() {
 #
 # Usage: ./scaffold/init.sh <frontend-dir> [--tokens]
 #   (default)  catalog tier — app shell + substrate + core deps + starter picker
-#   --tokens   tokens tier  — the three stylesheets + tokens.json and nothing else
+#   --tokens   tokens tier  — the three stylesheets and nothing else
 # Run from the generated/ directory. Idempotent.
 
 set -euo pipefail
@@ -75,7 +75,7 @@ echo "Target: $FRONTEND_DIR"
 echo ""
 
 # --- Validate ---
-# The tokens tier writes stylesheets and tokens.json into src/ and touches nothing else,
+# The tokens tier writes the stylesheets into src/ and touches nothing else,
 # so it does not require src/app/ — it does not assume Next.js, or a React app at all.
 for f in tokens.css loom.css loom.components.css; do
   [ -f "$GEN_DIR/$f" ] || { echo "ERROR: $f not found in $GEN_DIR — run the orchestrator first."; exit 1; }
@@ -112,19 +112,12 @@ SCRIPTJS
 }
 
 if [ "$TIER" = "tokens" ]; then
-  echo "[1/3] Copying stylesheets..."
+  echo "[1/2] Copying stylesheets..."
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
   cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
   cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
 
-  echo "[2/3] Copying tokens.json..."
-  if [ -f "$GEN_DIR/tokens.json" ]; then
-    cp "$GEN_DIR/tokens.json" "$SRC_DIR/tokens.json"
-  else
-    echo "  tokens.json not found in $GEN_DIR — skipped (run the orchestrator to emit it)"
-  fi
-
-  echo "[3/3] Adding the loom:sync script..."
+  echo "[2/2] Adding the loom:sync script..."
   add_loom_sync
 
   echo ""
@@ -139,7 +132,6 @@ if [ "$TIER" = "tokens" ]; then
   echo "drops the @layer statement, after which precedence falls back to first appearance."
   echo "Your own reset goes in @layer loom.reset, imported before tokens.css."
   echo ""
-  echo "tokens.json is the same data with no CSS runtime — for a native or non-web consumer."
   echo "No atoms were installed. To take them too, re-run without --tokens."
   echo ""
   echo "Refresh whenever the brand changes in the Loom repo:  npm run loom:sync"

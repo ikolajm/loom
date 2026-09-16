@@ -18,7 +18,7 @@ the whole surface.
 | Command | Entry point | Reads | Writes |
 |---|---|---|---|
 | `npm run configs` | `scripts/generate-configs/index.js` | `spec/answers.json`, `spec/direction-mappings.json`, `spec/config/standards.json` | `spec/config/local/base/*.json` (git-ignored) |
-| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — stylesheets, `tokens.json`, `components/`, `scaffold/`, `HANDOFF.md` — plus `catalog/` |
+| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — stylesheets, `components/`, `scaffold/`, `HANDOFF.md` — plus `catalog/` |
 | `npm run figma` | `scripts/assemble-figma.js` | the resolved config set | `generated/figma-scripts/` — 17 paste scripts |
 
 They are strictly ordered. `configs` writes the config set that the other two read;
@@ -175,7 +175,6 @@ redirects.
 | Target | Emits |
 |---|---|
 | `tokens` | `tokens.css`, `loom.css`, `loom.components.css` |
-| `tokens-json` | `tokens.json` — same values as neutral data, no `var()` |
 | `doc-layout` | `doc-layout.css` from `presentation/layout.json` |
 | `icons` | `components/icons.ts` |
 | `components` | `components/*.tsx` + `cn.ts` |
