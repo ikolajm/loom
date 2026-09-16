@@ -91,7 +91,6 @@ const CATEGORY_MAP = {
   'Data Display': 'data-display',
   'Navigation': 'navigation',
   'Composite': 'composite',
-  'Motion': 'motion',
 };
 
 function extractAxisKeys(obj) {
@@ -240,7 +239,7 @@ function generate(registry, outputDir, configs) {
 
   // Pickable atoms grouped by catalog group — the menu to grab loom-picks.json names from.
   // Generated from the catalog so it can't drift from what's actually built.
-  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite', 'motion'];
+  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite'];
   const byGroup = {};
   for (const a of atoms) (byGroup[a.category] ||= []).push(a.name);
   const grouped = {};

@@ -56,7 +56,6 @@ function loadAllConfigs() {
     layoutConfig: loadComponents('components/layout.json'),
     navigationConfig: loadComponents('components/navigation.json'),
     compositeConfig: loadComponents('components/composite.json'),
-    motionConfig: loadComponents('components/motion.json'),
   };
 }
 
@@ -365,8 +364,6 @@ const PATTERN_IDS = new Set([
   'list-item', 'accordion', 'avatar-group', 'tree-view', 'stepper', 'carousel',
   // Composed states
   'empty-state', 'fab-menu', 'toggle-group',
-  // Motion that drives other motion atoms
-  'stagger',
 ]);
 
 /** `atom` unless listed above. See PATTERN_IDS for why this is authored, not derived. */
@@ -377,7 +374,7 @@ function kindOf(key) {
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
-  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig, motionConfig } = configs;
+  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig } = configs;
   return {
     // === Actions ===
     'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
@@ -398,8 +395,6 @@ function getComponentRegistry(configs) {
     // === Navigation ===
 
     // === Composite ===
-
-    // === Motion ===
   };
 }
 

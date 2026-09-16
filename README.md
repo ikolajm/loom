@@ -74,7 +74,7 @@ Everything here **carries behavior** — focus traps, portals, keyboard navigati
 | **Forms** | form-field, select |
 | **Layout** | dialog |
 
-The motion atoms are **zero-dependency** — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no animation library. Interactive primitives that genuinely warrant a library use one (carousel → embla, date-picker → Radix); simple atoms don't.
+Interactive primitives that genuinely warrant a library use one (carousel → embla, date-picker → Radix); simple atoms don't.
 
 A few architectural choices worth noting:
 
@@ -244,7 +244,7 @@ spec/                  Single source of truth
   config/
     base/              ← Loom's committed default token set — the fallback
     local/             ← your generated brand (git-ignored; preferred over base/)
-    components/        ← hand-authored component schemas (8 group files)
+    components/        ← hand-authored component schemas (7 group files)
     figma/             ← Figma variable-collection definitions
     presentation/      ← Figma documentation chrome (layout, templates)
   questionnaire.md     ← the tiered intake that drives base/ tokens

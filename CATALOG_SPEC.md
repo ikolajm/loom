@@ -23,19 +23,11 @@ Do not confuse `kind` with the neighbouring `composition` field, which records `
 
 ---
 
-## Scope: the catalog today, and the deferred motion remainder
+## Scope: what the catalog covers
 
-The catalog covers the primitives, the infrastructure, the static catalog, and a zero-dependency motion core; a wider motion remainder is deferred behind a library-adoption decision.
+The catalog covers the primitives, the infrastructure, and the static catalog.
 
-**In the catalog.** Manifest schema, picker, dependency resolution, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (easings + spring `linear()` presets), and the **motion core is zero-dependency**: `reveal`, `stagger`, `count-up`, `scroll-progress` — hand-rolled on `IntersectionObserver` / `requestAnimationFrame` / CSS, no `motion` library. Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
-
-**Deferred — wider motion families.** Spring physics, layout morph, scroll-transform, and text effects sit behind a `motion`-library adoption decision, along with sub-categorization within the motion group and motion-in-Figma resolution. The remainder is gated on a real adoption decision, not scheduled — the zero-dep core covers the common cases without it.
-
-### Motion atoms are envelopes or leaves, not pre-composed pairs
-
-The wrapping motion atoms compose arbitrary children via the standard composition patterns. Loom does not ship `AnimatedButton` parallel to `Button`. Consumers compose: `<Reveal><Card>…</Card></Reveal>`, `<Stagger><List/></Stagger>`. The leaf motion atoms take their own props: `<CountUp value={42} />`, `<ScrollProgress />`. N primitives × M wrappers = N+M atoms, not N×M.
-
-Pre-composed molecules (e.g., a stat-trend display combining `CountUp` + caption + trend arrow + `Reveal`) live in the consuming project as project-authored composition; they graduate to catalog atoms only if a stable shape emerges across projects — hand-author molecules in the project, generalize only when the pattern holds.
+**In the catalog.** Manifest schema, picker, dependency resolution, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (one duration, one easing). Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
 
 ### Marketing characterization is project-owned
 
@@ -107,12 +99,12 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 | Field | Purpose |
 |---|---|
 | `name` | Pick key in `loom-picks.json` |
-| `category` | Catalog browse grouping (button / form / layout / feedback / data-display / navigation / composite / motion) |
+| `category` | Catalog browse grouping (button / form / layout / feedback / data-display / navigation / composite) |
 | `description` | Playground UI label, browse summary |
 | `version` | Content hash of the atom's generated source — changes only when the atom changes |
 | `dependencies` | Other catalog atoms required (registry deps; picker resolves transitively) |
 | `tokens` | Which token sets the atom reads (informational — substrate ships all-or-nothing, but useful in playground for filter-by-token-set) |
-| `composition` | Slot pattern — the contract for motion envelopes. Enum: `none` / `slot` / `slottable` / `children-as-function` |
+| `composition` | Slot pattern — how an atom hands its root or its children to a caller. Enum: `none` / `slot` / `slottable` / `children-as-function` |
 | `variants` | Primary variant axis — drives playground prop controls |
 | `sizes` | Size axis — drives playground prop controls |
 
@@ -187,7 +179,7 @@ Hand-editing an individual catalog file is allowed for one-off polish, but the t
 
 Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json` — or from `spec/config/local/base/*.json` when you have run `npm run configs` for your own brand, which is git-ignored and takes precedence (see `scripts/config-paths.js`). Tokens are foundation; characterization is project-owned.
 
-Motion tokens land with the substrate bundle — easings (`standard` / `decelerate` / `accelerate` / `emphasized`) and spring `linear()` presets sampled from real physics. They shipped before the motion components so the atoms had a stable token foundation, and so a consuming project's animations draw from the substrate rather than hard-coded values.
+Motion lands with the substrate bundle as one duration and one easing — `--transition` and `--easing`, both plain custom properties a consumer overrides with any value, including their own timing function. The four bezier presets and three spring `linear()` approximations that shipped earlier were emitted and referenced by nothing; a second tier gets added when something needs it.
 
 ---
 
@@ -240,13 +232,6 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
 4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself with `loom-picks.json` picking every atom.
 5. **Staleness stamp.** `generate` writes `$inputs` into `catalog/atoms.json` — a hash over the component schemas and code templates, the two things that decide what `catalog/*.tsx` contains. `sync.js` recomputes it and reports a mismatch. Hashed rather than compared by mtime because `git checkout` rewrites timestamps, so a fresh clone would warn on its first sync and every one after — the kind of false positive that trains people to ignore the message. Token configs are deliberately outside the hash: the substrate regenerates on every sync, so a brand change must not read as a stale catalog. Both sides import [`scripts/catalog-stamp.js`](scripts/catalog-stamp.js) so the definition of "the inputs" cannot drift between the thing that stamps and the thing that checks; the full reasoning is in that file's header rather than mirrored here.
-
----
-
-## Open items (intentionally unresolved here)
-
-- **Motion-in-Figma.** The motion core ships code-only. How motion maps into the Figma file (Smart Animate doesn't map cleanly to web motion tokens) is deferred — its own decision, part of the motion remainder.
-- **Wider motion families.** Gated on a `motion`-library adoption decision (see the execution split). The zero-dep core does not force it.
 
 ---
 

@@ -51,7 +51,7 @@ Two files are never generated and have no local counterpart in practice:
   read it for structure and fill it with your values. It is the reason
   `generate-spacing.js` is 25 lines: the scale already exists, and density only
   picks which scale steps each category points at.
-- **`spec/config/components/*.json`** — the eight component schemas. Hand-authored,
+- **`spec/config/components/*.json`** — the seven component schemas. Hand-authored,
   not derived from answers.
 
 ## Stage 1 — `answers.json` → config set
@@ -184,7 +184,7 @@ redirects.
 | `handoff` | `HANDOFF.md` |
 | `verify` | nothing — runs the invariant checks and fails the run |
 
-`loadAllConfigs()` reads six token/standards files plus the eight component schemas.
+`loadAllConfigs()` reads six token/standards files plus the seven component schemas.
 On the way in it applies **`$constant` expansion**: a component's `sizes.$constant`
 block is merged into every size tier, with a value declared on a tier winning. This
 happens at load so every generator downstream sees fully-populated tiers. The point
