@@ -34,14 +34,6 @@ const GENERATORS = {
       }
     },
   },
-  'tokens-json': {
-    description: 'tokens.json (neutral token data for non-web consumers — RN/NativeWind, native configs)',
-    run: (outputDir) => {
-      const { generate } = require('./generate-tokens-json');
-      fs.writeFileSync(path.join(outputDir, 'tokens.json'), JSON.stringify(generate(), null, 2) + '\n');
-      console.log('  tokens.json');
-    },
-  },
   'doc-layout': {
     description: 'doc-layout.css (gallery presentation layer — derived from presentation/layout.json)',
     run: (outputDir) => {
@@ -72,6 +64,20 @@ const GENERATORS = {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, 'page.tsx'), generate());
       console.log('  app/preview/page.tsx');
+    },
+  },
+  // Ignores outputDir on purpose: this page is read in the repo, not shipped in the
+  // bundle, and it links ../generated/ rather than living beside it. Separate from the
+  // 'preview' target above rather than replacing it — the playground still builds that
+  // one, and both retire together when the playground goes.
+  'preview-html': {
+    description: 'docs/preview.html (the substrate canvas as a static page — no framework under it)',
+    run: () => {
+      const { generate } = require('./generate-preview-html');
+      const dir = path.resolve(__dirname, '../../docs');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'preview.html'), generate());
+      console.log('  docs/preview.html');
     },
   },
   'scaffold': {
