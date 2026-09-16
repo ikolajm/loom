@@ -164,14 +164,8 @@ function buildSection6_Effects() {
 
   lines.push('');
   lines.push('/* === Transitions === */');
-  for (const [name, val] of Object.entries(standards.effects.transition)) {
-    lines.push(`--transition-${name}: ${val};`);
-  }
-  for (const [name, val] of Object.entries(standards.effects.easing)) {
-    if (name.startsWith('$')) continue;
-    lines.push(`--easing-${name}: ${val};`);
-  }
-  lines.push('--easing: var(--easing-standard);'); // back-compat alias
+  lines.push(`--transition: ${standards.effects.transition.default};`);
+  lines.push(`--easing: ${standards.effects.easing.default};`);
 
   lines.push('');
   lines.push('/* === Focus Ring === */');
@@ -709,11 +703,16 @@ const BASE_RULES = {
   'list-item': ['display: flex;', 'align-items: center;'],
   pagination: ['display: flex;', 'align-items: center;', 'justify-content: center;'],
   sidebar: ['display: flex;', 'flex-direction: column;'],
-  // `animate-pulse` was a Tailwind built-in; a consumer without Tailwind has no such
-  // utility, so the layer has to carry the animation for the class to mean anything.
-  skeleton: ['width: 100%;', 'border-radius: var(--radius-component);',
-             'animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;'],
-  spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  // Static by deliberate choice. A skeleton earns its place by reserving layout and
+  // showing the shape of what is coming, and it does both without moving. The pulse it
+  // used to carry was also the only thing a reduced-motion user had to be spared from,
+  // and what they would have been served instead is exactly this block.
+  skeleton: ['width: 100%;', 'border-radius: var(--radius-component);'],
+  // The layer's one animation, and the only class that is meaningless without it: a
+  // spinner that does not turn is a circle. Deliberately outside the reduced-motion
+  // block below — a frozen spinner does not read as calm, it reads as hung.
+  spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;',
+            'animation: spin 1s linear infinite;'],
   stepper: ['display: flex;', 'align-items: center;', 'width: 100%;'],
   textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
@@ -1020,7 +1019,7 @@ function buildSectionTable() {
 
 .table tr {
   border-bottom: var(--bw-1) solid ${ruleColor};
-  transition: background-color var(--transition-fast) var(--easing);
+  transition: background-color var(--transition) var(--easing);
 }
 
 /* The column modifier. .numeric gives tabular figures anywhere; a table also right-aligns
@@ -1057,7 +1056,7 @@ function buildSection16_ControlStates() {
   return `/* === Control States === */
 .control {
   transition-property: color, background-color, border-color, outline-color, opacity;
-  transition-duration: var(--transition-fast);
+  transition-duration: var(--transition);
   transition-timing-function: var(--easing);
 }
 
@@ -1142,7 +1141,7 @@ function buildSection11_InteractiveStates() {
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
   transition-property: color, background-color, border-color, box-shadow, opacity;
-  transition-duration: var(--transition-fast);
+  transition-duration: var(--transition);
   transition-timing-function: var(--easing);
 }
 
@@ -1153,7 +1152,7 @@ function buildSection11_InteractiveStates() {
   border-radius: inherit;
   background: currentColor;
   opacity: 0;
-  transition: opacity var(--transition-fast) var(--easing);
+  transition: opacity var(--transition) var(--easing);
   pointer-events: none;
   z-index: -1;
 }
@@ -1227,16 +1226,11 @@ function buildSection14_Animations() {
   to { transform: translateX(0); }
 }
 
+/* Consumed by .spinner. The other keyframes here are named for atoms to reach for;
+   this one the layer uses itself. */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-/* Consumed by .skeleton. The other keyframes here are named for atoms to reach for;
-   this one the layer uses itself, because a skeleton that does not pulse is a grey bar. */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }`;
 }
 
@@ -1291,6 +1285,31 @@ function buildSectionPrintRoles() {
   return `@media print {\n  :root,\n  [data-theme="dark"] {\n${indent(lines, 2)}\n  }\n}`;
 }
 
+/**
+ * The whole reduced-motion answer, because every transition the layer emits reads
+ * `--transition` and nothing else. One property to redefine, no per-class branches.
+ *
+ * `0.01ms` rather than `0s` so `transitionend` still fires — nothing in the catalog
+ * waits on it today, and a value that quietly stops firing events is a trap to leave
+ * for later.
+ *
+ * `.spinner` is deliberately unaffected: it animates on `spin`, not on `--transition`.
+ * An indeterminate progress indicator is essential motion — frozen, it reads as a hung
+ * app rather than a calm one, which is the worse outcome.
+ *
+ * Unlayered, next to the print block and for the same reason: an environmental override
+ * should not sit in a layer a consumer's plain `:root` outranks. A consumer who sets
+ * their own duration after this still wins on source order, which is the right boundary
+ * — they have taken the decision, and its consequences, back.
+ */
+function buildSectionReducedMotion() {
+  return `@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition: 0.01ms;
+  }
+}`;
+}
+
 function generateTokens() {
   const defaultMode = colors['default-mode'] || 'light';
   const altMode = defaultMode === 'dark' ? 'light' : 'dark';
@@ -1327,6 +1346,8 @@ function generateTokens() {
     ].join('\n').split('\n'))}\n}`,
     '',
     buildSectionPrintRoles(),
+    '',
+    buildSectionReducedMotion(),
     ''
   ].join('\n');
 }

@@ -104,16 +104,31 @@ Both placements: a soft config-time warning against [`spec/parity-safe-fonts.jso
 
 ---
 
-## Reduced motion is per-atom, not a blanket rule
+## Reduced motion is one line, and the spinner is exempt from it
 
-`prefers-reduced-motion` is not a global switch you flip on every animated atom. Whether an atom honors it — and how — depends on **what kind of motion it is**. The dividing line is who drives the motion.
+No browser honors `prefers-reduced-motion` on its own. It suppresses nothing; it is a
+media query you author, and unauthored it does nothing at all.
 
-| Kind | The motion is… | `prefers-reduced-motion` | Loom atoms |
-|------|----------------|--------------------------|------------|
-| **Autonomous** | plays on its own, user didn't trigger it | **Honor it** — suppress or snap to end state | `reveal`, `stagger`, `count-up` |
-| **Direct-manipulation** | the user is driving it; motion reflects their own action | **Do NOT honor it** — suppressing breaks the feedback | `scroll-progress` |
+Loom authors it once, in `tokens.css`:
 
-A scroll-progress bar frozen "to respect reduced-motion" would just be broken — you can't reduce the motion of a thing the user is actively moving. Implementation also varies per atom: `reveal` honors it in pure CSS (a media query lands the final state, no JS); `count-up` uses `matchMedia('(prefers-reduced-motion: reduce)')` to skip the rAF loop and set the final value (CSS can't intercept a JS animation); `scroll-progress` **deliberately** omits any handling — documented as intentional so a future reader doesn't "fix" the missing handler and break it.
+```css
+@media (prefers-reduced-motion: reduce) {
+  :root { --transition: 0.01ms; }
+}
+```
+
+That is the whole answer for transitions, because every transition the class layer emits
+reads `--transition` and nothing else. `0.01ms` rather than `0s` keeps `transitionend`
+firing for anything that waits on it.
+
+**`.spinner` is deliberately outside it.** It animates on the `spin` keyframe, not on
+`--transition`, so the block above does not reach it — by design. An indeterminate
+progress indicator is essential motion: frozen, it does not read as calm, it reads as a
+hung app. Suppressing it trades a small discomfort for a false signal. Don't "fix" the
+spinner by adding it to that block.
+
+`.skeleton` is static for the same family of reasons — it reserves layout and shows the
+shape of what is coming, and it does both without moving, so there is nothing to suppress.
 
 **The rule:** before reaching for `prefers-reduced-motion`, ask *"did the user trigger this, or is it playing on its own?"* Autonomous → honor it (pick the mechanism). Direct-manipulation → don't, and leave a comment saying so.
 

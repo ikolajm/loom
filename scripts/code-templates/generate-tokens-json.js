@@ -120,11 +120,6 @@ function buildSemanticHeight() {
 
 function buildEffects() {
   const focus = standards.effects['focus-ring'];
-  const easing = {};
-  for (const [name, val] of Object.entries(standards.effects.easing)) {
-    if (name.startsWith('$')) continue;
-    easing[name] = val;
-  }
   const opacity = {};
   for (const [name, val] of Object.entries(standards.effects.opacity)) {
     if (name.startsWith('$')) continue;
@@ -132,8 +127,8 @@ function buildEffects() {
   }
   return {
     shadow: effects.shadow,
-    transition: standards.effects.transition,
-    easing,
+    transition: standards.effects.transition.default,
+    easing: standards.effects.easing.default,
     focusRing: { width: focus.width, offset: focus.offset, color: focus.color },
     opacity,
   };
