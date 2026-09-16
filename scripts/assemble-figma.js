@@ -10,8 +10,7 @@
  * Figma receives the token half: variables, text styles, effect styles, and the page
  * layout that holds them. It does not receive components. Figma has no notion of a
  * class, so the class layer has no representation here — and a Figma component was
- * only ever a snapshot of one combination, not the rule that generates it. See
- * docs/decisions/2026-08-18_class-layer-is-the-deliverable.md.
+ * only ever a snapshot of one combination, not the rule that generates it.
  *
  * Usage:
  *   node scripts/assemble-figma.js                    — writes to generated/figma-scripts/

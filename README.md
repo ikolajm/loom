@@ -64,7 +64,7 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 **The catalog is a worked example, not a component library.** Five references, one per distinct way of wiring something to the class layer: `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix form control. Anything else you need, build — Radix is already the primitive layer, and what Loom uniquely owns is tokens to classes.
 
-That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for. See [`docs/decisions/2026-08-18_class-layer-is-the-deliverable.md`](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md).
+That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for.
 
 Everything here **carries behavior** — focus traps, portals, keyboard navigation, or a composition contract CSS cannot express. Appearance is not here at all: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why the [printed invoice](docs/examples/invoice/) renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
 
@@ -198,7 +198,7 @@ Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Go
 
 ### Apply the Figma scripts
 
-`npm run figma` writes 17 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`16` step scripts (each a self-contained async IIFE). They build **variables, text styles, effect styles and the page layout** — the token half. Figma does not receive components: it has no notion of a class, so the class layer has no representation there, and a Figma component was only ever a snapshot of one combination rather than the rule that generates it ([why](docs/decisions/2026-08-18_class-layer-is-the-deliverable.md)). Build the components you need from the variables. To build the Figma file:
+`npm run figma` writes 17 scripts to `generated/figma-scripts/` — `00_shared-utils.js` (global helpers) + `01`–`16` step scripts (each a self-contained async IIFE). They build **variables, text styles, effect styles and the page layout** — the token half. Figma does not receive components: it has no notion of a class, so the class layer has no representation there, and a Figma component was only ever a snapshot of one combination rather than the rule that generates it. Build the components you need from the variables. To build the Figma file:
 
 1. Open the target Figma file and open a plugin **console** (any dev plugin → Plugins → Development → Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.

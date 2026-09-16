@@ -247,8 +247,6 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 
 - **Motion-in-Figma.** The motion core ships code-only. How motion maps into the Figma file (Smart Animate doesn't map cleanly to web motion tokens) is deferred — its own decision, part of the motion remainder.
 - **Wider motion families.** Gated on a `motion`-library adoption decision (see the execution split). The zero-dep core does not force it.
-- **The rebuilt `select` has not been looked at.** Trigger, panel, rows, keyboard highlight and the error cascade are verified by typecheck and the checks only. The regressions this migration did produce — a dead `data-size`, vanished classes, a failing playground sync — were found by running rather than reading, so static verification is not the same as done here.
-- **The substrate has not been scaffolded into apps that did not grow up with it.** `jmi-finance` and `jmi-fitness` were hand-ported; a handful of unrelated projects is the broader test.
 
 ---
 

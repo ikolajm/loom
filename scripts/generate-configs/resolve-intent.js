@@ -12,8 +12,7 @@
  * for one value meant the resolved scale could not be stated without running the
  * generator and reading which layer won — the blocks genuinely conflicted, `dashboard`
  * saying `type-scale: compact` against its own first style-suggestion `clean` saying
- * `standard`. It was cut for that reason, not for size. See
- * docs/decisions/2026-08-18_class-layer-is-the-deliverable.md.
+ * `standard`. It was cut for that reason, not for size.
  *
  * Callers must resolve BEFORE handing answers to a generator. Two do: the `npm run
  * configs` entry point, and `verify.js`'s base-config-provenance check, which
