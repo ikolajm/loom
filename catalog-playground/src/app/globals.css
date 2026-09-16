@@ -8,7 +8,6 @@
 @import "../tokens.css";
 @import "../loom.css";
 @import "../loom.components.css";
-@import "../loom.tailwind.css";
 @import "./doc-layout.css";
 
 html, body {

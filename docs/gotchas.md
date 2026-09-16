@@ -4,46 +4,15 @@ Traps the generated code embodies but can't explain. The code holds the *fix*; t
 
 ---
 
-## Tailwind v4 — tokens must be registered as utilities, or they're ignored
-
-For a tokens-driven system to actually get *used*, the tokens have to be ergonomic. In Tailwind v4 that means registering them in an `@theme` block so they generate utility classes. Without it, tokens exist as CSS variables but get practically ignored — the call-site syntax is ugly enough that engineers reach for `bg-black/40` instead, and the whole point of the design system is silently abandoned.
-
-The raw-variable syntax (what you get without `@theme`):
-
-```jsx
-<div className="bg-[color:var(--surface)] border border-[color:var(--outline-subtle)]" />
-```
-
-Verbose, hard to remember, awkward with opacity. So `bg-black/40` wins — every component written in a Loom downstream project *before* this pattern was adopted defaulted to raw values, with the tokens sitting right there in `tokens.css`, unused.
-
-**The fix** — register tokens in `@theme`, after the tokens import:
-
-```css
-@import "tailwindcss";
-@import "../tokens.css";
-
-@theme {
-  --color-surface: var(--surface);
-  --color-on-surface: var(--on-surface);
-  --color-primary: var(--primary);
-  --color-outline-subtle: var(--outline-subtle);
-  /* …the role tokens that appear in your call sites */
-}
-```
-
-Now `bg-surface`, `text-on-surface`, `border-outline-subtle/40` all exist — same ergonomics as `bg-black/40`, so the *named* utility becomes the path of least resistance. The double indirection (`--color-surface` → `--surface` → hex) is cheap and means a theme swap follows automatically with no Tailwind rebuild. Loom bakes this block into the scaffold's `globals.css`, so downstream projects get it on day one instead of re-discovering the anti-pattern. **Path of least resistance wins. Always. Design accordingly.**
-
----
-
-## `.interactive` vs Tailwind utilities — resolved by layering, not by wrapping
+## A custom class and a consumer's utility are a pure cascade question
 
 **Symptom, historically.** Carousel arrows passed `className="absolute …"` through `Button` fell into normal document flow and stacked at the top instead of pinning to the viewport edges. It looked correct and compiled clean; it only showed up at visual-confirm.
 
 **Root cause.** `.interactive` hard-sets `position: relative`. Pass `absolute` through `className` and tailwind-merge keeps both — it *cannot dedupe a custom utility class against a Tailwind position utility*, having no idea `.interactive` also sets `position`. Which one wins is then a pure cascade question, and at the time the class layer shipped **unlayered** while Tailwind v4 puts its utilities in `@layer utilities`. Unlayered styles beat layered ones regardless of source order, so `absolute` was present in the DOM and silently overridden.
 
-**Resolution.** The class layer moved into `@layer components`, declared before `utilities`, so any Tailwind utility you type now wins over it. The wrap-in-a-positioning-div workaround this section used to prescribe is no longer needed.
+**Resolution.** The class layer moved into a cascade layer — `loom.components` now — so anything you write unlayered wins over it. The wrap-in-a-positioning-div workaround this section used to prescribe is no longer needed.
 
-**The part that outlives the fix.** tailwind-merge only ever knows Tailwind's own vocabulary, so it will never dedupe a custom class against a utility setting the same property — layering is the only thing making that harmless. Ship a custom class unlayered, or in a layer declared after `utilities`, and it silently outranks every utility for that property. The same mechanism bites from the other direction with consumer resets: see the last section of this file.
+**The part that outlives the fix, and Tailwind.** No merge helper can dedupe a custom class against something setting the same property from another vocabulary; it has no idea `.interactive` also sets `position`. Layering is the only thing that makes that harmless, which is why every rule Loom ships is in a layer. Ship a custom class unlayered and it silently outranks everything layered for that property. The same mechanism bites from the other direction with consumer resets: see the last section of this file.
 
 ## Radix `Slot` — `asChild` silently applies no classes when children are wrapped in a fragment
 
@@ -322,9 +291,9 @@ a workaround — the first invoice carried one for exactly that reason.
 warnings are noise here, but they share the channel with real ones, so a document render
 is not a clean-log check.
 
-## The class layer ships in `@layer components`, so any unlayered reset outranks all of it
+## Loom ships in cascade layers, so any unlayered reset outranks all of it
 
-`loom.css` and `loom.components.css` wrap their contents in `@layer components`.
+Everything Loom emits sits in a Loom-owned layer — `loom.tokens`, `loom.base`, `loom.components`.
 Unlayered CSS beats layered CSS **regardless of specificity** — that is the cascade
 working as specified, and it inverts the intuition that a more specific selector wins.
 
@@ -344,19 +313,20 @@ Reading computed styles on an affected button shows `--tone-bg` holding the righ
 colour while `background-color` computes to `rgba(0, 0, 0, 0)`. It reads as "the
 treatment classes are broken."
 
-**Put the reset in a layer declared before `components`.** A consuming project's own
-rules can stay unlayered if it wants them to be the last word:
+**Put the reset in `@layer loom.reset`.** Loom declares that slot for exactly this, first
+in its own order, and never writes to it. A consuming project's own rules can stay
+unlayered if it wants them to be the last word:
 
 ```
-@layer reset  →  @layer components (Loom)  →  unlayered (your app)
+@layer loom.reset (yours)  →  loom.tokens → loom.base → loom.components  →  unlayered (your app)
 ```
 
 **And establish the order structurally, not with a layer statement.** The
-`@layer reset, components;` form is correct CSS and minifiers drop it as redundant,
-after which precedence silently falls back to first appearance. If the reset block sits
-after the Loom imports in source, removing that one line reverses the whole cascade. A
-reset file that wraps itself in `@layer reset` and is imported before Loom cannot be
-minified into the wrong order.
+`@layer a, b;` form is correct CSS and minifiers drop it as redundant, after which
+precedence silently falls back to first appearance. That applies to the statement in
+`tokens.css` too. If the reset block sits after the Loom imports in source, removing that
+one line reverses the whole cascade. A reset file that wraps itself in `@layer loom.reset`
+and is imported before `tokens.css` cannot be minified into the wrong order.
 
 Found in pb2 (Paperboy v2). The buttons had correct tone and treatment classes and were
 diagnosed twice as a markup problem before anyone looked at the layer.

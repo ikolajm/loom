@@ -27,7 +27,7 @@ const { inputHash } = require('./catalog-stamp');
 
 const LOOM_ROOT = path.resolve(__dirname, '..');
 const CATALOG = path.join(LOOM_ROOT, 'catalog');
-const SUBSTRATE = ['tokens.css', 'loom.css', 'loom.components.css', 'loom.tailwind.css'];
+const SUBSTRATE = ['tokens.css', 'loom.css', 'loom.components.css'];
 
 function die(lines) {
   for (const line of [].concat(lines)) console.error(line);
@@ -158,7 +158,6 @@ function main(argv) {
   console.log('  @import "../tokens.css";          /* values — plain CSS */');
   console.log('  @import "../loom.css";            /* primitives — plain CSS */');
   console.log('  @import "../loom.components.css"; /* named components — plain CSS */');
-  console.log('  @import "../loom.tailwind.css";   /* Tailwind v4 only */');
 }
 
 if (require.main === module) main(process.argv.slice(2));

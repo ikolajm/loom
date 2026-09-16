@@ -1,20 +1,17 @@
 /**
  * Generates globals.css for the downstream project.
- * Imports Tailwind + the three token files, sets base body styles, scrollbar, selection.
+ * Imports the three stylesheets, sets base body styles, scrollbar, selection.
  *
- * Import order is load-bearing. tokens.css defines the custom properties; loom.css reads
- * them; loom.components.css composes them into named components; loom.tailwind.css maps
- * them onto Tailwind utilities. Drop loom.tailwind.css and
- * every token-derived utility class stops resolving — silently, since an unknown utility
- * is not an error.
+ * Import order is load-bearing, and not only for readability. tokens.css declares the
+ * cascade-layer order and the custom properties; loom.css reads them; loom.components.css
+ * composes them. A minifier drops the @layer statement as redundant, after which
+ * precedence falls back to first appearance — so this order is the mechanism, not a note.
  */
 
 function generate(configs) {
-  return `@import "tailwindcss";
-@import "../tokens.css";
+  return `@import "../tokens.css";
 @import "../loom.css";
 @import "../loom.components.css";
-@import "../loom.tailwind.css";
 
 body {
   background: var(--surface);

@@ -124,16 +124,29 @@ npm run figma        # → Figma plugin scripts (paste into the Figma console)
 
 Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
 
-`generate` emits four stylesheets, and only one is framework-bound:
+`generate` emits three stylesheets. All of them are plain CSS with no framework at-rules:
 
-| File | Holds | Portable |
+| File | Holds | Layer |
 |---|---|---|
-| `tokens.css` | custom properties — color roles, spacing, radius, type role values | yes |
-| `loom.css` | what you compose with — a document base, type ramp, text color roles, tones, treatments, control states, surfaces, elevation, links, tabular figures, keyframes, print rules | yes |
-| `loom.components.css` | what they compose into — named component classes, shape only | yes |
-| `loom.tailwind.css` | the `@theme inline` bridge and `@utility` shorthands | Tailwind v4 only |
+| `tokens.css` | custom properties — color roles, spacing, radius, type role values | `loom.tokens` |
+| `loom.css` | what you compose with — a document base, type ramp, text color roles, tones, treatments, control states, surfaces, elevation, links, tabular figures, keyframes, print rules | `loom.base`, `loom.components` |
+| `loom.components.css` | what they compose into — named component classes, shape only | `loom.components` |
 
-Import them in that order. A non-Tailwind build skips the last rather than silently dropping it, and a project that owns its own components can skip `loom.components.css` too. One thing to know before wiring `loom.css` into an app that already has a stylesheet: it is the only tier that touches bare elements — `box-sizing` and the `body` defaults — so a page not running Tailwind's preflight still gets a background, a text color and the body type role. It sits in `@layer components`, which means preflight loses to it and any utility you type still wins.
+**Import them in that order, and treat the order as load-bearing.** Everything Loom emits sits in a Loom-owned cascade layer:
+
+```css
+@layer loom.reset, loom.tokens, loom.base, loom.components;
+```
+
+`tokens.css` declares that line, which is why it goes first. Two things follow, and both are the point.
+
+**Your own CSS wins by default.** Unlayered rules outrank every layer regardless of specificity, so a plain `.card { border-radius: 0 }` in your stylesheet beats Loom's `.card` without `!important` and without a specificity fight. Override by writing normal CSS.
+
+**Your reset goes in `@layer loom.reset`, imported before `tokens.css`.** An unlayered reset outranks the entire class layer — every rule Loom ships, silently ([why](docs/gotchas.md)). The `loom.reset` slot exists so it loses instead.
+
+One caveat that decides how you wire this up: a minifier drops an `@layer` statement as redundant, after which precedence falls back to first-appearance order. The import sequence reproduces the same order on its own, which is why it is the mechanism and the statement is documentation. Don't reorder the imports.
+
+A project that owns its own components can skip `loom.components.css`. Before wiring `loom.css` into an app that already has a stylesheet, know that it is the only file touching bare elements — `box-sizing` and the `body` defaults — so a page with no reset of its own still gets a background, a text color and the body type role. Those sit in `loom.base`, below everything else Loom ships.
 
 Alongside them, `generate` emits **`tokens.json`** — the same token values as neutral, engine-agnostic data (no CSS `var()`), for consumers without a CSS runtime. If you're targeting **React Native / NativeWind**, that plus the preset in [`native/`](native/README.md) is your path — see below.
 
@@ -155,7 +168,7 @@ Both tiers are first-class on web:
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet — both are plain CSS and need no build step, but put your own reset in a layer declared before `components` or it will silently outrank the entire class layer ([why](docs/gotchas.md)) — add `loom.components.css` if you want the named component classes, and `loom.tailwind.css` after the `tailwindcss` import if you are on Tailwind. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components; `tokens.json` is the same data for anything without a CSS runtime. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
@@ -188,7 +201,7 @@ npm run sync -- ../my-loom-app
 #    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`, `loom.tailwind.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
 **From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: the playground does that, but a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
 

@@ -77,7 +77,7 @@ echo ""
 # --- Validate ---
 # The tokens tier writes stylesheets and tokens.json into src/ and touches nothing else,
 # so it does not require src/app/ — it does not assume Next.js, or a React app at all.
-for f in tokens.css loom.css loom.components.css loom.tailwind.css; do
+for f in tokens.css loom.css loom.components.css; do
   [ -f "$GEN_DIR/$f" ] || { echo "ERROR: $f not found in $GEN_DIR — run the orchestrator first."; exit 1; }
 done
 if [ "$TIER" = "tokens" ]; then
@@ -116,7 +116,6 @@ if [ "$TIER" = "tokens" ]; then
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
   cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
   cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
-  cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
   echo "[2/3] Copying tokens.json..."
   if [ -f "$GEN_DIR/tokens.json" ]; then
@@ -135,10 +134,10 @@ if [ "$TIER" = "tokens" ]; then
   echo "  @import \\"../tokens.css\\";          /* custom properties — plain CSS */"
   echo "  @import \\"../loom.css\\";            /* primitives — plain CSS */"
   echo "  @import \\"../loom.components.css\\"; /* named components — optional, plain CSS */"
-  echo "  @import \\"../loom.tailwind.css\\";   /* Tailwind v4 only — skip if you are not on it */"
   echo ""
-  echo "The first two run anywhere CSS runs. loom.tailwind.css is @theme/@utility at-rules;"
-  echo "a non-Tailwind build drops them without an error, so omit it rather than debug it."
+  echo "That order is the mechanism: tokens.css declares the cascade layers, and a minifier"
+  echo "drops the @layer statement, after which precedence falls back to first appearance."
+  echo "Your own reset goes in @layer loom.reset, imported before tokens.css."
   echo ""
   echo "tokens.json is the same data with no CSS runtime — for a native or non-web consumer."
   echo "No atoms were installed. To take them too, re-run without --tokens."
@@ -157,13 +156,12 @@ echo "[1/8] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/providers"
 
 # --- Step 2: Token substrate ---
-# Three files: values, class layer, Tailwind bridge. globals.css (step 3) imports all
-# three in that order — the bridge reads what the first two define.
+# Three files: values, class layer, named components. globals.css (step 3) imports all
+# three in that order — each reads what the one before it defines.
 echo "[2/8] Copying stylesheets..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
 cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
-cp "$GEN_DIR/loom.tailwind.css" "$SRC_DIR/loom.tailwind.css"
 
 # --- Step 3: globals.css ---
 echo "[3/8] Writing globals.css..."

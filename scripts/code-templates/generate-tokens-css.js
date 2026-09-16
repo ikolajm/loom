@@ -11,7 +11,6 @@
  *   - Optional accent group — skipped when not in config
  *   - {palette.X.N} → hex resolution
  *   - {scale.N} → var(--space-N) resolution
- *   - Tailwind v4 @theme inline block
  *
  * Usage:
  *   node generate-tokens-css.js                — writes to loom/tokens.css
@@ -181,9 +180,7 @@ function buildSection6_Effects() {
   lines.push(`--focus-ring-color: var(--${standards.effects['focus-ring'].color});`);
   lines.push(`--ring: var(--${standards.effects['focus-ring'].color});`);
 
-  // Plain custom properties, deliberately not inside @theme: Tailwind v4 has no
-  // --opacity-* namespace, so @theme would emit the variable and never generate the
-  // matching utility. Atoms consume these as opacity-(--opacity-disabled).
+  // Consumed as `opacity: var(--opacity-disabled)`.
   lines.push('');
   lines.push('/* === State Opacity === */');
   for (const [name, val] of Object.entries(standards.effects.opacity)) {
@@ -1183,37 +1180,6 @@ function buildSection11_InteractiveStates() {
 }`;
 }
 
-function buildSection13_SpacingUtilities() {
-  const lines = ['/* === Semantic Spacing Utilities === */'];
-
-  for (const [category, variants] of Object.entries(spacing.categories)) {
-    if (category.startsWith('$')) continue;
-
-    for (const [variant, props] of Object.entries(variants)) {
-      const suffix = variant === 'default' ? category : `${category}-${variant}`;
-      const varPrefix = variant === 'default' ? category : `${category}-${variant}`;
-
-      if (props['x-padding']) {
-        lines.push(`@utility px-${suffix} {`);
-        lines.push(`  padding-inline: var(--${varPrefix}-x-padding);`);
-        lines.push('}');
-      }
-      if (props['y-padding']) {
-        lines.push(`@utility py-${suffix} {`);
-        lines.push(`  padding-block: var(--${varPrefix}-y-padding);`);
-        lines.push('}');
-      }
-      if (props.gap) {
-        lines.push(`@utility gap-${suffix} {`);
-        lines.push(`  gap: var(--${varPrefix}-gap);`);
-        lines.push('}');
-      }
-    }
-  }
-
-  return lines.join('\n');
-}
-
 function buildSection14_Animations() {
   return `/* === Animation Keyframes === */
 @keyframes accordion-down {
@@ -1274,128 +1240,28 @@ function buildSection14_Animations() {
 }`;
 }
 
-// Note: Slider styling is NOT in tokens.css. Radix Slider provides real DOM elements
-// (SliderTrack, SliderRange, SliderThumb) that are styled directly with Tailwind classes
-// in the component file, using values from form.json → slider config.
-
-function buildSection12_TailwindTheme() {
-  const lines = ['/* === Tailwind v4 Theme === */', '@theme inline {'];
-
-  // Colors — from semantic roles
-  lines.push('  /* Colors */');
-  const defaultMode = colors['default-mode'] || 'light';
-  const defaultRoles = colors.roles[defaultMode];
-  if (defaultRoles) {
-    for (const [group, roleMap] of Object.entries(defaultRoles)) {
-      for (const role of Object.keys(roleMap)) {
-        lines.push(`  --color-${role}: var(--${role});`);
-      }
-    }
-  }
-
-  // Focus ring — maps --ring to Tailwind's ring-ring utility
-  lines.push('  --color-ring: var(--ring);');
-
-  // Spacing
-  lines.push('');
-  lines.push('  /* Spacing */');
-  for (const step of Object.keys(standards.spacing.scale)) {
-    lines.push(`  --spacing-${step}: var(--space-${step});`);
-  }
-
-  // Border radius primitives
-  lines.push('');
-  lines.push('  /* Border Radius */');
-  for (const token of Object.keys(standards.sizing['border-radius'])) {
-    const step = token.replace('br-', '');
-    lines.push(`  --radius-${step}: var(--${token});`);
-  }
-  // Semantic radius
-  for (const role of Object.keys(sizing['border-radius'])) {
-    lines.push(`  --radius-${role}: var(--radius-${role});`);
-  }
-
-  // Component Heights — enables h-ch-0 through h-ch-9
-  // NOTE: the custom scales emitted here (radius, ch-*, icon-*, spacing categories) must
-  // also be registered in components/cn.js so tailwind-merge dedupes className overrides
-  // against them. Add a scale here → add it there too.
-  lines.push('');
-  lines.push('  /* Component Heights */');
-  for (const token of Object.keys(standards.sizing['component-height'])) {
-    lines.push(`  --height-${token}: var(--${token});`);
-  }
-
-  // Semantic heights — enables h-control-md, h-bar-sm, etc. The block is `@theme inline`,
-  // so this substitutes textually into the utility rather than redefining the :root var;
-  // the same self-reference is how semantic radius reaches `rounded-component`.
-  lines.push('');
-  lines.push('  /* Component Heights (semantic) */');
-  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
-    for (const tier of Object.keys(tiers)) {
-      lines.push(`  --height-${role}-${tier}: var(--height-${role}-${tier});`);
-    }
-  }
-
-  // Component Sizes (square) — enables size-ch-0 through size-ch-9 (for icon-only buttons etc.)
-  lines.push('');
-  lines.push('  /* Component Sizes (square) */');
-  for (const token of Object.keys(standards.sizing['component-height'])) {
-    lines.push(`  --size-${token}: var(--${token});`);
-  }
-
-  // Square semantic — a square control (icon button, fab, pagination cell) takes its edge
-  // from the same role ladder, so size-control-md and h-control-md can never disagree.
-  lines.push('');
-  lines.push('  /* Component Sizes (square, semantic) */');
-  for (const [role, tiers] of Object.entries(sizing['component-height'])) {
-    for (const tier of Object.keys(tiers)) {
-      lines.push(`  --size-${role}-${tier}: var(--height-${role}-${tier});`);
-    }
-  }
-
-  // Icon Sizes — enables w-icon-0 through w-icon-4, h-icon-0 through h-icon-4
-  lines.push('');
-  lines.push('  /* Icon Sizes */');
-  for (const token of Object.keys(standards.sizing['icon-size'])) {
-    lines.push(`  --size-${token}: var(--${token});`);
-  }
-
-  // Shadows
-  lines.push('');
-  lines.push('  /* Shadows */');
-  for (const name of Object.keys(effects.shadow)) {
-    lines.push(`  --shadow-${name.replace('shadow-', '')}: var(--${name});`);
-  }
-
-  // Animations
-  lines.push('');
-  lines.push('  /* Animations */');
-  lines.push('  --animate-accordion-down: accordion-down 200ms ease-out;');
-  lines.push('  --animate-accordion-up: accordion-up 200ms ease-out;');
-  lines.push('  --animate-fade-in: fade-in 150ms ease-out;');
-  lines.push('  --animate-fade-out: fade-out 150ms ease-out;');
-  lines.push('  --animate-scale-in: scale-in 200ms ease-out;');
-  lines.push('  --animate-slide-in-from-top: slide-in-from-top 200ms ease-out;');
-  lines.push('  --animate-slide-in-from-bottom: slide-in-from-bottom 200ms ease-out;');
-  lines.push('  --animate-slide-in-from-left: slide-in-from-left 200ms ease-out;');
-  lines.push('  --animate-slide-in-from-right: slide-in-from-right 200ms ease-out;');
-  lines.push('  --animate-spin: spin 1s linear infinite;');
-
-  lines.push('}');
-  return lines.join('\n');
-}
-
 // --- Assembly ---
-// Three files, because only one of them is framework-bound. tokens.css and loom.css are
-// plain CSS and run wherever CSS runs — a Vite app, a Django template, headless Chrome
-// printing an invoice. loom.tailwind.css carries the `@theme inline` bridge and the
-// `@utility` blocks, which are Tailwind v4 at-rules: a non-Tailwind consumer drops them
-// silently, so shipping them inside tokens.css made the tokens tier's "assumes nothing
-// about your framework" claim false for every consumer that was not on Tailwind.
+// Three files, all plain CSS, running wherever CSS runs — a Vite app, a Django template,
+// headless Chrome printing an invoice. Nothing here is framework-bound.
 //
-// Keyframes ride with the layer, not the bridge — `@keyframes` is portable CSS. Only the
-// `--animate-*` registration that names them is Tailwind's, and that stays in the bridge.
-const FILES = ['tokens.css', 'loom.css', 'loom.components.css', 'loom.tailwind.css'];
+// Everything Loom emits sits in a Loom-owned cascade layer, so a consumer's own CSS wins
+// by default: unlayered rules outrank every layer regardless of specificity, and that is
+// the override story. Two blocks stay deliberately unlayered — see LAYER_ORDER.
+const FILES = ['tokens.css', 'loom.css', 'loom.components.css'];
+
+// The layer contract. Order is low-to-high precedence, so `loom.components` beats
+// `loom.base`, and a consumer's unlayered rule beats all of it.
+//
+// `loom.reset` is declared and never written to. It is a slot: a consumer's reset goes
+// there and is then guaranteed to lose to the class layer. Without it, an unlayered reset
+// silently outranks every rule Loom ships — the failure recorded in docs/gotchas.md.
+//
+// This statement is documentation, not the mechanism. Minifiers drop an @layer statement
+// as redundant, after which precedence falls back to first-appearance order — which is
+// why the import order of the files below reproduces this order on its own.
+const LAYER_ORDER = `/* Cascade layers, low to high. Your own unlayered CSS beats all of them.
+ * Put your reset in @layer loom.reset and import it before tokens.css. */
+@layer loom.reset, loom.tokens, loom.base, loom.components;`;
 
 function header(name, note) {
   return `/**
@@ -1450,11 +1316,15 @@ function generateTokens() {
   ];
 
   return [
-    header('tokens.css', `Design token values. Default mode: ${defaultMode}; \`[data-theme="${altMode}"]\` overrides the color roles. No framework at-rules — this file is plain CSS.`),
+    header('tokens.css', `Design token values in \`@layer loom.tokens\`. Default mode: ${defaultMode}; \`[data-theme="${altMode}"]\` overrides the color roles. Declares the layer order for every Loom file, so import this one first. Plain CSS.`),
     '',
-    `:root {\n${indent(rootSections.flat())}\n}`,
+    LAYER_ORDER,
     '',
-    buildSection9_AltMode(altMode),
+    `@layer loom.tokens {\n${indent([
+      `:root {\n${indent(rootSections.flat())}\n}`,
+      '',
+      buildSection9_AltMode(altMode),
+    ].join('\n').split('\n'))}\n}`,
     '',
     buildSectionPrintRoles(),
     ''
@@ -1462,25 +1332,21 @@ function generateTokens() {
 }
 
 /**
- * The class layer: type ramp, interactive states, keyframes. Portable.
+ * The class layer: document base, type ramp, interactive states, keyframes.
  *
- * The classes go in `@layer components`, which Tailwind orders below `utilities` — so
- * `<h3 class="text-title-md font-bold">` lets `font-bold` win. Unlayered they beat every
- * utility instead, which is not a style preference: it silently voided overrides authors
- * had written. `carousel.js` still carries a wrapper div added because `.interactive`'s
- * `position: relative` outranked an `absolute` on the same element.
+ * Two layers, because the two halves want different precedence. `loom.base` touches bare
+ * elements — box-sizing and the body defaults — and must lose to everything. Anything a
+ * consumer composes with goes in `loom.components`.
  *
- * Keyframes stay outside the layer — `@keyframes` is not a style rule and cascade layers
+ * That split is free: every base rule selects an element and every class rule a class, so
+ * specificity already ordered them this way when both sat in one layer. Naming the layers
+ * makes the order explicit instead of incidental, and gives a consumer somewhere to aim.
+ *
+ * Keyframes stay outside the layers — `@keyframes` is not a style rule and cascade layers
  * do not apply to it; wrapping it changes nothing and reads as though it might.
- *
- * A non-Tailwind consumer gets a bare `@layer components` with no other layers declared,
- * which is valid CSS and orders the layer before all unlayered rules. That is the same
- * relationship Tailwind produces, so the file behaves consistently in both.
  */
 function generateLayer() {
   const layered = [
-    buildSectionDocumentBase(),
-    '',
     buildSection10_TypographyPresets(),
     '',
     buildSection11_InteractiveStates(),
@@ -1493,9 +1359,11 @@ function generateLayer() {
   ].join('\n');
 
   return [
-    header('loom.css', 'The class layer — type ramp and interactive states in `@layer components` so utilities override them, plus keyframes. Reads the custom properties from tokens.css, which must load first. Plain CSS.'),
+    header('loom.css', 'The class layer — the document base in `@layer loom.base`, then the type ramp, tones, treatments and control states in `@layer loom.components`, plus keyframes. Reads the custom properties from tokens.css, which must load first. Plain CSS.'),
     '',
-    `@layer components {\n${indent(layered.split('\n'))}\n}`,
+    `@layer loom.base {\n${indent(buildSectionDocumentBase().split('\n'))}\n}`,
+    '',
+    `@layer loom.components {\n${indent(layered.split('\n'))}\n}`,
     '',
     buildSection14_Animations(),
     '',
@@ -1521,32 +1389,19 @@ function generateComponents() {
   ].join('\n');
 
   return [
-    header('loom.components.css', 'Named component classes — shape only; compose with the tones, treatments and control states in loom.css, which must load first.'),
+    header('loom.components.css', 'Named component classes in `@layer loom.components` — shape only; compose with the tones, treatments and control states in loom.css, which must load first.'),
     '',
-    `@layer components {\n${indent(layered.split('\n'))}\n}`,
+    `@layer loom.components {\n${indent(layered.split('\n'))}\n}`,
     ''
   ].join('\n');
 }
 
-/** The Tailwind v4 bridge: @theme inline and @utility. Not portable. */
-function generateTailwind() {
-  return [
-    header('loom.tailwind.css', 'Tailwind v4 only — `@theme inline` maps the token vocabulary onto Tailwind utilities, and `@utility` declares the semantic spacing shorthands. A non-Tailwind build drops both silently; skip this file there and use the custom properties directly.'),
-    '',
-    buildSection13_SpacingUtilities(),
-    '',
-    buildSection12_TailwindTheme(),
-    ''
-  ].join('\n');
-}
-
-/** @returns {{'tokens.css': string, 'loom.css': string, 'loom.tailwind.css': string}} */
+/** @returns {{'tokens.css': string, 'loom.css': string, 'loom.components.css': string}} */
 function generate() {
   return {
     'tokens.css': generateTokens(),
     'loom.css': generateLayer(),
     'loom.components.css': generateComponents(),
-    'loom.tailwind.css': generateTailwind(),
   };
 }
 
@@ -1569,4 +1424,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, generateTailwind, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };

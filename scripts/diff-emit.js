@@ -26,7 +26,7 @@ const os = require('os');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const FILES = ['tokens.css', 'loom.css', 'loom.components.css', 'loom.tailwind.css'];
+const FILES = ['tokens.css', 'loom.css', 'loom.components.css'];
 const BRAND = ['spec/answers.json', 'spec/config/local'];
 
 const args = process.argv.slice(2);
