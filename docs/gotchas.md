@@ -358,3 +358,11 @@ and is imported before `tokens.css` cannot be minified into the wrong order.
 
 Found in pb2 (Paperboy v2). The buttons had correct tone and treatment classes and were
 diagnosed twice as a markup problem before anyone looked at the layer.
+
+**The symptom now tells you which defect it is.** It used to be shared: a treatment with
+no tone class produced the same reading — tone properties unset, `background-color`
+transparent — and the two were indistinguishable without checking the markup. Treatments
+carry tone fallbacks now, so a treatment used alone renders a neutral fill or the outline
+role. If `background-color` computes to transparent on an element whose `--tone-*`
+properties are resolving, a class is not missing; something unlayered is outranking the
+layer.

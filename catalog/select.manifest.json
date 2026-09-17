@@ -3,7 +3,7 @@
   "kind": "atom",
   "category": "form",
   "description": "",
-  "version": "25e52eca020e",
+  "version": "c54dc9758731",
   "dependencies": [
     "cn",
     "form-field"

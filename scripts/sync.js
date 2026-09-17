@@ -2,10 +2,17 @@
 /**
  * sync.js — install the Loom catalog and the token substrate into a consuming project.
  *
- * Usage: node scripts/sync.js <project-dir> [--force] [--refresh]
+ * Usage: node scripts/sync.js <project-dir> [--tokens] [--force] [--refresh]
  *
+ *   --tokens   the substrate only — no atoms, no install line, no framework assumption
  *   --force    overwrite atoms the consumer has edited locally
  *   --refresh  regenerate the catalog from spec/ first, then sync
+ *
+ * `--tokens` and the loom:sync script below came from init.sh when scaffold/ was cut. Both
+ * belong here: this is the only thing that knows both paths, because it is invoked with
+ * one and lives in the other. What did NOT come across is the app shell — a Next root
+ * layout, a globals.css, a provider mount — because that is a framework's business and
+ * ThemeProvider is in the catalog now, delivered like any other component.
  *
  * Replaces setup.sh and scripts/refresh-test.sh. Those were 145 lines of shell whose only
  * work was argument parsing, copying, and printing — every decision already lived in
@@ -35,9 +42,10 @@ function die(lines) {
 function main(argv) {
   const flags = new Set(argv.filter((a) => a.startsWith('--')));
   const project = argv.find((a) => !a.startsWith('--'));
-  if (!project) die('Usage: node scripts/sync.js <project-dir> [--force] [--refresh]');
+  if (!project) die('Usage: node scripts/sync.js <project-dir> [--tokens] [--force] [--refresh]');
 
   const force = flags.has('--force');
+  const tokensOnly = flags.has('--tokens');
   const src = path.join(project, 'src');
   const dest = path.join(src, 'components');
 
@@ -90,15 +98,16 @@ function main(argv) {
     )
   )].sort();
 
-  fs.mkdirSync(dest, { recursive: true });
+  if (!tokensOnly) fs.mkdirSync(dest, { recursive: true });
 
   // `cn` is checked with the rest — it is a delivered file with a manifest, and a
   // consumer who patched it deserves the same care as one who patched an atom.
-  const states = checkLocalEdits(dest, CATALOG, [...atoms, 'cn']);
+  const states = tokensOnly ? new Map() : checkLocalEdits(dest, CATALOG, [...atoms, 'cn']);
   const skipped = [];
 
-  console.log('Atoms:');
-  for (const atom of [...atoms, 'cn']) {
+  if (tokensOnly) console.log('Atoms: skipped (--tokens)');
+  else console.log('Atoms:');
+  for (const atom of tokensOnly ? [] : [...atoms, 'cn']) {
     const state = states.get(atom);
     // `unknown` is skipped too: the file is installed but carries no delivery record, so
     // "has the consumer edited it" is unanswerable — and answering "no" is the silent
@@ -136,7 +145,7 @@ function main(argv) {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
-  console.log(`Done → ${dest}`);
+  console.log(`Done → ${tokensOnly ? src : dest}`);
 
   if (skipped.length) {
     console.log('');
@@ -154,15 +163,59 @@ function main(argv) {
     console.log('call site (className / prop / a wrapper), which survives every resync by design.');
   }
 
+  addLoomSyncScript(project);
+
+  if (!tokensOnly) {
+    console.log('');
+    console.log('Next — install the packages these atoms import (once):');
+    console.log(`  npm install ${npmDependencies.join(' ')}`);
+  }
+
   console.log('');
-  console.log('Next — install the packages these atoms import (once):');
-  console.log(`  npm install ${npmDependencies.join(' ')}`);
+  console.log('Wire the substrate into your global stylesheet with one line:');
+  console.log('  @import "./main.css";   /* path relative to that stylesheet */');
   console.log('');
-  console.log('Note: the stylesheets are auto-wired into globals.css by init.sh — nothing to do.');
-  console.log('Only if you bootstrapped globals.css yourself, add (after the tailwindcss import):');
-  console.log('  @import "../tokens.css";          /* values — plain CSS */');
-  console.log('  @import "../loom.css";            /* primitives — plain CSS */');
-  console.log('  @import "../loom.components.css"; /* named components — plain CSS */');
+  console.log('main.css imports the three in the order the cascade needs. Import them directly');
+  console.log('instead if you own your components and want to drop the third:');
+  console.log('  @import "./tokens.css";          /* values */');
+  console.log('  @import "./loom.css";            /* the class layer */');
+  console.log('  @import "./loom.components.css"; /* named components */');
+  console.log('');
+  console.log('Your own reset goes in @layer loom.reset, imported before tokens.css, or it');
+  console.log('silently outranks the whole class layer. See docs/gotchas.md.');
+}
+
+/**
+ * Add `loom:sync` to the project's package.json, so a refresh runs from the consumer's
+ * own directory instead of from this repo.
+ *
+ * This is the one thing init.sh did that nothing else could: it knows the path between the
+ * two repos. So does this script — it is invoked with the project directory and resolves
+ * its own root — which is why the job moved here rather than being written by hand into a
+ * README. An existing script is left alone; a project without a package.json says so and
+ * moves on, because the tokens tier does not assume node.
+ *
+ * Deliberately not wired into `predev`. A consumer's dev server that cannot start without
+ * a sibling repo present is a worse failure than a stale stylesheet, and it lands on
+ * whoever clones the project next rather than on the person who set it up.
+ */
+function addLoomSyncScript(project) {
+  const pkgPath = path.join(project, 'package.json');
+  console.log('');
+  if (!fs.existsSync(pkgPath)) {
+    console.log('No package.json — skipped the loom:sync script.');
+    return;
+  }
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.scripts = pkg.scripts || {};
+  if (pkg.scripts['loom:sync']) {
+    console.log('loom:sync already in package.json — left as-is.');
+    return;
+  }
+  const rel = path.relative(path.resolve(project), LOOM_ROOT).split(path.sep).join('/');
+  pkg.scripts['loom:sync'] = `node ${rel}/scripts/sync.js .`;
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+  console.log(`Added "loom:sync": "${pkg.scripts['loom:sync']}" — refresh from your own directory.`);
 }
 
 if (require.main === module) main(process.argv.slice(2));

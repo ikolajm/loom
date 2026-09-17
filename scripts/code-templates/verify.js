@@ -500,6 +500,231 @@ function checkBaseConfigProvenance() {
   return { failures, note: `${generators.length} configs + standards` };
 }
 
+// --- dead-exports ------------------------------------------------------------
+// A name on module.exports that nothing references, in any file including its own.
+//
+// Two cut-flows went past these. `tailwind-out` removed the bridge and left behind the
+// converters that only spoke to it — `iconSizeToClass` emitting `size-icon-2`,
+// `fontWeightToClass` emitting `font-semibold`, `letterSpacingToClass` emitting
+// `tracking-[…]` — plus `prefixClasses`, a utility-variant prefixer whose own example was
+// `data-[state=off]:bg-transparent`. `drop-the-playground` went past them again. They were
+// found by a hand sweep, which is not a mechanism.
+//
+// Deliberately narrow. An export used only inside its own module is over-exported, not
+// dead, and there are twenty-one of those — flagging them would be style noise in a check
+// that has to stay worth reading. An export nothing mentions anywhere is unambiguous.
+//
+// Not covered: a function that IS called but whose output is dead. `maxWidthToClass` and
+// friends still emit Tailwind class names into paths no surviving atom takes.
+// `atom-class-coverage` is what catches that, and only once an atom applies one.
+// Exempt by name and by reason, never by pattern. An allowlist that grows silently is how
+// the thing being checked stops being checked.
+const UNCALLED_EXPORTS = {
+  'sourceOf': 'a debugging entry point, not dead: gotchas.md and pipeline.md both point a '
+    + 'reader at it to find which config root a file came from. Nothing in the repo calls '
+    + 'it and nothing should — it answers a question you ask from a REPL. Wiring it into '
+    + 'the generate log would make it live and is a real option.',
+};
+
+function checkDeadExports() {
+  const roots = [path.join(ROOT, 'scripts')];
+  const files = [];
+  while (roots.length) {
+    const dir = roots.pop();
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { if (e.name !== 'node_modules') roots.push(full); }
+      else if (e.name.endsWith('.js')) files.push(full);
+    }
+  }
+
+  const texts = new Map(files.map((f) => [f, fs.readFileSync(f, 'utf8')]));
+  // Identifier tokens per file, as a set. A tokenizer rather than a per-name regex: an
+  // interpolated regex is how the first version of tone-fallbacks silently matched nothing.
+  const IDENT = /[A-Za-z_$][A-Za-z0-9_$]*/g;
+  const tokens = new Map();
+  for (const [f, t] of texts) tokens.set(f, t.match(IDENT) || []);
+
+  const EXPORTS = /module\.exports\s*=\s*\{([^}]*)\}/;
+  const failures = [];
+  let checked = 0;
+
+  for (const [f, t] of texts) {
+    const m = t.match(EXPORTS);
+    if (!m) continue;
+    const names = m[1]
+      .split(',')
+      .map((s) => s.split(':')[0].trim())
+      .filter((s) => s && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(s));
+
+    for (const name of names) {
+      checked += 1;
+      let refs = 0;
+      for (const [g, toks] of tokens) {
+        for (const tok of toks) if (tok === name) refs += 1;
+        // In its own file a live name appears at least three times: declaration, export,
+        // and a use. Two means declared and exported and never touched.
+        if (g === f && refs > 2) break;
+      }
+      if (refs <= 2 && !UNCALLED_EXPORTS[name]) {
+        failures.push(`${path.relative(ROOT, f)} exports \`${name}\`, which nothing references — not another module, not its own file. It is declared, exported, and never called`);
+      }
+    }
+  }
+
+  return { failures, note: `${checked} named exports over ${files.length} files, ${Object.keys(UNCALLED_EXPORTS).length} exempt` };
+}
+
+// --- tone-fallbacks ----------------------------------------------------------
+// Every `--tone-*` read carries a fallback, and no component default outranks a treatment.
+//
+// Tone and treatment are orthogonal classes, and both halves used to fail silently. A tone
+// alone set four custom properties nobody read. A treatment alone referenced undefined
+// ones — which makes the declaration invalid at computed-value time, so it is DROPPED
+// rather than falling back, and `treat-outline` alone drew no border at all. Neither half
+// errors, warns, or leaves a visual hint. A consumer build shipped `badge tone-primary`
+// with no background, and the author then wrote three buttons as `treat-outline` with no
+// tone in the same edit that fixed the badge.
+//
+// Second assertion, from a defect this check's own flow nearly introduced. The badge
+// default was specified as a plain `.badge` rule. Treatments are emitted in loom.css and
+// badge in loom.components.css, both inside @layer loom.components — so at equal
+// specificity the later FILE wins, and `.badge { background-color: ... }` would have
+// outranked the `background-color: transparent` in .treat-outline and .treat-ghost and
+// filled every outline badge. Anything providing a tone default has to sit below the
+// treatments, which is what :where() buys. Following the spec literally would have
+// traded a silent no-fill for a silent wrong-fill.
+const TONE_PROPS = ['--tone-bg', '--tone-fg', '--tone-text', '--tone-border'];
+
+// How a declaration uses a tone property: 'bare' (no fallback, the defect), 'fallback', or
+// null. Written with string scanning rather than a regex on purpose — the first version of
+// this was an interpolated regex whose escapes did not survive, so it matched nothing and
+// passed a stylesheet that had the fallback stripped out by hand. Third time in this repo
+// a check has been wrong in the direction of passing.
+function readTone(value, tone) {
+  let found = null;
+  for (let i = value.indexOf('var('); i !== -1; i = value.indexOf('var(', i + 4)) {
+    const inner = value.slice(i + 4).trimStart();
+    if (!inner.startsWith(tone)) continue;
+    const after = inner.slice(tone.length).trimStart();
+    if (after.startsWith(')')) return 'bare';
+    if (after.startsWith(',')) found = 'fallback';
+  }
+  return found;
+}
+
+function checkToneFallbacks() {
+  if (!parseComplete()) return NOT_PARSED;
+
+  const failures = [];
+  let reads = 0;
+  let defaults = 0;
+
+  for (const { selector, decls } of allRules()) {
+    for (const [prop, value] of Object.entries(decls)) {
+      for (const tone of TONE_PROPS) {
+        const use = readTone(value, tone);
+        if (use === 'bare') {
+          failures.push(`${selector} reads ${tone} with no fallback in \`${prop}\` — used without a tone class the declaration is invalid at computed-value time and gets dropped, so the rule renders as nothing rather than as a neutral version of itself`);
+        } else if (use === 'fallback') {
+          reads += 1;
+        }
+      }
+    }
+
+    // A rule that is not a treatment but hands out a tone fill is a component default.
+    // It must not be able to beat the treatment it defers to.
+    const isTreatment = /\.treat-[a-z]/.test(selector);
+    const setsToneFill = ['background-color', 'color'].some(
+      (p) => decls[p] && (decls[p].includes('--tone-bg') || decls[p].includes('--tone-fg'))
+    );
+    if (setsToneFill && !isTreatment) {
+      defaults += 1;
+      // Zero specificity is the only way to sit under a treatment emitted in an earlier
+      // file of the same layer. Anything with a bare class in the selector outranks it.
+      const bare = selector.replace(/:where\([^)]*\)/g, '');
+      if (/\.[a-zA-Z]/.test(bare)) {
+        failures.push(`${selector} sets a tone fill outside a .treat-* rule and carries specificity of its own — it outranks .treat-outline and .treat-ghost, which are emitted in an earlier file of the same layer, so every outline and ghost variant of it renders filled. Wrap the selector in :where()`);
+      }
+    }
+  }
+
+  return { failures, note: `${reads} tone reads, all with fallbacks; ${defaults} tone default(s) held at zero specificity` };
+}
+
+// --- focus-ring --------------------------------------------------------------
+// The focus ring reaches the elements, not a class someone has to remember.
+//
+// It shipped gated on `.control` alone, and a whole consumer app rendered with a ring on
+// nothing: every button in it was written `class="button interactive"`, deliberately, by
+// an author with loom.css open who wanted the press treatment. Lint passed, the build
+// passed, and with a mouse it looks correct. The mistake is invisible to the person
+// making it, which is why this is a gate and not a line in gotchas.md.
+//
+// Two things are asserted. That at least one `:focus-visible` rule is reachable without
+// naming a class — a class-gated ring is opt-in, and an accessibility floor cannot be.
+// And that each element a keyboard lands on is inside one of those selectors, because
+// "some element gets a ring" is the weaker claim and the one that was already true.
+//
+// The list is spelled out here rather than imported from the emitter. The point is to
+// notice when the emitter's idea of what a keyboard reaches drifts, so reading the set
+// from the emitter would make the check agree with whatever it does.
+const FOCUSABLE = [
+  'a[href]',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  'summary',
+  '[tabindex]:not([tabindex="-1"])',
+];
+
+function checkFocusRing() {
+  if (!parseComplete()) return NOT_PARSED;
+
+  const focusRules = allRules().filter(({ selector }) => selector.includes(':focus-visible'));
+  if (!focusRules.length) {
+    return {
+      failures: ['no :focus-visible rule is emitted at all — nothing in the substrate shows a keyboard user where they are'],
+      note: '0 focus-visible rules',
+    };
+  }
+
+  // A selector that names no class is one a consumer cannot fail to opt into. `:where()`
+  // and `:not()` wrappers are transparent for this — what matters is whether a class is
+  // required to match, so the test is the presence of a class anywhere in the selector.
+  const ungated = focusRules.filter(({ selector }) => !/\.[a-zA-Z]/.test(selector));
+
+  const failures = [];
+  if (!ungated.length) {
+    failures.push(
+      `all ${focusRules.length} :focus-visible rules are gated on a class (${focusRules.map((r) => r.selector.replace(/\s+/g, ' ')).join('; ')}) — the ring is opt-in, so an element styled without that exact class shows a keyboard user nothing`
+    );
+    return { failures, note: `${focusRules.length} focus-visible rules, none reachable without a class` };
+  }
+
+  // Every ungated rule has to actually draw something. A rule that only recolours is the
+  // validity variant's job and would leave a bare element ringless.
+  const drawing = ungated.filter(({ decls }) => 'outline' in decls || 'outline-width' in decls || 'box-shadow' in decls);
+  if (!drawing.length) {
+    failures.push(
+      `${ungated.length} :focus-visible rules are reachable without a class, but none of them draw a ring — they set only ${[...new Set(ungated.flatMap(({ decls }) => Object.keys(decls)))].join(', ')}`
+    );
+  }
+
+  const covered = drawing.map(({ selector }) => selector.replace(/\s+/g, ''));
+  for (const sel of FOCUSABLE) {
+    if (!covered.some((c) => c.includes(sel.replace(/\s+/g, '')))) {
+      failures.push(`${sel} is keyboard-focusable and no unclassed :focus-visible rule covers it`);
+    }
+  }
+
+  return {
+    failures,
+    note: `${FOCUSABLE.length} focusable selectors, ${drawing.length} of ${focusRules.length} focus rules reachable without a class`,
+  };
+}
+
 // --- touch-target ----------------------------------------------------------
 // `standards.json` has declared touch-target.min: 44px since v2 and nothing consumed it:
 // it reached tokens.css as a value no atom read,
@@ -792,6 +1017,9 @@ function verify() {
     ['phantom-parts', checkPhantomParts()],
     ['variant-keys', checkVariantKeys()],
     ['base-config-provenance', checkBaseConfigProvenance()],
+    ['dead-exports', checkDeadExports()],
+    ['tone-fallbacks', checkToneFallbacks()],
+    ['focus-ring', checkFocusRing()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],
     ['composited-contrast', checkCompositedContrast()],

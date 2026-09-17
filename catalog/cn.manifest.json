@@ -2,7 +2,7 @@
   "name": "cn",
   "kind": "utility",
   "category": "utility",
-  "description": "Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.",
+  "description": "Class name merger utility (clsx). Foundation dependency for all components.",
   "version": "da62114046ab",
   "dependencies": [],
   "npmDependencies": [

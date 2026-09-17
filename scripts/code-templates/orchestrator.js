@@ -3,7 +3,14 @@
  * Code Templates Orchestrator
  *
  * Produces the complete generated/ bundle:
- *   tokens.css, components/, scaffold/, HANDOFF.md
+ *   tokens.css, components/, HANDOFF.md
+ *
+ * No scaffold target. It wrote a Next app shell — a layout.tsx importing from `next`, an
+ * App Router route, a `@/providers/` alias — plus an init.sh that hard-required src/app/.
+ * The substrate was always portable; the only thing wiring it up was not. Its two parts
+ * worth keeping moved: ThemeProvider is a catalog component, and the selection and
+ * scrollbar rules are in loom.base. sync.js took the `--tokens` tier and the loom:sync
+ * script.
  *
  * Each generator is a separate module with a generate(config, outputDir) function.
  *
@@ -24,7 +31,7 @@ const registry = getComponentRegistry(configs);
 // --- Generator modules ---
 const GENERATORS = {
   'tokens': {
-    description: 'tokens.css + loom.css + loom.components.css (values, class layer, component classes)',
+    description: 'tokens.css + loom.css + loom.components.css + main.css (values, class layer, component classes, index)',
     run: (outputDir) => {
       const { generate, FILES } = require('./generate-tokens-css');
       const files = generate();
@@ -59,13 +66,6 @@ const GENERATORS = {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, 'preview.html'), generate());
       console.log('  docs/preview.html');
-    },
-  },
-  'scaffold': {
-    description: 'scaffold/ (init.sh, globals.css, ThemeProvider, layout)',
-    run: (outputDir) => {
-      const { generate } = require('./scaffold');
-      generate(configs, outputDir);
     },
   },
   'handoff': {

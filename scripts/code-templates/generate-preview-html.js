@@ -88,14 +88,6 @@ const row = (body) => `    <div class="pv-row">
 ${body}
     </div>`;
 
-// A gap holds a label, a lede and the demonstration. One indent deeper than a section,
-// so its lede is re-indented rather than given a second definition.
-const gap = (label, text, body) => `    <div class="pv-gap">
-      <span class="text-label-md">${label}</span>
-${lede(text).replace(/^ {4}/gm, '      ')}
-${body}
-    </div>`;
-
 // --- The generated half ------------------------------------------------------
 
 function ramps() {
@@ -289,24 +281,63 @@ const CLASS_STRIP = [
     </div>`,
   ].join(NL)),
 
-  section('Known gaps', [
-    lede(`This page renders the class layer, so a gap in the class layer shows up here
-      as nothing. These are open work, not defects in the page.`),
-    gap('focus-ring reaches .control but not .interactive',
-      `Tab to both. The first takes a ring, the second does not, though it is the class
-        a consumer reaches for when styling a button.`,
-      `      <div class="pv-row">
-        <button class="button treat-outline tone-neutral control" data-size="md">control</button>
-        <button class="button treat-outline tone-neutral interactive" data-size="md">interactive</button>
-      </div>`),
-    gap('tone without treatment renders nothing',
-      `The axes are orthogonal, so either alone is silent &mdash; no error, no visible
-        result. Only the pair produces anything.`,
-      `      <div class="pv-row">
-        <span class="badge tone-primary" data-size="md">tone only</span>
-        <span class="badge treat-filled" data-size="md">treatment only</span>
-        <span class="badge treat-filled tone-primary" data-size="md">both</span>
-      </div>`),
+  section('Focus', [
+    lede(`Tab through this row &mdash; every one of them takes the same ring, and none of
+      them names a class to get it. The ring is an element-level rule in
+      <code>loom.base</code>. <code>:where()</code> makes the element list weigh nothing,
+      so the selector costs only its one pseudo-class: any class of yours outranks it, and
+      overriding it is a normal rule rather than an <code>!important</code>.`),
+    row(`      <button class="button treat-outline tone-neutral interactive" data-size="md">.interactive only</button>
+      <button class="button treat-filled tone-primary interactive control" data-size="md">both classes</button>
+      <a class="link" href="https://github.com/ikolajm/loom">a link</a>`),
+    lede(`No state class on the next two. What they carry is shape &mdash;
+      <code>&lt;summary&gt;</code> a type class, <code>&lt;select&gt;</code> the
+      <code>.input</code> frame &mdash; and the ring arrives anyway, because it is keyed
+      on the element rather than on anything in the markup.`),
+    `    <div class="pv-row">
+      <details class="pv-details">
+        <summary class="text-body-md">a summary</summary>
+        <p class="text-body-sm text-on-surface-variant">Open and closed, it still takes the ring.</p>
+      </details>
+      <select data-size="md" class="input"><option>a select</option><option>second</option></select>
+    </div>`,
+    lede(`The scroll region carries <code>tabindex="0"</code>. A browser will make an
+      overflowing region keyboard-focusable on its own &mdash; Chrome and Firefox both do
+      &mdash; but there is no selector for "the browser decided this is focusable", so a
+      region that has not asked for a tab stop keeps the UA's ring rather than this one.
+      Taking the tab stop explicitly is what moves it onto the token.`),
+    `    <div class="pv-scroll" tabindex="0">
+      <p class="text-body-sm">Focus me from the keyboard, then arrow down. The ring is the
+        substrate's; the scrolling is the browser's.</p>
+      <p class="text-body-sm text-on-surface-variant">Second paragraph, so there is
+        something to scroll to.</p>
+      <p class="text-body-sm text-on-surface-variant">Third.</p>
+    </div>`,
+    lede(`Invalid is the one focus state still gated on a class:
+      <code>.control[aria-invalid]</code> recolours the ring it already has, rather than
+      declaring a second one that could drift from it.`),
+    `    <div class="pv-field">
+      <input class="input control" data-size="md" aria-invalid="true" value="not an email">
+    </div>`,
+  ].join(NL)),
+
+  section('Half a rule', [
+    lede(`Tone and treatment are independent axes, and either one alone used to render
+      nothing &mdash; a tone set four custom properties nobody read, and a treatment read
+      four that were undefined, which drops the whole declaration rather than falling
+      back. All four of these are visible now, and the two in the middle are visibly
+      unstyled rather than absent.`),
+    `    <div class="pv-row">
+      <span class="badge tone-primary" data-size="md">tone only</span>
+      <span class="badge treat-filled" data-size="md">filled, no tone</span>
+      <span class="badge treat-outline" data-size="md">outline, no tone</span>
+      <span class="badge treat-filled tone-primary" data-size="md">both</span>
+    </div>`,
+    lede(`<code>badge tone-primary</code> is filled because <code>.badge</code> carries a
+      tone default of its own, at zero specificity so every treatment still outranks it.
+      That is the spelling the defect was found in, and it is correct as written now.
+      A treatment with no tone falls back to a neutral surface or the outline role &mdash;
+      present, unstyled, and obviously missing something.`),
   ].join(NL)),
 ].join(NL + NL);
 
@@ -332,7 +363,8 @@ const PAGE_CSS = `    :root { color-scheme: light dark; }
     .pv-space-bar { height: var(--space-4); background: var(--primary); border-radius: var(--br-1); }
     .pv-radius { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
     .pv-radius-box { width: 5rem; height: 5rem; background: var(--surface-2); border: var(--bw-1) solid var(--outline); }
-    .pv-gap { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: var(--bw-1) dashed var(--outline); border-radius: var(--radius-card); }`;
+    .pv-details { padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }
+    .pv-scroll { height: 5rem; overflow-y: auto; padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }`;
 
 const THEME_SCRIPT = `    // The only script on the page, and it does one thing: flip the attribute the
     // alternate-mode block keys off, so both modes can be checked without a rebuild.

@@ -21,7 +21,8 @@ const SelectValue = SelectPrimitive.Value;
 type FieldSize = 'sm' | 'md' | 'lg';
 
 // The trigger is a text field, so it wears .input — the same class a hand-marked-up
-// <input> wears — plus .control for focus, validity and disabled. There is no cva and no
+// <input> wears — plus .control for validity and disabled. The focus ring is not on
+// either: it is an element-level rule, and this renders a button. There is no cva and no
 // state variant: .control[aria-invalid] re-points --tone-border and .input's border reads
 // it, so the error styling is the class layer's job rather than a second copy of it here.
 const SelectTrigger = forwardRef<

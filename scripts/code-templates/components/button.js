@@ -1,5 +1,5 @@
 const { buildSizeStyles, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes, extractIconSizes, buildSizeStylesWithText } = require('./helpers');
+const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
 function generateButton(name, config, meta) {
   // Orthogonal model: variant (treatment) and color are independent axes.
@@ -10,8 +10,6 @@ function generateButton(name, config, meta) {
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
   const iconSizesConfig = filterSizes(config['icon-sizes'] || {});
   const iconSizeStyles = buildSizeStyles(iconSizesConfig);
-  const iconSizes = extractIconSizes(sizes);
-  const iconOnlyIconSizes = extractIconSizes(iconSizesConfig);
   const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
 
@@ -21,8 +19,6 @@ function generateButton(name, config, meta) {
   for (const [k, v] of Object.entries(iconSizeStyles)) {
     allSizeEntries[`icon-${k}`] = v;
   }
-
-  const allIconSizes = { ...iconSizes, ...iconOnlyIconSizes };
 
   // Independent axes: `variant` carries a treatment class, `color` carries a tone class.
   // Both are plain classes from loom.css — the tone sets --tone-*, the treatment reads it.

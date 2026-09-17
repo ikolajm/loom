@@ -172,7 +172,9 @@ function buildSection6_Effects() {
   lines.push(`--focus-ring-width: ${standards.effects['focus-ring'].width};`);
   lines.push(`--focus-ring-offset: ${standards.effects['focus-ring'].offset};`);
   lines.push(`--focus-ring-color: var(--${standards.effects['focus-ring'].color});`);
-  lines.push(`--ring: var(--${standards.effects['focus-ring'].color});`);
+  // No `--ring` alias. It existed for the bridge's `--color-ring`, which is what Tailwind
+  // read to make `ring-ring` resolve; with the bridge gone it was a second spelling of
+  // --focus-ring-color that nothing read.
 
   // Consumed as `opacity: var(--opacity-disabled)`.
   lines.push('');
@@ -299,7 +301,12 @@ function buildSection10_TypographyPresets() {
  * component had bothered to declare.
  */
 /**
- * Control states — focus, validity, disabled.
+ * Control states — validity, disabled, and the transitions between them.
+ *
+ * Focus is deliberately not here any more. The baseline ring is an element-level rule in
+ * `loom.base`; what stays is the validity recolour, which is a state distinction rather
+ * than a baseline. `.control` keeps a narrower job, and its name stops implying "the
+ * class that handles focus."
  *
  * Validity keys off `aria-invalid`, not off a class the author has to keep in sync with
  * it. The attribute has to be right anyway for assistive tech, so styling from it means
@@ -307,7 +314,7 @@ function buildSection10_TypographyPresets() {
  * class" a permanent category of bug. It re-points the tone properties rather than
  * setting colors directly, so an invalid control keeps whatever treatment it had.
  *
- * The focus ring consumes `--focus-ring-width/-offset/-color`, which were defined in the
+ * The ring itself consumes `--focus-ring-width/-offset/-color`, which were defined in the
  * token set and read by nothing — every atom hardcoded `ring-2 ring-ring` instead, so
  * changing the tokens changed no pixel. `outline` rather than a box-shadow ring: it takes
  * no layout space, follows border-radius, and `outline-offset` is what the offset token
@@ -820,8 +827,8 @@ function buildSectionComponentClasses() {
   const parts = [
     '/* === Components ===',
     ' *',
-    ' * Shape only. Color composes: a tone class sets the fill, `.control` carries focus and',
-    ' * validity, `.surface-N` and `.elevate-N` carry plane and lift.',
+    ' * Shape only. Color composes: a tone class sets the fill, `.control` carries validity and',
+    ' * disabled state, `.surface-N` and `.elevate-N` carry plane and lift.',
     ' *',
     ` * No class emitted for: ${skipped.empty.join(', ')} — nothing declared to carry.`,
     ' * No class emitted for these until their internals are named:',
@@ -847,6 +854,26 @@ function buildSectionComponentClasses() {
 .icon-slot > svg {
   width: 100%;
   height: 100%;
+}
+`);
+  // Badge is filled by default, so `badge tone-primary` is correct as written — which is
+  // how it will keep being written, and how it was written in the consumer build that
+  // shipped a count badge with no background. A badge with no fill is not a variant
+  // anyone wants; the component has opinions already, which is what `data-size` implies.
+  //
+  // :where() is load-bearing, not caution. Spelled as a plain `.badge` rule this breaks
+  // every outline badge: the treatments live in loom.css and badge lives in
+  // loom.components.css, both inside @layer loom.components, so at equal specificity the
+  // later file wins and `.badge` would outrank the `background-color: transparent` that
+  // .treat-outline and .treat-ghost set. At zero specificity every treatment beats it and
+  // a bare tone still paints, because nothing else puts a background on a badge.
+  //
+  // Only badge. Button is deliberately untouched — a frameless text button is a real
+  // thing someone asks for, and .button already normalizes the UA chrome that made one
+  // look broken.
+  parts.push(`:where(.badge) {
+  background-color: var(--tone-bg, transparent);
+  color: var(--tone-fg, inherit);
 }
 `);
   for (const c of emit) parts.push(buildComponentClass(c.name, c.cfg, c.textFamily));
@@ -952,6 +979,72 @@ button,
   background-color: transparent;
   background-image: none;
   border: 0;
+}
+
+/* === Focus === */
+/* The ring belongs to the element, not to a class. It was gated on .control — the
+   form-state class — so a button written \`class="button interactive"\` took no ring at
+   all, and neither did a link, a <summary>, or a scroll container the browser has made
+   keyboard-focusable. A whole app shipped with a ring on nothing, by an author who had
+   loom.css open and picked .interactive deliberately for the press treatment. Lint
+   passed, the build passed, and with a mouse it looks correct. When the reader of the
+   source misses it, the API is wrong rather than the reader.
+
+   :where() contributes nothing, so the whole selector weighs only what :focus-visible
+   does — one pseudo-class. Any single class beats it and a layered or unlayered consumer
+   rule displaces it as a normal rule rather than a specificity fight. In loom.base for
+   the reason the form-control normalization is: loom.components should be able to restyle
+   a ring, not have to outrank one. */
+:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* === Selection and scrollbars === */
+/* Both were in the scaffold's globals.css, which is to say in a file a Next-only script
+   wrote into the consumer's app. They are token-driven appearance and nothing else in the
+   repo carried them, so cutting the scaffold would have lost them. The body rule that sat
+   beside them is not here: loom.base already sets the same three declarations, down to the
+   value, since --type-body-md-family resolves to var(--font-body).
+
+   The standard properties are declared alongside the -webkit- ones rather than instead of
+   them. ::-webkit-scrollbar is Chrome and Safari only, so on its own this was a substrate
+   whose scrollbars ignored the brand in Firefox; scrollbar-color covers that. Both read the
+   same two tokens, so the two spellings cannot disagree. */
+::selection {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+* {
+  scrollbar-color: var(--on-surface-variant) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--on-surface-variant);
+  border-radius: var(--br-999);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--on-surface);
 }
 
 /* === Text Colour Roles === */
@@ -1093,16 +1186,16 @@ function buildSection16_ControlStates() {
   transition-timing-function: var(--easing);
 }
 
-.control:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
-}
-
 .control[aria-invalid="true"] {
   --tone-border: var(--error);
   --tone-text: var(--error);
 }
 
+/* The validity colour only. The baseline ring is on the element in loom.base, so this
+   recolours a ring that is already there rather than declaring a second copy of one that
+   could drift from it. Nothing focusable reaches .control without matching that rule:
+   every atom and every headless primitive that takes it renders a button, an input or
+   something carrying tabindex. */
 .control[aria-invalid="true"]:focus-visible {
   outline-color: var(--error);
 }
@@ -1149,17 +1242,38 @@ function buildSection15_Tones() {
     ''
   );
 
+  // Every tone property is read through a fallback, so a treatment used without a tone
+  // renders a neutral version of itself instead of nothing. It was the other way round,
+  // and the two halves failed differently and both invisibly: a tone alone set four
+  // custom properties nobody read, and a treatment alone referenced undefined ones, which
+  // makes the declaration invalid at computed-value time — so the whole declaration is
+  // dropped rather than falling back. `treat-outline` alone drew no border at all.
+  //
+  // The evidence this comes from is one author, in one edit: they diagnosed the
+  // tone/treatment split correctly, wrote a source comment explaining it, fixed a badge
+  // to `badge tone-primary treat-filled`, and in the same edit wrote three buttons as
+  // `treat-outline` with no tone. An API that catches its reader immediately after they
+  // have understood it is not being misread.
+  //
+  // This is already the house pattern — `.input` and `.textarea` both read
+  // `var(--tone-border, var(--outline))`. The treatments were the outliers.
   lines.push('/* === Treatments === */');
-  lines.push('.treat-filled {', '  background-color: var(--tone-bg);', '  color: var(--tone-fg);', '}', '');
   lines.push(
-    '.treat-outline {',
-    '  background-color: transparent;',
-    '  border: var(--bw-1) solid var(--tone-border);',
-    '  color: var(--tone-text);',
+    '.treat-filled {',
+    '  background-color: var(--tone-bg, var(--surface-2));',
+    '  color: var(--tone-fg, var(--on-surface));',
     '}',
     ''
   );
-  lines.push('.treat-ghost {', '  background-color: transparent;', '  color: var(--tone-text);', '}', '');
+  lines.push(
+    '.treat-outline {',
+    '  background-color: transparent;',
+    '  border: var(--bw-1) solid var(--tone-border, var(--outline));',
+    '  color: var(--tone-text, var(--on-surface));',
+    '}',
+    ''
+  );
+  lines.push('.treat-ghost {', '  background-color: transparent;', '  color: var(--tone-text, currentColor);', '}', '');
 
   return lines.join('\n');
 }

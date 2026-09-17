@@ -18,7 +18,7 @@ the whole surface.
 | Command | Entry point | Reads | Writes |
 |---|---|---|---|
 | `npm run configs` | `scripts/generate-configs/index.js` | `spec/answers.json`, `spec/direction-mappings.json`, `spec/config/standards.json` | `spec/config/local/base/*.json` (git-ignored) |
-| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — stylesheets, `components/`, `scaffold/`, `HANDOFF.md` — plus `catalog/` |
+| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — stylesheets, `components/`, `HANDOFF.md` — plus `catalog/` and `docs/preview.html` |
 | `npm run figma` | `scripts/assemble-figma.js` | the resolved config set | `generated/figma-scripts/` — 17 paste scripts |
 
 They are strictly ordered. `configs` writes the config set that the other two read;
@@ -39,7 +39,10 @@ otherwise, **per file**. A local set containing only `base/colors.json` takes yo
 colors and Loom's spacing, sizing, typography and effects. That is the mechanism
 behind the stale-local-set gotcha — a `local/` directory left over from an older
 generator version silently outranks a freshly regenerated committed set, one file at
-a time. `sourceOf(rel)` reports which root won, which is why run logs name it.
+a time. `sourceOf(rel)` reports which root won. Nothing in the repo calls it — it is an
+entry point for a REPL or a one-off script, not something a run log surfaces. The source
+naming in the `configs` log is a different mechanism: `resolve-intent.js` returns a
+`sources` map per Tier 2 key, which the log prints.
 
 Deleting `spec/config/local/` reverts you to Loom's default look with no other step.
 
@@ -175,11 +178,9 @@ redirects.
 | Target | Emits |
 |---|---|
 | `tokens` | `tokens.css`, `loom.css`, `loom.components.css`, `main.css` |
-| `doc-layout` | `doc-layout.css` from `presentation/layout.json` |
 | `icons` | `components/icons.ts` |
 | `components` | `components/*.tsx` + `cn.ts` |
-| `preview` | `app/preview/page.tsx` |
-| `scaffold` | `init.sh`, `globals.css`, `ThemeProvider`, `layout` |
+| `preview-html` | `docs/preview.html` — written to the repo, not the output dir |
 | `handoff` | `HANDOFF.md` |
 | `verify` | nothing — runs the invariant checks and fails the run |
 
@@ -201,14 +202,17 @@ consumer source trees with nothing ignoring it.
 The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
 `interactive-implies-control`, `class-coverage`, `atom-class-coverage`,
 `class-box-model`, `phantom-parts`, `variant-keys`, `base-config-provenance`,
-`touch-target`, `contrast`, `composited-contrast`, `typecheck`. Any failure exits
-non-zero, so a full `npm run generate` cannot report success over broken output.
+`tone-fallbacks`, `focus-ring`, `touch-target`, `contrast`,
+`composited-contrast`, `typecheck`. Any failure exits non-zero, so a full
+`npm run generate` cannot report success over broken output.
 
 `css-parse` runs first and is the one the others stand on. Every check here read the
 stylesheets as text until postcss, which is how generated output with a syntax error
 passed twice — a regex asking "is there a rule shaped like this" cannot ask "is this a
 stylesheet". The old rule matcher also stopped at the first closing brace, so it could
-not see into an at-rule: it found 241 rules where postcss finds 267. The checks that
+not see into an at-rule: on the stylesheets as they stood it found 241 rules where
+postcss found 267, so twenty-six were never checked — including everything inside the
+reduced-motion and coarse-pointer blocks. The checks that
 read the tree report that they could not run when a stylesheet fails to parse, rather
 than finding nothing and calling it a pass.
 
@@ -318,4 +322,3 @@ line. It reports; it never installs.
 - [`../spec/questionnaire.md`](../spec/questionnaire.md) — every answer key
 - [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) — manifests, the install flow, the override mechanism
 - [`gotchas.md`](gotchas.md) — the traps, including config resolution and Figma Plugin API
-- [`decisions/`](decisions/) — why the class layer is the deliverable

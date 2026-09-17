@@ -60,7 +60,7 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 ## What's in the catalog
 
-5 components across 3 groups, each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
+6 components across 3 groups — 5 atoms plus `ThemeProvider`, which is its own kind — each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
 
 **The catalog is a worked example, not a component library.** Five references, one per distinct way of wiring something to the class layer: `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix form control. Anything else you need, build — Radix is already the primitive layer, and what Loom uniquely owns is tokens to classes.
 
@@ -82,7 +82,7 @@ Interactive primitives that genuinely warrant a library use one (carousel → em
 
 A few architectural choices worth noting:
 
-- **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost`) consumes them. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
+- **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost`) consumes them, each through a fallback — so a treatment with no tone renders a neutral version of itself rather than nothing, and `badge tone-primary` with no treatment is filled, because `.badge` carries a tone default at zero specificity. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
 - **Atoms are project-owned.** You don't `npm install` Loom. You pick a subset, the files are copied into your project, and you edit them freely — the shadcn model. There's no upstream auto-sync; a manual port-back is the deliberate path when an edit generalizes.
 - **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A scaffolded Loom project looks plain because the personality is yours to add, not because the system is unfinished.
 
@@ -119,7 +119,7 @@ the gate stood on something no consumer has.
 
 ### Configure and generate
 
-**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the preview page above renders before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the atoms are there on clone. `generated/` is not — the Figma scripts and `init.sh` exist only after you run the commands in this section.)
+**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the preview page above renders before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the components are there on clone. `generated/` is not — the stylesheets and the Figma scripts exist only after you run the commands in this section.)
 
 To build *your* brand, hand-author **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
 
@@ -137,7 +137,7 @@ npm run figma        # → Figma plugin scripts (paste into the Figma console)
 
 **Where your brand lands.** `npm run configs` writes to `spec/config/local/`, never to the committed set — so generating a brand never dirties the Loom repo. Every generator resolves each config file through `local/` first and falls back to `spec/config/base/`. Two things follow. Hand-edit `spec/config/local/`, not `spec/config/base/`: a local file of the same name overrides the committed one anyway, and editing the committed set fails the `base-config-provenance` check on the next `npm run generate`. And deleting `spec/config/local/` reverts you to Loom's default look.
 
-Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `tokens-json`, `components`, `scaffold`, `handoff`, …); `--only <target>` runs one.
+Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `icons`, `components`, `preview-html`, `handoff`, `verify`); `--only <target>` runs one.
 
 `generate` emits three stylesheets. All of them are plain CSS with no framework at-rules:
 
@@ -166,56 +166,38 @@ A project that owns its own components can skip `loom.components.css`. Before wi
 
 ### Use Loom in a project
 
-**Two install tiers.** Pick before you start; the difference is what Loom is allowed to put in your project.
+**Two install tiers.** Both are `npm run sync`; the difference is one flag, and what Loom is allowed to put in your project.
 
 | Tier | You get | Use when |
 |------|---------|----------|
-| **tokens** | the stylesheets, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values |
-| **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`), the core dependencies, and the catalog | You want the components too. This is what the quickstart below installs |
+| **tokens** (`--tokens`) | the stylesheets, nothing else — no components, no dependencies | You have your own components and want Loom's design decisions as values |
+| **catalog** (default) | The tokens tier, plus the whole catalog and `ThemeProvider` | You want the components too |
 
-To check that a brand landed, open [`docs/preview.html`](docs/preview.html) in this repo after generating. The scaffold used to write a React `/preview` route into your project for that; it was a second copy of the same page, needing a dev server to answer a question a static file answers.
+**There is no app shell, and no framework assumption.** Loom used to ship a `scaffold/` with an `init.sh` that wrote a Next root layout, a `globals.css` and a provider mount into your project, and hard-required `src/app/`. The stylesheets were always plain CSS and the components always plain React; the only thing that assumed a framework was the script wiring them up. It is gone. What it did that was worth keeping moved: `ThemeProvider` is a catalog component, the `::selection` and scrollbar rules are in the class layer, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Where a provider mounts and what your root layout looks like are your framework's business — Vite, Next, Remix, or a hand-rolled `index.html`.
 
-Both tiers are first-class on web:
+To check that a brand landed, open [`docs/preview.html`](docs/preview.html) in this repo after generating. No dev server and no route in your project — a static file answers the question.
 
-```bash
-./generated/scaffold/init.sh ../my-app --tokens   # tokens tier — writes the stylesheets, nothing else
-./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
-```
-
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout. Wire `main.css` into your global stylesheet — plain CSS, no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). If you own your components, drop the `loom.components.css` line from it. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
-
-Consumption is shadcn-style — the files are copied in and become yours. The scaffold targets a Next.js project with `src/app/`, living **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
-
-**Don't have one?** From your workspace (not inside the Loom repo), this spins up a correctly-configured project — Next.js + TypeScript + `src/app/`, no prompts. No `--tailwind`: Loom's stylesheets are plain CSS and its atoms need no CSS framework, so adding one buys a build step and a reset that will outrank the class layer.
+Consumption is shadcn-style: the files are copied in and become yours. Your project lives **alongside the Loom repo, not inside it** — Loom is the factory, your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
 ```bash
-npx create-next-app@latest my-loom-app \
-  --ts --no-tailwind --app --src-dir --eslint \
-  --import-alias "@/*" --use-npm --no-turbopack --no-agents-md
-```
+# From the Loom repo, pointing at your project by path.
 
-`--no-agents-md` skips the generic `AGENTS.md` / `CLAUDE.md` agent-rules files create-next-app would otherwise drop in — your project starts clean.
+# Tokens tier — four stylesheets into <project>/src/, nothing else:
+npm run sync -- ../my-loom-app --tokens
 
-Already made one (or have one)? The next two commands run **from the Loom repo**, pointing at your project by path:
-
-```bash
-# 1. Bootstrap the app shell once — ThemeProvider, root layout + fonts, globals,
-#    token substrate, and core deps. Run from the Loom repo, pointing at your project:
-./generated/scaffold/init.sh ../my-loom-app
-
-# 2. From the Loom repo, sync the catalog in (re-run anytime to resync).
-#    All five atoms land in src/components/ — delete the ones you do not want:
+# Catalog tier — the same, plus every component into <project>/src/components/:
 npm run sync -- ../my-loom-app
-
-# 3. Run your app and open /preview to confirm your brand landed:
-#    cd ../my-loom-app && npm run dev   → http://localhost:3000/preview
-#    init.sh scaffolds that route (token swatches, type, spacing, radius);
-#    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it copies the whole catalog into `your-project/src/components/` — delete what you do not want — and delivers a freshly generated substrate. It prints the `npm install` line for the packages those atoms import, taken from their manifests; your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. The atoms need React and the packages their manifests name; they need no CSS framework at all.
+Then three things, once:
 
-**From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
+1. **Wire the substrate in.** One `@import "./main.css"` in your global stylesheet — plain CSS, no build step. If you own your components, import the three directly and drop the `loom.components.css` line.
+2. **Put your own reset in `@layer loom.reset`** and import it before `tokens.css`, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). This is the single most common way a Loom install looks broken.
+3. **Mount `ThemeProvider`** at your app root if you want light/dark/system switching. It persists the choice and writes the `data-theme` attribute the alternate-mode block keys off.
+
+`npm run sync` is repeatable — re-run it any time a token or a schema changes. It copies the whole catalog into `your-project/src/components/` — delete what you do not want — and delivers a freshly generated substrate. It prints the `npm install` line for the packages those components import, taken from their manifests; your project owns its lockfile, so Loom reports deps rather than installing them. **A file you have edited is skipped, not overwritten** — these are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. The components need React 19 and the packages their manifests name; they need no CSS framework at all.
+
+**From the consumer side it is `npm run loom:sync`.** The first sync writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written rather than documented because the sync is the only thing that knows the path between the two repos — it is invoked with one and lives in the other, so it computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
 
 A sync always regenerates the substrate, so your tokens are current by construction; only `catalog/*.tsx` can lag behind the schemas and templates it was built from. The sync **reports** that in one line rather than repairing it — rebuilding the atoms runs the whole pipeline, including a typecheck, so refreshing a brand in your project could fail on a surface it has never heard of. Pass `--refresh` when you do want them rebuilt.
 
@@ -263,7 +245,7 @@ spec/                  Single source of truth
   answers.example.json ← committed template — copy to answers.json (git-ignored) and edit
 
 scripts/               The two codegen pipelines
-  code-templates/      ← React catalog + the four stylesheets + scaffold
+  code-templates/      ← React catalog + the four stylesheets
   figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts
   scripts/sync.js      ← installs the catalog + substrate into a project (`npm run sync`)

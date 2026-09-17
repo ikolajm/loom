@@ -1,12 +1,4 @@
-/**
- * Generates ThemeProvider.tsx — React context for theme switching.
- * Handles light/dark/system, localStorage persistence, system preference listener.
- */
-
-function generate(configs) {
-  const defaultMode = configs.colors['default-mode'] || 'dark';
-
-  return `'use client';
+'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
@@ -21,10 +13,10 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'theme';
-const DEFAULT_THEME: Theme = '${defaultMode === 'dark' ? 'dark' : 'light'}';
+const DEFAULT_THEME: Theme = 'dark';
 
 function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return '${defaultMode}';
+  if (typeof window === 'undefined') return 'dark';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
@@ -34,7 +26,7 @@ function resolveTheme(theme: Theme): 'light' | 'dark' {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
-  const [resolved, setResolved] = useState<'light' | 'dark'>('${defaultMode}');
+  const [resolved, setResolved] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
@@ -78,7 +70,3 @@ export function useTheme() {
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
 }
-`;
-}
-
-module.exports = { generate };

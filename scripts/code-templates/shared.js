@@ -133,23 +133,6 @@ function maxWidthToClass(val) {
   return `max-w-[${val}]`;
 }
 
-function iconSizeToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  if (val.startsWith('icon/')) return `size-${val.replace('icon/', '')}`;
-  return null;
-}
-
-function fontWeightToClass(w) {
-  if (!w) return null;
-  const map = { 400: 'font-normal', 500: 'font-medium', 600: 'font-semibold', 700: 'font-bold' };
-  return map[w] || null;
-}
-
-function letterSpacingToClass(ls) {
-  if (!ls || ls === '0' || ls === 'normal') return null;
-  return `tracking-[${ls}]`;
-}
-
 // --- Variant/size style builders ---
 
 function buildVariantStyles(variants) {
@@ -177,19 +160,6 @@ function buildVariantStyles(variants) {
     styles[name] = classes.join(' ');
   }
   return styles;
-}
-
-/**
- * Map a role-token path (color/primary/on-primary) to its runtime CSS variable — var(--on-primary).
- * The token pipeline emits role tokens to :root as --{role} (e.g. --primary, --on-surface, --outline).
- * NOTE: it must be --{role}, NOT --color-{role}: the @theme block is `@theme inline`, which inlines
- * values into utilities and does NOT register --color-* on :root, so only --{role} resolves at runtime.
- */
-function colorToVar(colorPath) {
-  if (!colorPath || colorPath === 'transparent') return null;
-  if (colorPath === 'currentColor') return 'currentColor';
-  const role = colorPath.split('/').pop();
-  return `var(--${role})`;
 }
 
 /**
@@ -376,16 +346,16 @@ function getComponentRegistry(configs) {
   const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig } = configs;
   return {
     // === Actions ===
-    'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions' },
     // IconButton removed — use <Button variant="ghost" size="icon"> instead
-    'Badge': { generator: 'badge#generateBadge', source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions', template: 'cva-only', primitive: '@radix-ui/react-slot' },
+    'Badge': { generator: 'badge#generateBadge', source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions' },
 
     // === Inputs ===
-    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', template: 'radix', primitive: '@radix-ui/react-select', variantKey: 'state' },
-    'FormField': { generator: 'form-field#generateFormField', source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs', template: 'cva-only', primitive: null },
+    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', variantKey: 'state' },
+    'FormField': { generator: 'form-field#generateFormField', source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs' },
 
     // === Layout ===
-    'Dialog': { generator: 'radix-dialogs#generateRadixDialog', source: layoutConfig, key: 'dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout', template: 'radix', primitive: '@radix-ui/react-dialog' },
+    'Dialog': { generator: 'radix-dialogs#generateRadixDialog', source: layoutConfig, key: 'dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout' },
 
     // === Feedback ===
 
@@ -422,12 +392,6 @@ function buildTypographyClasses(config) {
   return classes.join(' ');
 }
 
-// --- Display name formatting ---
-
-function formatDisplayName(name) {
-  return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
-}
-
 module.exports = {
   expandSizeConstants,
   loadAllConfigs,
@@ -439,11 +403,7 @@ module.exports = {
   shadowToClass,
   borderWidthToClass,
   maxWidthToClass,
-  iconSizeToClass,
-  fontWeightToClass,
-  letterSpacingToClass,
   buildVariantStyles,
-  colorToVar,
   TREATMENT_CLASSES,
   ICON_SLOT_CLASS,
   buildColorVars,
@@ -453,5 +413,4 @@ module.exports = {
   getComponentRegistry,
   kindOf,
   PATTERN_IDS,
-  formatDisplayName,
 };

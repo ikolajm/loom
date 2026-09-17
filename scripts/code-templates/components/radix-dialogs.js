@@ -1,4 +1,4 @@
-const { buildVariantStyles, buildSizeStyles } = require('../shared');
+const { buildSizeStyles } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
 /**

@@ -79,8 +79,10 @@ tokens.css                       ← plain CSS, portable
 └── [data-theme="${defaultMode === 'dark' ? 'light' : 'dark'}"] { }     ← Alternate mode overrides
 
 loom.css                         ← plain CSS, portable
+├── :focus-visible { }          ← The focus ring, on the elements themselves
 ├── .text-{family}-{size} { }   ← Text style family classes (6 families × 3 tiers)
-├── .interactive { }             ← Hover/active/focus/disabled states
+├── .interactive { }             ← Hover/active/disabled states
+├── .control { }                 ← Validity and disabled states
 └── @keyframes { }               ← Animation definitions
 
 loom.components.css              ← plain CSS, portable; named component classes
@@ -96,34 +98,31 @@ composes them. The order is the mechanism — a minifier drops the @layer statem
 redundant, after which precedence falls back to first appearance.
 
 ### components/ (YOURS TO MODIFY)
-${componentRows.length} component scaffolds. Variant/size class maps are generated from config.
+${componentRows.length} components. Variant/size class maps are generated from config.
 
 | File | Element | Attributes | Text Family | Notes |
 |------|---------|------------|-------------|-------|
 ${componentRows.join('\n')}
 
-### scaffold/
-App-shell bootstrap files — \`init.sh\` wires the atom-agnostic shell into a Next.js project.
-
-| File | Purpose |
-|------|---------|
-| \`init.sh <frontend-dir>\` | One-time: copies the shell + token substrate and installs core deps |
-| \`globals.css\` | Tailwind + tokens import, base body styles, scrollbar, selection |
-| \`ThemeProvider.tsx\` | React context for light/dark/system theme switching with localStorage persistence |
-| \`layout.tsx\` | Root layout with ThemeProvider, Google Fonts, data-theme attribute |
+\`theme-provider.tsx\` comes with them: light/dark/system, persisted to localStorage, and
+it writes the \`data-theme\` attribute the alternate-mode block keys off. Mount it once
+at your app root. It imports nothing framework-specific.
 
 ## Setup
 
+One command, from the Loom repo, pointing at your project. No app shell is written —
+where a provider mounts and what your root layout looks like are your framework's
+business.
+
 \`\`\`bash
-# 1. App shell + substrate (once) — from the generated/ directory:
-./scaffold/init.sh ./path-to-frontend
+# Catalog + substrate (repeatable — re-run any time a token or schema changes):
+npm run sync -- ./path-to-frontend
 
-# 2. Atoms + token refresh (repeatable) — from the loom repo root:
-npm run sync -- ./path-to-frontend     # copies the catalog + substrate
+# Substrate only, if you own your components:
+npm run sync -- ./path-to-frontend --tokens
 
-# 3. Install the npm deps the sync reports, then:
-cd ./path-to-frontend
-npm run dev
+# Then install the npm deps the sync reports, wire main.css into your global
+# stylesheet, and mount ThemeProvider at your root.
 \`\`\`
 
 ## Feedback Loop

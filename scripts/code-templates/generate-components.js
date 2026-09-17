@@ -3,10 +3,11 @@
  *
  * Architecture: Config → CVA (variant management) → Radix/lib primitives (behavior) → tokens (styling)
  *
- * Template types:
- *   cva-only  — styled HTML element + CVA variants from config
- *   radix     — Radix primitive + CVA styling from config
- *   lib       — specialized library + CVA styling from config
+ * Every registry entry in shared.js names its own generator module, as
+ * `<module>#<export>`, and there is no generic fallback. There used to be a `template`
+ * field selecting between `cva-only`, `radix` and `lib`; `lib` was never implemented,
+ * `radix` only warned, and `cva-only` was unreachable because every entry also carried a
+ * generator. The field is gone and dispatch throws on an entry without one.
  *
  * Output (per atom):
  *   catalog/[name].tsx          — component code
@@ -22,9 +23,8 @@ const crypto = require('crypto');
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
 const { kindOf } = require('./shared');
-const { applyPins } = require('./npm-pins');
 const { buildCnUtility } = require('./components/cn');
-const { generateCvaOnly } = require('./components/cva-only');
+const { buildThemeProvider } = require('./components/theme-provider');
 
 // Every other template module is reached through the registry's `generator` field
 // ('module#export', resolved below) rather than a hand-written import here. Adding an
@@ -62,18 +62,24 @@ function resolveGenerator(name, spec) {
   return fn;
 }
 
+/**
+ * Every registry entry names its own generator, and there is no fallback.
+ *
+ * There used to be a `template` switch behind this, falling through to `cva-only` — a
+ * generic "styled element plus CVA variants" builder. It was unreachable: `meta.generator`
+ * is set on all five entries, so the switch never ran, which was proven by making
+ * `generateCvaOnly` throw on entry and watching a full generate complete. It also emitted
+ * `size-icon-N`, a Tailwind class nothing has defined since the bridge went out, so the
+ * thing it would have produced had it ever run was partly broken.
+ *
+ * Throwing is the better failure. A component added without a generator now stops the
+ * build and says so, instead of silently receiving something utility-shaped.
+ */
 function dispatch(name, config, meta) {
-  if (meta.generator) return resolveGenerator(name, meta.generator)(name, config, meta);
-
-  switch (meta.template) {
-    case 'radix':
-      // A registry entry claiming a Radix primitive with no generator to build it. Was a
-      // silent cva-only fallback inside the old router; still falls back, still says so.
-      console.warn(`  ${name}: no generator for Radix primitive ${meta.primitive}, using cva-only`);
-      return `// TODO: Add Radix primitive template for ${name} (${meta.primitive})\n` + generateCvaOnly(name, config, meta);
-    case 'cva-only':
-    default: return generateCvaOnly(name, config, meta);
+  if (!meta.generator) {
+    throw new Error(`${name}: registry entry has no "generator". Add one — there is no generic fallback template.`);
   }
+  return resolveGenerator(name, meta.generator)(name, config, meta);
 }
 
 // ============================================================
@@ -99,7 +105,9 @@ function extractAxisKeys(obj) {
 // External npm packages a generated atom imports — the consumer install set.
 // Scans `from '<spec>'`; keeps non-relative specifiers, drops react/react-dom (peer deps
 // a React app already has). Scoped pkgs collapse to @scope/name, subpaths to the package root.
-// Pinned packages carry their range (see npm-pins.js) — sync.js prints this list verbatim.
+// Sorted, because sync.js prints this list verbatim and an install line that reorders
+// between runs reads as a change. No version ranges: the one pinned package was
+// tailwind-merge, which left with the bridge.
 function extractNpmDeps(src) {
   const deps = new Set();
   const re = /from\s+['"]([^'"]+)['"]/g;
@@ -110,7 +118,7 @@ function extractNpmDeps(src) {
     if (spec === 'react' || spec === 'react-dom' || spec.startsWith('react/') || spec.startsWith('react-dom/')) continue;
     deps.add(spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]);
   }
-  return applyPins(deps);
+  return [...deps].sort();
 }
 
 // Sibling catalog atoms a generated atom imports — the transitive copy set setup.sh walks.
@@ -194,7 +202,7 @@ function generate(registry, outputDir, configs) {
       const manifest = buildManifest(def, null, contentVersion(tsx), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
-      console.log(`  ${def.key}.tsx + manifest (utility)`);
+      console.log(`  ${def.key}.tsx + manifest (${def.generator})`);
       atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
       count++;
       continue;
@@ -212,7 +220,7 @@ function generate(registry, outputDir, configs) {
 
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
     fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
-    console.log(`  ${def.key}.tsx + manifest (${def.template})`);
+    console.log(`  ${def.key}.tsx + manifest (${def.generator})`);
     atoms.push({ name: manifest.name, category: manifest.category, description: manifest.description });
     count++;
   }
@@ -226,7 +234,7 @@ function generate(registry, outputDir, configs) {
     // filtering the catalog by kind never has to special-case it.
     kind: 'utility',
     category: 'utility',
-    description: 'Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.',
+    description: 'Class name merger utility (clsx). Foundation dependency for all components.',
     version: contentVersion(cnSrc),
     dependencies: [],
     npmDependencies: extractNpmDeps(cnSrc),
@@ -234,6 +242,29 @@ function generate(registry, outputDir, configs) {
     composition: 'none',
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
+
+  // theme-provider — the theme mechanism, catalog-resident.
+  //
+  // Its own kind, for the reason cn has one: a consumer filtering by kind should not have
+  // to special-case it. It is not an atom — it renders no shape and has no class contract
+  // — but it is not a utility either, because it carries the behavior the alternate-mode
+  // block depends on: persisting a choice, resolving prefers-color-scheme, and writing
+  // data-theme. It came out of scaffold/, where the only route to it was a Next-only
+  // init.sh.
+  const tpSrc = buildThemeProvider(configs);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-provider.tsx'), tpSrc);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-provider.manifest.json'), JSON.stringify({
+    name: 'ThemeProvider',
+    kind: 'provider',
+    category: 'utility',
+    description: 'Theme context — light/dark/system, persisted, writes data-theme. No framework coupling.',
+    version: contentVersion(tpSrc),
+    dependencies: [],
+    npmDependencies: extractNpmDeps(tpSrc),
+    tokens: [],
+    composition: 'wrapper',
+  }, null, 2) + '\n');
+  console.log(`  theme-provider.tsx + manifest (provider)`);
 
   // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.

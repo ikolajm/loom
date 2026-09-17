@@ -1,0 +1,11 @@
+{
+  "name": "ThemeProvider",
+  "kind": "provider",
+  "category": "utility",
+  "description": "Theme context — light/dark/system, persisted, writes data-theme. No framework coupling.",
+  "version": "c72bc0b4c1cc",
+  "dependencies": [],
+  "npmDependencies": [],
+  "tokens": [],
+  "composition": "wrapper"
+}
