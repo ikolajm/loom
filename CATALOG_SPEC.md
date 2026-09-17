@@ -2,7 +2,7 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider`. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/` and the consumer deletes what they do not want. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider`. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/`, every run. Deleting one does not stick — a removed file is indistinguishable from a never-installed one, so the next sync restores it. Unimported atoms are tree-shaken and cost nothing shipped, so the cost of carrying one you do not use is a file in your tree, not bytes in your build. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
 A consuming project ships atom files and nothing else — no stories, no harness. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 

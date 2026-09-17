@@ -4,9 +4,15 @@
  *
  * Usage: node scripts/sync.js <project-dir> [--tokens] [--force] [--refresh]
  *
+ *   --answers <file>  the brand to build from, resolved into a throwaway config root so
+ *                     this repo's own spec/config/local/ is never written to
  *   --tokens   the substrate only — no atoms, no install line, no framework assumption
  *   --force    overwrite atoms the consumer has edited locally
  *   --refresh  regenerate the catalog from spec/ first, then sync
+ *
+ * Without --answers the substrate is emitted from whichever brand is active in this repo,
+ * which is the right default for a maintainer and the wrong one for a consumer. A project
+ * that owns its answers file passes it and becomes reproducible from its own repo.
  *
  * `--tokens` and the loom:sync script below came from init.sh when scaffold/ was cut. Both
  * belong here: this is the only thing that knows both paths, because it is invoked with
@@ -41,18 +47,51 @@ function die(lines) {
 
 function main(argv) {
   const flags = new Set(argv.filter((a) => a.startsWith('--')));
-  const project = argv.find((a) => !a.startsWith('--'));
-  if (!project) die('Usage: node scripts/sync.js <project-dir> [--tokens] [--force] [--refresh]');
+  // --answers takes a value, so its argument is not a project directory.
+  const answersIdx = argv.indexOf('--answers');
+  const answers = answersIdx === -1 ? null : argv[answersIdx + 1];
+  // The guard is on answersIdx, not on the sum: with the flag absent it is -1, and
+  // -1 + 1 is the index the project directory sits at.
+  const answersValueIdx = answersIdx === -1 ? -1 : answersIdx + 1;
+  const project = argv.find((a, i) => !a.startsWith('--') && i !== answersValueIdx);
+  if (!project) die('Usage: node scripts/sync.js <project-dir> [--answers <file>] [--tokens] [--force] [--refresh]');
+  if (answersIdx !== -1 && (!answers || answers.startsWith('--'))) {
+    die('--answers needs a path to an answers JSON file.');
+  }
+  if (answers && !fs.existsSync(answers)) {
+    die([`ERROR: answers file not found: ${answers}`,
+         'This is the brand input. Without it the sync emits whichever brand is active in',
+         'the Loom repo, which is how a project ends up wearing another brand.']);
+  }
 
   const force = flags.has('--force');
   const tokensOnly = flags.has('--tokens');
   const src = path.join(project, 'src');
   const dest = path.join(src, 'components');
 
+  // The brand, built into a throwaway config root rather than into spec/config/local/.
+  // That directory is a single slot, so generating a consumer brand there evicts whatever
+  // was in it — and a project regenerating its own substrate has no business writing to
+  // this repo at all. LOOM_LOCAL_CONFIG redirects both the write and the read; see
+  // config-paths.js. Cleaned up in the finally below, alongside the emit directory.
+  let cfgRoot = null;
+  if (answers) {
+    cfgRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'loom-cfg-'));
+    execFileSync(
+      'node',
+      [path.join(LOOM_ROOT, 'scripts/generate-configs/index.js'), '--input', path.resolve(answers)],
+      { stdio: ['ignore', 'ignore', 'inherit'], env: { ...process.env, LOOM_LOCAL_CONFIG: cfgRoot } }
+    );
+  }
+  // Every child process reads the same config set, so --refresh cannot rebuild the atoms
+  // against one brand while the substrate comes from another.
+  const childEnv = cfgRoot ? { ...process.env, LOOM_LOCAL_CONFIG: cfgRoot } : process.env;
+
   if (flags.has('--refresh')) {
     console.log('Regenerating the catalog from spec/...');
     execFileSync('node', [path.join(LOOM_ROOT, 'scripts/code-templates/orchestrator.js')], {
       stdio: ['ignore', 'ignore', 'inherit'],
+      env: childEnv,
     });
   }
 
@@ -80,7 +119,12 @@ function main(argv) {
     console.log('      it is the atoms that may lag. Re-run with --refresh to rebuild them first.');
   }
 
-  // The whole catalog, and the consumer deletes what they do not want. There were six
+  // The whole catalog, every run. A consumer CANNOT opt out by deleting: check-local-edits
+  // reports a missing file as `fresh`, which is right for a first install and
+  // indistinguishable from a deletion, so the file returns on the next sync. That is
+  // acceptable only because an unimported component is tree-shaken — verified downstream,
+  // where seven synced atoms with none imported left the bundle byte-identical. If that
+  // ever stops being true, this needs a pick list again rather than a note. There were six
   // manifests and one edge in the dependency graph — every atom needs `cn`, which is
   // copied unconditionally below anyway — so resolving a subset walked a graph to
   // return what it had been handed. Deleting a file you did not want is cheaper than
@@ -135,7 +179,7 @@ function main(argv) {
     execFileSync(
       'node',
       [path.join(LOOM_ROOT, 'scripts/code-templates/orchestrator.js'), '--only', 'tokens', '--output', tmp],
-      { stdio: ['ignore', 'ignore', 'inherit'] }
+      { stdio: ['ignore', 'ignore', 'inherit'], env: childEnv }
     );
     for (const f of SUBSTRATE) {
       fs.copyFileSync(path.join(tmp, f), path.join(src, f));
@@ -143,6 +187,7 @@ function main(argv) {
     }
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
+    if (cfgRoot) fs.rmSync(cfgRoot, { recursive: true, force: true });
   }
 
   console.log(`Done → ${tokensOnly ? src : dest}`);
@@ -163,7 +208,7 @@ function main(argv) {
     console.log('call site (className / prop / a wrapper), which survives every resync by design.');
   }
 
-  addLoomSyncScript(project);
+  addLoomSyncScript(project, answers);
 
   if (!tokensOnly) {
     console.log('');
@@ -199,7 +244,7 @@ function main(argv) {
  * a sibling repo present is a worse failure than a stale stylesheet, and it lands on
  * whoever clones the project next rather than on the person who set it up.
  */
-function addLoomSyncScript(project) {
+function addLoomSyncScript(project, answers) {
   const pkgPath = path.join(project, 'package.json');
   console.log('');
   if (!fs.existsSync(pkgPath)) {
@@ -213,7 +258,21 @@ function addLoomSyncScript(project) {
     return;
   }
   const rel = path.relative(path.resolve(project), LOOM_ROOT).split(path.sep).join('/');
-  pkg.scripts['loom:sync'] = `node ${rel}/scripts/sync.js .`;
+  // The answers path goes into the script too, or `npm run loom:sync` would quietly fall
+  // back to whichever brand is active in the Loom checkout — the failure this flag exists
+  // to close. Written project-relative when the file lives in the project, which is where
+  // it belongs: that is what makes the substrate reproducible from the consumer's repo
+  // alone. An answers file kept outside the project is recorded absolute, and says so by
+  // looking like what it is.
+  let suffix = '';
+  if (answers) {
+    const abs = path.resolve(answers);
+    const inside = path.relative(path.resolve(project), abs);
+    suffix = inside.startsWith('..') || path.isAbsolute(inside)
+      ? ` --answers ${abs.split(path.sep).join('/')}`
+      : ` --answers ./${inside.split(path.sep).join('/')}`;
+  }
+  pkg.scripts['loom:sync'] = `node ${rel}/scripts/sync.js .${suffix}`;
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
   console.log(`Added "loom:sync": "${pkg.scripts['loom:sync']}" — refresh from your own directory.`);
 }

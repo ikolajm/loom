@@ -116,10 +116,13 @@ business.
 
 \`\`\`bash
 # Catalog + substrate (repeatable — re-run any time a token or schema changes):
-npm run sync -- ./path-to-frontend
+npm run sync -- ./path-to-frontend --answers ./path-to-frontend/loom-answers.json
 
 # Substrate only, if you own your components:
-npm run sync -- ./path-to-frontend --tokens
+npm run sync -- ./path-to-frontend --tokens --answers ./path-to-frontend/loom-answers.json
+
+# --answers is your brand, kept in your repo. Without it the sync emits whichever
+# brand is active in the Loom checkout.
 
 # Then install the npm deps the sync reports, wire main.css into your global
 # stylesheet, and mount ThemeProvider at your root.

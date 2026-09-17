@@ -30,7 +30,23 @@ const fs = require('fs');
 const path = require('path');
 
 const COMMITTED_ROOT = path.resolve(__dirname, '../spec/config');
-const LOCAL_ROOT = path.join(COMMITTED_ROOT, 'local');
+
+/**
+ * Where the local (brand) config set lives. `spec/config/local/` by default.
+ *
+ * `LOOM_LOCAL_CONFIG` redirects it, which is what makes a brand generation not evict the
+ * one already there. `spec/config/local/` is a single slot: generating pb2's brand
+ * overwrote loom-test's, and the only way to get it back was a manual copy. A consumer
+ * regenerating its own substrate has no business mutating this repo at all.
+ *
+ * An environment variable rather than a flag because it has to survive two process
+ * boundaries — sync.js spawns generate-configs and then the orchestrator, and threading a
+ * path through both CLIs is more plumbing than the job needs. Both roots resolve here, so
+ * the redirect covers the write side and the read side at once.
+ */
+const LOCAL_ROOT = process.env.LOOM_LOCAL_CONFIG
+  ? path.resolve(process.env.LOOM_LOCAL_CONFIG)
+  : path.join(COMMITTED_ROOT, 'local');
 
 /** Absolute path to `rel`, preferring the local set when it has that file. */
 function resolve(rel) {

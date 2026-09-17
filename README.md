@@ -183,11 +183,14 @@ Consumption is shadcn-style: the files are copied in and become yours. Your proj
 # From the Loom repo, pointing at your project by path.
 
 # Tokens tier — four stylesheets into <project>/src/, nothing else:
-npm run sync -- ../my-loom-app --tokens
+npm run sync -- ../my-loom-app --tokens --answers ../my-loom-app/loom-answers.json
 
 # Catalog tier — the same, plus every component into <project>/src/components/:
-npm run sync -- ../my-loom-app
+npm run sync -- ../my-loom-app --answers ../my-loom-app/loom-answers.json
 ```
+
+**Keep your answers file in your project, and pass it with `--answers`.** Without it the sync emits whichever brand is active in this checkout, which is the right default for a maintainer and the wrong one for you. `spec/answers.json` here is a single slot — one brand at a time — so a Loom repo that has been used for two projects has forgotten the first one's brand, and the only record left is the emitted CSS. `--answers` resolves your brand into a throwaway config root, so the sync never writes to this repo and never depends on what it was last used for. The first sync writes the flag into your `loom:sync` script, so a refresh from your own directory stays reproducible.
+
 
 Then three things, once:
 
@@ -195,7 +198,7 @@ Then three things, once:
 2. **Put your own reset in `@layer loom.reset`** and import it before `tokens.css`, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). This is the single most common way a Loom install looks broken.
 3. **Mount `ThemeProvider`** at your app root if you want light/dark/system switching. It persists the choice and writes the `data-theme` attribute the alternate-mode block keys off.
 
-`npm run sync` is repeatable — re-run it any time a token or a schema changes. It copies the whole catalog into `your-project/src/components/` — delete what you do not want — and delivers a freshly generated substrate. It prints the `npm install` line for the packages those components import, taken from their manifests; your project owns its lockfile, so Loom reports deps rather than installing them. **A file you have edited is skipped, not overwritten** — these are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. The components need React 19 and the packages their manifests name; they need no CSS framework at all.
+`npm run sync` is repeatable — re-run it any time a token or a schema changes. It copies the whole catalog into `your-project/src/components/` and delivers a freshly generated substrate. **Deleting a component you do not want is temporary** — it comes back on the next sync, because `check-local-edits` cannot tell a file you removed from one you never had. That is deliberate rather than unfortunate: an unimported component is tree-shaken, so it costs nothing in your bundle, and a pick list is a second place for the catalog to drift from itself. Leave it; it ships nothing. It prints the `npm install` line for the packages those components import, taken from their manifests; your project owns its lockfile, so Loom reports deps rather than installing them. **A file you have edited is skipped, not overwritten** — these are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. The components need React 19 and the packages their manifests name; they need no CSS framework at all.
 
 **From the consumer side it is `npm run loom:sync`.** The first sync writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written rather than documented because the sync is the only thing that knows the path between the two repos — it is invoked with one and lives in the other, so it computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
 

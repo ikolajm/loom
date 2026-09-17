@@ -845,6 +845,130 @@ function checkContrast() {
   return { failures, note: `${pairs} on-X/X pairs against WCAG AA ${AA_TEXT}:1` };
 }
 
+// --- tone-contrast ------------------------------------------------------------
+// Every tone's --tone-text against every surface it can sit on.
+//
+// `contrast` above checks a foreground against its OWN fill: on-primary against primary.
+// That is the declared pairing, and it says nothing about the treatments that paint no
+// fill at all. .treat-outline sets color: var(--tone-text) over whatever is behind it,
+// .treat-ghost sets only that, and .link reads the same property. For a non-neutral
+// family --tone-text is the base role at full strength, so the pairing that decides
+// legibility is role-against-surface, and nothing was measuring it.
+//
+// Found while deciding whether Badge should expose a ghost treatment. An outline badge
+// keeps a border when its label is too faint; a ghost badge has nothing else, so the
+// question could not be answered without this number.
+//
+// Neutral is skipped: its --tone-text is var(--on-surface), which `contrast` already
+// walks over every tier.
+const TONE_SURFACES = ['surface', 'surface-1', 'surface-2', 'surface-3'];
+
+// Pairs that fail on Loom's own default and are parked, not excused.
+//
+// The real fix is a per-family text role: the AA shade walker in generate-colors.js
+// already picks the nearest shade clearing a threshold against a reference colour, and
+// pointing that at the surface tiers would give every tone a label colour that is legible
+// where it is actually used. That changes the colour of every outline badge, every ghost
+// badge and every link, so it is a flow rather than a patch. Until then these are the
+// measured state, written down.
+//
+// KEYED ON THE HEX PAIR, not the role names. These ratios belong to one palette. A
+// consumer generating their own brand gets different colours, the key misses, and their
+// failures report — which is the whole point: this is Loom's debt, not a blanket
+// exemption that travels to every project that syncs.
+//
+// A parked pair that starts passing also fails, so the list cannot rot quietly.
+const PARKED_TONE_CONTRAST = {
+  'light:secondary:surface': ['#357d7b', '#f2f1f3', 4.27],
+  'light:secondary:surface-1': ['#357d7b', '#e5e4e7', 3.79],
+  'light:secondary:surface-2': ['#357d7b', '#d9d6db', 3.34],
+  'light:secondary:surface-3': ['#357d7b', '#ccc8d0', 2.91],
+  'light:success:surface-1': ['#127d3f', '#e5e4e7', 4.11],
+  'light:success:surface-2': ['#127d3f', '#d9d6db', 3.62],
+  'light:success:surface-3': ['#127d3f', '#ccc8d0', 3.16],
+  'light:warning:surface-2': ['#7d5912', '#d9d6db', 4.41],
+  'light:warning:surface-3': ['#7d5912', '#ccc8d0', 3.85],
+  'light:info:surface-3': ['#17599c', '#ccc8d0', 4.33],
+  'dark:error:surface-2': ['#e86363', '#3f3b44', 3.33],
+  'dark:error:surface-3': ['#e86363', '#4c4752', 2.74],
+  'dark:warning:surface-3': ['#dfa020', '#4c4752', 3.94],
+  'dark:info:surface-2': ['#63a6e8', '#3f3b44', 4.24],
+  'dark:info:surface-3': ['#63a6e8', '#4c4752', 3.50],
+};
+
+function checkToneContrast() {
+  const colors = loadConfig('base/colors.json');
+  const failures = [];
+  let pairs = 0;
+  const matched = new Set();
+
+  for (const mode of Object.keys(colors.roles || {})) {
+    const groups = colors.roles[mode];
+    const flat = {};
+    for (const group of Object.values(groups)) {
+      for (const [role, value] of Object.entries(group)) {
+        if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
+      }
+    }
+
+    // The same four-role test the tones emitter uses to decide a family qualifies,
+    // restated rather than imported: a check that asks the emitter which families exist
+    // agrees with the emitter by construction.
+    const families = Object.keys(groups).filter((f) => f !== 'neutral'
+      && [f, 'on-' + f, f + '-container', 'on-' + f + '-container'].every((k) => k in flat));
+
+    for (const family of families) {
+      for (const surface of TONE_SURFACES) {
+        if (!flat[family] || !flat[surface]) continue;
+        pairs++;
+        const ratio = contrastRatio(flat[family], flat[surface]);
+        const park = PARKED_TONE_CONTRAST[mode + ':' + family + ':' + surface];
+        const isParked = park && park[0] === flat[family] && park[1] === flat[surface];
+
+        if (isParked) {
+          matched.add(mode + ':' + family + ':' + surface);
+          continue;
+        }
+
+        if (ratio < AA_TEXT) {
+          failures.push(
+            mode + ': tone-' + family + ' text (' + flat[family] + ') on ' + surface
+            + ' (' + flat[surface] + ') — ' + ratio.toFixed(2) + ':1, needs ' + AA_TEXT
+            + ' — reached by .treat-outline, .treat-ghost and .link'
+          );
+        }
+      }
+    }
+  }
+
+  // Staleness, checked the only way it can go stale.
+  //
+  // A matched park can never start passing: the key IS the colour pair, and the same two
+  // colours always give the same ratio. What does happen is the palette moves and a park
+  // stops describing anything — so the test is whether every entry found its pair.
+  //
+  // Only when at least one did. A consumer on their own brand matches none of these, and
+  // failing them for not having Loom's palette would be the opposite of the point.
+  const all = Object.keys(PARKED_TONE_CONTRAST);
+  if (matched.size > 0 && matched.size < all.length) {
+    for (const key of all) {
+      if (matched.has(key)) continue;
+      const [fg, bg, was] = PARKED_TONE_CONTRAST[key];
+      failures.push(
+        key + ' is parked at ' + was + ':1 for ' + fg + ' on ' + bg
+        + ', and no pair in this palette matches it — the colours moved, so re-measure and '
+        + 'either drop the entry or update it'
+      );
+    }
+  }
+
+  return {
+    failures,
+    note: pairs + ' tone-text/surface pairs against WCAG AA ' + AA_TEXT + ':1, '
+      + matched.size + ' of ' + all.length + ' parked failures matched',
+  };
+}
+
 // --- composited-contrast -----------------------------------------------------
 // A token is not what renders: at `opacity-muted` a pair that clears 4.5:1 as declared
 // composites toward its background and can land far below it.
@@ -1022,6 +1146,7 @@ function verify() {
     ['focus-ring', checkFocusRing()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],
+    ['tone-contrast', checkToneContrast()],
     ['composited-contrast', checkCompositedContrast()],
     ['typecheck', checkTypecheck()],
   ];

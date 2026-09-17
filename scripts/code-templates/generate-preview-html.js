@@ -160,7 +160,8 @@ function toneMatrix(kind) {
   const cells = kind === 'badge'
     ? (t) => `      <span class="badge treat-filled tone-${t}" data-size="md">filled</span>
       <span class="badge treat-filled tone-${t}-soft" data-size="md">filled soft</span>
-      <span class="badge treat-outline tone-${t}" data-size="md">outline</span>`
+      <span class="badge treat-outline tone-${t}" data-size="md">outline</span>
+      <span class="badge treat-ghost tone-${t}" data-size="md">ghost</span>`
     : (t) => `      <button class="button treat-filled tone-${t} interactive control" data-size="md">filled</button>
       <button class="button treat-outline tone-${t} interactive control" data-size="md">outline</button>
       <button class="button treat-ghost tone-${t} interactive control" data-size="md">ghost</button>`;
@@ -249,6 +250,29 @@ const CLASS_STRIP = [
         <button class="button treat-outline tone-neutral interactive control" data-size="md" id="pv-close">Close</button>
       </div>
     </dialog>`,
+    lede(`And the third path, which is the one a headless dialog library takes: a plain
+      <code>&lt;div&gt;</code> carrying <code>.dialog .dialog-fixed</code>, with
+      <code>.dialog-overlay</code> behind it. No <code>&lt;dialog&gt;</code> element, so
+      no <code>::backdrop</code> and no UA centring &mdash; both come from the two
+      classes instead.
+
+      This path was described here and never rendered, and it was broken:
+      <code>.dialog:not(dialog)</code> weighs (0,1,1) because <code>:not()</code> takes
+      its argument's specificity, which beat <code>.dialog-fixed</code> at (0,1,0) in the
+      same layer. The panel took <code>position: relative</code>, laid out in flow at the
+      end of the body, and a consumer saw the scrim with no panel. Rendering it is the
+      only reason anyone would notice.`),
+    row(`      <button class="button treat-filled tone-primary interactive control" data-size="md" id="pv-open-fixed">Open a portaled dialog</button>`),
+    `    <div class="dialog-overlay" id="pv-overlay" hidden></div>
+    <div class="dialog dialog-fixed" data-size="md" data-variant="default" id="pv-fixed" role="dialog" aria-modal="true" aria-labelledby="pv-fixed-title" hidden>
+      <div class="dialog-header">
+        <span class="dialog-title" id="pv-fixed-title">Portaled dialog</span>
+        <span class="dialog-description">Centred by .dialog-fixed, scrimmed by .dialog-overlay. If this appears at the bottom of the page instead, the specificity bug is back.</span>
+      </div>
+      <div class="dialog-footer">
+        <button class="button treat-outline tone-neutral interactive control" data-size="md" id="pv-close-fixed">Close</button>
+      </div>
+    </div>`,
   ].join(NL)),
 
   section('A removable filter is a button', [
@@ -381,6 +405,15 @@ const THEME_SCRIPT = `    // The only script on the page, and it does one thing:
       var dlg = document.getElementById('pv-dialog');
       document.getElementById('pv-open').addEventListener('click', function () { dlg.showModal(); });
       document.getElementById('pv-close').addEventListener('click', function () { dlg.close(); });
+
+      // The portaled path. The hidden attribute rather than a page-local class, so this
+      // adds no CSS and cannot flatter the two classes it exists to check.
+      var ov = document.getElementById('pv-overlay');
+      var fx = document.getElementById('pv-fixed');
+      function showFixed(on) { ov.hidden = !on; fx.hidden = !on; }
+      document.getElementById('pv-open-fixed').addEventListener('click', function () { showFixed(true); });
+      document.getElementById('pv-close-fixed').addEventListener('click', function () { showFixed(false); });
+      ov.addEventListener('click', function () { showFixed(false); });
     })();`;
 
 function generate() {

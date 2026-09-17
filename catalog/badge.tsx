@@ -8,30 +8,36 @@ const badgeVariants = cva('badge', {
     variant: {
       'filled': 'treat-filled',
       'outline': 'treat-outline',
-    },
-    state: {
-      default: 'tone-primary-soft',
-      neutral: 'tone-neutral-soft',
-      destructive: 'tone-error-soft',
-      success: 'tone-success-soft',
-      warning: 'tone-warning-soft',
-      info: 'tone-info-soft',
+      'ghost': 'treat-ghost',
     },
   },
   defaultVariants: {
     variant: 'filled',
-    state: 'default',
   },
 });
 
+// The family behind each colour; `intensity` picks the suffix. One declaration in the
+// schema therefore reaches both tone classes, instead of pinning this component to
+// whichever one its `bg` token happened to name.
+const badgeTone: Record<string, string> = {
+  primary: 'primary',
+  neutral: 'neutral',
+  destructive: 'error',
+  success: 'success',
+  warning: 'warning',
+  info: 'info',
+};
+
 type BadgeSize = 'sm' | 'md' | 'lg';
-type BadgeVariant = 'filled' | 'outline';
-type BadgeState = 'default' | 'neutral' | 'destructive' | 'success' | 'warning' | 'info';
+type BadgeVariant = 'filled' | 'outline' | 'ghost';
+type BadgeColor = 'primary' | 'neutral' | 'destructive' | 'success' | 'warning' | 'info';
+type BadgeIntensity = 'solid' | 'soft';
 
 type BadgeProps = React.HTMLAttributes<HTMLElement>
   & {
     variant?: BadgeVariant;
-    state?: BadgeState;
+    color?: BadgeColor;
+    intensity?: BadgeIntensity;
     size?: BadgeSize;
     asChild?: boolean;
     leadingIcon?: React.ReactNode;
@@ -45,10 +51,17 @@ type BadgeProps = React.HTMLAttributes<HTMLElement>
  * ("remove this filter"), not as a label with a second control buried inside it, and
  * splitting it into two targets meant two tab stops and two names for one intent.
  * Compose a Button with a trailing icon instead.
+ *
+ * `color` selects the family, `intensity` its strength. Solid is the default: it is what
+ * a badge is in every system that ships one, and a count on a trigger exists to be
+ * noticed. Soft is the low-emphasis status form. Outline ignores intensity entirely —
+ * `.tone-X` and `.tone-X-soft` set the same `--tone-text` and `--tone-border`, and
+ * outline reads only those two.
  */
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ variant = 'filled', state = 'default', size = 'md', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
-    const computedClasses = badgeVariants({ variant, state });
+  ({ variant = 'filled', color = 'primary', intensity = 'solid', size = 'md', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
+    const tone = 'tone-' + badgeTone[color] + (intensity === 'soft' ? '-soft' : '');
+    const computedClasses = cn(badgeVariants({ variant }), tone);
 
     if (asChild) {
       return (

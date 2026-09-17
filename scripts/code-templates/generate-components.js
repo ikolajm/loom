@@ -276,7 +276,7 @@ function generate(registry, outputDir, configs) {
     if (byGroup[g] && !grouped[g]) grouped[g] = byGroup[g].sort();
   }
   fs.writeFileSync(path.join(CATALOG_DIR, 'atoms.json'), JSON.stringify({
-    $note: 'Atoms by group, and the carrier for the $inputs staleness stamp. The sync copies the whole catalog; delete what you do not want. Generated from the catalog; do not hand-edit.',
+    $note: 'Atoms by group, and the carrier for the $inputs staleness stamp. The sync delivers the whole catalog every run, so deleting a file you do not want is temporary — it returns on the next sync, because a missing file and a never-installed one are the same thing on disk. An unimported component is tree-shaken and costs nothing shipped, which is why this is a note rather than a pick list. Generated from the catalog; do not hand-edit.',
     // Fingerprint of the schemas and templates this catalog was built from, so a sync can
     // say "these atoms predate your edits" without relying on mtimes, which a checkout
     // rewrites. See scripts/catalog-stamp.js.

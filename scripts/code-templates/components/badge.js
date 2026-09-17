@@ -2,10 +2,23 @@ const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, T
 const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
-  // Orthogonal axes (independent, no compound matrix — shared with Button via buildColorVars):
-  // variant = treatment (filled/outline) consuming per-state CSS vars; state sets those vars.
+  // Three orthogonal axes: variant = treatment, color = family, intensity = solid or soft.
+  //
+  // color and intensity cannot both be cva variants. Each cva axis contributes its own
+  // class independently, and what is needed here is ONE class built from two choices —
+  // `tone-error` against `tone-error-soft`. A compound matrix would express that at six
+  // colours times two intensities; a lookup on the family is the same thing without the
+  // twelve entries, so cva keeps the treatment and the tone is computed.
+  //
+  // Before this, badge's schema declared its fills as containers (`bg:
+  // color/primary/primary-container`), and buildColorVars derives the tone class from
+  // that token — so the component could reach `tone-primary-soft` and nothing else, while
+  // Button, declaring the base role, could reach only the solid one. A consumer wanting a
+  // solid count badge had no prop for it. The schema now declares the base role the way
+  // Button's does, and `intensity` picks the suffix.
   const treatments = config.treatments || ['filled', 'outline'];
-  const { colorNames: stateNames, toneClass } = buildColorVars(config.colors || {});
+  const intensities = config.intensities || ['solid', 'soft'];
+  const { colorNames, toneFamily } = buildColorVars(config.colors || {});
 
   // Text-bearing sizes
   const sizes = filterSizes(config.sizes || {});
@@ -56,24 +69,29 @@ const badgeVariants = cva('badge', {
     variant: {
 ${treatments.map(v => `      '${v}': '${TREATMENT_CLASSES[v]}',`).join('\n')}
     },
-    state: {
-${stateNames.map(s => `      ${s}: '${toneClass[s]}',`).join('\n')}
-    },
   },
   defaultVariants: {
     variant: '${dflt.variant || 'filled'}',
-    state: '${dflt.state || 'default'}',
   },
 });
 
+// The family behind each colour; \`intensity\` picks the suffix. One declaration in the
+// schema therefore reaches both tone classes, instead of pinning this component to
+// whichever one its \`bg\` token happened to name.
+const badgeTone: Record<string, string> = {
+${colorNames.map(c => `  ${c}: '${toneFamily[c]}',`).join('\n')}
+};
+
 type BadgeSize = 'sm' | 'md' | 'lg';
 type BadgeVariant = ${treatments.map(v => `'${v}'`).join(' | ')};
-type BadgeState = ${stateNames.map(s => `'${s}'`).join(' | ')};
+type BadgeColor = ${colorNames.map(c => `'${c}'`).join(' | ')};
+type BadgeIntensity = ${intensities.map(i => `'${i}'`).join(' | ')};
 
 type BadgeProps = React.HTMLAttributes<HTMLElement>
   & {
     variant?: BadgeVariant;
-    state?: BadgeState;
+    color?: BadgeColor;
+    intensity?: BadgeIntensity;
     size?: BadgeSize;
     asChild?: boolean;
     leadingIcon?: React.ReactNode;
@@ -87,10 +105,17 @@ type BadgeProps = React.HTMLAttributes<HTMLElement>
  * ("remove this filter"), not as a label with a second control buried inside it, and
  * splitting it into two targets meant two tab stops and two names for one intent.
  * Compose a Button with a trailing icon instead.
+ *
+ * \`color\` selects the family, \`intensity\` its strength. Solid is the default: it is what
+ * a badge is in every system that ships one, and a count on a trigger exists to be
+ * noticed. Soft is the low-emphasis status form. Outline ignores intensity entirely —
+ * \`.tone-X\` and \`.tone-X-soft\` set the same \`--tone-text\` and \`--tone-border\`, and
+ * outline reads only those two.
  */
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ variant = 'filled', state = 'default', size = 'md', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
-    const computedClasses = badgeVariants({ variant, state });
+  ({ variant = '${dflt.variant || 'filled'}', color = '${dflt.color || 'primary'}', intensity = '${dflt.intensity || 'solid'}', size = '${dflt.size || 'md'}', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
+    const tone = 'tone-' + badgeTone[color] + (intensity === 'soft' ? '-soft' : '');
+    const computedClasses = cn(badgeVariants({ variant }), tone);
 
     if (asChild) {
       return (

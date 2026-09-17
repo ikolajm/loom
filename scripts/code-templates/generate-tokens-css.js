@@ -1600,8 +1600,19 @@ function buildSectionDialogParts() {
    and an author rule outranks that — so styling a real <dialog> with .dialog would stop
    it centring itself, which is the one thing taking .dialog alone is supposed to allow.
    Nothing is lost: a fixed box establishes a containing block for the close button just
-   as a relative one does. */
-.dialog:not(dialog) {
+   as a relative one does.
+
+   And scoped off .dialog-fixed, which is not belt-and-braces. :not() takes the weight of
+   its argument, so .dialog:not(dialog) is (0,1,1) against .dialog-fixed at (0,1,0) —
+   same layer, so position: relative won and .dialog-fixed could not position anything.
+   Both classes were added by the same flow, and the only element .dialog-fixed is for is
+   a div, which is exactly what :not(dialog) selects.
+
+   Found downstream: a portaled Radix dialog laid out in normal flow at the end of body
+   with the overlay over the viewport, so the scrim appeared and the panel did not. Not
+   caught here because docs/preview.html demonstrates the native dialog path, the one
+   case the exclusion makes immune. */
+.dialog:not(dialog):not(.dialog-fixed) {
   position: relative;
 }
 

@@ -3,20 +3,66 @@
     "$catalog": {
       "category": "button",
       "description": "Primary action button — orthogonal variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral/inherit). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons. The `inherit` color reads currentColor — for icon-button affordances embedded in colored surfaces (e.g. a Banner dismiss) that must take the parent's foreground.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "typography",
+        "spacing",
+        "sizing"
+      ],
       "composition": "slottable"
     },
     "$note": "Orthogonal model — variant (treatment: filled/outline/ghost) and color (primary/secondary/destructive/success/warning/neutral) are INDEPENDENT CVA axes. Color is declared once as 4 CSS-var token refs: bg/fg drive the solid fill; text/border drive the line+label. Each treatment is a fixed consumer of those vars (see shared TREATMENT_CLASSES) — no N×M compound matrix. Default filled+primary reproduces the old `default`. neutral's text/border split lets its outline stay a subtle line with readable on-surface text.",
-    "treatments": ["filled", "outline", "ghost"],
+    "treatments": [
+      "filled",
+      "outline",
+      "ghost"
+    ],
     "colors": {
-      "primary":     { "bg": "color/primary/primary",     "fg": "color/primary/on-primary",     "text": "color/primary/primary",     "border": "color/primary/primary" },
-      "secondary":   { "bg": "color/secondary/secondary", "fg": "color/secondary/on-secondary", "text": "color/secondary/secondary", "border": "color/secondary/secondary" },
-      "destructive": { "bg": "color/error/error",         "fg": "color/error/on-error",         "text": "color/error/error",         "border": "color/error/error" },
-      "success":     { "bg": "color/success/success",     "fg": "color/success/on-success",     "text": "color/success/success",     "border": "color/success/success" },
-      "warning":     { "bg": "color/warning/warning",     "fg": "color/warning/on-warning",     "text": "color/warning/warning",     "border": "color/warning/warning" },
-      "neutral":     { "bg": "color/neutral/neutral",     "fg": "color/neutral/on-neutral",     "text": "color/surface/on-surface",  "border": "color/outline/outline" },
-      "inherit":     { "bg": "transparent",               "fg": "currentColor",                 "text": "currentColor",              "border": "currentColor" }
+      "primary": {
+        "bg": "color/primary/primary",
+        "fg": "color/primary/on-primary",
+        "text": "color/primary/primary",
+        "border": "color/primary/primary"
+      },
+      "secondary": {
+        "bg": "color/secondary/secondary",
+        "fg": "color/secondary/on-secondary",
+        "text": "color/secondary/secondary",
+        "border": "color/secondary/secondary"
+      },
+      "destructive": {
+        "bg": "color/error/error",
+        "fg": "color/error/on-error",
+        "text": "color/error/error",
+        "border": "color/error/error"
+      },
+      "success": {
+        "bg": "color/success/success",
+        "fg": "color/success/on-success",
+        "text": "color/success/success",
+        "border": "color/success/success"
+      },
+      "warning": {
+        "bg": "color/warning/warning",
+        "fg": "color/warning/on-warning",
+        "text": "color/warning/warning",
+        "border": "color/warning/warning"
+      },
+      "neutral": {
+        "bg": "color/neutral/neutral",
+        "fg": "color/neutral/on-neutral",
+        "text": "color/surface/on-surface",
+        "border": "color/outline/outline"
+      },
+      "inherit": {
+        "bg": "transparent",
+        "fg": "currentColor",
+        "text": "currentColor",
+        "border": "currentColor"
+      }
     },
     "typography": {
       "font-family": "body",
@@ -24,40 +70,123 @@
       "text-transform": "none"
     },
     "icon-slots": {
-      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
-      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+      "leading": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      },
+      "trailing": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      }
     },
     "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm":   { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
-      "md":   { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
-      "lg":   { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "icon-size": "icon/icon-3" }
+      "$constant": {
+        "radius": "radius/component"
+      },
+      "sm": {
+        "height": "height/control-sm",
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.1}",
+        "gap": "{scale.1}",
+        "icon-size": "icon/icon-1"
+      },
+      "md": {
+        "height": "height/control-md",
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.2}",
+        "gap": "{scale.2}",
+        "icon-size": "icon/icon-2"
+      },
+      "lg": {
+        "height": "height/control-lg",
+        "x-padding": "{scale.6}",
+        "y-padding": "{scale.3}",
+        "gap": "{scale.2}",
+        "icon-size": "icon/icon-3"
+      }
     },
     "icon-sizes": {
       "$note": "Square sizing for icon-only mode (iconOnly prop). No padding — icon centers via flexbox. Touch target met at all sizes.",
-      "sm":   { "size": "height/control-sm", "radius": "radius/component", "icon-size": "icon/icon-1" },
-      "md":   { "size": "height/control-md", "radius": "radius/component", "icon-size": "icon/icon-2" },
-      "lg":   { "size": "height/control-lg", "radius": "radius/component", "icon-size": "icon/icon-3" }
+      "sm": {
+        "size": "height/control-sm",
+        "radius": "radius/component",
+        "icon-size": "icon/icon-1"
+      },
+      "md": {
+        "size": "height/control-md",
+        "radius": "radius/component",
+        "icon-size": "icon/icon-2"
+      },
+      "lg": {
+        "size": "height/control-lg",
+        "radius": "radius/component",
+        "icon-size": "icon/icon-3"
+      }
     },
-    "default": { "variant": "filled", "color": "primary", "size": "md" }
+    "default": {
+      "variant": "filled",
+      "color": "primary",
+      "size": "md"
+    }
   },
   "badge": {
     "$catalog": {
       "category": "button",
-      "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button with a trailing icon, so one intent keeps one tab stop and one name. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral).",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
+      "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button with a trailing icon, so one intent keeps one tab stop and one name. Visual treatments: filled, outline, ghost. Ghost was added because the class layer already emits .treat-ghost and Button already exposed it — badge declaring two of three was an omission rather than a restriction, and it left the component unable to reach a treatment the CSS supports. Use it where the label carries the meaning and the box would be noise: a column of status words reads better as coloured text than as a column of outlines. CAUTION, and the reason this is written here: ghost paints no fill and no border, so --tone-text against the surface behind it is the only thing making the label legible. The tone-contrast check measures exactly that pairing, and on the committed default 15 of 48 combinations are below AA — secondary and success in light, error and info in dark, worse on every raised tier. An outline badge degrades to a visible box when its label is faint; a ghost badge degrades to nothing. Read tone-contrast before choosing it.",
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "typography",
+        "spacing",
+        "sizing"
+      ],
       "composition": "slot"
     },
     "$note": "Orthogonal axes — variant (treatment: filled/outline) and state (color/severity) are independent. State is declared once as 4 CSS-var token refs: bg/fg = container fill + on-container text (filled); text/border = base color (outline line/text). Treatments are fixed consumers of those vars (shared TREATMENT_CLASSES) — no compound matrix. Body radius is radius/component (malleable with edges).",
-    "treatments": ["filled", "outline"],
+    "treatments": [
+      "filled",
+      "outline",
+      "ghost"
+    ],
     "colors": {
-      "default":     { "bg": "color/primary/primary-container",   "fg": "color/primary/on-primary-container",   "text": "color/primary/primary",   "border": "color/primary/primary" },
-      "neutral":     { "bg": "color/neutral/neutral-container",   "fg": "color/neutral/on-neutral-container",   "text": "color/neutral/neutral",   "border": "color/neutral/neutral" },
-      "destructive": { "bg": "color/error/error-container",       "fg": "color/error/on-error-container",       "text": "color/error/error",       "border": "color/error/error" },
-      "success":     { "bg": "color/success/success-container",   "fg": "color/success/on-success-container",   "text": "color/success/success",   "border": "color/success/success" },
-      "warning":     { "bg": "color/warning/warning-container",   "fg": "color/warning/on-warning-container",   "text": "color/warning/warning",   "border": "color/warning/warning" },
-      "info":        { "bg": "color/info/info-container",         "fg": "color/info/on-info-container",         "text": "color/info/info",         "border": "color/info/info" }
+      "primary": {
+        "bg": "color/primary/primary",
+        "fg": "color/primary/on-primary",
+        "text": "color/primary/primary",
+        "border": "color/primary/primary"
+      },
+      "neutral": {
+        "bg": "color/neutral/neutral",
+        "fg": "color/neutral/on-neutral",
+        "text": "color/neutral/neutral",
+        "border": "color/neutral/neutral"
+      },
+      "destructive": {
+        "bg": "color/error/error",
+        "fg": "color/error/on-error",
+        "text": "color/error/error",
+        "border": "color/error/error"
+      },
+      "success": {
+        "bg": "color/success/success",
+        "fg": "color/success/on-success",
+        "text": "color/success/success",
+        "border": "color/success/success"
+      },
+      "warning": {
+        "bg": "color/warning/warning",
+        "fg": "color/warning/on-warning",
+        "text": "color/warning/warning",
+        "border": "color/warning/warning"
+      },
+      "info": {
+        "bg": "color/info/info",
+        "fg": "color/info/on-info",
+        "text": "color/info/info",
+        "border": "color/info/info"
+      }
     },
     "typography": {
       "font-family": "body",
@@ -65,29 +194,71 @@
       "text-transform": "none"
     },
     "icon-slots": {
-      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
-      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+      "leading": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      },
+      "trailing": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      }
     },
     "sizes": {
       "$note": "Type is not declared here — it comes from the label/{tier} ramp (10/12/14), which the Figma builder has always bound to and which code now reads too. The font-size and line-height keys that used to sit on each tier were dead once code switched to the ramp, and they did not ramp anyway: sm and md both declared 10px/14px, so md differed from sm only in padding. Icons stay at 12/12/16 — against the label ramp that is 120%/100%/114% of the font and never more than 86% of the line box, where the old lg pairing put a 16px icon in 16px of leading.",
-      "$constant": { "gap": "{scale.1}", "radius": "radius/component" },
-      "sm": { "x-padding": "{scale.1}", "y-padding": "2px", "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.", "icon": "icon/icon-0" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "icon": "icon/icon-0" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "icon": "icon/icon-1" }
+      "$constant": {
+        "gap": "{scale.1}",
+        "radius": "radius/component"
+      },
+      "sm": {
+        "x-padding": "{scale.1}",
+        "y-padding": "2px",
+        "$exception": "2px y-padding — below spacing scale minimum (4px). Required to maintain proportional badge height at the label/sm font size.",
+        "icon": "icon/icon-0"
+      },
+      "md": {
+        "x-padding": "{scale.2}",
+        "y-padding": "{scale.1}",
+        "icon": "icon/icon-0"
+      },
+      "lg": {
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.1}",
+        "icon": "icon/icon-1"
+      }
     },
-    "default": { "variant": "filled", "state": "default", "size": "md" }
+    "default": {
+      "variant": "filled",
+      "color": "primary",
+      "intensity": "solid",
+      "size": "md"
+    },
+    "intensities": [
+      "solid",
+      "soft"
+    ]
   },
   "fab": {
     "$catalog": {
       "category": "button",
       "description": "Floating action button — primary screen action. Single variant by design. Extended mode adds a text label next to the icon. Positioning is consumer responsibility.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing", "effects"],
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "typography",
+        "spacing",
+        "sizing",
+        "effects"
+      ],
       "composition": "slot"
     },
     "$note": "Floating action button. Primary screen action, one per screen. Positioned fixed bottom-right. Extended variant adds a text label next to the icon. Uses primary-container for a softer presence than button's saturated primary fill.",
     "variants": {
-      "default": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+      "default": {
+        "bg": "color/primary/primary-container",
+        "fg": "color/primary/on-primary-container"
+      }
     },
     "typography": {
       "font-family": "body",
@@ -95,42 +266,115 @@
       "text-transform": "none"
     },
     "sizes": {
-      "$constant": { "radius": "radius/card" },
-      "sm": { "size": "height/fab-sm", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "md": { "size": "height/fab-md", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
-      "lg": { "size": "height/fab-lg", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
+      "$constant": {
+        "radius": "radius/card"
+      },
+      "sm": {
+        "size": "height/fab-sm",
+        "icon-size": "icon/icon-2",
+        "shadow": "effects/shadow-2"
+      },
+      "md": {
+        "size": "height/fab-md",
+        "icon-size": "icon/icon-3",
+        "shadow": "effects/shadow-3"
+      },
+      "lg": {
+        "size": "height/fab-lg",
+        "icon-size": "icon/icon-3",
+        "shadow": "effects/shadow-3"
+      }
     },
     "extended": {
       "$note": "Extended FAB adds a label. Allowed at all sizes incl. sm (sm uses compact 12px label typography).",
-      "sm": { "height": "height/fab-sm", "x-padding": "{scale.3}", "gap": "{scale.2}", "text": "action/sm" },
-      "md": { "height": "height/fab-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/md" },
-      "lg": { "height": "height/fab-lg", "x-padding": "{scale.5}", "gap": "{scale.3}", "text": "action/lg" }
+      "sm": {
+        "height": "height/fab-sm",
+        "x-padding": "{scale.3}",
+        "gap": "{scale.2}",
+        "text": "action/sm"
+      },
+      "md": {
+        "height": "height/fab-md",
+        "x-padding": "{scale.4}",
+        "gap": "{scale.2}",
+        "text": "action/md"
+      },
+      "lg": {
+        "height": "height/fab-lg",
+        "x-padding": "{scale.5}",
+        "gap": "{scale.3}",
+        "text": "action/lg"
+      }
     },
-    "default": { "variant": "default", "size": "md" }
+    "default": {
+      "variant": "default",
+      "size": "md"
+    }
   },
   "fab-menu": {
     "$catalog": {
       "category": "button",
       "description": "FAB that expands into a vertical stack of action buttons (M3 speed-dial pattern). Trigger FAB + FabAction subcomponents. Static open/closed — the expand animation is deferred.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing", "effects"],
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "typography",
+        "spacing",
+        "sizing",
+        "effects"
+      ],
       "composition": "slot"
     },
     "$note": "Trigger uses fab styling. Actions stack vertically above the trigger. Each action is a smaller circular button + optional label. No backdrop scrim by default.",
     "variants": {
-      "default": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
+      "default": {
+        "bg": "color/primary/primary-container",
+        "fg": "color/primary/on-primary-container"
+      }
     },
     "trigger-sizes": {
       "$note": "Trigger FAB sizes — matches fab atom.",
-      "sm": { "size": "height/fab-sm", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "md": { "size": "height/fab-md", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" },
-      "lg": { "size": "height/fab-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-3" }
+      "sm": {
+        "size": "height/fab-sm",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-2",
+        "shadow": "effects/shadow-2"
+      },
+      "md": {
+        "size": "height/fab-md",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-3",
+        "shadow": "effects/shadow-3"
+      },
+      "lg": {
+        "size": "height/fab-lg",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-3",
+        "shadow": "effects/shadow-3"
+      }
     },
     "action-sizes": {
       "$note": "Action button sizes — one step smaller than trigger. Circular by default; extended adds label.",
-      "sm": { "size": "height/control-sm", "radius": "radius/card", "icon-size": "icon/icon-1", "shadow": "effects/shadow-1" },
-      "md": { "size": "height/control-md", "radius": "radius/card", "icon-size": "icon/icon-2", "shadow": "effects/shadow-2" },
-      "lg": { "size": "height/control-lg", "radius": "radius/card", "icon-size": "icon/icon-3", "shadow": "effects/shadow-2" }
+      "sm": {
+        "size": "height/control-sm",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-1",
+        "shadow": "effects/shadow-1"
+      },
+      "md": {
+        "size": "height/control-md",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-2",
+        "shadow": "effects/shadow-2"
+      },
+      "lg": {
+        "size": "height/control-lg",
+        "radius": "radius/card",
+        "icon-size": "icon/icon-3",
+        "shadow": "effects/shadow-2"
+      }
     },
     "stack-spacing": {
       "$note": "Gap between stacked actions when expanded.",
@@ -149,21 +393,38 @@
       "bg": "color/surface/surface-2",
       "fg": "color/surface/on-surface"
     },
-    "default": { "variant": "default", "size": "md" }
+    "default": {
+      "variant": "default",
+      "size": "md"
+    }
   },
-
   "toggle": {
     "$catalog": {
       "category": "button",
       "description": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider) and Badge in interactive mode. Uses Radix Toggle for state + a11y.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "typography",
+        "spacing",
+        "sizing"
+      ],
       "composition": "none"
     },
     "$note": "Single toggle button with pressed/unpressed states. Distinct from Switch (slider control) and Chip (selection tag). Used for toolbar actions (bold, italic), view toggles, feature on/off. aria-pressed required.",
     "state": {
-      "unpressed": { "bg": "transparent", "fg": "color/surface/on-surface-variant", "border": "color/outline/outline" },
-      "pressed":   { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary-container" }
+      "unpressed": {
+        "bg": "transparent",
+        "fg": "color/surface/on-surface-variant",
+        "border": "color/outline/outline"
+      },
+      "pressed": {
+        "bg": "color/primary/primary-container",
+        "fg": "color/primary/on-primary-container",
+        "border": "color/primary/primary-container"
+      }
     },
     "typography": {
       "font-family": "body",
@@ -171,24 +432,58 @@
       "text-transform": "none"
     },
     "icon-slots": {
-      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
-      "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
+      "leading": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      },
+      "trailing": {
+        "default-visible": false,
+        "default-icon": "icon/placeholder"
+      }
     },
     "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm": { "height": "height/control-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/control-md", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/control-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" }
+      "$constant": {
+        "radius": "radius/component"
+      },
+      "sm": {
+        "height": "height/control-sm",
+        "x-padding": "{scale.2}",
+        "y-padding": "{scale.1}",
+        "gap": "{scale.1}",
+        "icon-size": "icon/icon-1"
+      },
+      "md": {
+        "height": "height/control-md",
+        "x-padding": "{scale.3}",
+        "y-padding": "{scale.2}",
+        "gap": "{scale.2}",
+        "icon-size": "icon/icon-2"
+      },
+      "lg": {
+        "height": "height/control-lg",
+        "x-padding": "{scale.4}",
+        "y-padding": "{scale.2}",
+        "gap": "{scale.2}",
+        "icon-size": "icon/icon-2"
+      }
     },
-    "default": { "state": "unpressed", "size": "md" }
+    "default": {
+      "state": "unpressed",
+      "size": "md"
+    }
   },
-
   "toggle-group": {
     "$catalog": {
       "category": "button",
       "description": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant joins items with shared borders; spaced variant adds visible gaps.",
-      "dependencies": ["cn"],
-      "tokens": ["color", "spacing", "sizing"],
+      "dependencies": [
+        "cn"
+      ],
+      "tokens": [
+        "color",
+        "spacing",
+        "sizing"
+      ],
       "composition": "none"
     },
     "$note": "Group of toggle buttons — exclusive (single select) or multi-select. Segmented variant: items share borders, radius collapses to first/last only (absorbs M3 segmented-button). Spaced variant: visible gaps between items, each toggle has its own borders/radius.",
@@ -207,11 +502,22 @@
       }
     },
     "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm": { "height": "height/control-sm" },
-      "md": { "height": "height/control-md" },
-      "lg": { "height": "height/control-lg" }
+      "$constant": {
+        "radius": "radius/component"
+      },
+      "sm": {
+        "height": "height/control-sm"
+      },
+      "md": {
+        "height": "height/control-md"
+      },
+      "lg": {
+        "height": "height/control-lg"
+      }
     },
-    "default": { "variant": "segmented", "size": "md" }
+    "default": {
+      "variant": "segmented",
+      "size": "md"
+    }
   }
 }

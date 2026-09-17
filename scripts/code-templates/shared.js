@@ -195,10 +195,16 @@ const TREATMENT_CLASSES = {
 function buildColorVars(colorsCfg) {
   const colorNames = Object.keys(colorsCfg).filter((k) => !k.startsWith('$'));
   const toneClass = {};
+  // The family behind each colour, so a component with an intensity axis can build both
+  // `tone-{family}` and `tone-{family}-soft` from one declaration. toneClass alone pins a
+  // state to whichever intensity its `bg` token named, which is how Badge ended up
+  // soft-only while Button was solid-only. null for `inherit`, which has no family.
+  const toneFamily = {};
   for (const name of colorNames) {
     const c = colorsCfg[name] || {};
     if (c.bg === 'transparent' && c.fg === 'currentColor') {
       toneClass[name] = 'tone-inherit';
+      toneFamily[name] = null;
       continue;
     }
     const role = String(c.bg || '').split('/').pop();
@@ -206,6 +212,7 @@ function buildColorVars(colorsCfg) {
     if (!role || !family) {
       throw new Error(`Cannot derive a tone for color "${name}": bg is "${c.bg}".`);
     }
+    toneFamily[name] = family;
     if (role === family) toneClass[name] = `tone-${family}`;
     else if (role === `${family}-container`) toneClass[name] = `tone-${family}-soft`;
     else {
@@ -216,7 +223,7 @@ function buildColorVars(colorsCfg) {
       );
     }
   }
-  return { colorNames, toneClass };
+  return { colorNames, toneClass, toneFamily };
 }
 
 function buildSizeStyles(sizes) {
