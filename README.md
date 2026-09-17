@@ -66,7 +66,11 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for.
 
-Everything here **carries behavior** — focus traps, portals, keyboard navigation, or a composition contract CSS cannot express. Appearance is not here at all: a card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why the [printed invoice](docs/examples/invoice/) renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
+**Appearance is not here at all.** A card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why the [printed invoice](docs/examples/invoice/) renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
+
+What is here earns a file one of two ways. Most **carry behavior** CSS cannot express — focus traps, portals, keyboard navigation, a composition contract. `badge` is the exception and is deliberate: it carries no behavior at all, and exists because its class contract has enough independent axes — treatment, tone, size — that composing them from memory at every call site is the failure mode. A typed prop is the cheaper contract. `card`, `table` and `skeleton` get no file because they have neither: one class, no axes, nothing to forget.
+
+A label is not interactive, but it is one of the handful of things every app needs on day one, and this is a scaffold for getting one off the ground.
 
 | Group | Atoms |
 |-------|-------|
@@ -78,7 +82,7 @@ Interactive primitives that genuinely warrant a library use one (carousel → em
 
 A few architectural choices worth noting:
 
-- **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost` / `-dot`) consumes them. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
+- **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost`) consumes them. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
 - **Atoms are project-owned.** You don't `npm install` Loom. You pick a subset, the files are copied into your project, and you edit them freely — the shadcn model. There's no upstream auto-sync; a manual port-back is the deliberate path when an edit generalizes.
 - **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A scaffolded Loom project looks plain because the personality is yours to add, not because the system is unfinished.
 

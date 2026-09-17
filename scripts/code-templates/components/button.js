@@ -60,7 +60,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
   };
 
 const LoadingSpinner = () => (
-  <svg className="size-full animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg className="spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
     <path d="M12 2 A 10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
   </svg>

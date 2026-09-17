@@ -22,7 +22,7 @@ const path = require('path');
 // match: "table — did you mean tabs?" sends someone looking for a component that was never
 // the answer, when the answer is one class away.
 const MOVED_TO_CLASS = new Set([
-  'banner', 'bottom-nav', 'breadcrumbs', 'card', 'dot', 'empty-state', 'fab',
+  'banner', 'bottom-nav', 'breadcrumbs', 'card', 'empty-state', 'fab',
   'helper-text', 'input', 'kbd', 'label', 'list-item', 'skeleton', 'spinner', 'table',
   'textarea', 'toolbar', 'top-bar',
 ]);

@@ -3,7 +3,7 @@ const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
   // Orthogonal axes (independent, no compound matrix — shared with Button via buildColorVars):
-  // variant = treatment (filled/outline/dot) consuming per-state CSS vars; state sets those vars.
+  // variant = treatment (filled/outline) consuming per-state CSS vars; state sets those vars.
   const treatments = config.treatments || ['filled', 'outline'];
   const { colorNames: stateNames, toneClass } = buildColorVars(config.colors || {});
 
@@ -11,20 +11,11 @@ function generateBadge(name, config, meta) {
   const sizes = filterSizes(config.sizes || {});
   const sizeClasses = {};
   for (const [tier, sz] of Object.entries(sizes)) {
+    // Padding and gap are not emitted here. `.badge[data-size]` in the class layer
+    // already carries both from the same schema tier, so these were a second copy that
+    // resolved only through the bridge — and after it went out, the only copy that
+    // rendered was the one in CSS.
     const classes = [];
-    const px = spacingToClass(sz['x-padding'], 'px');
-    if (px) classes.push(px);
-    // y-padding may be a raw value (e.g. "2px" — see badge sm $exception note)
-    const yp = sz['y-padding'];
-    if (yp) {
-      if (typeof yp === 'string' && yp.match(/^\d/)) classes.push(`py-[${yp}]`);
-      else {
-        const py = spacingToClass(yp, 'py');
-        if (py) classes.push(py);
-      }
-    }
-    const gap = spacingToClass(sz.gap, 'gap');
-    if (gap) classes.push(gap);
     // Type comes from the family ramp, not from literals in this config. Two reasons:
     // the literals did not ramp (sm and md were both 10px/14px, so md differed from sm
     // only in padding), and the Figma builder has always bound badge text to the
@@ -52,28 +43,12 @@ function generateBadge(name, config, meta) {
     }
   }
 
-  // Segment padding per size — used by the interactive+onRemove split layout, where
-  // padding moves off the container onto the two button segments.
-  const segmentPad = {};
-  for (const [tier, sz] of Object.entries(sizes)) {
-    const cls = [];
-    const px = spacingToClass(sz['x-padding'], 'px');
-    if (px) cls.push(px);
-    const yp = sz['y-padding'];
-    if (yp) {
-      if (typeof yp === 'string' && yp.match(/^\d/)) cls.push(`py-[${yp}]`);
-      else { const py = spacingToClass(yp, 'py'); if (py) cls.push(py); }
-    }
-    segmentPad[tier] = cls.join(' ');
-  }
-
   const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
 
   return `import { forwardRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
-import { X } from 'lucide-react';
 import { cn } from './cn';
 
 const badgeVariants = cva('badge', {
@@ -91,63 +66,36 @@ ${stateNames.map(s => `      ${s}: '${toneClass[s]}',`).join('\n')}
   },
 });
 
-const badgeSegmentPad: Record<string, string> = {
-${Object.entries(segmentPad).map(([k, v]) => `  ${k}: '${v}',`).join('\n')}
-};
-
 type BadgeSize = 'sm' | 'md' | 'lg';
 type BadgeVariant = ${treatments.map(v => `'${v}'`).join(' | ')};
 type BadgeState = ${stateNames.map(s => `'${s}'`).join(' | ')};
 
-type BadgeProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
+type BadgeProps = React.HTMLAttributes<HTMLElement>
   & {
     variant?: BadgeVariant;
     state?: BadgeState;
     size?: BadgeSize;
     asChild?: boolean;
-    interactive?: boolean;
-    onClick?: React.MouseEventHandler<HTMLElement>;
-    onRemove?: () => void;
     leadingIcon?: React.ReactNode;
     trailingIcon?: React.ReactNode;
   };
 
-const INTERACTIVE_CLASSES = 'interactive cursor-pointer control';
-const CLOSE_BUTTON_CLASSES = 'shrink-0 ml-1 inline-flex items-center justify-center rounded-component p-0.5 interactive opacity-(--opacity-muted) hover:opacity-100 transition-opacity cursor-pointer control';
-
-const Badge = forwardRef<HTMLElement, BadgeProps>(
-  ({ variant = 'filled', state = 'default', size = 'md', asChild = false, interactive = false, onClick, onRemove, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
+/**
+ * A badge is a label. It is never a target.
+ *
+ * If a thing can be clicked it is a Button — a removable filter reads as one control
+ * ("remove this filter"), not as a label with a second control buried inside it, and
+ * splitting it into two targets meant two tab stops and two names for one intent.
+ * Compose a Button with a trailing icon instead.
+ */
+const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
+  ({ variant = 'filled', state = 'default', size = 'md', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
     const computedClasses = badgeVariants({ variant, state });
 
-    const content = (
-      <>
-        {leadingIcon && <span className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>}
-        {children}
-        {trailingIcon && !onRemove && <span className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>}
-      </>
-    );
-
-    const closeButton = onRemove ? (
-      <button
-        key="close"
-        type="button"
-        className={CLOSE_BUTTON_CLASSES}
-        onClick={onRemove}
-        aria-label="Remove"
-      >
-        <span className={'${ICON_SLOT_CLASS}'}><X /></span>
-      </button>
-    ) : null;
-
-    // asChild — Slot merges into the consumer-provided element. Behavior modes (interactive/onRemove) layer on top.
     if (asChild) {
       return (
-        <Slot
-          ref={ref}
-          className={cn(computedClasses, interactive && INTERACTIVE_CLASSES, className)} data-size={size}
-          {...props}
-        >
-          {/* Spelled out rather than reusing the shared content, and an array rather than a
+        <Slot ref={ref} className={cn(computedClasses, className)} data-size={size} {...props}>
+          {/* Spelled out rather than reusing a shared fragment, and an array rather than a
               fragment. Slot locates the consumer's element through Slottable, and finds
               it with React.Children.toArray — which flattens arrays but not fragments.
               Wrapped in one, and with no Slottable to find at all, Slot cloned the
@@ -156,61 +104,17 @@ const Badge = forwardRef<HTMLElement, BadgeProps>(
           {[
             leadingIcon && <span key="lead" className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>,
             <Slottable key="label">{children}</Slottable>,
-            trailingIcon && !onRemove && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
-            closeButton,
+            trailingIcon && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
           ]}
         </Slot>
       );
     }
 
-    // interactive + onRemove — container carries the fill/radius; two transparent
-    // segments split it, each padded like a button and rounded only on its outer edge,
-    // for a uniform button-like split hover. Padding moves off the container (!p-0 !gap-0).
-    // ref is narrowed per branch — a polymorphic span/button ref can't be expressed at the type level.
-    if (interactive && onRemove) {
-      const segPad = badgeSegmentPad[size];
-      const segmentBase = 'inline-flex items-center justify-center cursor-pointer transition-colors hover:bg-current/10 control';
-      return (
-        <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, '!p-0 !gap-0 inline-flex items-stretch', className)} data-size={size} {...props}>
-          <button
-            type="button"
-            className={cn(segmentBase, 'rounded-l-[inherit]', segPad)}
-            onClick={onClick}
-          >
-            {content}
-          </button>
-          <button
-            type="button"
-            className={cn(segmentBase, 'rounded-r-[inherit] border-l border-current/15', segPad)}
-            onClick={onRemove}
-            aria-label="Remove"
-          >
-            <span className={'${ICON_SLOT_CLASS}'}><X /></span>
-          </button>
-        </span>
-      );
-    }
-
-    // interactive only — button
-    if (interactive) {
-      return (
-        <button
-          ref={ref as React.Ref<HTMLButtonElement>}
-          type="button"
-          className={cn(computedClasses, INTERACTIVE_CLASSES, className)} data-size={size}
-          onClick={onClick}
-          {...props}
-        >
-          {content}
-        </button>
-      );
-    }
-
-    // span (plain or onRemove only)
     return (
-      <span ref={ref as React.Ref<HTMLSpanElement>} className={cn(computedClasses, className)} data-size={size} {...props}>
-        {content}
-        {closeButton}
+      <span ref={ref} className={cn(computedClasses, className)} data-size={size} {...props}>
+        {leadingIcon && <span className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>}
+        {children}
+        {trailingIcon && <span className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>}
       </span>
     );
   }

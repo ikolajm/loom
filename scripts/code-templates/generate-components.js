@@ -25,7 +25,6 @@ const { kindOf } = require('./shared');
 const { applyPins } = require('./npm-pins');
 const { buildCnUtility } = require('./components/cn');
 const { generateCvaOnly } = require('./components/cva-only');
-const { generateLib } = require('./components/radix-fallback');
 
 // Every other template module is reached through the registry's `generator` field
 // ('module#export', resolved below) rather than a hand-written import here. Adding an
@@ -72,7 +71,6 @@ function dispatch(name, config, meta) {
       // silent cva-only fallback inside the old router; still falls back, still says so.
       console.warn(`  ${name}: no generator for Radix primitive ${meta.primitive}, using cva-only`);
       return `// TODO: Add Radix primitive template for ${name} (${meta.primitive})\n` + generateCvaOnly(name, config, meta);
-    case 'lib': return generateLib(name, config, meta);
     case 'cva-only':
     default: return generateCvaOnly(name, config, meta);
   }

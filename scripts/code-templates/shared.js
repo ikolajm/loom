@@ -207,7 +207,6 @@ const TREATMENT_CLASSES = {
   filled: 'treat-filled',
   outline: 'treat-outline',
   ghost: 'treat-ghost',
-  dot: 'treat-dot',
 };
 
 /**

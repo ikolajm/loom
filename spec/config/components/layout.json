@@ -24,7 +24,8 @@
       "sm":   { "max-width": "400px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.4}", "radius": "radius/modal" },
       "md":   { "max-width": "560px", "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
       "lg":   { "max-width": "720px", "x-padding": "{scale.8}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/modal" },
-      "full": { "max-width": "100%",  "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/component" }
+      "$note": "`full` takes md's type role explicitly. It is a width tier, not a type tier, so the family+tier derivation has no `body/full` to find and emitted five undefined custom properties. The atom carried no text class here at all and inherited whatever ancestor it landed in.",
+      "full": { "max-width": "100%",  "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.6}", "radius": "radius/component", "text": "body/md" }
     },
     "default": { "variant": "default", "size": "md" }
   },

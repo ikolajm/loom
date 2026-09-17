@@ -433,7 +433,8 @@ const PART_PROPS = new Set(['text', 'fg', 'size', 'height', 'gap', 'x-padding', 
  */
 const SELF_PROPS = new Set([
   'text', 'x-padding', 'y-padding', 'gap', 'radius', 'height', 'min-height', 'size',
-  'width', 'min-width', 'line-height', 'border-width', 'shadow', 'icon-size', 'icon',
+  'width', 'min-width', 'max-width', 'line-height', 'border-width', 'shadow', 'icon-size',
+  'icon',
 ]);
 
 /**
@@ -512,6 +513,9 @@ function buildComponentClass(name, cfg, textFamily) {
     }
     if (src.width) d.push(`width: ${CSS_SPACE(src.width) || CSS_TOKEN(src.width, 'height-')};`);
     if (src['min-width']) d.push(`min-width: ${CSS_SPACE(src['min-width']) || CSS_TOKEN(src['min-width'], 'height-')};`);
+    // Raw lengths by design: dialog's schema marks these an $exception, because a modal's
+    // breakpoints are layout-specific and derive from no spacing or sizing primitive.
+    if (src['max-width']) d.push(`max-width: ${CSS_SPACE(src['max-width']) || CSS_TOKEN(src['max-width'], 'height-')};`);
     if (src['line-height']) d.push(`line-height: ${CSS_SPACE(src['line-height']) || src['line-height']};`);
     if (src['border-width']) d.push(`border-width: ${CSS_TOKEN(src['border-width'], '')};`);
     if (src.shadow) d.push(`box-shadow: ${CSS_TOKEN(src.shadow, '')};`);
@@ -679,10 +683,12 @@ const BASE_RULES = {
   breadcrumbs: ['display: flex;', 'align-items: center;'],
   button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
   card: ['display: flex;', 'flex-direction: column;'],
-  // `rounded-pill` sat in the cva base, not in the schema, so the dot emitted as a square.
-  dot: ['display: inline-block;', 'flex-shrink: 0;', 'border-radius: var(--radius-pill);'],
+  // Appearance only. `.dialog-fixed` carries placement, so the class works on a native
+  // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
+  dialog: ['display: flex;', 'flex-direction: column;', 'width: 100%;'],
   'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
   fab: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  'form-field': ['display: flex;', 'flex-direction: column;'],
   'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
   // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
   // the error role and the field turns red without this rule knowing about validity.
@@ -761,17 +767,17 @@ const SUB_PART_RULES = {
 const SUB_PART_KEYS = new Set([]);
 
 const APPEARANCE_ONLY = new Set([
-  'badge', 'banner', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'dot', 'empty-state',
+  'badge', 'banner', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'empty-state',
   'fab', 'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
-  'separator', 'sidebar', 'skeleton', 'spinner', 'stepper', 'table', 'textarea',
-  'toolbar', 'top-bar', 'avatar-group',
+  'dialog', 'separator', 'sidebar', 'skeleton', 'spinner', 'stepper', 'table',
+  'textarea', 'toolbar', 'top-bar', 'avatar-group',
 ]);
 
 const TEXT_FAMILY = {
   badge: 'label', banner: 'body', 'bottom-nav': 'label', breadcrumbs: 'body',
-  button: 'action', card: 'body', 'empty-state': 'body', fab: 'action',
+  button: 'action', card: 'body', dialog: 'body', 'empty-state': 'body', fab: 'action',
   'helper-text': 'label', input: 'input', kbd: 'label', label: 'action',
-  'list-item': 'body', spinner: null, dot: null, skeleton: 'body', table: 'body',
+  'list-item': 'body', spinner: null, skeleton: 'body', table: 'body',
   textarea: 'input', toolbar: 'body', 'top-bar': 'title',
 };
 
@@ -849,8 +855,7 @@ function buildSectionComponentClasses() {
 
 function buildSectionPrintStructure() {
   return `@media print {
-  .treat-filled,
-  .treat-dot {
+  .treat-filled {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
@@ -919,6 +924,34 @@ body {
   font-family: var(--type-body-md-family);
   font-size: var(--type-body-md-size);
   line-height: var(--type-body-md-line);
+}
+
+/* === Form Controls === */
+/* Tailwind's preflight did this until the bridge went out, and nothing replaced it. A
+   <button> keeps the UA's border and its own font family, so .button.treat-filled renders
+   framed and .treat-ghost renders as an outline, which is the opposite of ghost. Nothing
+   in the class layer sets a border on a button: .treat-outline does, which is the only
+   reason that one looked right.
+
+   In loom.base on purpose, so a treatment in loom.components that does want a border
+   still wins. Buttons only — this is a normalization of the chrome that was showing
+   through, not a reset library. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  appearance: none;
+  background-color: transparent;
+  background-image: none;
+  border: 0;
 }
 
 /* === Text Colour Roles === */
@@ -1127,8 +1160,6 @@ function buildSection15_Tones() {
     ''
   );
   lines.push('.treat-ghost {', '  background-color: transparent;', '  color: var(--tone-text);', '}', '');
-  // The dot mark has no text of its own — it is the border colour rendered as a fill.
-  lines.push('.treat-dot {', '  background-color: var(--tone-border);', '}');
 
   return lines.join('\n');
 }
@@ -1402,11 +1433,139 @@ function generateLayer() {
  * consumer who wants the substrate and owns their own components takes loom.css and skips
  * this one; that is the tokens tier, now expressible as a file rather than a paragraph.
  */
+/**
+ * Dialog's parts — hand-written, because none of them ramp on a tier.
+ *
+ * `.dialog` itself is schema-driven and carries appearance only. Placement is split out
+ * into `.dialog-fixed` so one class serves two ways of opening a modal: a native
+ * `<dialog>` opened with `showModal()` is centred and layered by the UA, and adding
+ * placement on top of that fights it; a hand-rolled portal or a Radix `Content` is a
+ * plain div that has to be told.
+ *
+ * The overlay is styled twice for the same reason. `.dialog-overlay` is the element a
+ * portal renders; `::backdrop` is the pseudo the UA renders for a native dialog, and it
+ * cannot be reached by a class because it is not in the tree.
+ *
+ * The parts carry type roles rather than inheriting: `.dialog-title` read `text-title-md`
+ * in the atom and `.dialog-description` read `text-body-sm text-on-surface-variant`, both
+ * bridge utilities that resolve to nothing now. Naming them here is what makes the
+ * README's claim true — appearance in the class layer, behavior in the atom.
+ */
+/**
+ * The target floor: if it is interactive it is 44px, on every pointer.
+ *
+ * `--touch-min` is what standards.json declares, and it is the WCAG 2.2 AAA figure
+ * (2.5.5) rather than the AA one — AA asks 24x24 (2.5.8). Apple's HIG says the same 44.
+ *
+ * This is deliberately not conditioned on `pointer: coarse`. A media query would let the
+ * same build be compliant on a phone and not on a laptop, and a target is hard to hit
+ * with a trackpad and a tremor too. The cost is real and worth stating: on the compact
+ * and standard directions the control ladder starts below 44, so the small tier stops
+ * being small for anything interactive — compact goes 24/32/40 to 44/44/44, standard
+ * 32/40/48 to 44/44/48. `height` still ramps; this clamps it.
+ *
+ * Layered rather than unlayered, unlike the print and reduced-motion blocks: those are
+ * environmental overrides a consumer should not casually beat, while a target size is a
+ * decision a consumer may legitimately take back.
+ */
+function buildSectionTargetFloor() {
+  return `/* === Target floor === */
+.interactive,
+.control {
+  min-height: var(--touch-min);
+}`;
+}
+
+function buildSectionDialogParts() {
+  return `/* === Dialog parts === */
+
+/* Panel-relative, so the close affordance can sit in the padding rather than the flow.
+   Placement of the panel itself is .dialog-fixed, which is opt-in.
+
+   Scoped off the native element deliberately. A UA gives dialog:modal position: fixed,
+   and an author rule outranks that — so styling a real <dialog> with .dialog would stop
+   it centring itself, which is the one thing taking .dialog alone is supposed to allow.
+   Nothing is lost: a fixed box establishes a containing block for the close button just
+   as a relative one does. */
+.dialog:not(dialog) {
+  position: relative;
+}
+
+/* A closed <dialog> is hidden by the UA rule dialog:not([open]) { display: none }.
+   That rule is UA-origin, and any author declaration outranks it whatever the
+   specificity — so .dialog's own display: flex un-hides a dialog that is shut, and the
+   panel sits in the page flow waiting to be opened twice. Restating the UA's rule as an
+   author one puts it back. Specificity here is 0,2,1 against .dialog's 0,1,0, so it wins
+   inside the layer without !important. */
+dialog.dialog:not([open]) {
+  display: none;
+}
+
+.dialog-fixed {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--z-modal);
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background-color: var(--scrim);
+}
+
+dialog::backdrop {
+  background-color: var(--scrim);
+}
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.dialog-title {
+  font-family: var(--type-title-md-family);
+  font-size: var(--type-title-md-size);
+  line-height: var(--type-title-md-line);
+  font-weight: var(--type-title-md-weight);
+  letter-spacing: var(--type-title-md-tracking);
+}
+
+.dialog-description {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-line);
+  font-weight: var(--type-body-sm-weight);
+  letter-spacing: var(--type-body-sm-tracking);
+  color: var(--on-surface-variant);
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.dialog-close {
+  position: absolute;
+  right: var(--space-4);
+  top: var(--space-4);
+}`;
+}
+
 function generateComponents() {
   const layered = [
     buildSectionTable(),
     '',
     buildSectionComponentClasses(),
+    '',
+    buildSectionDialogParts(),
+    '',
+    buildSectionTargetFloor(),
   ].join('\n');
 
   return [

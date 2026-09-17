@@ -83,12 +83,11 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 {
   "name": "badge",
   "category": "button",
-  "description": "Small styled label with optional icon, severity, interactive/removable modes",
+  "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button.",
   "version": "a1b2c3d4e5f6",
   "dependencies": ["cn"],
   "tokens": ["color", "typography", "spacing", "sizing"],
-  "composition": "slottable",
-  "variants": ["filled", "outline", "outline-mono", "dot"],
+  "composition": "slot",
   "sizes": ["sm", "md", "lg"]
 }
 ```

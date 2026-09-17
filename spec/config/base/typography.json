@@ -74,19 +74,20 @@
       }
     },
     "label": {
+      "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider (0.02em vs 0.01em) and leads tighter (1.17/1.14/1.25 against 1.33/1.43/1.5), which is what a chip, a kbd key or a nav label wants and what a button does not. Weight is 500 in both. sm was 10px until the ramp was floored at 12. It was the only size the system emitted below 12, and it reached badge sm, kbd sm, bottom-nav sm and helper-text sm. WCAG sets no minimum font size, but iOS HIG floors at 11pt and Material at 11sp, so it cleared no platform guidance.",
       "font": "body",
       "weight": 500,
       "letter-spacing": "0.02em",
       "sm": {
-        "size": "10px",
+        "size": "12px",
         "line-height": "14px"
       },
       "md": {
-        "size": "12px",
+        "size": "14px",
         "line-height": "16px"
       },
       "lg": {
-        "size": "14px",
+        "size": "16px",
         "line-height": "20px"
       }
     },

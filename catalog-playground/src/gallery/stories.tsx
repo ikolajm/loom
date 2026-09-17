@@ -11,6 +11,7 @@ const Plus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const Check = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>;
 const Arrow = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 5l7 7-7 7" /></svg>;
 const Star = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" /></svg>;
+const Close = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>;
 
 const TREATMENTS = ['filled', 'outline', 'ghost'] as const;
 const COLORS = ['primary', 'secondary', 'destructive', 'success', 'warning', 'neutral'] as const;
@@ -81,15 +82,13 @@ export const STORIES: GalleryStory[] = [
   {
     name: 'Badge',
     category: 'Actions',
-    description: 'Label with severity + interactive/removable modes. filled/outline × state.',
+    description: 'Label with severity. filled/outline × state. Never a target — if it can be clicked it is a Button.',
     sections: [
       { label: 'filled', content: BADGE_STATES.map((s) => <Badge key={s} state={s}>{s}</Badge>) },
       { label: 'outline', content: BADGE_STATES.map((s) => <Badge key={s} variant="outline" state={s}>{s}</Badge>) },
       { label: 'sizes', content: SIZES.map((s) => <Badge key={s} size={s}>{s}</Badge>) },
       { label: 'with icons', content: [<Badge key="1" leadingIcon={<Star />}>Featured</Badge>, <Badge key="2" trailingIcon={<Arrow />} state="success">Active</Badge>, <Badge key="3" variant="outline" leadingIcon={<Check />} state="success">Verified</Badge>] },
-      { label: 'interactive', content: [<Badge key="1" interactive onClick={() => {}}>Click me</Badge>, <Badge key="2" interactive variant="outline" state="info" onClick={() => {}}>Filter</Badge>] },
-      { label: 'onRemove', content: [<Badge key="1" onRemove={() => {}}>React</Badge>, <Badge key="2" onRemove={() => {}} variant="outline" state="destructive">TypeScript</Badge>] },
-      { label: 'interactive + onRemove (split hover)', content: [<Badge key="1" interactive onClick={() => {}} onRemove={() => {}}>filter + remove</Badge>, <Badge key="2" interactive variant="outline" state="info" onClick={() => {}} onRemove={() => {}}>split</Badge>] },
+      { label: 'a removable filter is a Button, not a Badge', content: [<Button key="1" variant="outline" color="neutral" size="sm" trailingIcon={<Close />} onClick={() => {}}>Category: Design</Button>, <Button key="2" variant="outline" color="neutral" size="sm" trailingIcon={<Close />} onClick={() => {}}>Status: Open</Button>] },
     ],
   },
   {

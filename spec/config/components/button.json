@@ -44,12 +44,12 @@
   "badge": {
     "$catalog": {
       "category": "button",
-      "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
+      "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button with a trailing icon, so one intent keeps one tab stop and one name. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral).",
       "dependencies": ["cn"],
       "tokens": ["color", "typography", "spacing", "sizing"],
       "composition": "slot"
     },
-    "$note": "Orthogonal axes — variant (treatment: filled/outline) and state (color/severity) are independent. State is declared once as 4 CSS-var token refs: bg/fg = container fill + on-container text (filled); text/border = base color (outline line/text). Treatments are fixed consumers of those vars (shared TREATMENT_CLASSES) — no compound matrix. Body radius is radius/component (malleable with edges). The status dot is its own atom (`dot`) — compose it into a badge if needed. Behavior modes (interactive, onRemove) are template-level props.",
+    "$note": "Orthogonal axes — variant (treatment: filled/outline) and state (color/severity) are independent. State is declared once as 4 CSS-var token refs: bg/fg = container fill + on-container text (filled); text/border = base color (outline line/text). Treatments are fixed consumers of those vars (shared TREATMENT_CLASSES) — no compound matrix. Body radius is radius/component (malleable with edges).",
     "treatments": ["filled", "outline"],
     "colors": {
       "default":     { "bg": "color/primary/primary-container",   "fg": "color/primary/on-primary-container",   "text": "color/primary/primary",   "border": "color/primary/primary" },
@@ -65,7 +65,6 @@
       "text-transform": "none"
     },
     "icon-slots": {
-      "$note": "Suppressed for dot variant.",
       "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
     },
@@ -77,29 +76,6 @@
       "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "icon": "icon/icon-1" }
     },
     "default": { "variant": "filled", "state": "default", "size": "md" }
-  },
-  "dot": {
-    "$catalog": {
-      "category": "feedback",
-      "description": "Status/severity indicator dot — a small colored circle keyed by state. Standalone primitive; compose into badges, banners, list items, subheadings, nav. For a notification count bubble, use Badge size=\"sm\".",
-      "dependencies": ["cn"],
-      "tokens": ["color", "sizing"],
-      "composition": "none"
-    },
-    "$note": "Single-axis atom: state → base color fill. Always a circle (rounded-pill). No text/icon. Sizes reuse icon tokens. No neutral state: a dot exists to say which of several conditions holds, and a neutral dot says nothing a missing dot does not — brand and status hues carry the meaning. Badge keeps neutral because a badge carries a label that means something on its own.",
-    "state": {
-      "default":     { "bg": "color/primary/primary" },
-      "destructive": { "bg": "color/error/error" },
-      "success":     { "bg": "color/success/success" },
-      "warning":     { "bg": "color/warning/warning" },
-      "info":        { "bg": "color/info/info" }
-    },
-    "sizes": {
-      "sm": { "size": "icon/icon-0" },
-      "md": { "size": "icon/icon-1" },
-      "lg": { "size": "icon/icon-2" }
-    },
-    "default": { "state": "default", "size": "md" }
   },
   "fab": {
     "$catalog": {

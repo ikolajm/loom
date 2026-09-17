@@ -23,7 +23,7 @@ type FormFieldProps = React.HTMLAttributes<HTMLDivElement> & {
 const FormField = forwardRef<HTMLDivElement, FormFieldProps>(
   ({ error, className, children, ...props }, ref) => (
     <FormFieldContext.Provider value={{ error }}>
-      <div ref={ref} className={cn('flex flex-col gap-component-compact', className)} {...props}>
+      <div ref={ref} className={cn('form-field', className)} {...props}>
         {children}
       </div>
     </FormFieldContext.Provider>

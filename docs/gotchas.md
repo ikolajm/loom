@@ -196,6 +196,19 @@ asks the second question, stated as the failure rather than as a list of names: 
 that sets `width`, `height` or `gap` anywhere in its ladder must declare a `display`
 somewhere in that same ladder, or name itself in `NO_BOX` with a reason.
 
+**The same gap had a second half, found much later.** Preflight was doing more than
+the class layer recovered: it also cleared the UA's own chrome from form elements. When
+the Tailwind bridge went out, nothing replaced that, so every `<button>` wore the UA
+border no matter its treatment — `.button` sets none, and neither do `.treat-filled` or
+`.treat-ghost`. `.treat-outline` looked correct only because it happens to set a border
+itself, which is exactly how the defect stayed invisible: the one treatment defined by
+having no frame was the one that showed a frame, and the fix was mistaken for a question
+about whether ghost should exist. There is now a Form Controls block in `loom.base` —
+low enough in the cascade that a treatment wanting a border still wins.
+
+The lesson generalises past this file: a reset you delete is not gone, it is inherited
+from the UA, and the UA's defaults are not neutral.
+
 Write that check against the emitted CSS, not against the emitter's plan. The two worst
 instances — `.icon-slot` and the `<name>-icon` sub-parts — are written by the emitter
 directly and never appear in the plan at all. A first version of the check enumerated the
@@ -286,7 +299,7 @@ matter, all found by rendering [`docs/examples/invoice/`](examples/invoice/) rat
 by reading the CSS.
 
 **`print-color-adjust: exact` is ignored, and backgrounds print anyway.** The class
-layer sets it on `.treat-filled` and `.treat-dot` so a badge reading OVERDUE prints as a
+layer sets it on `.treat-filled` so a badge reading OVERDUE prints as a
 fill rather than as bare text. WeasyPrint logs it as an unknown property — it has no
 "economy" mode to opt out of, so it always paints backgrounds. The declaration stays
 because it is the browser print path that needs it; the document path gets the same

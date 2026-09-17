@@ -42,6 +42,15 @@ const ROLE_GROUPS = [
 const TONES = ['primary', 'secondary', 'neutral', 'error', 'success', 'warning', 'info'];
 const SIZES = ['sm', 'md', 'lg'];
 
+// The page carries no icon library on purpose — taking one would be exactly the
+// framework coupling it exists to avoid. These are drawn inline so each slot renders at
+// the size a consumer's icon would: .icon-slot reserves var(--icon-size) and
+// .icon-slot > svg fills it, which a text glyph never does.
+const CLOSE_MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const SPINNER_MARK = '<svg viewBox="0 0 24 24" fill="none" width="100%" height="100%" aria-hidden="true">'
+  + '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>'
+  + '<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+
 // A swatch label has to stay readable on every stop of every ramp. The TSX preview did
 // this with `mix-blend-mode: difference` over white, which inverts the background — and
 // an inverted mid-tone lands back near the luminance it started from, so contrast
@@ -151,14 +160,21 @@ function radius() {
 
 // Every tone against every treatment. Generated because this is exactly the list that
 // must not drift — a tone added without a swatch here is a tone nobody ever looks at.
-function toneMatrix() {
+// Badge and button are shown as separate matrices, not mixed in a row. They declare
+// different treatment sets — badge filled/outline, button filled/outline/ghost — and
+// they now have different heights, so a mixed row reads as the two disagreeing rather
+// than as one tone across two components.
+function toneMatrix(kind) {
+  const cells = kind === 'badge'
+    ? (t) => `      <span class="badge treat-filled tone-${t}" data-size="md">filled</span>
+      <span class="badge treat-filled tone-${t}-soft" data-size="md">filled soft</span>
+      <span class="badge treat-outline tone-${t}" data-size="md">outline</span>`
+    : (t) => `      <button class="button treat-filled tone-${t} interactive control" data-size="md">filled</button>
+      <button class="button treat-outline tone-${t} interactive control" data-size="md">outline</button>
+      <button class="button treat-ghost tone-${t} interactive control" data-size="md">ghost</button>`;
   return TONES.map((t) => row(
     `      <span class="pv-key text-label-sm text-on-surface-variant">${t}</span>
-      <span class="badge treat-filled tone-${t}" data-size="md">filled</span>
-      <span class="badge treat-filled tone-${t}-soft" data-size="md">filled soft</span>
-      <span class="badge treat-outline tone-${t}" data-size="md">outline</span>
-      <span class="badge treat-ghost tone-${t}" data-size="md">ghost</span>
-      <span class="badge treat-dot tone-${t}" data-size="md">dot</span>`
+${cells(t)}`
   )).join(NL);
 }
 
@@ -194,7 +210,7 @@ const CLASS_STRIP = [
     lede(`The spinner carries the layer's only animation; the skeleton is deliberately
       static, because it earns its place by reserving layout rather than by moving. Set
       reduced motion at the OS and reload: the spinner keeps turning on purpose.`),
-    row(`      <span class="spinner" data-size="md" data-variant="default"></span>
+    row(`      <span class="spinner" data-size="md" data-variant="default">${SPINNER_MARK}</span>
       <div class="pv-field"><span class="skeleton" data-variant="default" style="height: var(--space-6)"></span></div>`),
   ].join(NL)),
 
@@ -213,19 +229,69 @@ const CLASS_STRIP = [
     </table>`,
   ].join(NL)),
 
+  section('Dialog', [
+    lede(`The panel is a class, so it renders in flow like anything else — shown inline
+      here rather than as a screenshot of a modal. Placement is the separate
+      <code>.dialog-fixed</code>, which is why the same class works on a native
+      <code>&lt;dialog&gt;</code> the browser centres itself.`),
+    `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
+      <div class="dialog-header">
+        <span class="dialog-title">Delete this project</span>
+        <span class="dialog-description">This cannot be undone. Everything in it goes with it.</span>
+      </div>
+      <div class="dialog-footer">
+        <button class="button treat-outline tone-neutral interactive control" data-size="md">Cancel</button>
+        <button class="button treat-filled tone-error interactive control" data-size="md">Delete</button>
+      </div>
+    </div>`,
+    lede(`The same class on a real <code>&lt;dialog&gt;</code>, opened with
+      <code>showModal()</code>. No portal, no focus-trap library: the browser supplies the
+      backdrop, the focus containment and Escape. Tab inside it — focus should not leave.`),
+    row(`      <button class="button treat-filled tone-primary interactive control" data-size="md" id="pv-open">Open a native dialog</button>`),
+    `    <dialog class="dialog" data-size="md" data-variant="default" id="pv-dialog">
+      <div class="dialog-header">
+        <span class="dialog-title">Native dialog</span>
+        <span class="dialog-description">Centred and layered by the UA. The scrim is ::backdrop.</span>
+      </div>
+      <div class="dialog-footer">
+        <button class="button treat-outline tone-neutral interactive control" data-size="md" id="pv-close">Close</button>
+      </div>
+    </dialog>`,
+  ].join(NL)),
+
+  section('A removable filter is a button', [
+    lede(`Badges are labels and never targets. A filter chip you can dismiss is one
+      control with one intent &mdash; remove this filter &mdash; so it is a button with a
+      trailing icon, not a label with a second control buried in it. The earlier split
+      version gave one intent two tab stops and two accessible names.`),
+    row(`      <button class="button treat-outline tone-neutral interactive control" data-size="md">
+        Category: Design
+        <span class="icon-slot">${CLOSE_MARK}</span>
+      </button>
+      <button class="button treat-outline tone-neutral interactive control" data-size="md">
+        Status: Open
+        <span class="icon-slot">${CLOSE_MARK}</span>
+      </button>`),
+    lede(`The label form, for comparison. No hover, no focus ring, no target floor.`),
+    row(`      <span class="badge treat-filled tone-primary-soft" data-size="md">Design</span>
+      <span class="badge treat-outline tone-neutral" data-size="md">Open</span>`),
+  ].join(NL)),
+
+  section('Form field', [
+    lede(`A label, a control and its helper text as one column. The gap is the only thing
+      the class carries — everything else composes.`),
+    `    <div class="pv-field">
+      <div class="form-field">
+        <label class="label" data-size="md" for="pv-input">Project name</label>
+        <input class="input control" data-size="md" id="pv-input" placeholder="Acme rebrand">
+        <span class="helper-text" data-size="md">Shown to everyone with access.</span>
+      </div>
+    </div>`,
+  ].join(NL)),
+
   section('Known gaps', [
     lede(`This page renders the class layer, so a gap in the class layer shows up here
       as nothing. These are open work, not defects in the page.`),
-    gap('dialog has no class',
-      `Its panel, overlay, header and sizing live in the atom's TSX as utilities that
-        resolved only through the Tailwind bridge. Below is that markup with the classes
-        it would use; nothing styles it. Compare against the card above.`,
-      `      <div class="dialog" data-size="md">
-        <div class="dialog-header">
-          <span class="dialog-title">Unstyled</span>
-          <span class="dialog-description">This block has no rule behind it.</span>
-        </div>
-      </div>`),
     gap('focus-ring reaches .control but not .interactive',
       `Tab to both. The first takes a ring, the second does not, though it is the class
         a consumer reaches for when styling a button.`,
@@ -279,6 +345,10 @@ const THEME_SCRIPT = `    // The only script on the page, and it does one thing:
         label();
       });
       label();
+
+      var dlg = document.getElementById('pv-dialog');
+      document.getElementById('pv-open').addEventListener('click', function () { dlg.showModal(); });
+      document.getElementById('pv-close').addEventListener('click', function () { dlg.close(); });
     })();`;
 
 function generate() {
@@ -288,10 +358,20 @@ function generate() {
     section('Typography', typeStyles()),
     section('Spacing', spacing()),
     section('Radius', row(radius())),
-    section('Tone and treatment', [
-      lede(`A tone sets four custom properties; a treatment reads them. Independent
-        axes, so adding either is one rule rather than a matrix.`),
-      toneMatrix(),
+    section('Tone and treatment: badge', [
+      lede(`A tone sets four custom properties; a treatment reads them. Independent axes,
+        so adding either is one rule rather than a matrix. Badge declares filled and
+        outline only, and a badge is a label &mdash; these are not targets and carry no
+        height floor.`),
+      toneMatrix('badge'),
+    ].join(NL)),
+
+    section('Tone and treatment: button', [
+      lede(`The same two axes on the component that adds ghost. Ghost should read as text
+        with no frame at all: if a border shows here, the UA's own button chrome is coming
+        through and the normalization in <code>loom.base</code> is not reaching it. Every
+        one of these is a target, so all of them sit on the 44px floor.`),
+      toneMatrix('button'),
     ].join(NL)),
     CLASS_STRIP,
   ].join(NL + NL);

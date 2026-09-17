@@ -2,15 +2,14 @@
   "name": "badge",
   "kind": "atom",
   "category": "button",
-  "description": "Label with optional icon, severity, interactive/removable modes. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral). The status dot is its own `dot` atom.",
-  "version": "9d6d5ed89dfd",
+  "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button with a trailing icon, so one intent keeps one tab stop and one name. Visual treatments: filled, outline. Consolidates prior chip / tag-chip (= outline + neutral).",
+  "version": "df28c46a8559",
   "dependencies": [
     "cn"
   ],
   "npmDependencies": [
     "@radix-ui/react-slot",
-    "class-variance-authority",
-    "lucide-react"
+    "class-variance-authority"
   ],
   "tokens": [
     "color",

@@ -3,14 +3,13 @@
   "kind": "atom",
   "category": "layout",
   "description": "",
-  "version": "54c113085215",
+  "version": "38dfeec248a2",
   "dependencies": [
     "button",
     "cn"
   ],
   "npmDependencies": [
     "@radix-ui/react-dialog",
-    "class-variance-authority",
     "lucide-react"
   ],
   "tokens": [
