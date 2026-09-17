@@ -146,8 +146,9 @@ Re-run these any time you change a value in `spec/answers.json` or a component s
 | `tokens.css` | custom properties — color roles, spacing, radius, type role values | `loom.tokens` |
 | `loom.css` | what you compose with — a document base, type ramp, text color roles, tones, treatments, control states, surfaces, elevation, links, tabular figures, keyframes, print rules | `loom.base`, `loom.components` |
 | `loom.components.css` | what they compose into — named component classes, shape only | `loom.components` |
+| `main.css` | the three above, imported in order. Three lines and no rules of its own | — |
 
-**Import them in that order, and treat the order as load-bearing.** Everything Loom emits sits in a Loom-owned cascade layer:
+**Import `main.css`, or the three directly in that order — the order is load-bearing.** Everything Loom emits sits in a Loom-owned cascade layer:
 
 ```css
 @layer loom.reset, loom.tokens, loom.base, loom.components;
@@ -170,9 +171,9 @@ A project that owns its own components can skip `loom.components.css`. Before wi
 | Tier | You get | Use when |
 |------|---------|----------|
 | **tokens** | the stylesheets, nothing else — no atoms, no app shell, no dependencies | You have your own components and want Loom's design decisions as values |
-| **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`, a `/preview` route), the core dependencies, and the atoms you pick | You want the components too. This is what the quickstart below installs |
+| **catalog** | The tokens tier, plus the app shell (`ThemeProvider`, root layout, `globals.css`), the core dependencies, and the catalog | You want the components too. This is what the quickstart below installs |
 
-The `/preview` route belongs to the **catalog** tier: it renders the token substrate — swatches, type, spacing, radius — and is the one thing that catches a silently failed Tailwind v4 `@theme` wiring. Its own header calls it a token-landing check, not a component gallery. Delete it once your brand has landed.
+To check that a brand landed, open [`docs/preview.html`](docs/preview.html) in this repo after generating. The scaffold used to write a React `/preview` route into your project for that; it was a second copy of the same page, needing a dev server to answer a question a static file answers.
 
 Both tiers are first-class on web:
 
@@ -181,15 +182,15 @@ Both tiers are first-class on web:
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout. Wire `main.css` into your global stylesheet — plain CSS, no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). If you own your components, drop the `loom.components.css` line from it. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
 
-Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
+Consumption is shadcn-style — the files are copied in and become yours. The scaffold targets a Next.js project with `src/app/`, living **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
-**Don't have one?** From your workspace (not inside the Loom repo), this spins up a correctly-configured project — Next.js + Tailwind v4 + TypeScript + `src/app/`, no prompts:
+**Don't have one?** From your workspace (not inside the Loom repo), this spins up a correctly-configured project — Next.js + TypeScript + `src/app/`, no prompts. No `--tailwind`: Loom's stylesheets are plain CSS and its atoms need no CSS framework, so adding one buys a build step and a reset that will outrank the class layer.
 
 ```bash
 npx create-next-app@latest my-loom-app \
-  --ts --tailwind --app --src-dir --eslint \
+  --ts --no-tailwind --app --src-dir --eslint \
   --import-alias "@/*" --use-npm --no-turbopack --no-agents-md
 ```
 
@@ -212,7 +213,7 @@ npm run sync -- ../my-loom-app
 #    delete src/app/preview/ once you've confirmed.
 ```
 
-`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
+`init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it copies the whole catalog into `your-project/src/components/` — delete what you do not want — and delivers a freshly generated substrate. It prints the `npm install` line for the packages those atoms import, taken from their manifests; your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. The atoms need React and the packages their manifests name; they need no CSS framework at all.
 
 **From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
 

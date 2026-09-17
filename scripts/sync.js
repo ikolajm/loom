@@ -25,7 +25,7 @@ const { inputHash } = require('./catalog-stamp');
 
 const LOOM_ROOT = path.resolve(__dirname, '..');
 const CATALOG = path.join(LOOM_ROOT, 'catalog');
-const SUBSTRATE = ['tokens.css', 'loom.css', 'loom.components.css'];
+const SUBSTRATE = ['tokens.css', 'loom.css', 'loom.components.css', 'main.css'];
 
 function die(lines) {
   for (const line of [].concat(lines)) console.error(line);

@@ -9,9 +9,7 @@
  */
 
 function generate(configs) {
-  return `@import "../tokens.css";
-@import "../loom.css";
-@import "../loom.components.css";
+  return `@import "../main.css";
 
 body {
   background: var(--surface);

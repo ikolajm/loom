@@ -174,7 +174,7 @@ redirects.
 
 | Target | Emits |
 |---|---|
-| `tokens` | `tokens.css`, `loom.css`, `loom.components.css` |
+| `tokens` | `tokens.css`, `loom.css`, `loom.components.css`, `main.css` |
 | `doc-layout` | `doc-layout.css` from `presentation/layout.json` |
 | `icons` | `components/icons.ts` |
 | `components` | `components/*.tsx` + `cn.ts` |

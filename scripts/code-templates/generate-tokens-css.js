@@ -1272,7 +1272,7 @@ function buildSection14_Animations() {
 // Everything Loom emits sits in a Loom-owned cascade layer, so a consumer's own CSS wins
 // by default: unlayered rules outrank every layer regardless of specificity, and that is
 // the override story. Two blocks stay deliberately unlayered — see LAYER_ORDER.
-const FILES = ['tokens.css', 'loom.css', 'loom.components.css'];
+const FILES = ['tokens.css', 'loom.css', 'loom.components.css', 'main.css'];
 
 // The layer contract. Order is low-to-high precedence, so `loom.components` beats
 // `loom.base`, and a consumer's unlayered rule beats all of it.
@@ -1577,11 +1577,40 @@ function generateComponents() {
 }
 
 /** @returns {{'tokens.css': string, 'loom.css': string, 'loom.components.css': string}} */
+/**
+ * main.css — one import instead of three, in the order the cascade needs.
+ *
+ * The order is the mechanism, not the decoration. `@layer` is declared in tokens.css and
+ * a minifier is entitled to drop that statement as redundant, after which precedence
+ * falls back to first-appearance — which these imports reproduce exactly. So the file
+ * works minified and unminified, and a consumer who imports the three directly gets the
+ * same result as long as they keep this order.
+ *
+ * `@import` is serial and render-blocking without a bundler, which is three requests
+ * rather than one. That is the cost of the convenience and it is why the three files stay
+ * importable on their own: a consumer who owns their components skips
+ * loom.components.css, and one who bundles pays nothing either way.
+ *
+ * Deliberately not a fourth copy of the CSS. It is three lines and no rules, so nothing
+ * here can drift from what it imports.
+ */
+function generateMain() {
+  return [
+    header('main.css', 'The index stylesheet — imports the three in load-bearing order. Import this, or the three directly in this order. Plain CSS.'),
+    '',
+    "@import url('tokens.css');",
+    "@import url('loom.css');",
+    "@import url('loom.components.css');",
+    '',
+  ].join(String.fromCharCode(10));
+}
+
 function generate() {
   return {
     'tokens.css': generateTokens(),
     'loom.css': generateLayer(),
     'loom.components.css': generateComponents(),
+    'main.css': generateMain(),
   };
 }
 
@@ -1604,4 +1633,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateMain, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };

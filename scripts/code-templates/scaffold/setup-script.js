@@ -74,7 +74,7 @@ echo ""
 # --- Validate ---
 # The tokens tier writes the stylesheets into src/ and touches nothing else,
 # so it does not require src/app/ — it does not assume Next.js, or a React app at all.
-for f in tokens.css loom.css loom.components.css; do
+for f in tokens.css loom.css loom.components.css main.css; do
   [ -f "$GEN_DIR/$f" ] || { echo "ERROR: $f not found in $GEN_DIR — run the orchestrator first."; exit 1; }
 done
 if [ "$TIER" = "tokens" ]; then
@@ -112,6 +112,7 @@ if [ "$TIER" = "tokens" ]; then
   echo "[1/2] Copying stylesheets..."
   cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
   cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
+  cp "$GEN_DIR/main.css" "$SRC_DIR/main.css"
   cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
 
   echo "[2/2] Adding the loom:sync script..."
