@@ -118,8 +118,8 @@ App-shell bootstrap files — \`init.sh\` wires the atom-agnostic shell into a N
 # 1. App shell + substrate (once) — from the generated/ directory:
 ./scaffold/init.sh ./path-to-frontend
 
-# 2. Picked atoms + token refresh (repeatable) — from the loom repo root:
-npm run sync -- ./path-to-frontend     # reads loom-picks.json
+# 2. Atoms + token refresh (repeatable) — from the loom repo root:
+npm run sync -- ./path-to-frontend     # copies the catalog + substrate
 
 # 3. Install the npm deps the sync reports, then:
 cd ./path-to-frontend

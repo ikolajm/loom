@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * sync.js — install picked Loom atoms and the token substrate into a consuming project.
+ * sync.js — install the Loom catalog and the token substrate into a consuming project.
  *
  * Usage: node scripts/sync.js <project-dir> [--force] [--refresh]
  *
@@ -9,8 +9,8 @@
  *
  * Replaces setup.sh and scripts/refresh-test.sh. Those were 145 lines of shell whose only
  * work was argument parsing, copying, and printing — every decision already lived in
- * resolve-picks.js, check-local-edits.js and the orchestrator, which the shell called out
- * to four times. One language, and the three helpers are now imported rather than shelled.
+ * check-local-edits.js and the orchestrator, which the shell called out to four times.
+ * One language, and the helpers are imported rather than shelled.
  *
  * An atom the consumer has edited is SKIPPED, not overwritten, and named in the summary.
  * Skipping rather than prompting is deliberate: this runs unattended (the playground
@@ -21,7 +21,6 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { resolvePicks, PickError } = require('./resolve-picks');
 const { checkLocalEdits } = require('./check-local-edits');
 const { inputHash } = require('./catalog-stamp');
 
@@ -40,7 +39,6 @@ function main(argv) {
   if (!project) die('Usage: node scripts/sync.js <project-dir> [--force] [--refresh]');
 
   const force = flags.has('--force');
-  const picksPath = path.join(project, 'loom-picks.json');
   const src = path.join(project, 'src');
   const dest = path.join(src, 'components');
 
@@ -54,7 +52,6 @@ function main(argv) {
   if (!fs.existsSync(CATALOG)) {
     die('ERROR: catalog/ not found — run: node scripts/code-templates/orchestrator.js --only components');
   }
-  if (!fs.existsSync(picksPath)) die(`ERROR: ${picksPath} not found`);
 
   // Staleness is reported, not repaired. Regenerating on every sync would run the whole
   // pipeline — including a tsc pass over the playground — so a consumer refreshing its
@@ -76,14 +73,23 @@ function main(argv) {
     console.log('      it is the atoms that may lag. Re-run with --refresh to rebuild them first.');
   }
 
-  let atoms;
-  let npmDependencies;
-  try {
-    ({ atoms, npmDependencies } = resolvePicks(picksPath, CATALOG));
-  } catch (e) {
-    if (!(e instanceof PickError)) throw e;
-    die(['', ...e.lines, '', 'Nothing was copied.']);
-  }
+  // The whole catalog, and the consumer deletes what they do not want. There were six
+  // manifests and one edge in the dependency graph — every atom needs `cn`, which is
+  // copied unconditionally below anyway — so resolving a subset walked a graph to
+  // return what it had been handed. Deleting a file you did not want is cheaper than
+  // maintaining a pick list, and there is no id left to mistype.
+  const atoms = fs
+    .readdirSync(CATALOG)
+    .filter((f) => f.endsWith('.manifest.json'))
+    .map((f) => f.replace(/\.manifest\.json$/, ''))
+    .filter((name) => name !== 'cn')
+    .sort();
+
+  const npmDependencies = [...new Set(
+    [...atoms, 'cn'].flatMap((name) =>
+      JSON.parse(fs.readFileSync(path.join(CATALOG, `${name}.manifest.json`), 'utf8')).npmDependencies || []
+    )
+  )].sort();
 
   fs.mkdirSync(dest, { recursive: true });
 
@@ -92,7 +98,7 @@ function main(argv) {
   const states = checkLocalEdits(dest, CATALOG, [...atoms, 'cn']);
   const skipped = [];
 
-  console.log('Picked + resolved atoms:');
+  console.log('Atoms:');
   for (const atom of [...atoms, 'cn']) {
     const state = states.get(atom);
     // `unknown` is skipped too: the file is installed but carries no delivery record, so

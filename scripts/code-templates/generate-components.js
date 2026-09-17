@@ -235,7 +235,7 @@ function generate(registry, outputDir, configs) {
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
 
-  // Pickable atoms grouped by catalog group — the menu to grab loom-picks.json names from.
+  // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.
   const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite'];
   const byGroup = {};
@@ -245,7 +245,7 @@ function generate(registry, outputDir, configs) {
     if (byGroup[g] && !grouped[g]) grouped[g] = byGroup[g].sort();
   }
   fs.writeFileSync(path.join(CATALOG_DIR, 'atoms.json'), JSON.stringify({
-    $note: 'Pickable atoms by group — copy names into loom-picks.json "picks". The sync resolves dependencies automatically. Generated from the catalog; do not hand-edit.',
+    $note: 'Atoms by group, and the carrier for the $inputs staleness stamp. The sync copies the whole catalog; delete what you do not want. Generated from the catalog; do not hand-edit.',
     // Fingerprint of the schemas and templates this catalog was built from, so a sync can
     // say "these atoms predate your edits" without relying on mtimes, which a checkout
     // rewrites. See scripts/catalog-stamp.js.

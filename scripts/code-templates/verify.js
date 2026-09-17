@@ -687,6 +687,75 @@ function checkStoryCoverage(atoms) {
   return { failures, note: `${covered} atoms rendered in the playground` };
 }
 
+// --- atom-class-coverage ---------------------------------------------------
+// The gate that was missing for the whole of the Tailwind removal.
+//
+// `dialog` shipped visually broken across five commits with every check green. Its
+// appearance lived in the TSX as `bg-surface-1 rounded-modal px-6`, utilities that
+// resolved only through the `@theme` bridge; once the bridge went, they resolved to
+// nothing. No check could see it: the static checks read the emitted CSS or the schemas,
+// and `tsc` does not read CSS at all. A class that exists and a class that is *applied to
+// something* are two questions, and only the first was being asked.
+//
+// So: every class an atom puts in a className must exist in the emitted CSS, and every
+// custom property an emitted rule reads must be defined in tokens.css. The second half is
+// here because `data-size="full"` on dialog emitted five `--type-body-full-*` references
+// against a type role that does not exist — same shape of defect, found by hand.
+//
+// Known gaps are declared, not discovered. An allowlist that grows silently is how the
+// thing being checked stops being checked.
+const CLASS_GAPS = {};
+
+function checkAtomClassCoverage() {
+  const emitted = ['loom.css', 'loom.components.css']
+    .map((f) => fs.readFileSync(path.join(ROOT, 'generated', f), 'utf8'))
+    .join(String.fromCharCode(10));
+  const defined = new Set([...emitted.matchAll(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g)].map((m) => m[1]));
+
+  // Tailwind-shaped: a utility prefix followed by a dash, or a bare utility word. A class
+  // Loom does not define and that looks like a utility is a class nothing will style.
+  const BARE = new Set(['flex', 'grid', 'block', 'hidden', 'relative', 'absolute', 'fixed', 'truncate', 'shrink-0', 'grow']);
+  const PREFIX = /^!?-?(p|m|px|py|pt|pb|pl|pr|mx|my|ml|mr|w|h|gap|space|text|bg|border|rounded|shadow|z|inset|top|left|right|bottom|size|flex|items|justify|grid|opacity|cursor|overflow|animate|transition|duration|ease|translate|ring|outline|font|leading|tracking|hover|fill|stroke)(-|$)/;
+
+  const failures = [];
+  let checked = 0;
+
+  for (const file of fs.readdirSync(CATALOG).filter((f) => f.endsWith('.tsx'))) {
+    const name = file.replace(/\.tsx$/, '');
+    const src = fs.readFileSync(path.join(CATALOG, file), 'utf8');
+    const allowed = new Set(CLASS_GAPS[name] || []);
+    const strings = [
+      ...src.matchAll(/className=(?:\{cn\(|\{)?\s*'([^']*)'/g),
+      ...src.matchAll(/className="([^"]*)"/g),
+      ...src.matchAll(/cva\(\s*'([^']*)'/g),
+      ...src.matchAll(/CLASSES = '([^']*)'/g),
+    ];
+    for (const m of strings) {
+      for (const token of m[1].split(/\s+/).filter(Boolean)) {
+        checked += 1;
+        const base = token.replace(/^.*:/, '').replace(/\[.*\]/, '').replace(/^!/, '');
+        if (defined.has(base) || allowed.has(token)) continue;
+        if (BARE.has(base) || PREFIX.test(base)) {
+          failures.push(`${name} applies \`${token}\`, which no rule in the emitted CSS defines — it will render as nothing`);
+        }
+      }
+    }
+  }
+
+  // Every --type-* an emitted rule reads has to be a role tokens.css actually declares.
+  const tokens = fs.readFileSync(path.join(ROOT, 'generated', 'tokens.css'), 'utf8');
+  const declared = new Set([...tokens.matchAll(/(--type-[a-z0-9-]+):/g)].map((m) => m[1]));
+  const read = new Set([...emitted.matchAll(/var\((--type-[a-z0-9-]+)\)/g)].map((m) => m[1]));
+  for (const v of read) {
+    checked += 1;
+    if (!declared.has(v)) {
+      failures.push(`${v} is read by the class layer and declared nowhere — a tier is deriving a type role that does not exist`);
+    }
+  }
+
+  return { failures, note: `${checked} class and token references across ${fs.readdirSync(CATALOG).filter((f) => f.endsWith('.tsx')).length} atoms` };
+}
+
 function verify() {
   const atoms = atomNames();
   const checks = [
@@ -695,6 +764,7 @@ function verify() {
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['class-coverage', checkClassCoverage()],
+    ['atom-class-coverage', checkAtomClassCoverage()],
     ['class-box-model', checkClassBoxModel()],
     ['phantom-parts', checkPhantomParts()],
     ['variant-keys', checkVariantKeys()],

@@ -170,7 +170,7 @@ Both tiers are first-class on web:
 ./generated/scaffold/init.sh ../my-app            # catalog tier — the quickstart below
 ```
 
-The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout, no `loom-picks.json`. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
+The tokens tier assumes nothing about your framework beyond a `src/` directory: no `npm install`, no layout. Wire `tokens.css` and `loom.css` into your global stylesheet, in that order — both are plain CSS and need no build step. Put your own reset in `@layer loom.reset` and import it first, or it will silently outrank the entire class layer ([why](docs/gotchas.md)). Add `loom.components.css` if you want the named component classes. Use the token vocabulary in your own components. Re-run without `--tokens` to move up to the catalog tier.
 
 Consumption is shadcn-style — declare what you want, copy it in. You need a Next.js + Tailwind v4 project with `src/app/` that lives **alongside the Loom repo, not inside it** — Loom is the factory; your app is a separate project it builds into. The clean layout is siblings: `~/projects/loom` and `~/projects/my-loom-app`.
 
@@ -191,13 +191,11 @@ Already made one (or have one)? The next two commands run **from the Loom repo**
 #    token substrate, and core deps. Run from the Loom repo, pointing at your project:
 ./generated/scaffold/init.sh ../my-loom-app
 
-# 2. init.sh wrote a starter loom-picks.json in your project — edit its `picks`.
-#    Valid pick ids: catalog/atoms.json (generated) — or the catalog table above.
-
-# 3. From the Loom repo, sync the picked atoms in (re-run anytime to resync):
+# 2. From the Loom repo, sync the catalog in (re-run anytime to resync).
+#    All five atoms land in src/components/ — delete the ones you do not want:
 npm run sync -- ../my-loom-app
 
-# 4. Run your app and open /preview to confirm your brand landed:
+# 3. Run your app and open /preview to confirm your brand landed:
 #    cd ../my-loom-app && npm run dev   → http://localhost:3000/preview
 #    init.sh scaffolds that route (token swatches, type, spacing, radius);
 #    delete src/app/preview/ once you've confirmed.
@@ -256,8 +254,7 @@ scripts/               The two codegen pipelines
   code-templates/      ← React catalog + the four stylesheets + scaffold
   figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts
-  resolve-picks.js     ← the picker's dependency resolver
-  scripts/sync.js      ← installs picked atoms + substrate into a project (`npm run sync`)
+  scripts/sync.js      ← installs the catalog + substrate into a project (`npm run sync`)
 
 catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
 catalog-playground/    Compile gate + gallery — picks every atom; its tsc run is verify.js's typecheck
@@ -271,7 +268,7 @@ docs/                  Design-system engineering docs (see below)
 
 [`docs/pipeline.md`](docs/pipeline.md) traces the derivation chain end to end — the three commands, how a config file is resolved, what each generator transforms rather than copies, and where a symptom points. Start there to extend the generator or to debug an output that doesn't match the answers.
 
-The full catalog model — surfaces, picker, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
+The full catalog model — surfaces, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
 
 A note on generated code: when an atom's Radix primitive has no template wired, the generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`. That marker is a deliberate fallback signal, not unfinished work. No atom in the current catalog carries one.
 

@@ -273,19 +273,17 @@ of one combination rather than the rule that generates it.
 `npm run sync <project-dir> [--force] [--refresh]` — `scripts/sync.js`.
 
 1. `--refresh` regenerates the catalog first.
-2. `resolve-picks.js` reads the project's `loom-picks.json` and walks each picked
-   atom's manifest `dependencies` transitively. Unknown ids are a hard error **before
-   any copy**, so a typo leaves the project untouched instead of half-synced. An id in
-   `MOVED_TO_CLASS` gets told which class replaced it rather than a fuzzy did-you-mean.
-3. The resolved atoms copy in, plus `cn.ts` unconditionally, plus the four
-   stylesheets.
-4. An atom the consumer has edited locally is **skipped and named in the summary**,
+2. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
+   pick list: at five atoms the dependency graph is one edge — everything needs `cn`,
+   which copies unconditionally anyway — so resolving a subset walked a graph to return
+   what it was handed. The consumer deletes what they do not want.
+3. An atom the consumer has edited locally is **skipped and named in the summary**,
    never overwritten without `--force`. Skipping rather than prompting is deliberate:
    this runs unattended in CI and in the playground resync inside `npm run generate`,
    where a `[y/N]` prompt hangs a build instead of protecting anything.
 
-`--npm` on `resolve-picks.js` prints the union of required npm specifiers. It reports;
-`sync.js` never installs.
+`sync.js` prints the union of the manifests' `npmDependencies` as a single install
+line. It reports; it never installs.
 
 ---
 
@@ -305,6 +303,6 @@ of one combination rather than the rule that generates it.
 ## Cross-references
 
 - [`../spec/questionnaire.md`](../spec/questionnaire.md) — every answer key
-- [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) — manifests, the picker, the override mechanism
+- [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) — manifests, the install flow, the override mechanism
 - [`gotchas.md`](gotchas.md) — the traps, including config resolution and Figma Plugin API
 - [`decisions/`](decisions/) — why the class layer is the deliverable

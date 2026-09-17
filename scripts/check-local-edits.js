@@ -3,7 +3,7 @@
  * Which of a project's installed atoms has the consumer edited?
  *
  * Loom's promise is that atoms are project-owned — install them, then edit them freely.
- * `setup.sh` used to break that promise on every resync: a plain `cp` over each picked
+ * `setup.sh` used to break that promise on every resync: a plain `cp` over each installed
  * atom, no diff, no backup, no warning. A consuming project hand-patched `badge.tsx`
  * for a defect Loom had shipped, and two later resyncs — adding `select`, then
  * `form-field` — silently reverted the patch both times. Each resync was run to pick up

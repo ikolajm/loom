@@ -4,9 +4,9 @@
  * specific atom (ThemeProvider, globals, root layout, the three stylesheets, core deps).
  *
  * Atoms are a separate, repeatable step — the catalog sync at the repo root
- * (`npm run sync -- <project>`), which resolves loom-picks.json. Two commands, two jobs:
+ * (`npm run sync -- <project>`). Two commands, two jobs:
  *   init.sh  → app shell + substrate (once)
- *   npm run sync → picked atoms + token refresh (repeatable)
+ *   npm run sync → the catalog + token refresh (repeatable)
  */
 
 const { applyPins } = require('../npm-pins');
@@ -20,11 +20,8 @@ const { applyPins } = require('../npm-pins');
 // project failed its first sync on an unknown atom. Nothing caught that: the catalog
 // checks verify what the catalog contains, and this list is a string in a generator.
 // `dialog` replaces it — a real behavior component, which is what the catalog is now.
-const STARTER_PICKS = ['button', 'dialog'];
 
 function generate() {
-  const picksBlock = STARTER_PICKS.map((p) => `      "${p}"`).join(',\n');
-  const picksNote = 'A starter pair. Add the atoms you need.';
 
   // Core deps — atom-agnostic. Per-atom Radix deps come with their atoms (sync side).
   // Pins come from npm-pins.js, the same map sync.js's printed line resolves through;
@@ -46,7 +43,7 @@ function generate() {
 #   npm run sync -- <this-project-dir>
 #
 # Usage: ./scaffold/init.sh <frontend-dir> [--tokens]
-#   (default)  catalog tier — app shell + substrate + core deps + starter picker
+#   (default)  catalog tier — app shell + substrate + core deps
 #   --tokens   tokens tier  — the three stylesheets and nothing else
 # Run from the generated/ directory. Idempotent.
 
@@ -144,23 +141,23 @@ fi
 # the sync — cannot take the app shell with it. It used to, and the resulting build
 # failure named a missing provider, which reads like a code defect rather than the
 # consequence of the reset.
-echo "[1/8] Creating app-shell directories..."
+echo "[1/7] Creating app-shell directories..."
 mkdir -p "$SRC_DIR/providers"
 
 # --- Step 2: Token substrate ---
 # Three files: values, class layer, named components. globals.css (step 3) imports all
 # three in that order — each reads what the one before it defines.
-echo "[2/8] Copying stylesheets..."
+echo "[2/7] Copying stylesheets..."
 cp "$GEN_DIR/tokens.css" "$SRC_DIR/tokens.css"
 cp "$GEN_DIR/loom.css" "$SRC_DIR/loom.css"
 cp "$GEN_DIR/loom.components.css" "$SRC_DIR/loom.components.css"
 
 # --- Step 3: globals.css ---
-echo "[3/8] Writing globals.css..."
+echo "[3/7] Writing globals.css..."
 cp "$SCRIPT_DIR/globals.css" "$SRC_DIR/app/globals.css"
 
 # --- Step 4: Theme mechanism + root layout (atom-independent) ---
-echo "[4/8] Writing ThemeProvider + layout..."
+echo "[4/7] Writing ThemeProvider + layout..."
 cp "$SCRIPT_DIR/ThemeProvider.tsx" "$SRC_DIR/providers/ThemeProvider.tsx"
 cp "$SCRIPT_DIR/layout.tsx" "$SRC_DIR/app/layout.tsx"
 
@@ -176,7 +173,7 @@ fi
 # --- Step 5: Foundation preview route (one-time, consumer-owned) ---
 # A /preview route rendering the token substrate (colors, type, spacing, radius)
 # so the consumer can confirm their brand landed. Atom-agnostic. Never overwrites.
-echo "[5/8] Writing /preview route..."
+echo "[5/7] Writing /preview route..."
 if [ ! -f "$SRC_DIR/app/preview/page.tsx" ]; then
   mkdir -p "$SRC_DIR/app/preview"
   cp "$SCRIPT_DIR/preview-page.tsx" "$SRC_DIR/app/preview/page.tsx"
@@ -188,30 +185,11 @@ fi
 # --- Step 6: Core dependencies (atom-agnostic) ---
 # --prefix installs into the target without changing cwd, so every path in this
 # script stays relative to the loom repo — no ordering landmine around a cd.
-echo "[6/8] Installing core dependencies..."
+echo "[6/7] Installing core dependencies..."
 npm install --prefix "$FRONTEND_DIR" ${depString}
 echo "  ${coreDeps.length} core packages installed"
 
-# --- Step 7: Starter loom-picks.json (the input the sync reads) ---
-echo "[7/8] Writing starter loom-picks.json..."
-if [ ! -f "$FRONTEND_DIR/loom-picks.json" ]; then
-  cat > "$FRONTEND_DIR/loom-picks.json" <<'PICKS'
-{
-  "$schema": "Loom picker — list the atom names you want; the sync resolves their dependencies and copies them into src/components/. The full list of valid names is catalog/atoms.json in the Loom repo.",
-  "$picks": "${picksNote}",
-  "loom": {
-    "picks": [
-${picksBlock}
-    ]
-  }
-}
-PICKS
-  echo "  created loom-picks.json (${STARTER_PICKS.length} starter picks — edit, then run the sync)"
-else
-  echo "  loom-picks.json already exists — left as-is"
-fi
-
-# --- Step 8: loom:sync script ------------------------------------------------
+# --- Step 7: loom:sync script ------------------------------------------------
 # The round trip used to be one-directional: you tune spec/answers.json in the Loom repo,
 # and this project keeps rendering whatever substrate was last copied in until you go back
 # there and re-run the sync. This puts the pull side in the project.
@@ -220,13 +198,13 @@ fi
 # between the two repos — it was invoked with it. Not wired into predev: a dev server
 # that cannot start without a sibling repo present is a worse failure than a stale
 # stylesheet, and it is discovered by whoever clones this next rather than by you.
-echo "[8/8] Adding the loom:sync script..."
+echo "[7/7] Adding the loom:sync script..."
 add_loom_sync
 
 echo ""
 echo "=== App shell ready ==="
 echo ""
-echo "Next — edit loom-picks.json to pick your atoms, then sync. From here:"
+echo "Next — sync the catalog in. From here:"
 echo "  npm run loom:sync"
 echo ""
 echo "Re-run that whenever the brand changes in the Loom repo — it regenerates the token"

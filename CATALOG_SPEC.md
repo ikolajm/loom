@@ -2,9 +2,9 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom ships 5 components. It is a **first-party component catalog with a per-project picker**. Consuming projects declare which atoms they want in a `loom-picks.json` file; `setup.sh` copies just those files in. Atoms are project-owned after install — edit freely, no upstream auto-flow. Picks land alongside any project-authored atoms in the project's `src/components/`; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 5 components. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/` and the consumer deletes what they do not want. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
-The model resolves the playground/production split structurally: the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only picked atom files, with zero playground/stories footprint. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
+The model resolves the playground/production split structurally: the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only atom files, with zero playground/stories footprint. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 
 ## Kind: atoms and patterns
 
@@ -27,7 +27,7 @@ Do not confuse `kind` with the neighbouring `composition` field, which records `
 
 The catalog covers the primitives, the infrastructure, and the static catalog.
 
-**In the catalog.** Manifest schema, picker, dependency resolution, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (one duration, one easing). Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
+**In the catalog.** Manifest schema, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (one duration, one easing). Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
 
 ### Marketing characterization is project-owned
 
@@ -40,39 +40,33 @@ Marketing primitives (hero, media, stat, cross-link) are intentionally **not** c
 | Surface | Role | Lives in |
 |---|---|---|
 | **Loom catalog playground** | Canonical browse — all catalog atoms in their blessed state, full prop controls. The "what's available" surface. | `catalog-playground/` (this repo) |
-| **Production app** | Picked + project-authored atom files only. Zero playground/stories footprint. | Consuming project |
+| **Production app** | Catalog + project-authored atom files only. Zero playground/stories footprint. | Consuming project |
 
-The Loom catalog playground is the canonical view of every atom in its blessed state. A consuming project holds its *own* atoms in *their current state* — picked atoms with whatever local edits it has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
+The Loom catalog playground is the canonical view of every atom in its blessed state. A consuming project holds its *own* atoms in *their current state* — synced atoms with whatever local edits it has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
 
 Comparing a project's atoms against the catalog playground is the upstream-pitch surface. If the project's `Button` has grown variants the catalog `Button` doesn't have, that's the trigger for a manual upstream port.
 
 ---
 
-## Picker
+## Install
 
-`loom-picks.json` lives in the consuming project. Lists picked components by name. Single source of truth for "what this project picked." Re-running `setup.sh` resyncs.
+`npm run sync -- <project>` copies the whole catalog into the consuming project's
+`src/components/`, plus `cn` and the three stylesheets. Delete what you do not want.
 
-Shape:
+There was a picker: a `loom-picks.json` in the consuming project listing atom names, and
+a resolver that walked each name's manifest `dependencies` transitively. It went when the
+catalog reached five. The entire dependency graph is that every atom needs `cn`, which the
+sync copies unconditionally and outside the resolved set, so the walk returned what it had
+been handed. Deleting a file you did not want is cheaper than maintaining a list of the
+ones you did.
 
-```json
-{
-  "loom": {
-    "picks": [
-      "button",
-      "card",
-      "input",
-      "combobox",
-      "table",
-      "toast"
-    ]
-  }
-}
-```
+The manifests stay, because they answer a question picking never asked: `npmDependencies`
+is how a consumer learns `button` needs `@radix-ui/react-slot` and
+`class-variance-authority` without reverse-engineering it from imports, and the sync prints
+the union of them as a single `npm install` line.
 
-Dependencies are resolved automatically from per-atom manifests (see below). Picking `combobox` pulls in `input`, `popover`, and `command-palette` without the consumer having to list them.
-
----
-
+A local edit is still never overwritten — see [Override mechanism](#override-mechanism-shadcn-pure-copy). That guard is
+independent of how files are chosen and is the more valuable half of the sync.
 ## Manifests
 
 Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON, `version` stamp from generation time).
@@ -97,11 +91,11 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 
 | Field | Purpose |
 |---|---|
-| `name` | Pick key in `loom-picks.json` |
+| `name` | The atom's file stem in `catalog/` |
 | `category` | Catalog browse grouping (button / form / layout / feedback / data-display / navigation / composite) |
 | `description` | Playground UI label, browse summary |
 | `version` | Content hash of the atom's generated source — changes only when the atom changes |
-| `dependencies` | Other catalog atoms required (registry deps; picker resolves transitively) |
+| `dependencies` | Other catalog atoms this one imports |
 | `tokens` | Which token sets the atom reads (informational — substrate ships all-or-nothing, but useful in playground for filter-by-token-set) |
 | `composition` | Slot pattern — how an atom hands its root or its children to a caller. Enum: `none` / `slot` / `slottable` / `children-as-function` |
 | `variants` | Primary variant axis — drives playground prop controls |
@@ -127,7 +121,7 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 
 ## Override mechanism: shadcn-pure copy
 
-Atoms are project-owned after install. There is no override config layer, no per-project JSON merge, no picker-time customization UI. The flow is:
+Atoms are project-owned after install. There is no override config layer, no per-project JSON merge, no install-time customization UI. The flow is:
 
 1. Pick an atom — file lands in your project's `src/components/`
 2. Edit the file freely
@@ -135,7 +129,7 @@ Atoms are project-owned after install. There is no override config layer, no per
 
 Two costs accepted:
 
-- **No upstream auto-flow.** Bug fixes and improvements in catalog atoms don't propagate to projects that already picked. Each project has a frozen-at-pick-time copy. Multi-project consistency requires deliberate re-picking.
+- **No upstream auto-flow.** Bug fixes and improvements in catalog atoms don't propagate to projects already synced. Each project has a frozen-at-sync-time copy. Multi-project consistency requires a deliberate resync.
 - **No automatic dependency resolution beyond the manifest.** Picker reads `dependencies` from manifests and pulls in transitively. Anything deeper (e.g., "this atom assumes a `ThemeProvider` exists in the tree") is documented in the atom, not enforced.
 
 These costs are the shadcn tradeoff. The alternative is owning a versioning + diff-merge system, which is too much for the value.
@@ -144,9 +138,9 @@ These costs are the shadcn tradeoff. The alternative is owning a versioning + di
 
 ## Upstream-promote loop (manual)
 
-When a project's edits to a picked atom are generalizable, the dev manually ports them back to `catalog/[component].tsx`. There is no automated submission tool.
+When a project's edits to an atom are generalizable, the dev manually ports them back to `catalog/[component].tsx`. There is no automated submission tool.
 
-Trigger: dev edits a picked atom in their project → recognizes "this change should be in the catalog" → opens both files → ports the diff.
+Trigger: dev edits an atom in their project → recognizes "this change should be in the catalog" → opens both files → ports the diff.
 
 Speculative future tooling (don't build until friction proves it): a `promote.sh button --from ../your-project` CLI that diffs the project's `Button` against the catalog `Button` and offers to merge the delta. Only worth building if manual port becomes a recurring drag.
 
@@ -161,7 +155,7 @@ The template pipeline (`scripts/code-templates/orchestrator.js` + the templates 
 | Concern | How it works |
 |---|---|
 | Generation | Orchestrator produces `catalog/[component].tsx` + `[component].manifest.json` (per-atom files) |
-| Install | `npm run sync` reads `loom-picks.json`, resolves dependencies via manifests, copies only the picked subset into the consuming project's `src/components/` |
+| Install | `npm run sync` copies the whole catalog into the consuming project's `src/components/`, and prints the union of the manifests' `npmDependencies` |
 
 Why templates instead of hand-authored:
 
@@ -174,7 +168,7 @@ Hand-editing an individual catalog file is allowed for one-off polish, but the t
 
 ---
 
-## Token bundle: substrate, not picked
+## Token bundle: substrate, all-or-nothing
 
 Tokens are not in the catalog. They ship as a single substrate bundle, all-or-nothing, generated from `spec/config/base/*.json` — or from `spec/config/local/base/*.json` when you have run `npm run configs` for your own brand, which is git-ignored and takes precedence (see `scripts/config-paths.js`). Tokens are foundation; characterization is project-owned.
 
@@ -184,7 +178,7 @@ Motion lands with the substrate bundle as one duration and one easing — `--tra
 
 ## Catalog playground hosting
 
-The catalog playground in `catalog-playground/` is itself a consuming project that picks every atom: its `loom-picks.json` lists the full catalog, and `setup.sh` populates `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
+The catalog playground in `catalog-playground/` is itself a consuming project: `npm run sync` populates its `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
 
 **It is load-bearing, not a demo.** Because it picks everything and compiles under `strict`, its build is the generator's compile gate — `verify.js` delegates `typecheck`, `playground-parity` and `story-coverage` to it, and deliberately re-checks none of what tsc already covers. Both checks were earned: generated TSX with a syntax error passed every other check twice in one session, and `playground-parity` once reported full coverage while nine atoms were rendered nowhere and could not be looked at. Deleting this app would let `npm run generate` report success on output nothing has compiled.
 
@@ -199,7 +193,6 @@ loom/
     button.manifest.json
     …
   catalog-playground/             ← Next.js, consuming-project-of-itself
-    loom-picks.json               ← picks every catalog atom
     src/
       components/                 ← populated by `npm run sync` from catalog/
       gallery/                    ← hand-authored browse harness (shell + stories)
@@ -214,7 +207,7 @@ Implications:
 
 Costs accepted:
 
-- Another Next.js app to maintain inside the repo. Dev startup and build times scale with catalog size. Mitigation when it bites: filter `loom-picks.json` to a working subset during dev, or move to per-group browse routes. Not built preemptively.
+- Another Next.js app to maintain inside the repo. Dev startup and build times scale with catalog size. Mitigation when it bites: move to per-group browse routes. Not built preemptively.
 
 Hosting is a separate downstream decision. Local-only is fine; a static export (e.g. Netlify, `output: 'export'`) is a candidate for later.
 
@@ -227,9 +220,9 @@ Hosting is a separate downstream decision. Local-only is fine; a static export (
 Every atom is produced through the same pipeline. The mechanical pieces:
 
 1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
-2. **Install-flow rewrite.** Reads `loom-picks.json`, resolves manifest dependencies, copies the picked subset into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
+2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
 3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
-4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself with `loom-picks.json` picking every atom.
+4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself, synced from the catalog.
 5. **Staleness stamp.** `generate` writes `$inputs` into `catalog/atoms.json` — a hash over the component schemas and code templates, the two things that decide what `catalog/*.tsx` contains. `sync.js` recomputes it and reports a mismatch. Hashed rather than compared by mtime because `git checkout` rewrites timestamps, so a fresh clone would warn on its first sync and every one after — the kind of false positive that trains people to ignore the message. Token configs are deliberately outside the hash: the substrate regenerates on every sync, so a brand change must not read as a stale catalog. Both sides import [`scripts/catalog-stamp.js`](scripts/catalog-stamp.js) so the definition of "the inputs" cannot drift between the thing that stamps and the thing that checks; the full reasoning is in that file's header rather than mirrored here.
 
 ---
