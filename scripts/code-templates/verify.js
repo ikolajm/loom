@@ -10,6 +10,7 @@
  * `strict` + `noUnusedLocals` — a real compiler beats a regex, so nothing here re-checks
  * what tsc already covers. This file checks the artifacts around the code:
  *
+ *   css-parse         — the emitted stylesheets parse at all (postcss)
  *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
@@ -19,7 +20,9 @@
  *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
- * is not — a check whose scope silently shrank reads identically to one that passed.
+ * is not — a check whose scope silently shrank reads identically to one that passed. The
+ * checks that read the parse tree say so explicitly when the tree is short, because
+ * finding nothing in a file that did not parse is not a pass.
  */
 const fs = require('fs');
 const path = require('path');
@@ -30,6 +33,90 @@ const { loadConfig } = require('../config-paths');
 const ROOT = path.resolve(__dirname, '../..');
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
 const CATALOG = path.join(ROOT, 'catalog');
+const EMITTED = ['tokens.css', 'loom.css', 'loom.components.css', 'main.css'];
+
+/**
+ * The emitted CSS, parsed once.
+ *
+ * Every check here read the stylesheets as text until postcss. That is how generated
+ * output with a syntax error passed twice: a regex asking "is there a rule that looks
+ * like this" cannot ask "is this a stylesheet", and nothing else was asking either — the
+ * atoms had a compiler, the CSS did not.
+ *
+ * postcss also removes a whole class of near-miss. The old rule matcher was
+ * `/\{([^}]*)\}/`, which stops at the first closing brace and so cannot see into an
+ * at-rule; the reduced-motion and coarse-pointer blocks are exactly that shape. And
+ * `/\.([a-z0-9-]+)/` over raw text matched the `.5` in `0.5rem` as a class named `5`.
+ *
+ * Returns null when postcss is not installed, and every check that needs it says so
+ * rather than passing. A gate that quietly stops checking is worse than one that is off.
+ */
+let _sheets;
+function sheets() {
+  if (_sheets !== undefined) return _sheets;
+  let postcss;
+  try { postcss = require('postcss'); } catch { _sheets = null; return _sheets; }
+  // A stylesheet that does not parse is css-parse's failure to report, not an exception
+  // to throw out of the middle of an unrelated check. Unparseable files drop out here and
+  // everything downstream says it skipped.
+  _sheets = [];
+  for (const name of EMITTED) {
+    try {
+      _sheets.push({
+        name,
+        root: postcss.parse(fs.readFileSync(path.join(ROOT, 'generated', name), 'utf8'), { from: name }),
+      });
+    } catch {
+      /* css-parse reports it, with the line and the reason. */
+    }
+  }
+  return _sheets;
+}
+
+/**
+ * Whether every emitted stylesheet parsed.
+ *
+ * A check that reads a parse tree and finds nothing has not passed, it has not run — and
+ * with an unparseable file it reported "0 sized classes carry a display — ok", which is
+ * the failure this whole arc keeps turning up. Depending on the tree means saying so when
+ * the tree is short.
+ */
+const parseComplete = () => (sheets() || []).length === EMITTED.length;
+const NOT_PARSED = { failures: [], note: 'emitted CSS did not parse — see css-parse' };
+
+/** Every rule in the emitted CSS, at any nesting depth, as { selector, decls }. */
+function allRules() {
+  const out = [];
+  for (const { root } of sheets() || []) {
+    root.walkRules((rule) => {
+      const decls = {};
+      rule.walkDecls((d) => { decls[d.prop] = d.value; });
+      out.push({ selector: rule.selector, decls });
+    });
+  }
+  return out;
+}
+
+// --- css-parse ---------------------------------------------------------------
+// Does the emitted CSS parse at all. postcss throws a CssSyntaxError with a line and a
+// caret, which is the whole check: everything below assumes a stylesheet, and this is the
+// only thing that confirms there is one.
+function checkCssParse() {
+  let postcss;
+  try { postcss = require('postcss'); } catch { return { failures: [], note: 'postcss not installed — skipped' }; }
+  const failures = [];
+  let rules = 0;
+  for (const name of EMITTED) {
+    const file = path.join(ROOT, 'generated', name);
+    try {
+      const root = postcss.parse(fs.readFileSync(file, 'utf8'), { from: name });
+      root.walkRules(() => { rules += 1; });
+    } catch (e) {
+      failures.push(`${name} — ${e.reason || e.message}${e.line ? ` (line ${e.line})` : ''}`);
+    }
+  }
+  return { failures, note: `${EMITTED.length} stylesheets, ${rules} rules` };
+}
 
 // Files carrying hand-written counts. A doc not listed here is not checked — add it
 // when it starts making a claim, or the claim drifts unobserved.
@@ -124,6 +211,7 @@ function checkInteractiveImpliesControl(atoms) {
 // so the guard is that the emitter's own accounting adds up: emitted plus skipped equals
 // the full set, and each emitted name is actually present in the output it produced.
 function checkClassCoverage() {
+  if (!parseComplete()) return NOT_PARSED;
   const { componentPlan, APPEARANCE_ONLY, generateComponents } =
     require('./generate-tokens-css');
   const { emit, skipped } = componentPlan();
@@ -245,7 +333,8 @@ function checkPhantomParts() {
     .map((k) => k.split('-')[0]))]
     .filter((h) => !ALLOWED_HEADS.has(h));
 
-  const emitted = new Set([...css.matchAll(/\.([a-z0-9-]+)/g)].map((m) => m[1]));
+  const emitted = new Set(allRules().flatMap(({ selector }) =>
+    (selector.match(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g) || []).map((c) => c.slice(1))));
   const failures = [];
   for (const name of emitted) {
     for (const h of heads) {
@@ -274,6 +363,7 @@ function checkPhantomParts() {
 // the next component to arrive without one — an emitted class either declares a
 // `display` or names why it does not.
 function checkClassBoxModel() {
+  if (!parseComplete()) return NOT_PARSED;
   const { componentPlan, generateComponents, BASE_RULES, NO_BOX } =
     require('./generate-tokens-css');
   const { emit } = componentPlan();
@@ -314,15 +404,14 @@ function checkClassBoxModel() {
   // which has one. Eleven classes were hiding behind that, and the hole was found by
   // hand-marking-up `.sidebar-item` in the gallery shell, not by the check. Second time
   // this check has been wrong in the direction of passing.
-  const rules = [...css.matchAll(/^\s*(\.[^{]+?)\s*\{([^}]*)\}/gm)];
   const byClass = new Map();
-  for (const [, sel, body] of rules) {
-    const classes = sel.match(/\.([a-z0-9-]+)/g);
+  for (const { selector, decls } of allRules()) {
+    const classes = selector.match(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g);
     if (!classes) continue;
     const name = classes[classes.length - 1].slice(1);
     const e = byClass.get(name) || { sized: false, display: false };
-    if (/(^|\s)(width|height|gap):/.test(body)) e.sized = true;
-    if (/(^|\s)display:/.test(body)) e.display = true;
+    if ('width' in decls || 'height' in decls || 'gap' in decls) e.sized = true;
+    if ('display' in decls) e.display = true;
     byClass.set(name, e);
   }
   let boxed = 0;
@@ -636,10 +725,10 @@ function checkTypecheck() {
 const CLASS_GAPS = {};
 
 function checkAtomClassCoverage() {
-  const emitted = ['loom.css', 'loom.components.css']
-    .map((f) => fs.readFileSync(path.join(ROOT, 'generated', f), 'utf8'))
-    .join(String.fromCharCode(10));
-  const defined = new Set([...emitted.matchAll(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g)].map((m) => m[1]));
+  if (!sheets()) return { failures: [], note: 'postcss not installed — skipped' };
+  if (!parseComplete()) return NOT_PARSED;
+  const defined = new Set(allRules().flatMap(({ selector }) =>
+    (selector.match(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g) || []).map((c) => c.slice(1))));
 
   // Tailwind-shaped: a utility prefix followed by a dash, or a bare utility word. A class
   // Loom does not define and that looks like a utility is a class nothing will style.
@@ -672,9 +761,14 @@ function checkAtomClassCoverage() {
   }
 
   // Every --type-* an emitted rule reads has to be a role tokens.css actually declares.
-  const tokens = fs.readFileSync(path.join(ROOT, 'generated', 'tokens.css'), 'utf8');
-  const declared = new Set([...tokens.matchAll(/(--type-[a-z0-9-]+):/g)].map((m) => m[1]));
-  const read = new Set([...emitted.matchAll(/var\((--type-[a-z0-9-]+)\)/g)].map((m) => m[1]));
+  const declared = new Set();
+  const read = new Set();
+  for (const { root } of sheets()) {
+    root.walkDecls((d) => {
+      if (d.prop.startsWith('--type-')) declared.add(d.prop);
+      for (const m of d.value.matchAll(/var\((--type-[a-z0-9-]+)\)/g)) read.add(m[1]);
+    });
+  }
   for (const v of read) {
     checked += 1;
     if (!declared.has(v)) {
@@ -688,6 +782,7 @@ function checkAtomClassCoverage() {
 function verify() {
   const atoms = atomNames();
   const checks = [
+    ['css-parse', checkCssParse()],
     ['doc-counts', checkDocCounts(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],

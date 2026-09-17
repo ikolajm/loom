@@ -198,11 +198,19 @@ consumer source trees with nothing ignoring it.
 
 ### `verify` is the gate, and it runs last
 
-The checks, in order: `doc-counts`, `manifest-deps`, `interactive-implies-control`,
-`class-coverage`, `atom-class-coverage`, `class-box-model`, `phantom-parts`,
-`variant-keys`, `base-config-provenance`, `touch-target`, `contrast`,
-`composited-contrast`, `typecheck`. Any failure exits non-zero, so a full
-`npm run generate` cannot report success over broken output.
+The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
+`interactive-implies-control`, `class-coverage`, `atom-class-coverage`,
+`class-box-model`, `phantom-parts`, `variant-keys`, `base-config-provenance`,
+`touch-target`, `contrast`, `composited-contrast`, `typecheck`. Any failure exits
+non-zero, so a full `npm run generate` cannot report success over broken output.
+
+`css-parse` runs first and is the one the others stand on. Every check here read the
+stylesheets as text until postcss, which is how generated output with a syntax error
+passed twice — a regex asking "is there a rule shaped like this" cannot ask "is this a
+stylesheet". The old rule matcher also stopped at the first closing brace, so it could
+not see into an at-rule: it found 241 rules where postcss finds 267. The checks that
+read the tree report that they could not run when a stylesheet fails to parse, rather
+than finding nothing and calling it a pass.
 
 Two of them read the atoms rather than the artifacts around them. `typecheck` is
 `tsc --noEmit` over `catalog/` under `strict` + `noUnusedLocals`, the only thing that
