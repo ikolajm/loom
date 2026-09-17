@@ -6,18 +6,16 @@
  * dependency, so an install typechecked here and failed there.
  *
  * Scope: things the TypeScript compiler cannot see. Compile-level invariants (unused
- * imports, type errors) belong to catalog-playground, which picks every atom and runs
+ * imports, type errors) belong to the typecheck gate, which runs
  * `strict` + `noUnusedLocals` — a real compiler beats a regex, so nothing here re-checks
  * what tsc already covers. This file checks the artifacts around the code:
  *
  *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match
- *   playground-parity — the playground's synced copies match what the generator emits
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
  *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
  *   composited-contrast — the same pairs still clear 3:1 after the muted opacity role
- *   story-coverage    — every atom is actually rendered somewhere in the playground
  *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
@@ -32,7 +30,6 @@ const { loadConfig } = require('../config-paths');
 const ROOT = path.resolve(__dirname, '../..');
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
 const CATALOG = path.join(ROOT, 'catalog');
-const PLAYGROUND = path.join(ROOT, 'catalog-playground/src/components');
 
 // Files carrying hand-written counts. A doc not listed here is not checked — add it
 // when it starts making a claim, or the claim drifts unobserved.
@@ -96,44 +93,6 @@ function checkDocCounts(atoms) {
   return { failures, note: `${claims} claims across ${COUNTED_DOCS.length} files` };
 }
 
-// --- playground-parity ----------------------------------------------------
-// The playground is the compile-level gate; a stale copy means it is verifying an old
-// catalog. Checked, never auto-synced — copying into it here would make it a mirror
-// this repo maintains by hand, which is the failure mode two items above it describe.
-function checkPlaygroundParity(atoms) {
-  if (!fs.existsSync(PLAYGROUND)) {
-    return { failures: ['catalog-playground is not synced — run: npm run sync -- catalog-playground'], note: 'not synced' };
-  }
-  const failures = [];
-  const synced = fs.readdirSync(PLAYGROUND).filter((f) => /\.(tsx|ts|manifest\.json)$/.test(f));
-
-  for (const f of synced) {
-    const src = path.join(CATALOG, f);
-    if (!fs.existsSync(src)) {
-      failures.push(`catalog-playground/src/components/${f} — no longer in the catalog`);
-      continue;
-    }
-    if (fs.readFileSync(src, 'utf8') !== fs.readFileSync(path.join(PLAYGROUND, f), 'utf8')) {
-      failures.push(`${f} — playground copy differs from the catalog`);
-    }
-  }
-
-  const uncovered = atoms.filter((a) => !fs.existsSync(path.join(PLAYGROUND, `${a}.tsx`)));
-  if (uncovered.length) {
-    const noun = uncovered.length === 1 ? 'atom' : 'atoms';
-    failures.push(`${uncovered.length} ${noun} not compiled by the playground: ${uncovered.join(', ')}`);
-  }
-  if (failures.length) failures.push('  → resync with: npm run sync -- catalog-playground');
-
-  return { failures, note: `${synced.length} synced files, ${atoms.length - uncovered.length}/${atoms.length} atoms covered` };
-}
-
-// --- manifest-deps --------------------------------------------------------
-// --- interactive-implies-control ---------------------------------------------
-// `.interactive` carries only the pointer half of the disabled state (pointer-events);
-// the opacity and cursor live on `.control`. That split is safe exactly while every atom
-// using one also uses the other — otherwise a disabled control renders at full opacity
-// with a normal cursor and nothing says why. The layer cannot enforce it, so this does.
 function checkInteractiveImpliesControl(atoms) {
   const failures = [];
   const cls = (src, name) => new RegExp(`(?:^|[\\s'"\`])${name}(?:[\\s'"\`]|$)`, 'm').test(src);
@@ -639,52 +598,22 @@ function checkCompositedContrast() {
 }
 
 // --- typecheck ---------------------------------------------------------------
-// The compile gate lives in catalog-playground's build, not here, so generated TSX with
-// a syntax error passed every check in this file — twice in one session. tsc is the only
-// instrument that reads the emitted code as code; everything else reads it as text.
-// Skipped rather than failed when the playground has no node_modules: a fresh clone runs
-// `npm run generate` before it installs, and a missing toolchain is not a defect.
+// The atoms are TypeScript, and nothing else in this repo compiles them. It used to be
+// a `tsc --noEmit` over a whole Next app; it is now tsc over `catalog/`
+// against the root tsconfig, which is the same question asked of a tenth of the files.
+//
+// Skipped when the root has no node_modules. Generating Loom needs no install — this is
+// the only
+// thing that does, and losing it silently on a fresh clone beats failing a generate
+// that is otherwise fine. CI installs.
 function checkTypecheck() {
-  const dir = path.join(ROOT, 'catalog-playground');
-  const tsc = path.join(dir, 'node_modules/typescript/bin/tsc');
-  if (!fs.existsSync(tsc)) return { failures: [], note: 'playground deps not installed — skipped' };
+  const tsc = path.join(ROOT, 'node_modules/typescript/bin/tsc');
+  if (!fs.existsSync(tsc)) return { failures: [], note: 'root deps not installed — skipped' };
   const { spawnSync } = require('child_process');
-  const run = spawnSync(process.execPath, [tsc, '--noEmit'], { cwd: dir, encoding: 'utf-8' });
-  if (run.status === 0) return { failures: [], note: 'catalog-playground tsc --noEmit' };
-  const lines = String(run.stdout || run.stderr || '').split('\n').filter(Boolean).slice(0, 10);
-  return { failures: lines, note: 'catalog-playground tsc --noEmit' };
-}
-
-// --- story-coverage ----------------------------------------------------------
-// playground-parity counts synced *files*, so it reported "66/66 atoms covered" while
-// nine atoms were rendered nowhere and could not be looked at — Toast among them, which
-// is how a change to it shipped unverifiable. An atom counts as covered when any
-// component it exports is rendered in stories.tsx; six atoms (checkbox, radio, switch,
-// label, form-field, helper-text) are covered only inside other atoms' stories, which is
-// visible and therefore fine.
-const STORIES = path.join(ROOT, 'catalog-playground/src/gallery/stories.tsx');
-
-function checkStoryCoverage(atoms) {
-  if (!fs.existsSync(STORIES)) return { failures: [], note: 'no stories file — skipped' };
-  const src = fs.readFileSync(STORIES, 'utf-8');
-  const failures = [];
-  let covered = 0;
-
-  for (const atom of atoms) {
-    const file = path.join(CATALOG, `${atom}.tsx`);
-    if (!fs.existsSync(file)) continue;
-    const names = new Set();
-    for (const m of fs.readFileSync(file, 'utf-8').matchAll(/export\s*\{([^}]+)\}/g)) {
-      for (const raw of m[1].split(',')) {
-        const n = raw.trim().split(/\s+as\s+/).pop().trim();
-        if (n && /^[A-Z]/.test(n)) names.add(n);
-      }
-    }
-    if (!names.size) continue; // utility, nothing to render
-    if ([...names].some((n) => new RegExp(`<${n}(\\s|/|>)`).test(src))) covered++;
-    else failures.push(`${atom} — no export of it is rendered in stories.tsx`);
-  }
-  return { failures, note: `${covered} atoms rendered in the playground` };
+  const run = spawnSync(process.execPath, [tsc, '--noEmit', '-p', 'tsconfig.json'], { cwd: ROOT, encoding: 'utf-8' });
+  if (run.status === 0) return { failures: [], note: 'tsc --noEmit over catalog/' };
+  const lines = String(run.stdout || run.stderr || '').split(String.fromCharCode(10)).filter(Boolean).slice(0, 10);
+  return { failures: lines, note: 'tsc --noEmit over catalog/' };
 }
 
 // --- atom-class-coverage ---------------------------------------------------
@@ -760,7 +689,6 @@ function verify() {
   const atoms = atomNames();
   const checks = [
     ['doc-counts', checkDocCounts(atoms)],
-    ['playground-parity', checkPlaygroundParity(atoms)],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['class-coverage', checkClassCoverage()],
@@ -772,7 +700,6 @@ function verify() {
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],
     ['composited-contrast', checkCompositedContrast()],
-    ['story-coverage', checkStoryCoverage(atoms)],
     ['typecheck', checkTypecheck()],
   ];
 

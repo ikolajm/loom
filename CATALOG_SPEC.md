@@ -2,9 +2,9 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom ships 5 components. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/` and the consumer deletes what they do not want. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; comparing them against the catalog playground is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 5 components. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/` and the consumer deletes what they do not want. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
-The model resolves the playground/production split structurally: the canonical playground lives in this repo (`catalog-playground/`), so consuming projects ship only atom files, with zero playground/stories footprint. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
+A consuming project ships atom files and nothing else — no stories, no harness. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 
 ## Kind: atoms and patterns
 
@@ -27,7 +27,7 @@ Do not confuse `kind` with the neighbouring `composition` field, which records `
 
 The catalog covers the primitives, the infrastructure, and the static catalog.
 
-**In the catalog.** Manifest schema, the `npm run sync` install flow, per-atom catalog generation, the catalog playground in `catalog-playground/`, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (one duration, one easing). Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
+**In the catalog.** Manifest schema, the `npm run sync` install flow, per-atom catalog generation, the static preview page, the Figma side for static atoms, and a designed primitive in every group. Motion tokens ship with the substrate (one duration, one easing). Composition patterns (`slot` / `asChild` / `children-as-function`) are standardized across atoms that warrant wrapping.
 
 ### Marketing characterization is project-owned
 
@@ -39,12 +39,12 @@ Marketing primitives (hero, media, stat, cross-link) are intentionally **not** c
 
 | Surface | Role | Lives in |
 |---|---|---|
-| **Loom catalog playground** | Canonical browse — all catalog atoms in their blessed state, full prop controls. The "what's available" surface. | `catalog-playground/` (this repo) |
-| **Production app** | Catalog + project-authored atom files only. Zero playground/stories footprint. | Consuming project |
+| **The catalog** | `catalog/` in this repo — every atom in its blessed state, and what the preview page's class layer is built against. | This repo |
+| **Production app** | Catalog + project-authored atom files only. No stories, no harness. | Consuming project |
 
-The Loom catalog playground is the canonical view of every atom in its blessed state. A consuming project holds its *own* atoms in *their current state* — synced atoms with whatever local edits it has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
+`catalog/` is the canonical state. A consuming project holds its *own* atoms in *their current state* — synced atoms with whatever local edits it has applied, plus project-authored atoms that haven't been promoted to the catalog (yet).
 
-Comparing a project's atoms against the catalog playground is the upstream-pitch surface. If the project's `Button` has grown variants the catalog `Button` doesn't have, that's the trigger for a manual upstream port.
+Diffing a project's atoms against `catalog/` is the upstream-pitch surface. If the project's `Button` has grown variants the catalog `Button` doesn't have, that's the trigger for a manual upstream port.
 
 ---
 
@@ -96,10 +96,10 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 | `description` | Playground UI label, browse summary |
 | `version` | Content hash of the atom's generated source — changes only when the atom changes |
 | `dependencies` | Other catalog atoms this one imports |
-| `tokens` | Which token sets the atom reads (informational — substrate ships all-or-nothing, but useful in playground for filter-by-token-set) |
+| `tokens` | Which token sets the atom reads (informational — the substrate ships all-or-nothing) |
 | `composition` | Slot pattern — how an atom hands its root or its children to a caller. Enum: `none` / `slot` / `slottable` / `children-as-function` |
-| `variants` | Primary variant axis — drives playground prop controls |
-| `sizes` | Size axis — drives playground prop controls |
+| `variants` | Primary variant axis |
+| `sizes` | Size axis |
 
 ### `composition` enum
 
@@ -112,7 +112,7 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 
 ### Deliberately not in the schema
 
-- `states` / `slots` / `behaviorModes` — too granular; the component file + TypeScript types are the source of truth for props. Manifest is for discovery + resolution + playground hints, not full prop documentation.
+- `states` / `slots` / `behaviorModes` — too granular; the component file + TypeScript types are the source of truth for props. Manifest is for discovery and install, not full prop documentation.
 - `iconOnly` — Button-specific usage mode; absorbed into how the atom is documented, not a manifest field.
 - `versionAdded` / `versionUpdated` — the per-atom content hash already signals when an atom changed; finer granularity is overkill for now.
 - `deprecated` — add when the first atom needs it.
@@ -176,42 +176,29 @@ Motion lands with the substrate bundle as one duration and one easing — `--tra
 
 ---
 
-## Catalog playground hosting
+## Where a visual pass happens
 
-The catalog playground in `catalog-playground/` is itself a consuming project: `npm run sync` populates its `src/components/` from `catalog/` exactly as it would for any downstream project. The browse surface is a hand-authored gallery (`src/gallery/`), not a generated harness.
+[`docs/preview.html`](docs/preview.html) — one static page, generated, importing the three
+stylesheets and nothing else. It renders the token half (ramps, roles, type, spacing,
+radius) and the class layer (tones, treatments, surfaces, control states, every component
+class), plus a **Known gaps** section where a defect that is spec'd but not fixed renders
+as itself.
 
-**It is load-bearing, not a demo.** Because it picks everything and compiles under `strict`, its build is the generator's compile gate — `verify.js` delegates `typecheck`, `playground-parity` and `story-coverage` to it, and deliberately re-checks none of what tsc already covers. Both checks were earned: generated TSX with a syntax error passed every other check twice in one session, and `playground-parity` once reported full coverage while nine atoms were rendered nowhere and could not be looked at. Deleting this app would let `npm run generate` report success on output nothing has compiled.
+There was a Next application here, `catalog-playground/`, doing two jobs. The compile gate
+is now `tsc --noEmit` over `catalog/`, which asks the same question of a tenth of the files
+and needs nine packages rather than thirty. The gallery is the page above.
 
-**Its `src/tokens.css` is git-ignored and regenerated on every `npm run dev` / `npm run build`** by a `predev` / `prebuild` hook. That makes the playground a live reflection of whichever config set is active: run it holding your own brand in `spec/config/local/` and the ramps, type and control sizing are yours, so token-source edits can be checked against the whole catalog in one place. A fresh clone with no local set renders Loom's own look. Committing that file would force it to be both canonical enough to review in a diff and local enough to be useful, and it cannot be both — so it is generated, never tracked. Build with `npm run build` rather than `npx next build`; the latter bypasses the hook and fails on a missing import if the file was never generated.
+It was cut on a specific ground, not on weight. The playground kept `tailwindcss` as a
+devDependency after the bridge was removed, so stock utilities still resolved inside it
+and a consumer's did not — it was the only rendering surface in the repo, and it flattered
+the layer it existed to check. A static page standing on the three stylesheets cannot.
 
-Structure:
-
-```
-loom/
-  catalog/
-    button.tsx
-    button.manifest.json
-    …
-  catalog-playground/             ← Next.js, consuming-project-of-itself
-    src/
-      components/                 ← populated by `npm run sync` from catalog/
-      gallery/                    ← hand-authored browse harness (shell + stories)
-    next.config.ts
-    tokens.css                    ← substrate bundle
-```
-
-Implications:
-
-- **Dogfooding.** The catalog playground exercises `npm run sync` and the install ceremony every time it refreshes — the same path a downstream consumer runs.
-- **No second engineering surface.** It's the consuming-project scaffold pointed at `catalog/`, not a bespoke build.
-
-Costs accepted:
-
-- Another Next.js app to maintain inside the repo. Dev startup and build times scale with catalog size. Mitigation when it bites: move to per-group browse routes. Not built preemptively.
-
-Hosting is a separate downstream decision. Local-only is fine; a static export (e.g. Netlify, `output: 'export'`) is a candidate for later.
-
-**Why a hand-authored gallery, not Storybook or Vite:** the playground is a single internal browse app, so a bespoke gallery (`src/gallery/`) is the lighter choice — no extra dependency, no second component/story format to maintain alongside the atoms, and full control over the gallery shell. Storybook's CSF would put a parallel story format on every atom for one internal app; a separate Vite shell would add a build surface the existing Next.js consuming-project scaffold already covers.
+What went with it and has no replacement: `story-coverage`, which asserted every atom was
+rendered somewhere. A static page cannot render TSX. After appearance moved into the class
+layer the page does show everything an atom *looks* like, and what remains in the TSX is
+behavior — focus traps, portals, keyboard nav — which a gallery never verified by being
+looked at either. `atom-class-coverage` covers the seam between them: every class an atom
+applies must exist in the CSS.
 
 ---
 
@@ -222,7 +209,7 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
 2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
 3. **Scaffold output.** `init.sh` bootstraps the atom-agnostic app shell — ThemeProvider, root layout (+ fonts), globals, and the token substrate — into the consuming project.
-4. **Catalog playground.** `catalog-playground/` — a Next.js consuming-project-of-itself, synced from the catalog.
+4. **Preview page.** `docs/preview.html` — the class layer rendered on the three stylesheets and nothing else.
 5. **Staleness stamp.** `generate` writes `$inputs` into `catalog/atoms.json` — a hash over the component schemas and code templates, the two things that decide what `catalog/*.tsx` contains. `sync.js` recomputes it and reports a mismatch. Hashed rather than compared by mtime because `git checkout` rewrites timestamps, so a fresh clone would warn on its first sync and every one after — the kind of false positive that trains people to ignore the message. Token configs are deliberately outside the hash: the substrate regenerates on every sync, so a brand change must not read as a stale catalog. Both sides import [`scripts/catalog-stamp.js`](scripts/catalog-stamp.js) so the definition of "the inputs" cannot drift between the thing that stamps and the thing that checks; the full reasoning is in that file's header rather than mirrored here.
 
 ---

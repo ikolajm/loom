@@ -2,7 +2,7 @@
 
 A printed document built on `tokens.css` and `loom.css` alone. No React, no build step,
 no Tailwind. It exists because the portable tier is the one with the fewest eyes on it:
-the catalog, the playground and both ported apps all run through a Tailwind build, so a
+the catalog and both ported apps ran through a Tailwind build, so a
 gap in the tokens or class tier can hide behind preflight and utilities. This file has
 neither to hide behind.
 

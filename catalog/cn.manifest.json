@@ -3,11 +3,10 @@
   "kind": "utility",
   "category": "utility",
   "description": "Class name merger utility (clsx + tailwind-merge). Foundation dependency for all components.",
-  "version": "c639b97ecb2e",
+  "version": "da62114046ab",
   "dependencies": [],
   "npmDependencies": [
-    "clsx",
-    "tailwind-merge@^3"
+    "clsx"
   ],
   "tokens": [],
   "composition": "none"

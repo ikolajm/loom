@@ -13,9 +13,8 @@
  * One language, and the helpers are imported rather than shelled.
  *
  * An atom the consumer has edited is SKIPPED, not overwritten, and named in the summary.
- * Skipping rather than prompting is deliberate: this runs unattended (the playground
- * resync inside `npm run generate`, CI), where a [y/N] prompt hangs a build instead of
- * protecting anything.
+ * Skipping rather than prompting is deliberate: this runs unattended in CI, where a
+ * [y/N] prompt hangs a build instead of protecting anything.
  */
 const fs = require('fs');
 const os = require('os');
@@ -54,7 +53,7 @@ function main(argv) {
   }
 
   // Staleness is reported, not repaired. Regenerating on every sync would run the whole
-  // pipeline — including a tsc pass over the playground — so a consumer refreshing its
+  // pipeline — including a tsc pass over the catalog — so a consumer refreshing its
   // brand could fail on a surface it has never heard of. Saying so costs a line.
   const stampPath = path.join(CATALOG, 'atoms.json');
   let stale = false;

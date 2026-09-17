@@ -92,23 +92,34 @@ A few architectural choices worth noting:
 
 Requires Node ≥ 18.18. **Using Loom in a project? This Quickstart is everything you need** — the architecture spec and the `docs/` folder are internals for *extending* the generator, not for consuming it.
 
-### Browse the catalog — and the compile gate
+### Browse the substrate — and the compile gate
 
-`catalog-playground/` is the generator's compile gate first and a gallery second. It picks every atom, so its build is the only thing that reads the emitted `.tsx` **as code** rather than as text: `npm run generate` ends in `verify.js`, which delegates to this app for `typecheck` (`tsc --noEmit`, `strict` + `noUnusedLocals`), `playground-parity` (the synced copies match what the generator just emitted) and `story-coverage` (every atom is rendered somewhere, so none can change unverifiably). Generated TSX with a syntax error passed every regex-level check twice before this gate existed.
+[`docs/preview.html`](docs/preview.html) is the surface you look at. Open it after
+`npm run generate` and it renders the whole class layer with the three stylesheets and
+nothing else underneath — no framework, no build step, no utility layer, which is the
+point: what renders there is what a consumer gets. It carries the token half too, so a
+brand lands or does not land in one place.
 
-The gallery half is the surface you look at — every atom with prop controls, which is where a visual pass happens:
+The compile gate is separate and smaller. The atoms are TypeScript and nothing else in
+this repo compiles them, so `verify.js` ends in `tsc --noEmit` over `catalog/` with
+`strict` and `noUnusedLocals`. That is the only thing reading the emitted `.tsx` **as
+code** rather than as text — generated TSX with a syntax error passed every regex-level
+check twice before a compiler was in the loop.
 
 ```bash
-cd catalog-playground
-npm install
-npm run dev          # → http://localhost:3000
+npm install     # typescript, @types/react, and the seven packages the atoms import
+npm run generate
 ```
 
-This works on a bare clone with no configuration — see *Configure and generate* below. The playground regenerates its token substrate on every `dev` / `build`, so it renders Loom's default look until you generate a brand, and yours from then on.
+**The install is only for that gate.** Generating Loom is pure Node with no
+dependencies, and `typecheck` skips itself when `node_modules` is absent rather than
+failing a generate that is otherwise fine. There used to be a whole Next application here
+to ask the same question; it carried thirty-odd packages and a Tailwind build, which meant
+the gate stood on something no consumer has.
 
 ### Configure and generate
 
-**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the playground above runs before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the atoms are there on clone. `generated/` is not — the Figma scripts and `init.sh` exist only after you run the commands in this section.)
+**Loom builds with no configuration at all.** A fresh clone generates Loom's own look, because the committed token set in `spec/config/base/` is a complete working default — that is why the preview page above renders before you have configured anything. You still run the generators below; what you don't need is an answers file. (`catalog/` is committed, so the atoms are there on clone. `generated/` is not — the Figma scripts and `init.sh` exist only after you run the commands in this section.)
 
 To build *your* brand, hand-author **`spec/answers.json`** — your brand colors, fonts, and token choices. It's git-ignored (it's your brand, not Loom's), so copy the committed template first, then edit it:
 
@@ -203,9 +214,9 @@ npm run sync -- ../my-loom-app
 
 `init.sh` is the one-time app-shell step (atom-agnostic). `npm run sync` is the repeatable atom sync: it resolves each pick's dependencies transitively from its manifest (picking `combobox` pulls in `popover` + `form-field`), copies just those atoms into `your-project/src/components/`, and delivers a freshly generated substrate (`tokens.css`, `loom.css`, `loom.components.css`). It prints the `npm install` line for the packages those atoms import — your project owns its lockfile, so Loom reports deps rather than installing them. **An atom you have edited is skipped, not overwritten** — atoms are yours after install, so a resync names what it kept and prints the diff command; pass `--force` to take the catalog version instead. Atoms require **Tailwind v4** + `@tailwindcss/postcss` and **`tailwind-merge` ≥ 3** (the generated `cn()` registers the token scales via tailwind-merge's v3 `theme` keys, so v2 silently breaks className overrides).
 
-**From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: the playground does that, but a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
+**From the consumer side it is `npm run loom:sync`.** `init.sh` writes that script into your project's `package.json` on both tiers, so a refresh runs from your own directory instead of from this repo. It is written by `init.sh` rather than by hand because that is the only thing that knows the path between the two repos — it was invoked with it, and computes the relative form (`../loom/scripts/sync.js` in the sibling layout). It is deliberately **not** wired into `predev`: a consumer's dev server that cannot start without a sibling repo present is a worse failure than a stale stylesheet, and it lands on whoever clones the project next rather than on the person who set it up.
 
-A sync always regenerates the substrate, so your tokens are current by construction; only `catalog/*.tsx` can lag behind the schemas and templates it was built from. The sync **reports** that in one line rather than repairing it — rebuilding the atoms runs the whole pipeline, including a typecheck over the playground, so refreshing a brand in your project could fail on a surface it has never heard of. Pass `--refresh` when you do want them rebuilt.
+A sync always regenerates the substrate, so your tokens are current by construction; only `catalog/*.tsx` can lag behind the schemas and templates it was built from. The sync **reports** that in one line rather than repairing it — rebuilding the atoms runs the whole pipeline, including a typecheck, so refreshing a brand in your project could fail on a surface it has never heard of. Pass `--refresh` when you do want them rebuilt.
 
 Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
 
@@ -256,8 +267,7 @@ scripts/               The two codegen pipelines
   assemble-figma.js    ← bundles the Figma plugin scripts
   scripts/sync.js      ← installs the catalog + substrate into a project (`npm run sync`)
 
-catalog/               Generated output — per-atom .tsx + .manifest.json (stories live in catalog-playground/src/gallery/)
-catalog-playground/    Compile gate + gallery — picks every atom; its tsc run is verify.js's typecheck
+catalog/               Generated output — per-atom .tsx + .manifest.json; `tsc --noEmit` over it is verify.js's typecheck
 docs/                  Design-system engineering docs (see below)
   pipeline.md          ← the derivation chain: answers.json → every output
 ```

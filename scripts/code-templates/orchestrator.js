@@ -34,14 +34,6 @@ const GENERATORS = {
       }
     },
   },
-  'doc-layout': {
-    description: 'doc-layout.css (gallery presentation layer — derived from presentation/layout.json)',
-    run: (outputDir) => {
-      const { generate } = require('./generate-doc-layout');
-      fs.writeFileSync(path.join(outputDir, 'doc-layout.css'), generate());
-      console.log('  doc-layout.css');
-    },
-  },
   'icons': {
     description: 'components/icons.ts (icon map + size classes)',
     run: (outputDir) => {
@@ -56,20 +48,9 @@ const GENERATORS = {
       return generate(registry, outputDir, configs);
     },
   },
-  'preview': {
-    description: 'preview-page.tsx (the substrate canvas, standalone — for a surface that mounts it directly)',
-    run: (outputDir) => {
-      const { generate } = require('./generate-preview');
-      const dir = path.join(outputDir, 'app', 'preview');
-      fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, 'page.tsx'), generate());
-      console.log('  app/preview/page.tsx');
-    },
-  },
   // Ignores outputDir on purpose: this page is read in the repo, not shipped in the
-  // bundle, and it links ../generated/ rather than living beside it. Separate from the
-  // 'preview' target above rather than replacing it — the playground still builds that
-  // one, and both retire together when the playground goes.
+  // bundle, and it links ../generated/ rather than living beside it. It is the only
+  // preview surface now — the TSX one retired with the Next app it lived in.
   'preview-html': {
     description: 'docs/preview.html (the substrate canvas as a static page — no framework under it)',
     run: () => {
@@ -131,7 +112,7 @@ if (require.main === module) {
   // Copy answers.json as a receipt — the DNA of this generation. Only for a FULL run:
   // answers.json holds the brand and the project name, and a partial run is how it
   // reaches somewhere it should not be. `--only tokens --output <consumer>/src` is a
-  // real invocation — sync.js and the playground's prebuild hook both use it — and it
+  // real invocation — sync.js uses it — and it
   // was dropping a private answers file into a consumer's source tree, where nothing
   // was ignoring it. A receipt belongs with the artifact set it documents, not beside
   // one file pulled out of it.

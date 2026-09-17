@@ -192,25 +192,30 @@ components, and hoisting it means the tier blocks hold only what actually ramps.
 
 `answers.json` is copied into the output as a receipt, but **only on a full run**. A
 partial run is how a private brand file reaches somewhere it shouldn't:
-`--only tokens --output <consumer>/src` is a real invocation — `sync.js` and the
-playground's prebuild hook both use it — and it was dropping an answers file into
+`--only tokens --output <consumer>/src` is a real invocation — `sync.js` uses it —
+and it was dropping an answers file into
 consumer source trees with nothing ignoring it.
 
 ### `verify` is the gate, and it runs last
 
-The checks, in order: `doc-counts`, `playground-parity`, `manifest-deps`,
-`interactive-implies-control`, `class-coverage`, `class-box-model`, `phantom-parts`,
+The checks, in order: `doc-counts`, `manifest-deps`, `interactive-implies-control`,
+`class-coverage`, `atom-class-coverage`, `class-box-model`, `phantom-parts`,
 `variant-keys`, `base-config-provenance`, `touch-target`, `contrast`,
-`composited-contrast`, `story-coverage`, `typecheck`. Any failure exits non-zero, so
-a full `npm run generate` cannot report success over broken output.
+`composited-contrast`, `typecheck`. Any failure exits non-zero, so a full
+`npm run generate` cannot report success over broken output.
 
-Three of them delegate to `catalog-playground/`, which is why that app is the compile
-gate rather than a gallery: `typecheck` is its `tsc --noEmit` under `strict` +
-`noUnusedLocals` and is the only thing that reads emitted `.tsx` **as code** rather
-than as text; `playground-parity` confirms its synced copies match what the generator
-just emitted; `story-coverage` confirms every atom is rendered somewhere, so none can
-change unverifiably. Generated TSX with a syntax error passed every regex-level check
-twice before this gate existed.
+Two of them read the atoms rather than the artifacts around them. `typecheck` is
+`tsc --noEmit` over `catalog/` under `strict` + `noUnusedLocals`, the only thing that
+reads emitted `.tsx` **as code** rather than as text — generated TSX with a syntax error
+passed every regex-level check twice before a compiler was in the loop. It is the one
+check that needs `npm install`, and skips itself without it.
+
+`atom-class-coverage` asks the question neither a compiler nor a CSS read can: every
+class an atom *applies* must exist in the emitted CSS, and every `--type-*` an emitted
+rule reads must be declared. `dialog` shipped visually broken across five commits with
+everything green, because its appearance was Tailwind utilities that resolved through a
+bridge that had been removed — present in the TSX, absent from the CSS, and invisible to
+tsc, which does not read CSS at all.
 
 `base-config-provenance` is the one that guards the committed set. It regenerates
 `spec/config/base/` in memory from `answers.example.json` and fails if the tracked
@@ -279,7 +284,7 @@ of one combination rather than the rule that generates it.
    what it was handed. The consumer deletes what they do not want.
 3. An atom the consumer has edited locally is **skipped and named in the summary**,
    never overwritten without `--force`. Skipping rather than prompting is deliberate:
-   this runs unattended in CI and in the playground resync inside `npm run generate`,
+   this runs unattended in CI,
    where a `[y/N]` prompt hangs a build instead of protecting anything.
 
 `sync.js` prints the union of the manifests' `npmDependencies` as a single install

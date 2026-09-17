@@ -1,45 +1,29 @@
-function buildCnUtility(configs) {
-  const families = Object.keys(configs.typography.textStyles);
-  const tiers = ['sm', 'md', 'lg'];
-  const textStyleValues = families.flatMap(f => tiers.map(t => `'${f}-${t}'`));
-
-  // Custom token utilities aren't in tailwind-merge's default scales, so an override
-  // (e.g. `rounded-none` on a `rounded-component` atom, or `h-10` on `h-ch-5`) wouldn't
-  // displace them — both classes survive and CSS order decides. Feeding the radius +
-  // spacing theme scales makes every dependent group (rounded, h/w/size, gap/p/m) treat
-  // these as real conflicts, so className overrides win cleanly.
-  // KEEP IN SYNC with generate-tokens-css.js, which *emits* these same scales as
-  // utilities. A scale added there but not here silently regresses overrides for it.
-  const q = (arr) => arr.map(v => `'${v}'`).join(', ');
-  const radiusValues = Object.keys(configs.sizing['border-radius']);     // component, card, input, modal, pill
-  // Semantic heights are `<role>-<tier>` (control-md, bar-sm, ...) — the same strings the
-  // h-* and size-* utilities carry, so an `h-12` override displaces `h-control-md`.
-  const semanticHeights = Object.entries(configs.sizing['component-height'])
-    .flatMap(([role, tiers]) => Object.keys(tiers).map((tier) => `${role}-${tier}`));
-  const spacingValues = [
-    ...Object.keys(configs.standards.sizing['component-height']),         // ch-0 .. ch-9
-    ...semanticHeights,                                                  // control-md, row-lg, ...
-    ...Object.keys(configs.standards.sizing['icon-size']),                // icon-0 .. icon-4
-    ...Object.keys(configs.spacing.categories),                          // screen, content, section, group, component
-  ];
-
+/**
+ * cn.ts is clsx, and nothing else.
+ *
+ * It used to be `extendTailwindMerge` fed Loom's radius, spacing and semantic-height
+ * scales plus a `text-style` class group, so a className override displaced the atom's
+ * own utility instead of sitting beside it and losing to stylesheet order. That was
+ * load-bearing while atoms carried Tailwind utilities. It is not any more:
+ *
+ *   - Nothing utility-shaped is emitted for the radius or spacing scales. The class layer
+ *     writes `border-radius` inside a component's rule; there is no `rounded-component`
+ *     class for `rounded-none` to conflict with.
+ *   - The `text-*` type ramp *is* still emitted, but no atom applies one. Moving
+ *     appearance into the class layer took the last of them out of the TSX.
+ *
+ * So every group twMerge was configured for is empty on the only files it runs against.
+ * What is left is conditional class joining, which is clsx.
+ *
+ * The one thing genuinely given up: a consumer hand-composing two `text-*` classes on one
+ * element no longer gets the later one deduped, and stylesheet order decides instead.
+ * That was a Tailwind-shaped expectation, and there is no Tailwind under this any more.
+ */
+function buildCnUtility() {
   return `import { type ClassValue, clsx } from 'clsx';
-import { extendTailwindMerge } from 'tailwind-merge';
-
-const twMerge = extendTailwindMerge<'text-style'>({
-  extend: {
-    theme: {
-      radius: [${q(radiusValues)}],
-      spacing: [${q(spacingValues)}],
-    },
-    classGroups: {
-      'text-style': [{ text: [${textStyleValues.join(', ')}] }],
-    },
-  },
-});
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return clsx(inputs);
 }
 `;
 }

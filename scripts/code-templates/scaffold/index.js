@@ -26,7 +26,6 @@ function generate(configs, outputDir) {
     { name: 'globals.css', content: globalsCss.generate(configs) },
     { name: 'ThemeProvider.tsx', content: themeProvider.generate(configs) },
     { name: 'layout.tsx', content: layout.generate(configs) },
-    { name: 'preview-page.tsx', content: require('../generate-preview').generate() },
     { name: 'init.sh', content: setupScript.generate(), executable: true },
   ];
 
