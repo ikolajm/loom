@@ -1220,11 +1220,21 @@ function buildSection15_Tones() {
 
   const lines = ['/* === Tones === */'];
   for (const f of families) {
-    // text/border stay at base intensity in both: an outline treatment draws the brand
-    // line and reads the brand label whether its fill is solid or soft.
+    // Both stay at base intensity across solid and soft: an outline treatment draws the
+    // same brand line and reads the same label whether its fill is solid or soft. That
+    // was the whole justification for --tone-text too, and it was a statement about
+    // intensity rather than about legibility — which is what the property actually
+    // decides. The label now reads the family's text role, resolved per mode against the
+    // most raised surface tier; see the third pass in generate-colors.js.
+    //
+    // --tone-border deliberately still reads the base role. A border is a non-text
+    // boundary, which WCAG 1.4.11 puts at 3:1 rather than 4.5:1, and the brand line is
+    // most of what an outline treatment is for. Worth knowing it is not free: on the
+    // first consumer's brand, dark `secondary` scores 2.20 against surface-3, so the
+    // boundary threshold has cases of its own. Nothing measures that pairing yet.
     const edge = f === 'neutral'
       ? ['  --tone-text: var(--on-surface);', '  --tone-border: var(--outline);']
-      : [`  --tone-text: var(--${f});`, `  --tone-border: var(--${f});`];
+      : [`  --tone-text: var(--${f}-text);`, `  --tone-border: var(--${f});`];
     lines.push(`.tone-${f} {`, `  --tone-bg: var(--${f});`, `  --tone-fg: var(--on-${f});`, ...edge, '}', '');
     lines.push(`.tone-${f}-soft {`, `  --tone-bg: var(--${f}-container);`, `  --tone-fg: var(--on-${f}-container);`, ...edge, '}', '');
   }

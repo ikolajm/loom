@@ -7,7 +7,12 @@
  *   --answers <file>  the brand to build from, resolved into a throwaway config root so
  *                     this repo's own spec/config/local/ is never written to
  *   --tokens   the substrate only — no atoms, no install line, no framework assumption
- *   --force    overwrite atoms the consumer has edited locally
+ *   --force    overwrite atoms the consumer has edited locally. Takes an optional list:
+ *              `--force badge,select` overwrites those two and leaves every other edit
+ *              alone. Bare `--force` still means all of them, which is the blunt form and
+ *              is why the list exists — repairing one wrongly-flagged atom used to mean
+ *              disabling the guard for every atom, destroying a real edit elsewhere to
+ *              fix a false positive here.
  *   --refresh  regenerate the catalog from spec/ first, then sync
  *
  * Without --answers the substrate is emitted from whichever brand is active in this repo,
@@ -53,7 +58,12 @@ function main(argv) {
   // The guard is on answersIdx, not on the sum: with the flag absent it is -1, and
   // -1 + 1 is the index the project directory sits at.
   const answersValueIdx = answersIdx === -1 ? -1 : answersIdx + 1;
-  const project = argv.find((a, i) => !a.startsWith('--') && i !== answersValueIdx);
+  // A --force list is a value too, so it must not be mistaken for the project directory.
+  const forceValueIdx = (() => {
+    const i = argv.indexOf('--force');
+    return i !== -1 && argv[i + 1] && !argv[i + 1].startsWith('--') ? i + 1 : -1;
+  })();
+  const project = argv.find((a, i) => !a.startsWith('--') && i !== answersValueIdx && i !== forceValueIdx);
   if (!project) die('Usage: node scripts/sync.js <project-dir> [--answers <file>] [--tokens] [--force] [--refresh]');
   if (answersIdx !== -1 && (!answers || answers.startsWith('--'))) {
     die('--answers needs a path to an answers JSON file.');
@@ -64,10 +74,25 @@ function main(argv) {
          'the Loom repo, which is how a project ends up wearing another brand.']);
   }
 
-  const force = flags.has('--force');
+  // `--force` alone means every atom; `--force a,b` means those. The value is read the
+  // same way --answers reads its own, and the index guard is on the flag rather than on
+  // the sum: with the flag absent indexOf is -1, and -1 + 1 is the project directory.
+  const forceIdx = argv.indexOf('--force');
+  const forceArg = forceIdx === -1 ? null : argv[forceIdx + 1];
+  const forceList = forceArg && !forceArg.startsWith('--')
+    ? new Set(forceArg.split(',').map((a) => a.trim()).filter(Boolean))
+    : null;
+  const force = forceIdx !== -1;
+  const forces = (atom) => force && (!forceList || forceList.has(atom));
   const tokensOnly = flags.has('--tokens');
   const src = path.join(project, 'src');
-  const dest = path.join(src, 'components');
+  // A directory of Loom's own, not `src/components/` itself. Interleaving delivered files
+  // with the consumer's meant nothing downstream could address one set without the other:
+  // the first consumer's lint run produced 14 errors, all in files it had not written, and
+  // the only fix available was an override naming each one — which a seventh atom then
+  // arrives outside of. One glob covers every atom, now and later.
+  const dest = path.join(src, 'components', 'loom');
+  const legacyDest = path.join(src, 'components');
 
   // The brand, built into a throwaway config root rather than into spec/config/local/.
   // That directory is a single slot, so generating a consumer brand there evicts whatever
@@ -136,6 +161,17 @@ function main(argv) {
     .filter((name) => name !== 'cn')
     .sort();
 
+  // Delivered filename per atom, straight from the manifests. See check-local-edits.js:
+  // the alternative was a second copy of `atom === 'cn' ? 'cn.ts' : ...`, which held only
+  // until a second non-.tsx artifact existed.
+  const fileOf = (name) => {
+    try {
+      const m = JSON.parse(fs.readFileSync(path.join(CATALOG, `${name}.manifest.json`), 'utf8'));
+      if (m.file) return m.file;
+    } catch { /* fall through */ }
+    return name === 'cn' ? 'cn.ts' : `${name}.tsx`;
+  };
+
   const npmDependencies = [...new Set(
     [...atoms, 'cn'].flatMap((name) =>
       JSON.parse(fs.readFileSync(path.join(CATALOG, `${name}.manifest.json`), 'utf8')).npmDependencies || []
@@ -148,27 +184,36 @@ function main(argv) {
   // consumer who patched it deserves the same care as one who patched an atom.
   const states = tokensOnly ? new Map() : checkLocalEdits(dest, CATALOG, [...atoms, 'cn']);
   const skipped = [];
+  const repaired = [];
 
   if (tokensOnly) console.log('Atoms: skipped (--tokens)');
   else console.log('Atoms:');
   for (const atom of tokensOnly ? [] : [...atoms, 'cn']) {
     const state = states.get(atom);
-    // `unknown` is skipped too: the file is installed but carries no delivery record, so
-    // "has the consumer edited it" is unanswerable — and answering "no" is the silent
-    // overwrite this whole mechanism exists to stop.
-    if (!force && (state === 'modified' || state === 'unknown')) {
+
+    // `inconsistent` is repaired, not skipped. The installed source is already byte-for-
+    // byte the catalog file, so there is no edit to protect and no change to make to it —
+    // only its manifest is wrong. Skipping it was the defect: it told a consumer they had
+    // edited a file they never opened and then withheld every later fix to it.
+    if (state === 'inconsistent') {
+      repaired.push(atom);
+    } else if (!forces(atom) && (state === 'modified' || state === 'unknown')) {
+      // `unknown` is skipped too: the file is installed but carries no delivery record, so
+      // "has the consumer edited it" is unanswerable — and answering "no" is the silent
+      // overwrite this whole mechanism exists to stop.
       skipped.push(atom);
       const why = state === 'unknown' ? 'no manifest to compare against' : 'edited locally';
       console.log(`  ~ ${atom} (${why} — skipped)`);
       continue;
     }
-    const file = atom === 'cn' ? 'cn.ts' : `${atom}.tsx`;
+    const file = fileOf(atom);
     fs.copyFileSync(path.join(CATALOG, file), path.join(dest, file));
     const manifest = `${atom}.manifest.json`;
     if (fs.existsSync(path.join(CATALOG, manifest))) {
       fs.copyFileSync(path.join(CATALOG, manifest), path.join(dest, manifest));
     }
-    console.log(`  + ${atom}${atom === 'cn' ? ' (utility)' : ''}`);
+    const note = state === 'inconsistent' ? ' (manifest repaired)' : atom === 'cn' ? ' (utility)' : '';
+    console.log(`  + ${atom}${note}`);
   }
 
   // The substrate is generated fresh rather than copied from generated/, so a sync always
@@ -192,6 +237,50 @@ function main(argv) {
 
   console.log(`Done → ${tokensOnly ? src : dest}`);
 
+  // Atoms from before the catalog moved into its own directory. They still compile and the
+  // consumer's imports still resolve to them, so nothing goes red — they simply stop
+  // receiving upstream fixes, which is the silent-staleness failure the overwrite guard
+  // exists to prevent, arriving by a different door. Named, never deleted: this is the
+  // consumer's tree, and one of these files may be a copy they edited.
+  const strays = tokensOnly
+    ? []
+    : [...atoms, 'cn'].filter((a) => fs.existsSync(path.join(legacyDest, fileOf(a))));
+  if (strays.length) {
+    const legacyStates = checkLocalEdits(legacyDest, CATALOG, strays);
+    console.log('');
+    console.log('WARNING: older copies of these atoms are still in src/components/:');
+    for (const a of strays) {
+      const state = legacyStates.get(a);
+      const note = state === 'clean' ? 'unmodified — safe to delete'
+        : state === 'modified' ? 'YOU EDITED THIS — move your change before deleting'
+        : 'no delivery record — read it before deleting';
+      console.log(`  ! ${a} (${note})`);
+    }
+    console.log('');
+    console.log('Your imports still point at them, so your build stays green while those files');
+    console.log("go stale. Repoint each import at './loom/<atom>' (or '../components/loom/<atom>'),");
+    console.log('then delete the old pair:');
+    for (const a of strays) {
+      // Only what is actually there. An atom installed before manifests were delivered
+      // alongside has no manifest, and naming one makes a copy-pasted rm fail on the file
+      // that does exist.
+      const pair = [fileOf(a), `${a}.manifest.json`]
+        .filter((f) => fs.existsSync(path.join(legacyDest, f)))
+        .map((f) => `"${path.join(legacyDest, f)}"`);
+      console.log(`  rm ${pair.join(' ')}`);
+    }
+  }
+
+  if (repaired.length) {
+    console.log('');
+    console.log('Repaired a split delivery — these files already matched the catalog exactly,');
+    console.log('but their manifests recorded a different version, so the guard had been');
+    console.log('reporting them as your edits and withholding upstream fixes:');
+    for (const atom of repaired) console.log(`  + ${atom}`);
+    console.log('');
+    console.log('Nothing of yours was overwritten: the source was already what a resync writes.');
+  }
+
   if (skipped.length) {
     console.log('');
     console.log('Kept your edits — these were NOT resynced:');
@@ -200,12 +289,15 @@ function main(argv) {
     console.log("They still hold your changes and may be missing catalog fixes. To see what you'd");
     console.log('be taking, diff against the catalog:');
     for (const atom of skipped) {
-      const ext = atom === 'cn' ? 'ts' : 'tsx';
-      console.log(`  diff "${path.join(dest, `${atom}.${ext}`)}" "${path.join(CATALOG, `${atom}.${ext}`)}"`);
+      const file = fileOf(atom);
+      console.log(`  diff "${path.join(dest, file)}" "${path.join(CATALOG, file)}"`);
     }
     console.log('');
-    console.log('Then re-run with --force to take the catalog version, or move your change to the');
-    console.log('call site (className / prop / a wrapper), which survives every resync by design.');
+    console.log(`Then re-run with --force ${skipped.join(',')} to take the catalog version for`);
+    console.log('these, or name a subset. Bare --force overwrites every edited atom, which is');
+    console.log('rarely what you want: repairing one file should not destroy an edit in another.');
+    console.log('Or move your change to the call site (className / prop / a wrapper), which');
+    console.log('survives every resync by design.');
   }
 
   addLoomSyncScript(project, answers);
@@ -228,6 +320,20 @@ function main(argv) {
   console.log('');
   console.log('Your own reset goes in @layer loom.reset, imported before tokens.css, or it');
   console.log('silently outranks the whole class layer. See docs/gotchas.md.');
+
+  if (!tokensOnly) {
+    console.log('');
+    console.log('Theme switching is two artifacts, not one:');
+    console.log('  1. Paste the body of components/loom/theme-init.js into an INLINE <script>');
+    console.log('     in <head>, before your stylesheet. It sets data-theme on the first frame.');
+    console.log('  2. Mount <ThemeProvider> at your root. It owns every change after that.');
+    console.log('');
+    console.log('Skip step 1 and the theme still works — one frame late, so anyone who chose the');
+    console.log('non-default mode sees a flash of it on every load. Nothing React renders can');
+    console.log('set an attribute before React has rendered, which is why this half is not a');
+    console.log('component. Do not <script src> it: deferred it runs after the paint it exists');
+    console.log('to precede, undeferred it costs a round trip before it.');
+  }
 }
 
 /**

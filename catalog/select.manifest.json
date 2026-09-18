@@ -2,7 +2,8 @@
   "name": "select",
   "kind": "atom",
   "category": "form",
-  "description": "",
+  "file": "select.tsx",
+  "description": "Listbox built on Radix, with form-field error context wired in. **Read this before reaching for it.** A plain <select class=\"input control\" data-size=\"sm\"> is styled by the same class layer and does four things this cannot. A <label for> labels it (a label cannot label the Radix trigger, which is a <button>) — that one has no workaround. <option value=\"\"> is an ordinary option, where Radix reserves the empty string for \"nothing selected\", so an \"All\" sentinel needs translating both ways. A native select works inside a native <dialog> and a Radix one does not, because showModal() makes the portal target inert — which cascades, forcing the dialog to convert too. And the UA draws the arrow, which follows the theme through color-scheme, because loom.base takes appearance off buttons only. Reach for THIS component when you need rich rows, grouping or search — things <option> cannot hold, since it renders text and nothing else. WEIGHT: 39 transitive packages, and 29.31 kB gzip with Dialog on a consumer's entry chunk against 1.98 kB for Button and Badge. See CATALOG_SPEC.md, Native first.",
   "version": "c54dc9758731",
   "dependencies": [
     "cn",

@@ -2,7 +2,7 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider`. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/`, every run. Deleting one does not stick — a removed file is indistinguishable from a never-installed one, so the next sync restores it. Unimported atoms are tree-shaken and cost nothing shipped, so the cost of carrying one you do not use is a file in your tree, not bytes in your build. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider`. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/loom/`, every run. Deleting one does not stick — a removed file is indistinguishable from a never-installed one, so the next sync restores it. Unimported atoms are tree-shaken and cost nothing shipped, so the cost of carrying one you do not use is a file in your tree, not bytes in your build. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
 A consuming project ships atom files and nothing else — no stories, no harness. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 
@@ -48,10 +48,107 @@ Diffing a project's atoms against `catalog/` is the upstream-pitch surface. If t
 
 ---
 
+## Native first
+
+`dialog` and `select` wrap elements the browser already ships. They are the right call
+when native cannot do the job and the wrong one by default, and this document used to
+present them the other way round.
+
+**Reach for the native recipe first.** Reach for the component when one of the named cases
+below applies. Both recipes use the same class layer the components do, so moving between
+them is a markup change and not a restyle.
+
+### A dialog
+
+```html
+<dialog class="dialog" data-size="md">
+  <div class="dialog-header">
+    <span class="dialog-title">Delete this project</span>
+    <span class="dialog-description">This cannot be undone.</span>
+  </div>
+  <form method="dialog" class="dialog-footer">
+    <button class="button treat-outline tone-neutral interactive control" value="cancel">Cancel</button>
+    <button class="button treat-filled tone-error interactive control" value="delete">Delete</button>
+  </form>
+</dialog>
+```
+
+`el.showModal()` opens it. What you get without writing any of it: a focus trap, the top
+layer (so no `z-index` contest and no portal), Escape-to-close, and inertness for
+everything behind.
+
+- **The scrim is `dialog::backdrop`**, which Loom styles. `.dialog-overlay` is for the
+  non-native path only; on a real `<dialog>` it is a second scrim you do not need.
+- **`.dialog-fixed` is for the non-native path only, too.** The UA centres a modal
+  `<dialog>` itself. `.dialog` is deliberately scoped off the native element for exactly
+  this reason — see the comment in `loom.components.css`.
+- **`returnValue` tells commit from dismiss** across Escape, the backdrop and a button,
+  with no handler and no state. A submit button's `value` inside `method="dialog"` lands
+  there. Replacing this by hand means a ref flag set at every exit, which is what a
+  consumer had to write after converting.
+
+**Use the `dialog` component when** the panel is not a `<dialog>` element — a portaled
+panel that must escape an `overflow` or `transform` ancestor — or when you need a
+non-modal or arbitrarily positioned surface. That path is what `.dialog-fixed` and
+`.dialog-overlay` exist for.
+
+### A select
+
+```html
+<label class="text-label-md" for="source">Source</label>
+<select class="input control" id="source" data-size="sm">
+  <option value="">All sources</option>
+  <option value="npr">NPR</option>
+</select>
+```
+
+- **`<label for>` labels it.** This is the one that has no workaround: a label cannot
+  label the Radix trigger, because that trigger is a `<button>`.
+- **`<option value="">` is an ordinary option.** Radix reserves the empty string for
+  "nothing selected", so an "All" sentinel needs translating to a different value going in
+  and back again coming out.
+- **The UA keeps drawing the arrow**, because `loom.base` sets `appearance: none` on
+  buttons only. That is the affordance, not a leak — and it follows the theme, because
+  `theme-init.js` sets `color-scheme` on the root.
+- **A native `<select>` works inside a native `<dialog>`. A Radix one does not**, because
+  `showModal()` makes everything outside the dialog inert, including the portal target.
+  **This is the one that cascades**: it is what forced a consumer to convert their dialog
+  after converting their select.
+
+**Use the `select` component when** you need a listbox with rich rows, grouping or search
+— things `<option>` cannot hold, since it renders text and nothing else.
+
+### What each one costs
+
+Measured on a real consumer's production build, not estimated:
+
+| | main chunk, gzip |
+|---|---|
+| atoms synced, none imported | 79.23 kB |
+| plus Button and Badge | 81.21 kB |
+| plus Dialog and Select | 110.52 kB |
+
+Two kB against twenty-nine, on the critical path. Transitive package closures: `clsx` 1,
+`cva` 2, `react-slot` 2, `react-dialog` 25, `react-select` 39. Install footprint is a
+non-issue — 1.8 MB of `@radix-ui` against 233 MB of `node_modules` — so bytes on the
+critical path are the cost worth counting, and both sheets sit behind triggers, which
+makes `React.lazy` around the panels a real option.
+
+None of this argues the components should go. A consumer should be told what they are
+taking, and shown the native recipe first.
+
 ## Install
 
 `npm run sync -- <project>` copies the whole catalog into the consuming project's
-`src/components/`, plus `cn` and the three stylesheets. Delete what you do not want.
+`src/components/loom/`, plus `cn`, and writes the four stylesheets into `src/`. Deleting an
+atom you do not want does not stick — see the note on tree-shaking above.
+
+**A directory of Loom's own, not `src/components/` itself.** Delivered files interleaved
+with yours means nothing downstream can address one set without the other. The first
+consumer's lint run produced 14 errors in files it had not written — every atom exports its
+cva variants, which `react-refresh/only-export-components` objects to — and the only fix
+available was an override naming each file, which the next atom arrives outside of.
+`src/components/loom/` is one glob, now and after the catalog grows.
 
 There was a picker: a `loom-picks.json` in the consuming project listing atom names, and
 a resolver that walked each name's manifest `dependencies` transitively. It went when the
@@ -123,7 +220,7 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 
 Atoms are project-owned after install. There is no override config layer, no per-project JSON merge, no install-time customization UI. The flow is:
 
-1. Pick an atom — file lands in your project's `src/components/`
+1. Pick an atom — file lands in your project's `src/components/loom/`
 2. Edit the file freely
 3. (Optionally) port the change back upstream when it's generalizable
 
@@ -155,7 +252,7 @@ The template pipeline (`scripts/code-templates/orchestrator.js` + the templates 
 | Concern | How it works |
 |---|---|
 | Generation | Orchestrator produces `catalog/[component].tsx` + `[component].manifest.json` (per-atom files) |
-| Install | `npm run sync` copies the whole catalog into the consuming project's `src/components/`, and prints the union of the manifests' `npmDependencies` |
+| Install | `npm run sync` copies the whole catalog into the consuming project's `src/components/loom/`, and prints the union of the manifests' `npmDependencies` |
 
 Why templates instead of hand-authored:
 

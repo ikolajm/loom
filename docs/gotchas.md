@@ -319,6 +319,40 @@ a workaround — the first invoice carried one for exactly that reason.
 warnings are noise here, but they share the channel with real ones, so a document render
 is not a clean-log check.
 
+## `hidden` does not hide anything Loom gives a `display` to
+
+`[hidden] { display: none }` lives in the UA stylesheet, and **any** author rule beats a
+UA rule regardless of specificity or layer. `.dialog` sets `display: flex`. So this
+renders permanently:
+
+```html
+<div class="dialog dialog-fixed" hidden>...</div>
+```
+
+The overlay beside it hides correctly, because `.dialog-overlay` sets no `display` — which
+makes the symptom worse than a plain no-op: the scrim disappears and the panel stays,
+which reads as a stuck dialog rather than as a CSS problem.
+
+Every class that declares a `display` carries this, not only `.dialog`. `class-box-model`
+requires one on anything sized, so the set is large by design.
+
+**Fix it in your own layer**, not by removing the attribute:
+
+```css
+[hidden] { display: none !important; }
+```
+
+`!important` rather than specificity, because your rule and Loom's are both author rules
+and Loom's may be more specific. In a layered sheet an `!important` declaration in the
+*earliest* layer wins, which is the opposite of the normal order — so if you layer this,
+put it where you mean it.
+
+Found in Loom's own preview page, where the portaled-dialog demo had been stuck open
+since the day it was written. It was toggled with `hidden` specifically to avoid adding
+page-local CSS that might flatter the classes under test; the reasoning was right and the
+mechanism does not work. `preview-coverage` did not catch it either: the class was
+rendered, which is all that check asserts — it was just never hidden.
+
 ## Loom ships in cascade layers, so any unlayered reset outranks all of it
 
 Everything Loom emits sits in a Loom-owned layer — `loom.tokens`, `loom.base`, `loom.components`.

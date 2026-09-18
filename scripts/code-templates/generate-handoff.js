@@ -97,7 +97,7 @@ cascade-layer order and the custom properties, loom.css reads them, loom.compone
 composes them. The order is the mechanism — a minifier drops the @layer statement as
 redundant, after which precedence falls back to first appearance.
 
-### components/ (YOURS TO MODIFY)
+### components/loom/ (YOURS TO MODIFY)
 ${componentRows.length} components. Variant/size class maps are generated from config.
 
 | File | Element | Attributes | Text Family | Notes |

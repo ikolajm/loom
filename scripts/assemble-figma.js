@@ -167,12 +167,22 @@ function buildAllSteps() {
     for (const [group, roles] of Object.entries(groups)) {
       resolvedModes[mode][group] = {};
       for (const [role, template] of Object.entries(roles)) {
-        if (typeof template === 'string' && template.startsWith('{fill.')) {
-          const landed = colors.$fillShades && colors.$fillShades[mode] && colors.$fillShades[mode][role];
+        // Both resolved kinds behave identically here: the generator moved the shade, so
+        // Figma has to be handed where it landed rather than where the template pointed.
+        // {readable.*} is the label colour resolved against the most raised surface tier;
+        // it travels through the same door as {fill.*} and for the same reason.
+        const resolved = template && typeof template === 'string'
+          ? (template.startsWith('{fill.') ? ['$fillShades', colors.$fillShades]
+            : template.startsWith('{readable.') ? ['$textShades', colors.$textShades]
+            : null)
+          : null;
+        if (resolved) {
+          const [key, table] = resolved;
+          const landed = table && table[mode] && table[mode][role];
           if (!landed) {
             throw new Error(
-              `No $fillShades entry for ${mode}.${role} (template ${template}).\n` +
-                `  The active colors.json predates the fill resolver — regenerate it:\n` +
+              `No ${key} entry for ${mode}.${role} (template ${template}).\n` +
+                `  The active colors.json predates that resolver — regenerate it:\n` +
                 `    npm run configs                 (your brand, spec/config/local/)\n` +
                 `    npm run configs -- --input spec/answers.example.json --default-set   (maintainers)`
             );

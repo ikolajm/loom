@@ -25,6 +25,7 @@ const { resolveConfig } = require('./components/helpers');
 const { kindOf } = require('./shared');
 const { buildCnUtility } = require('./components/cn');
 const { buildThemeProvider } = require('./components/theme-provider');
+const { buildThemeInit } = require('./components/theme-init');
 
 // Every other template module is reached through the registry's `generator` field
 // ('module#export', resolved below) rather than a hand-written import here. Adding an
@@ -160,6 +161,10 @@ function buildManifest(def, config, version, src) {
     // asChild/Slot mechanics (how it renders). Different axes, easily confused.
     kind: kindOf(def.key),
     category: cat.category || CATEGORY_MAP[def.category] || 'misc',
+    // The delivered filename, so nothing downstream has to know which atoms are not
+    // .tsx. sync.js and check-local-edits.js both carried `atom === 'cn' ? 'cn.ts' : ...`,
+    // which was one special case until theme-init.js made it two.
+    file: `${def.key}.tsx`,
     description: cat.description || '',
     version: cat.version || version,
     dependencies: [...new Set([...imported, ...declared])].sort(),
@@ -193,13 +198,15 @@ function generate(registry, outputDir, configs) {
   const atoms = []; // collected for the pickable-atom index (catalog/atoms.json)
 
   for (const [name, def] of Object.entries(registry)) {
-    // Config-free utilities. The branch is about the MANIFEST — buildManifest takes a
-    // null config — not about the generator, which resolves through the registry like
-    // every other atom's. It used to call its template directly, which made it a fourth
-    // place an atom's generator could be named.
+    // The GENERATOR is config-free here — form-field declares only a $constant, so its
+    // template takes null — but the MANIFEST is not. Passing null to both meant its
+    // $catalog never reached the manifest, and form-field shipped to every consumer with
+    // an empty description while badge and button carried paragraphs. Nothing noticed,
+    // because a description is only ever read by a person opening the file; the
+    // catalog-integrity check reads it now.
     if (name === 'FormField') {
       const tsx = dispatch(name, null, def);
-      const manifest = buildManifest(def, null, contentVersion(tsx), tsx);
+      const manifest = buildManifest(def, resolveConfig(def.source, def.key, def.baseKey), contentVersion(tsx), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.tsx`), tsx);
       fs.writeFileSync(path.join(CATALOG_DIR, `${def.key}.manifest.json`), JSON.stringify(manifest, null, 2) + '\n');
       console.log(`  ${def.key}.tsx + manifest (${def.generator})`);
@@ -234,6 +241,7 @@ function generate(registry, outputDir, configs) {
     // filtering the catalog by kind never has to special-case it.
     kind: 'utility',
     category: 'utility',
+    file: 'cn.ts',
     description: 'Class name merger utility (clsx). Foundation dependency for all components.',
     version: contentVersion(cnSrc),
     dependencies: [],
@@ -257,7 +265,8 @@ function generate(registry, outputDir, configs) {
     name: 'ThemeProvider',
     kind: 'provider',
     category: 'utility',
-    description: 'Theme context — light/dark/system, persisted, writes data-theme. No framework coupling.',
+    file: 'theme-provider.tsx',
+    description: 'Theme context — light/dark/system, persisted, writes data-theme. Pair it with theme-init.js, which sets the first frame.',
     version: contentVersion(tpSrc),
     dependencies: [],
     npmDependencies: extractNpmDeps(tpSrc),
@@ -265,6 +274,29 @@ function generate(registry, outputDir, configs) {
     composition: 'wrapper',
   }, null, 2) + '\n');
   console.log(`  theme-provider.tsx + manifest (provider)`);
+
+  // theme-init.js — the blocking half of the theme mechanism.
+  //
+  // Its own kind, and not a component, because it is not code a consumer imports: it is
+  // text they paste into an inline <script> in <head>. A module cannot do this job. React
+  // renders after first paint, so nothing React owns can set an attribute before the
+  // first frame, which is the entire defect. It ships beside ThemeProvider so the two
+  // halves arrive together and agree on the storage key and the default by construction.
+  const tiSrc = buildThemeInit(configs);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-init.js'), tiSrc);
+  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-init.manifest.json'), JSON.stringify({
+    name: 'theme-init',
+    kind: 'snippet',
+    category: 'utility',
+    file: 'theme-init.js',
+    description: 'Blocking <head> snippet that sets data-theme and color-scheme before first paint. Paste its body inline; do not load it with <script src>. Without it ThemeProvider still works, one frame late.',
+    version: contentVersion(tiSrc),
+    dependencies: [],
+    npmDependencies: [],
+    tokens: [],
+    composition: 'none',
+  }, null, 2) + '\n');
+  console.log(`  theme-init.js + manifest (snippet)`);
 
   // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.

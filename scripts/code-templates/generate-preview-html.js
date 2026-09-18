@@ -228,6 +228,9 @@ const CLASS_STRIP = [
       <code>.dialog-fixed</code>, which is why the same class works on a native
       <code>&lt;dialog&gt;</code> the browser centres itself.`),
     `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
+      <div class="dialog-close">
+        <button class="button treat-ghost tone-inherit interactive control" data-size="icon-sm" aria-label="Close">${CLOSE_MARK}</button>
+      </div>
       <div class="dialog-header">
         <span class="dialog-title">Delete this project</span>
         <span class="dialog-description">This cannot be undone. Everything in it goes with it.</span>
@@ -295,74 +298,30 @@ const CLASS_STRIP = [
 
   section('Form field', [
     lede(`A label, a control and its helper text as one column. The gap is the only thing
-      the class carries — everything else composes.`),
-    `    <div class="pv-field">
-      <div class="form-field">
-        <label class="label" data-size="md" for="pv-input">Project name</label>
-        <input class="input control" data-size="md" id="pv-input" placeholder="Acme rebrand">
-        <span class="helper-text" data-size="md">Shown to everyone with access.</span>
+      the class carries &mdash; everything else composes. The second one is a plain
+      <code>&lt;select&gt;</code>: the same two classes, no component, and the arrow is the
+      UA's because <code>loom.base</code> takes <code>appearance</code> off buttons only.
+      It follows the theme through <code>color-scheme</code>.`),
+    row(`      <div class="pv-field">
+        <div class="form-field">
+          <label class="label" data-size="md" for="pv-input">Project name</label>
+          <input class="input control" data-size="md" id="pv-input" placeholder="Acme rebrand">
+          <span class="helper-text" data-size="md">Shown to everyone with access.</span>
+        </div>
       </div>
-    </div>`,
+      <div class="pv-field">
+        <div class="form-field">
+          <label class="label" data-size="md" for="pv-select">Source</label>
+          <select class="input control" data-size="md" id="pv-select">
+            <option value="">All sources</option>
+            <option value="npr">NPR</option>
+            <option value="guardian">The Guardian</option>
+          </select>
+          <span class="helper-text" data-size="md">A label can label this one.</span>
+        </div>
+      </div>`),
   ].join(NL)),
 
-  section('Focus', [
-    lede(`Tab through this row &mdash; every one of them takes the same ring, and none of
-      them names a class to get it. The ring is an element-level rule in
-      <code>loom.base</code>. <code>:where()</code> makes the element list weigh nothing,
-      so the selector costs only its one pseudo-class: any class of yours outranks it, and
-      overriding it is a normal rule rather than an <code>!important</code>.`),
-    row(`      <button class="button treat-outline tone-neutral interactive" data-size="md">.interactive only</button>
-      <button class="button treat-filled tone-primary interactive control" data-size="md">both classes</button>
-      <a class="link" href="https://github.com/ikolajm/loom">a link</a>`),
-    lede(`No state class on the next two. What they carry is shape &mdash;
-      <code>&lt;summary&gt;</code> a type class, <code>&lt;select&gt;</code> the
-      <code>.input</code> frame &mdash; and the ring arrives anyway, because it is keyed
-      on the element rather than on anything in the markup.`),
-    `    <div class="pv-row">
-      <details class="pv-details">
-        <summary class="text-body-md">a summary</summary>
-        <p class="text-body-sm text-on-surface-variant">Open and closed, it still takes the ring.</p>
-      </details>
-      <select data-size="md" class="input"><option>a select</option><option>second</option></select>
-    </div>`,
-    lede(`The scroll region carries <code>tabindex="0"</code>. A browser will make an
-      overflowing region keyboard-focusable on its own &mdash; Chrome and Firefox both do
-      &mdash; but there is no selector for "the browser decided this is focusable", so a
-      region that has not asked for a tab stop keeps the UA's ring rather than this one.
-      Taking the tab stop explicitly is what moves it onto the token.`),
-    `    <div class="pv-scroll" tabindex="0">
-      <p class="text-body-sm">Focus me from the keyboard, then arrow down. The ring is the
-        substrate's; the scrolling is the browser's.</p>
-      <p class="text-body-sm text-on-surface-variant">Second paragraph, so there is
-        something to scroll to.</p>
-      <p class="text-body-sm text-on-surface-variant">Third.</p>
-    </div>`,
-    lede(`Invalid is the one focus state still gated on a class:
-      <code>.control[aria-invalid]</code> recolours the ring it already has, rather than
-      declaring a second one that could drift from it.`),
-    `    <div class="pv-field">
-      <input class="input control" data-size="md" aria-invalid="true" value="not an email">
-    </div>`,
-  ].join(NL)),
-
-  section('Half a rule', [
-    lede(`Tone and treatment are independent axes, and either one alone used to render
-      nothing &mdash; a tone set four custom properties nobody read, and a treatment read
-      four that were undefined, which drops the whole declaration rather than falling
-      back. All four of these are visible now, and the two in the middle are visibly
-      unstyled rather than absent.`),
-    `    <div class="pv-row">
-      <span class="badge tone-primary" data-size="md">tone only</span>
-      <span class="badge treat-filled" data-size="md">filled, no tone</span>
-      <span class="badge treat-outline" data-size="md">outline, no tone</span>
-      <span class="badge treat-filled tone-primary" data-size="md">both</span>
-    </div>`,
-    lede(`<code>badge tone-primary</code> is filled because <code>.badge</code> carries a
-      tone default of its own, at zero specificity so every treatment still outranks it.
-      That is the spelling the defect was found in, and it is correct as written now.
-      A treatment with no tone falls back to a neutral surface or the outline role &mdash;
-      present, unstyled, and obviously missing something.`),
-  ].join(NL)),
 ].join(NL + NL);
 
 // --- Page-local layout -------------------------------------------------------
@@ -387,6 +346,13 @@ const PAGE_CSS = `    :root { color-scheme: light dark; }
     .pv-space-bar { height: var(--space-4); background: var(--primary); border-radius: var(--br-1); }
     .pv-radius { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
     .pv-radius-box { width: 5rem; height: 5rem; background: var(--surface-2); border: var(--bw-1) solid var(--outline); }
+    /* The hidden attribute is a UA rule and .dialog sets display: flex, which is an
+       author rule — so any element carrying .dialog ignored hidden and rendered
+       permanently. The portaled demo below was stuck open from the day it was written.
+       Restoring what the attribute promises, scoped to this page: it touches no
+       positioning or colour, so it cannot flatter the classes under test. The same trap
+       is a consumer's the moment they hide a .dialog div; see docs/gotchas.md. */
+    [hidden] { display: none !important; }
     .pv-details { padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }
     .pv-scroll { height: 5rem; overflow-y: auto; padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }`;
 

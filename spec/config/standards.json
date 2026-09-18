@@ -94,6 +94,7 @@
         "primary": {
           "primary": "{fill.primary.600}",
           "on-primary": "#FFFFFF",
+          "primary-text": "{readable.primary.600}",
           "primary-container": "{fill.primary.100}",
           "on-primary-container": "{palette.primary.900}",
           "primary-fixed": "{fill.primary.200}",
@@ -104,6 +105,7 @@
         "secondary": {
           "secondary": "{fill.secondary.600}",
           "on-secondary": "#FFFFFF",
+          "secondary-text": "{readable.secondary.600}",
           "secondary-container": "{fill.secondary.100}",
           "on-secondary-container": "{palette.secondary.900}",
           "secondary-fixed": "{fill.secondary.200}",
@@ -136,24 +138,28 @@
         "error": {
           "error": "{fill.error.600}",
           "on-error": "#FFFFFF",
+          "error-text": "{readable.error.600}",
           "error-container": "{fill.error.100}",
           "on-error-container": "{palette.error.900}"
         },
         "success": {
           "success": "{fill.success.600}",
           "on-success": "#FFFFFF",
+          "success-text": "{readable.success.600}",
           "success-container": "{fill.success.100}",
           "on-success-container": "{palette.success.900}"
         },
         "warning": {
           "warning": "{fill.warning.600}",
           "on-warning": "#FFFFFF",
+          "warning-text": "{readable.warning.600}",
           "warning-container": "{fill.warning.100}",
           "on-warning-container": "{palette.warning.900}"
         },
         "info": {
           "info": "{fill.info.600}",
           "on-info": "#FFFFFF",
+          "info-text": "{readable.info.600}",
           "info-container": "{fill.info.100}",
           "on-info-container": "{palette.info.900}"
         },
@@ -166,6 +172,7 @@
         "primary": {
           "primary": "{fill.primary.300}",
           "on-primary": "{palette.primary.900}",
+          "primary-text": "{readable.primary.300}",
           "primary-container": "{fill.primary.800}",
           "on-primary-container": "{palette.primary.100}",
           "primary-fixed": "{fill.primary.200}",
@@ -176,6 +183,7 @@
         "secondary": {
           "secondary": "{fill.secondary.300}",
           "on-secondary": "{palette.secondary.900}",
+          "secondary-text": "{readable.secondary.300}",
           "secondary-container": "{fill.secondary.800}",
           "on-secondary-container": "{palette.secondary.100}",
           "secondary-fixed": "{fill.secondary.200}",
@@ -208,24 +216,28 @@
         "error": {
           "error": "{fill.error.400}",
           "on-error": "{palette.error.900}",
+          "error-text": "{readable.error.400}",
           "error-container": "{fill.error.800}",
           "on-error-container": "{palette.error.100}"
         },
         "success": {
           "success": "{fill.success.400}",
           "on-success": "{palette.success.900}",
+          "success-text": "{readable.success.400}",
           "success-container": "{fill.success.800}",
           "on-success-container": "{palette.success.100}"
         },
         "warning": {
           "warning": "{fill.warning.400}",
           "on-warning": "{palette.warning.900}",
+          "warning-text": "{readable.warning.400}",
           "warning-container": "{fill.warning.800}",
           "on-warning-container": "{palette.warning.100}"
         },
         "info": {
           "info": "{fill.info.400}",
           "on-info": "{palette.info.900}",
+          "info-text": "{readable.info.400}",
           "info-container": "{fill.info.800}",
           "on-info-container": "{palette.info.100}"
         },

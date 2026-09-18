@@ -18,6 +18,10 @@ const {
 // WCAG 2.1 AA for text. Mirrored by the `contrast` check in code-templates/verify.js,
 // which is what actually fails the build — this constant only steers the pick.
 const AA_TEXT = 4.5;
+// Which surface tier a {readable.*} role must clear. The most raised one Loom ships:
+// one value has to survive every background it can land on. Loosening this to
+// 'surface' re-creates the debt on every raised tier.
+const READABLE_AGAINST = 'surface-3';
 
 function srgbToLinear(channel) {
   const s = channel / 255;
@@ -80,8 +84,9 @@ function generate(answers, standards) {
     for (const [group, groupRoles] of Object.entries(modeRoles)) {
       roles[mode][group] = {};
       for (const [role, template] of Object.entries(groupRoles)) {
-        if (typeof template === 'string' && template.startsWith('{fill.')) {
-          // Reserve the key so the second pass overwrites in place. Creating it there
+        if (typeof template === 'string'
+            && (template.startsWith('{fill.') || template.startsWith('{readable.'))) {
+          // Reserve the key so a later pass overwrites in place. Creating it there
           // instead would append it after every first-pass role and reorder the emitted
           // JSON — a 70-line diff for a handful of changed values.
           roles[mode][group][role] = null;
@@ -154,6 +159,61 @@ function generate(answers, standards) {
   }
 
 
+  // Third pass: {readable.family.shade} → the nearest shade to `shade` whose contrast
+  // against READABLE_AGAINST clears AA.
+  //
+  // This is the label colour a treatment paints WITH, as opposed to the fill it paints
+  // ON. --tone-text was the base role at full strength, chosen with the reasoning that
+  // "text/border stay at base intensity in both" — a statement about intensity, not
+  // about legibility, and legibility is what the property decides. On the committed
+  // default that left 15 of 48 tone/surface pairs below AA and on the first consumer's
+  // brand 16, including `light secondary` at 4.27 on plain `surface`.
+  //
+  // It is a NEW role rather than a shift of the existing one. Moving --primary would move
+  // every fill with it; this moves only what .treat-outline, .treat-ghost and .link paint.
+  //
+  // Resolved against the MOST RAISED tier, not the base surface. --tone-text is one value
+  // and nothing tells a badge which tier it landed on, so the value has to satisfy the
+  // worst background it can sit on or the guarantee is not one. Resolving against
+  // `surface` instead keeps the colour nearer the brand and leaves every raised tier
+  // failing, which is the debt this pass exists to clear. Measured cost of the strict
+  // choice: on both brands tested every family clears all four tiers, six of twelve
+  // family/mode pairs do not move at all, and the largest move is two ramp steps.
+  //
+  // Nearest-passing on the family ramp, and deliberately not an off-ramp colour computed
+  // by lightness. The Figma pipeline aliases semantic colours to primitive variables by
+  // name, so a colour that is not a ramp stop has nothing to alias to — the same
+  // constraint that produced $fillShades.
+  const textShades = {};
+
+  for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
+    const backdrop = roles[mode]?.surface?.[READABLE_AGAINST];
+    for (const [group, groupRoles] of Object.entries(modeRoles)) {
+      for (const [role, template] of Object.entries(groupRoles)) {
+        if (typeof template !== 'string' || !template.startsWith('{readable.')) continue;
+        const m = template.match(/\{readable\.(\w+)\.(\w+)\}/);
+        if (!m || !palette[m[1]] || !backdrop || !String(backdrop).startsWith('#')) {
+          roles[mode][group][role] = m ? palette[m[1]]?.[m[2]] || template : template;
+          if (m) (textShades[mode] = textShades[mode] || {})[role] = `${m[1]}.${m[2]}`;
+          continue;
+        }
+        const [, family, startShade] = m;
+        const shades = Object.keys(palette[family]);
+        const startIdx = shades.indexOf(startShade);
+        const passing = shades
+          .map((sh, i) => ({ sh, i, hex: palette[family][sh] }))
+          .filter((c) => contrastRatio(c.hex, backdrop) >= AA_TEXT)
+          .sort((a, b) => Math.abs(a.i - startIdx) - Math.abs(b.i - startIdx));
+        // No passing shade keeps the start, and the tone-contrast check fails the build
+        // loudly. A brand whose ramp cannot produce a legible label is a brand problem,
+        // and shipping it quietly is the failure this replaces.
+        const landed = passing.length ? passing[0].sh : startShade;
+        roles[mode][group][role] = palette[family][landed] || template;
+        (textShades[mode] = textShades[mode] || {})[role] = `${family}.${landed}`;
+      }
+    }
+  }
+
   return {
     $note: `Generated from primary: ${primary} (chosen). secondary: ${secondary} (${secondaryChosen ? 'chosen' : `DERIVED — analogous +${SECONDARY_ROTATION}° from primary, nobody picked it; set "secondary" in your answers file to choose one`}). accent: ${accent} (${accentChosen ? 'chosen' : `DERIVED — analogous +${ACCENT_ROTATION}° from primary, nobody picked it; set "accent" in your answers file to choose one`}). Neutral tinted from primary hue (${Math.round(primaryHsl.h)}°). A derived family generates a full ramp and role set identical in structure to a chosen one, so this note is the only thing recording which is which. Questionnaire is the override mechanism — change inputs and regenerate.`,
     // Machine-readable half of the note above. The Figma pipeline reads this to put
@@ -165,6 +225,11 @@ function generate(answers, standards) {
     // pipeline reads this instead of the raw templates, so its aliases point at the same
     // primitive the code shipped.
     $fillShades: fillShades,
+
+    // Resolved shade per {readable.*} role, per mode — see the third pass. Same job as
+    // $fillShades and for the same reason: Figma must alias the primitive the code
+    // shipped, not the one the template asked for.
+    $textShades: textShades,
 
     // Which mode loads first. Lives here, with the generated colors, because it is a
     // per-project answer: standards.json declares itself "values locked across all

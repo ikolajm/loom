@@ -23,10 +23,23 @@
  * sync.js skips it and says so, rather than picking for the consumer.
  *
  * Returns one status per resolved atom (and prints them, run as a CLI):
- *   fresh     — not installed yet
- *   clean     — installed, unmodified; safe to overwrite
- *   modified  — installed and edited locally
- *   unknown   — installed but no local manifest, so no delivery record to compare against
+ *   fresh        — not installed yet
+ *   clean        — installed, unmodified; safe to overwrite
+ *   modified     — installed and edited locally
+ *   unknown      — installed but no local manifest, so no delivery record to compare against
+ *   inconsistent — the installed source IS the current catalog file, byte for byte, and
+ *                  only its manifest disagrees. The consumer cannot have edited it into
+ *                  something identical to the catalog, so this is a split pair: the source
+ *                  and the manifest are copied in two calls with no transaction around
+ *                  them, at both ends. Without this verdict the guard said `modified` and
+ *                  told a consumer they had edited a file they never opened, which is how
+ *                  it was found.
+ *
+ * The drift is one-directional, which is worth stating because the opposite was claimed
+ * once: `clean` requires hash(installed) === manifest.version, so ANY divergence pushes
+ * the verdict toward `modified`. A false negative would need a consumer's edit to hash to
+ * the same value as the catalog file, which means it is the catalog file. It cries wolf;
+ * it does not wave things through.
  *
  * Usage: node check-local-edits.js <dest-dir> <catalog-dir> <atom>...
  */
@@ -34,11 +47,21 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-/** @returns {Map<string,'fresh'|'clean'|'modified'|'unknown'>} */
+/** @returns {Map<string,'fresh'|'clean'|'modified'|'unknown'|'inconsistent'>} */
 function checkLocalEdits(dest, catalog, atoms) {
   const states = new Map();
   const hash = (s) => crypto.createHash('sha256').update(s).digest('hex').slice(0, 12);
-  const sourceName = (atom) => (atom === 'cn' ? 'cn.ts' : `${atom}.tsx`);
+  // The delivered filename comes from the catalog manifest, not from a list of which
+  // atoms are not .tsx. That list was `atom === 'cn' ? 'cn.ts' : ...` in two files, which
+  // held until a second non-.tsx artifact existed. Falls back for a catalog generated
+  // before manifests carried `file`, so an older install still resolves.
+  const sourceName = (atom) => {
+    try {
+      const m = JSON.parse(fs.readFileSync(path.join(catalog, `${atom}.manifest.json`), 'utf8'));
+      if (m.file) return m.file;
+    } catch { /* fall through */ }
+    return atom === 'cn' ? 'cn.ts' : `${atom}.tsx`;
+  };
 
   for (const atom of atoms) {
     const localSrc = path.join(dest, sourceName(atom));
@@ -79,8 +102,24 @@ function checkLocalEdits(dest, catalog, atoms) {
       continue;
     }
 
-    const local = hash(fs.readFileSync(localSrc, 'utf8'));
-    states.set(atom, local === delivered ? 'clean' : 'modified');
+    const src = fs.readFileSync(localSrc, 'utf8');
+    const local = hash(src);
+    if (local === delivered) {
+      states.set(atom, 'clean');
+      continue;
+    }
+
+    // Byte-identical to the catalog with a manifest that says otherwise. Nothing a
+    // consumer could type produces this; the pair was delivered split. Safe to repair,
+    // because the source is already what a resync would write — only the manifest is
+    // wrong, and rewriting it destroys nothing.
+    const catalogSrc = path.join(catalog, sourceName(atom));
+    if (fs.existsSync(catalogSrc) && fs.readFileSync(catalogSrc, 'utf8') === src) {
+      states.set(atom, 'inconsistent');
+      continue;
+    }
+
+    states.set(atom, 'modified');
   }
 
   return states;

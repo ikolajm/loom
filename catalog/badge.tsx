@@ -21,16 +21,23 @@ const badgeVariants = cva('badge', {
 // whichever one its `bg` token happened to name.
 const badgeTone: Record<string, string> = {
   primary: 'primary',
-  neutral: 'neutral',
+  secondary: 'secondary',
   destructive: 'error',
   success: 'success',
   warning: 'warning',
+  neutral: 'neutral',
   info: 'info',
+};
+
+// Colours with no family. These paint nothing and read currentColor, so they resolve to
+// one class and ignore `intensity` — there is no soft form of "no colour".
+const badgeToneFixed: Record<string, string> = {
+  inherit: 'tone-inherit',
 };
 
 type BadgeSize = 'sm' | 'md' | 'lg';
 type BadgeVariant = 'filled' | 'outline' | 'ghost';
-type BadgeColor = 'primary' | 'neutral' | 'destructive' | 'success' | 'warning' | 'info';
+type BadgeColor = 'primary' | 'secondary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
 type BadgeIntensity = 'solid' | 'soft';
 
 type BadgeProps = React.HTMLAttributes<HTMLElement>
@@ -60,7 +67,7 @@ type BadgeProps = React.HTMLAttributes<HTMLElement>
  */
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ variant = 'filled', color = 'primary', intensity = 'solid', size = 'md', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
-    const tone = 'tone-' + badgeTone[color] + (intensity === 'soft' ? '-soft' : '');
+    const tone = badgeToneFixed[color] ?? 'tone-' + badgeTone[color] + (intensity === 'soft' ? '-soft' : '');
     const computedClasses = cn(badgeVariants({ variant }), tone);
 
     if (asChild) {

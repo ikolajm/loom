@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
@@ -10,27 +10,41 @@ const buttonVariants = cva('button interactive control', {
       outline: 'treat-outline',
       ghost: 'treat-ghost',
     },
-    color: {
-      primary: 'tone-primary',
-      secondary: 'tone-secondary',
-      destructive: 'tone-error',
-      success: 'tone-success',
-      warning: 'tone-warning',
-      neutral: 'tone-neutral',
-      inherit: 'tone-inherit',
-    },
   },
   defaultVariants: {
     variant: 'filled',
-    color: 'primary',
   },
 });
 
+// The family behind each colour; `intensity` picks the suffix. One declaration in the
+// schema therefore reaches both tone classes, instead of pinning this component to
+// whichever one its `bg` token happened to name.
+const buttonTone: Record<string, string> = {
+  primary: 'primary',
+  secondary: 'secondary',
+  destructive: 'error',
+  success: 'success',
+  warning: 'warning',
+  neutral: 'neutral',
+  info: 'info',
+};
+
+// Colours with no family. These paint nothing and read currentColor, so they resolve to
+// one class and ignore `intensity` — there is no soft form of "no colour".
+const buttonToneFixed: Record<string, string> = {
+  inherit: 'tone-inherit',
+};
+
 type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonVariant = 'filled' | 'outline' | 'ghost';
+type ButtonColor = 'primary' | 'secondary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
+type ButtonIntensity = 'solid' | 'soft';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
-  & VariantProps<typeof buttonVariants>
   & {
+    variant?: ButtonVariant;
+    color?: ButtonColor;
+    intensity?: ButtonIntensity;
     size?: ButtonSize;
     asChild?: boolean;
     iconOnly?: boolean;
@@ -47,8 +61,9 @@ const LoadingSpinner = () => (
 );
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, color, size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
+  ({ variant = 'filled', color = 'primary', intensity = 'solid', size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
+    const tone = buttonToneFixed[color] ?? 'tone-' + buttonTone[color] + (intensity === 'soft' ? '-soft' : '');
     const resolvedSize = iconOnly ? `icon-${size}` : size;
     const isDisabled = disabled || loading;
     const effectiveLeadingIcon = loading ? <LoadingSpinner /> : leadingIcon;
@@ -56,7 +71,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, color }), className)}
+        className={cn(buttonVariants({ variant }), tone, className)}
         data-size={resolvedSize}
         disabled={isDisabled}
         aria-busy={loading || undefined}

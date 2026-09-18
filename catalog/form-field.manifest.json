@@ -2,7 +2,8 @@
   "name": "form-field",
   "kind": "atom",
   "category": "form",
-  "description": "",
+  "file": "form-field.tsx",
+  "description": "A label, its control and its helper text as one column. The class carries the gap and nothing else — everything visible composes from the class layer, and the markup is a plain <div class=\"form-field\"> around a <label class=\"label\">, an <input class=\"input control\"> and a <span class=\"helper-text\">. What earns it a file is not the column: it is the error context. FormField publishes an `error` flag that useFieldError() reads, so a control inside it goes invalid without the call site threading a prop through every layer, and a control used outside one still honours an explicit prop. That is React context, which is the one thing on the bar that neither CSS nor HTML can express — a <fieldset> groups, but nothing in HTML propagates validity downward to an arbitrary descendant. Exports FormField, useFormField and useFieldError. WEIGHT: no runtime dependency beyond React and cn.",
   "version": "471f1b966196",
   "dependencies": [
     "cn"

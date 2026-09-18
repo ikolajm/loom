@@ -1,11 +1,18 @@
-const { buildSizeStyles, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { buildSizeStyles, buildTypographyClasses, buildColorVars, buildToneLookup, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
 function generateButton(name, config, meta) {
-  // Orthogonal model: variant (treatment) and color are independent axes.
+  // Three axes: variant = treatment, color = family, intensity = solid or soft.
   // Treatments consume the tone properties (--tone-bg/fg/text/border) set by the tone class.
+  //
+  // `color` and `intensity` cannot both be cva variants — see buildToneLookup. Button was
+  // solid-only for the same reason badge was soft-only: the tone class came straight from
+  // whichever role the schema's `bg` token named, so each atom could reach exactly one
+  // intensity and neither could reach the other's.
   const treatments = config.treatments || ['filled', 'outline', 'ghost'];
-  const { colorNames: colorKeys, toneClass } = buildColorVars(config.colors || {});
+  const intensities = config.intensities || ['solid', 'soft'];
+  const { colorNames: colorKeys, toneClass, toneFamily } = buildColorVars(config.colors || {});
+  const tones = buildToneLookup('button', colorKeys, toneFamily, toneClass);
   const sizes = filterSizes(config.sizes);
   const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
   const iconSizesConfig = filterSizes(config['icon-sizes'] || {});
@@ -20,10 +27,11 @@ function generateButton(name, config, meta) {
     allSizeEntries[`icon-${k}`] = v;
   }
 
-  // Independent axes: `variant` carries a treatment class, `color` carries a tone class.
-  // Both are plain classes from loom.css — the tone sets --tone-*, the treatment reads it.
+  // `variant` carries a treatment class and is the only cva axis; the tone is computed
+  // from color and intensity together. Both are plain classes from loom.css — the tone
+  // sets --tone-*, the treatment reads it.
   return `import { forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
@@ -32,21 +40,24 @@ const buttonVariants = cva('button interactive control', {
     variant: {
 ${treatments.map((k) => `      ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
     },
-    color: {
-${colorKeys.map((k) => `      ${k}: '${toneClass[k]}',`).join('\n')}
-    },
   },
   defaultVariants: {
     variant: '${dflt.variant || 'filled'}',
-    color: '${dflt.color || 'primary'}',
   },
 });
 
+${tones.declaration}
+
 type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonVariant = ${treatments.map(v => `'${v}'`).join(' | ')};
+type ButtonColor = ${colorKeys.map(c => `'${c}'`).join(' | ')};
+type ButtonIntensity = ${intensities.map(i => `'${i}'`).join(' | ')};
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
-  & VariantProps<typeof buttonVariants>
   & {
+    variant?: ButtonVariant;
+    color?: ButtonColor;
+    intensity?: ButtonIntensity;
     size?: ButtonSize;
     asChild?: boolean;
     iconOnly?: boolean;
@@ -63,8 +74,9 @@ const LoadingSpinner = () => (
 );
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, color, size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
+  ({ variant = '${dflt.variant || 'filled'}', color = '${dflt.color || 'primary'}', intensity = '${dflt.intensity || 'solid'}', size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
+    const tone = ${tones.expression('color', 'intensity')};
     const resolvedSize = iconOnly ? \`icon-\${size}\` : size;
     const isDisabled = disabled || loading;
     const effectiveLeadingIcon = loading ? <LoadingSpinner /> : leadingIcon;
@@ -72,7 +84,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, color }), className)}
+        className={cn(buttonVariants({ variant }), tone, className)}
         data-size={resolvedSize}
         disabled={isDisabled}
         aria-busy={loading || undefined}

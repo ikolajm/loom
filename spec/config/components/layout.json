@@ -15,7 +15,8 @@
     "default": { "variant": "default", "size": "md" }
   },
   "dialog": {
-    "$catalog": { "dependencies": ["cn", "button"] },
+    "$catalog": {
+        "description": "Modal surface built on Radix. **Read this before reaching for it.** A native <dialog> plus showModal() gives you a focus trap, the top layer (no z-index contest, no portal), Escape-to-close, inertness behind, and returnValue to tell commit from dismiss with no handler — and Loom styles it: the same .dialog, .dialog-header/-title/-description/-footer classes apply, and the scrim is dialog::backdrop. Reach for THIS component when the panel is not a <dialog> element: a portaled panel escaping an overflow or transform ancestor, or a non-modal or arbitrarily positioned surface. That path is what .dialog-fixed and .dialog-overlay exist for; on a real <dialog> both are wrong. CAUTION, and it cascades: a Radix Select cannot live inside a native <dialog>, because showModal() makes everything outside the dialog inert including the portal target. Converting a select therefore forces the dialog too. WEIGHT: Dialog and Select together cost 29.31 kB gzip on a consumer's entry chunk, against 1.98 kB for Button and Badge. Both sit behind triggers, so React.lazy around the panel moves most of it off first paint. See CATALOG_SPEC.md, Native first.", "dependencies": ["cn", "button"] },
     "variants": {
       "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "overlay": "color/surface/scrim", "shadow": "effects/shadow-3" }
     },

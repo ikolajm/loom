@@ -2,6 +2,7 @@
   "name": "cn",
   "kind": "utility",
   "category": "utility",
+  "file": "cn.ts",
   "description": "Class name merger utility (clsx). Foundation dependency for all components.",
   "version": "da62114046ab",
   "dependencies": [],

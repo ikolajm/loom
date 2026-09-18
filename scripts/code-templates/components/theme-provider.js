@@ -10,9 +10,27 @@
  * Config-driven, which is why it is generated rather than a static asset: the default
  * mode and the server-side fallback both come from `colors['default-mode']`.
  *
+ * HALF THE MECHANISM. `theme-init.js` sets `data-theme` before first paint; this owns
+ * every change after it. The split is not stylistic — React renders after the first
+ * frame, so nothing it owns can set an attribute before that frame exists.
+ *
+ * This file therefore does NOT stamp the attribute on mount. It used to, and that was a
+ * flash the snippet could not have fixed: effects run in declaration order against the
+ * values of the render that scheduled them, so the `[theme]` effect wrote
+ * DEFAULT_THEME to the DOM before the storage effect's setState had been applied. With
+ * the snippet in place the sequence was paint-correct, stamp-default, re-render,
+ * stamp-stored — the provider undoing the snippet's work and then redoing it.
+ *
+ * The mount effect adopts the stored choice and writes the attribute only when it
+ * disagrees with what is already there. That is a no-op for a consumer who inlined the
+ * snippet, and the old one-frame-late behaviour for a consumer who did not — so skipping
+ * the snippet costs the flash, never the theme.
+ *
  * No Next coupling. `'use client'` is a directive a non-Next bundler ignores, and nothing
  * here imports from `next`.
  */
+const { THEME_STORAGE_KEY } = require('./theme-init');
+
 function buildThemeProvider(configs) {
   const defaultMode = configs.colors['default-mode'] || 'dark';
 
@@ -30,7 +48,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'theme';
+const STORAGE_KEY = '${THEME_STORAGE_KEY}';
 const DEFAULT_THEME: Theme = '${defaultMode === 'dark' ? 'dark' : 'light'}';
 
 function getSystemTheme(): 'light' | 'dark' {
@@ -42,38 +60,68 @@ function resolveTheme(theme: Theme): 'light' | 'dark' {
   return theme === 'system' ? getSystemTheme() : theme;
 }
 
+/** Read the stored choice. Guarded: localStorage throws rather than returning null in a
+ *  private window with site data blocked, and an unguarded read here takes the provider
+ *  down with it. theme-init.js guards the same call for the same reason. */
+function readStored(): Theme | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Write the resolved mode to the document, and only if it is not already there.
+ *  colorScheme rides along: it is what makes the UA paint form controls, the scrollbar
+ *  gutter and the canvas to match, and no Loom stylesheet sets it. */
+function apply(r: 'light' | 'dark') {
+  const el = document.documentElement;
+  if (el.getAttribute('data-theme') !== r) el.setAttribute('data-theme', r);
+  el.style.colorScheme = r;
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
   const [resolved, setResolved] = useState<'light' | 'dark'>('${defaultMode}');
 
+  // Adopt what is stored. The apply() is a no-op when theme-init.js already set the
+  // attribute to the same value, which is the whole point of the split.
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (saved && ['light', 'dark', 'system'].includes(saved)) {
-      setThemeState(saved);
-      setResolved(resolveTheme(saved));
-    }
+    const next = readStored() ?? DEFAULT_THEME;
+    const r = resolveTheme(next);
+    setThemeState(next);
+    setResolved(r);
+    apply(r);
   }, []);
 
+  // Only while following the system. Nothing here runs on mount for a fixed theme, which
+  // is what stops this effect stamping DEFAULT_THEME over the first frame.
   useEffect(() => {
-    const r = resolveTheme(theme);
-    setResolved(r);
-    document.documentElement.setAttribute('data-theme', r);
-
-    if (theme === 'system') {
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => {
-        const sys = getSystemTheme();
-        setResolved(sys);
-        document.documentElement.setAttribute('data-theme', sys);
-      };
-      mq.addEventListener('change', handler);
-      return () => mq.removeEventListener('change', handler);
-    }
+    if (theme !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      const sys = getSystemTheme();
+      setResolved(sys);
+      apply(sys);
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, [theme]);
 
+  // The DOM write for a deliberate change lives here rather than in an effect, so a
+  // toggle takes effect in the same tick the user clicked.
   const setTheme = (t: Theme) => {
+    const r = resolveTheme(t);
     setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
+    setResolved(r);
+    apply(r);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // Storage blocked. The theme still changes for this session; it just will not
+      // survive a reload, which is better than throwing out of a click handler.
+    }
   };
 
   return (

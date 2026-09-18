@@ -145,10 +145,16 @@ function checkDocCounts(atoms) {
     const m = JSON.parse(fs.readFileSync(path.join(CATALOG, `${a}.manifest.json`), 'utf8'));
     return m.kind || 'atom';
   });
+  // `components` is by KIND, not "everything that is not cn". A snippet is delivered by
+  // the sync and is not a component: theme-init.js is text a consumer pastes into <head>,
+  // with nothing to import and no class contract. Counting it as one made three docs
+  // wrong the moment it existed.
+  const COMPONENT_KINDS = new Set(['atom', 'pattern', 'provider']);
   const expected = {
-    components: atoms.length,
+    components: kinds.filter((k) => COMPONENT_KINDS.has(k)).length,
     atoms: kinds.filter((k) => k === 'atom').length,
     patterns: kinds.filter((k) => k === 'pattern').length,
+    snippets: kinds.filter((k) => k === 'snippet').length,
     groups,
   };
   const failures = [];
@@ -845,62 +851,29 @@ function checkContrast() {
   return { failures, note: `${pairs} on-X/X pairs against WCAG AA ${AA_TEXT}:1` };
 }
 
-// --- tone-contrast ------------------------------------------------------------
-// Every tone's --tone-text against every surface it can sit on.
-//
-// `contrast` above checks a foreground against its OWN fill: on-primary against primary.
-// That is the declared pairing, and it says nothing about the treatments that paint no
-// fill at all. .treat-outline sets color: var(--tone-text) over whatever is behind it,
-// .treat-ghost sets only that, and .link reads the same property. For a non-neutral
-// family --tone-text is the base role at full strength, so the pairing that decides
-// legibility is role-against-surface, and nothing was measuring it.
-//
-// Found while deciding whether Badge should expose a ghost treatment. An outline badge
-// keeps a border when its label is too faint; a ghost badge has nothing else, so the
-// question could not be answered without this number.
-//
-// Neutral is skipped: its --tone-text is var(--on-surface), which `contrast` already
-// walks over every tier.
 const TONE_SURFACES = ['surface', 'surface-1', 'surface-2', 'surface-3'];
 
-// Pairs that fail on Loom's own default and are parked, not excused.
+// --- tone-contrast ------------------------------------------------------------
+// The colour a treatment paints its label WITH, against the surfaces it can land on.
 //
-// The real fix is a per-family text role: the AA shade walker in generate-colors.js
-// already picks the nearest shade clearing a threshold against a reference colour, and
-// pointing that at the surface tiers would give every tone a label colour that is legible
-// where it is actually used. That changes the colour of every outline badge, every ghost
-// badge and every link, so it is a flow rather than a patch. Until then these are the
-// measured state, written down.
+// `contrast` checks a foreground against its own fill — on-primary against primary.
+// That is the declared pairing and it is the wrong one for .treat-outline,
+// .treat-ghost and .link, which paint no fill at all. Until this existed, the pairing
+// that decides whether an outline badge can be read was measured by nothing.
 //
-// KEYED ON THE HEX PAIR, not the role names. These ratios belong to one palette. A
-// consumer generating their own brand gets different colours, the key misses, and their
-// failures report — which is the whole point: this is Loom's debt, not a blanket
-// exemption that travels to every project that syncs.
+// It reads {family}-text, not {family}. --tone-text used to be the base role at full
+// strength, which left 15 of 48 pairs below AA on Loom’s own default and 16 on the
+// first consumer’s brand. Those were parked by hex pair while the fix was a flow;
+// the park is deleted, because every pair now passes on both brands by construction
+// — generate-colors.js resolves the role against the most raised tier.
 //
-// A parked pair that starts passing also fails, so the list cannot rot quietly.
-const PARKED_TONE_CONTRAST = {
-  'light:secondary:surface': ['#357d7b', '#f2f1f3', 4.27],
-  'light:secondary:surface-1': ['#357d7b', '#e5e4e7', 3.79],
-  'light:secondary:surface-2': ['#357d7b', '#d9d6db', 3.34],
-  'light:secondary:surface-3': ['#357d7b', '#ccc8d0', 2.91],
-  'light:success:surface-1': ['#127d3f', '#e5e4e7', 4.11],
-  'light:success:surface-2': ['#127d3f', '#d9d6db', 3.62],
-  'light:success:surface-3': ['#127d3f', '#ccc8d0', 3.16],
-  'light:warning:surface-2': ['#7d5912', '#d9d6db', 4.41],
-  'light:warning:surface-3': ['#7d5912', '#ccc8d0', 3.85],
-  'light:info:surface-3': ['#17599c', '#ccc8d0', 4.33],
-  'dark:error:surface-2': ['#e86363', '#3f3b44', 3.33],
-  'dark:error:surface-3': ['#e86363', '#4c4752', 2.74],
-  'dark:warning:surface-3': ['#dfa020', '#4c4752', 3.94],
-  'dark:info:surface-2': ['#63a6e8', '#3f3b44', 4.24],
-  'dark:info:surface-3': ['#63a6e8', '#4c4752', 3.50],
-};
+// A brand whose ramp cannot produce a legible label still fails here, loudly, which
+// is the outcome worth having: the alternative is shipping an unreadable label.
 
 function checkToneContrast() {
   const colors = loadConfig('base/colors.json');
   const failures = [];
   let pairs = 0;
-  const matched = new Set();
 
   for (const mode of Object.keys(colors.roles || {})) {
     const groups = colors.roles[mode];
@@ -918,21 +891,28 @@ function checkToneContrast() {
       && [f, 'on-' + f, f + '-container', 'on-' + f + '-container'].every((k) => k in flat));
 
     for (const family of families) {
-      for (const surface of TONE_SURFACES) {
-        if (!flat[family] || !flat[surface]) continue;
-        pairs++;
-        const ratio = contrastRatio(flat[family], flat[surface]);
-        const park = PARKED_TONE_CONTRAST[mode + ':' + family + ':' + surface];
-        const isParked = park && park[0] === flat[family] && park[1] === flat[surface];
+      // The role --tone-text actually reads. Its absence is itself a failure: a family
+      // that qualifies for a tone but declares no text role emits
+      // `--tone-text: var(--{family}-text)` pointing at nothing, and an invalid
+      // custom-property reference drops the whole declaration — so the label renders as
+      // whatever it inherited rather than as the tone, silently.
+      const label = flat[family + '-text'];
+      if (!label) {
+        failures.push(
+          mode + ': ' + family + ' qualifies for a tone but declares no ' + family
+          + '-text role, so .tone-' + family + ' points --tone-text at an undefined property'
+        );
+        continue;
+      }
 
-        if (isParked) {
-          matched.add(mode + ':' + family + ':' + surface);
-          continue;
-        }
+      for (const surface of TONE_SURFACES) {
+        if (!flat[surface]) continue;
+        pairs++;
+        const ratio = contrastRatio(label, flat[surface]);
 
         if (ratio < AA_TEXT) {
           failures.push(
-            mode + ': tone-' + family + ' text (' + flat[family] + ') on ' + surface
+            mode + ': tone-' + family + ' text (' + label + ') on ' + surface
             + ' (' + flat[surface] + ') — ' + ratio.toFixed(2) + ':1, needs ' + AA_TEXT
             + ' — reached by .treat-outline, .treat-ghost and .link'
           );
@@ -941,31 +921,9 @@ function checkToneContrast() {
     }
   }
 
-  // Staleness, checked the only way it can go stale.
-  //
-  // A matched park can never start passing: the key IS the colour pair, and the same two
-  // colours always give the same ratio. What does happen is the palette moves and a park
-  // stops describing anything — so the test is whether every entry found its pair.
-  //
-  // Only when at least one did. A consumer on their own brand matches none of these, and
-  // failing them for not having Loom's palette would be the opposite of the point.
-  const all = Object.keys(PARKED_TONE_CONTRAST);
-  if (matched.size > 0 && matched.size < all.length) {
-    for (const key of all) {
-      if (matched.has(key)) continue;
-      const [fg, bg, was] = PARKED_TONE_CONTRAST[key];
-      failures.push(
-        key + ' is parked at ' + was + ':1 for ' + fg + ' on ' + bg
-        + ', and no pair in this palette matches it — the colours moved, so re-measure and '
-        + 'either drop the entry or update it'
-      );
-    }
-  }
-
   return {
     failures,
-    note: pairs + ' tone-text/surface pairs against WCAG AA ' + AA_TEXT + ':1, '
-      + matched.size + ' of ' + all.length + ' parked failures matched',
+    note: pairs + ' tone-text/surface pairs against WCAG AA ' + AA_TEXT + ':1, nothing parked',
   };
 }
 
@@ -1128,14 +1086,382 @@ function checkAtomClassCoverage() {
   return { failures, note: `${checked} class and token references across ${fs.readdirSync(CATALOG).filter((f) => f.endsWith('.tsx')).length} atoms` };
 }
 
+// --- tone-matrix --------------------------------------------------------------
+// Every colour x intensity pair an atom can express must land on a class that exists,
+// and Badge and Button must answer to one colour vocabulary.
+//
+// This covers a real blind spot rather than doubling up on atom-class-coverage. An atom
+// builds its tone by concatenation - `'tone-' + badgeTone[color] + (intensity === 'soft'
+// ? '-soft' : '')` - so no scan of the source ever sees the string `tone-info-soft`.
+// atom-class-coverage reads the literal class names an atom applies and cannot resolve an
+// interpolated one. That same blind spot is why `.dialog-fixed` shipped unable to do its
+// only job with seventeen gates green.
+//
+// The failure is cheap to cause and silent: add a colour to a component schema whose
+// family does not emit the full four-role set, and the atom compiles, typechecks, renders
+// and paints nothing. buildSection15_Tones only emits a family carrying all four roles,
+// so the schema's colour list and the emitted tones can disagree with nothing noticing.
+//
+// The maps are lifted out of the GENERATED components, not recomputed from the schema.
+// Recomputing would re-derive the thing under test from its own inputs and pass whenever
+// the generator was self-consistently wrong.
+function checkToneMatrix() {
+  if (!parseComplete()) return NOT_PARSED;
+
+  const failures = [];
+
+  // Every class the emitted CSS defines, from the parsed tree rather than by matching
+  // text - an at-rule's contents are invisible to a brace-counting regex.
+  const emitted = new Set();
+  for (const { selector } of allRules()) {
+    for (const m of selector.matchAll(/\.([A-Za-z_][\w-]*)/g)) emitted.add(m[1]);
+  }
+
+  const atoms = [
+    { file: 'button', varName: 'button', type: 'Button' },
+    { file: 'badge', varName: 'badge', type: 'Badge' },
+  ];
+
+  let pairs = 0;
+  const vocabularies = {};
+
+  for (const { file, varName, type } of atoms) {
+    const srcPath = path.join(CATALOG, `${file}.tsx`);
+    if (!fs.existsSync(srcPath)) continue;
+    const src = fs.readFileSync(srcPath, 'utf8');
+
+    const grab = (name) => {
+      const m = src.match(new RegExp(`const ${name}: Record<string, string> = \\{([^}]*)\\}`));
+      const out = {};
+      if (m) for (const e of m[1].matchAll(/([\w-]+):\s*'([^']+)'/g)) out[e[1]] = e[2];
+      return out;
+    };
+    const list = (suffix) => {
+      const m = src.match(new RegExp(`type ${type}${suffix} = ([^;]+);`));
+      return m ? m[1].split('|').map((x) => x.trim().replace(/'/g, '')) : [];
+    };
+
+    const tone = grab(`${varName}Tone`);
+    const fixed = grab(`${varName}ToneFixed`);
+    const colors = list('Color');
+    const intensities = list('Intensity');
+    vocabularies[file] = colors;
+
+    if (!colors.length || !intensities.length) {
+      failures.push(`${file}: could not read its Color or Intensity union out of the generated source, so its matrix went unchecked`);
+      continue;
+    }
+
+    for (const color of colors) {
+      if (fixed[color] === undefined && tone[color] === undefined) {
+        failures.push(`${file}.${color} is in the ${type}Color union but in neither tone map, so it resolves to "tone-undefined"`);
+        continue;
+      }
+      for (const intensity of intensities) {
+        pairs++;
+        const cls = fixed[color] !== undefined
+          ? fixed[color]
+          : `tone-${tone[color]}${intensity === 'soft' ? '-soft' : ''}`;
+        if (!emitted.has(cls)) {
+          failures.push(`${file}: color="${color}" intensity="${intensity}" applies .${cls}, which nothing emits`);
+        }
+      }
+    }
+  }
+
+  // Badge and Button share one vocabulary deliberately. They diverged on the axis NAME
+  // (state against color) and later on its VALUES, both silently, and each cost a
+  // consumer call sites. Same keys, same order.
+  const names = Object.keys(vocabularies);
+  if (names.length === 2) {
+    const [a, b] = names;
+    if (vocabularies[a].join(',') !== vocabularies[b].join(',')) {
+      failures.push(
+        `${a} and ${b} no longer share one colour vocabulary - ` +
+        `${a} is [${vocabularies[a].join(', ')}] and ${b} is [${vocabularies[b].join(', ')}]. ` +
+        `Converge them in spec/config/components/button.json, or drop this assertion with a stated reason`
+      );
+    }
+  }
+
+  return { failures, note: `${pairs} colour/intensity pairs across ${names.length} atoms` };
+}
+
+// --- theme-init-parity --------------------------------------------------------
+// The two halves of the theme mechanism must agree, and only one of them can be tested
+// by running it.
+//
+// theme-init.js sets data-theme before first paint; theme-provider.tsx owns every change
+// after. They are separate artifacts in separate languages, and they share three
+// constants: the storage key, the default mode, and what an unrecognised stored value
+// resolves to. If those drift, the page paints one theme and React switches it to
+// another - which is the flash the snippet exists to remove, arriving from the other
+// side and looking exactly the same to a consumer.
+//
+// Checked by reading the EMITTED files rather than the generators. Both are produced
+// from the same module, so comparing the generators would compare a value to itself.
+function checkThemeInitParity() {
+  const failures = [];
+  const initPath = path.join(CATALOG, 'theme-init.js');
+  const provPath = path.join(CATALOG, 'theme-provider.tsx');
+
+  if (!fs.existsSync(initPath) || !fs.existsSync(provPath)) {
+    return {
+      failures: ['theme-init.js or theme-provider.tsx is missing from the catalog, so the two halves could not be compared'],
+      note: 'not run',
+    };
+  }
+
+  const init = fs.readFileSync(initPath, 'utf8');
+  const prov = fs.readFileSync(provPath, 'utf8');
+
+  // Storage key.
+  const initKey = init.match(/localStorage\.getItem\('([^']+)'\)/);
+  const provKey = prov.match(/const STORAGE_KEY = '([^']+)';/);
+  if (!initKey || !provKey) {
+    failures.push('could not read the storage key out of both files, so parity went unchecked');
+  } else if (initKey[1] !== provKey[1]) {
+    failures.push(
+      `storage key disagrees - theme-init.js reads '${initKey[1]}', theme-provider.tsx writes '${provKey[1]}'. ` +
+      'A visitor who picks a theme would have it saved under one key and read back under another, so the choice never sticks'
+    );
+  }
+
+  // Default mode. The snippet carries it twice: the fallback branch and the catch.
+  const provDefault = prov.match(/const DEFAULT_THEME: Theme = '([^']+)';/);
+  const initDefaults = [...init.matchAll(/: '(light|dark)';\n/g)].map((m) => m[1])
+    .concat([...init.matchAll(/setAttribute\('data-theme', '(light|dark)'\)/g)].map((m) => m[1]));
+  if (!provDefault) {
+    failures.push('could not read DEFAULT_THEME out of theme-provider.tsx, so parity went unchecked');
+  } else {
+    // De-duplicated: the snippet carries the default twice, in the fallback branch and in
+    // the catch, and both disagreeing is one fact rather than two.
+    for (const d of new Set(initDefaults)) {
+      if (d !== provDefault[1]) {
+        failures.push(
+          `default mode disagrees - theme-init.js falls back to '${d}', theme-provider.tsx to '${provDefault[1]}'. ` +
+          'A first-time visitor would be painted one theme and handed another on hydration'
+        );
+      }
+    }
+  }
+
+  // The snippet must never be loadable as an external script: deferred it runs after the
+  // paint it exists to precede, and undeferred it costs a round trip before it.
+  if (!/paste/i.test(init)) {
+    failures.push('theme-init.js no longer says it must be pasted inline - a consumer who <script src>s it gets the flash back and no error');
+  }
+
+  // The provider must not stamp the attribute from an effect that runs on mount with a
+  // fixed theme. That is the defect this pair was built to fix: the effect wrote
+  // DEFAULT_THEME over the snippet's value before the stored choice had applied.
+  const sysEffect = prov.match(/useEffect\(\(\) => \{\s*if \(theme !== 'system'\) return;/);
+  if (!sysEffect) {
+    failures.push(
+      "theme-provider.tsx's [theme] effect no longer bails out for a fixed theme - if it applies on mount it " +
+      'will stamp DEFAULT_THEME over whatever theme-init.js painted, and the flash returns with the snippet installed'
+    );
+  }
+
+  return { failures, note: 'storage key, default mode and mount behaviour across both halves' };
+}
+
+// --- preview-coverage ---------------------------------------------------------
+// Every class an ATOM applies is rendered in docs/preview.html, and no class on that page
+// is one the stylesheets do not emit.
+//
+// Scoped to atoms deliberately, and narrower than this started. The first version required
+// all 94 emitted classes to appear, which the page satisfied by growing a generated
+// inventory of labelled boxes. Jacob's read of that page: it should show itself off, not
+// explain itself, and an inventory of generic boxes is neither. He is right, and the
+// coverage requirement was mine rather than the defect's.
+//
+// What survives is the half with a defect behind it. `.dialog-fixed` shipped unable to do
+// its only job - it weighs (0,1,0) against `.dialog:not(dialog)` at (0,1,1), same layer,
+// so it could not position anything - and it is applied by dialog.tsx. So "every class an
+// atom applies is rendered here" would have caught it, while "every class the emitters
+// produce" was a bigger net for the same fish.
+//
+// The classes it no longer covers are the named component classes with no atom and no
+// consumer: banner, breadcrumbs, empty-state, fab, pagination, sidebar, stepper, toolbar,
+// top-bar. class-coverage still asserts those are emitted. Nothing asserts they render,
+// and that gap is now stated rather than papered over with boxes nobody reads.
+//
+// Read as GENERATED HTML, not as the generator: every class on the page is in the static
+// markup, because the one script flips attributes and calls dialog methods and never
+// touches classList. So interpolated names are already resolved.
+const PREVIEW_SKIPS = {
+  'list-item': "select.tsx's listbox row. It is `display: flex; align-items: center` and "
+    + 'nothing else, and the page has no select demo to put it in — a bare div carrying the '
+    + 'class would assert less than class-coverage already does. The better answer is a real '
+    + 'select demo showing an open listbox, which is a design task rather than a coverage one.',
+};
+
+function checkPreviewCoverage() {
+  if (!parseComplete()) return NOT_PARSED;
+
+  const page = path.join(ROOT, 'docs/preview.html');
+  if (!fs.existsSync(page)) {
+    return { failures: ['docs/preview.html is missing, so nothing could be compared against it'], note: 'not run' };
+  }
+  const html = fs.readFileSync(page, 'utf8');
+
+  const rendered = new Set();
+  for (const m of html.matchAll(/class="([^"]*)"/g)) {
+    for (const c of m[1].split(/\s+/)) if (c) rendered.add(c);
+  }
+  if (!rendered.size) {
+    return { failures: ['no class attributes found in docs/preview.html - the matcher read nothing, so this check did not run'], note: 'not run' };
+  }
+
+  const emitted = new Set();
+  for (const { selector } of allRules()) {
+    for (const m of selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) emitted.add(m[1]);
+  }
+
+  // The classes atoms actually apply, from the same string positions atom-class-coverage
+  // reads. Only names the stylesheets define count: the rest are utilities and prop
+  // values, which that check already polices.
+  const applied = new Set();
+  for (const file of fs.readdirSync(CATALOG).filter((f) => f.endsWith('.tsx'))) {
+    const src = fs.readFileSync(path.join(CATALOG, file), 'utf8');
+    const strings = [
+      ...src.matchAll(/className=(?:\{cn\(|\{)?\s*'([^']*)'/g),
+      ...src.matchAll(/className="([^"]*)"/g),
+      ...src.matchAll(/cva\(\s*'([^']*)'/g),
+      ...src.matchAll(/CLASSES = '([^']*)'/g),
+      ...src.matchAll(/'(tone-[a-z-]*|treat-[a-z-]*)'/g),
+    ];
+    for (const m of strings) {
+      for (const t of m[1].split(/\s+/).filter(Boolean)) if (emitted.has(t)) applied.add(t);
+    }
+  }
+  if (!applied.size) {
+    return { failures: ['no atom-applied classes were found, so this check did not run'], note: 'not run' };
+  }
+
+  const failures = [];
+  const isChrome = (c) => c.startsWith('pv-');
+
+  for (const c of [...applied].sort()) {
+    if (rendered.has(c) || PREVIEW_SKIPS[c]) continue;
+    failures.push(
+      `.${c} is applied by an atom but never rendered in docs/preview.html - it can be ` +
+      'emptied, renamed or outranked without this page changing, which is how .dialog-fixed ' +
+      'shipped unable to position anything. Render it, or add it to PREVIEW_SKIPS with a reason'
+    );
+  }
+
+  for (const c of [...rendered].sort()) {
+    if (isChrome(c) || emitted.has(c)) continue;
+    failures.push(
+      `.${c} is applied in docs/preview.html but no stylesheet emits it - the page is ` +
+      'showing a class the product does not have'
+    );
+  }
+
+  for (const c of Object.keys(PREVIEW_SKIPS)) {
+    if (!applied.has(c)) {
+      failures.push(`.${c} is in PREVIEW_SKIPS but no atom applies it any more - drop the entry`);
+    } else if (rendered.has(c)) {
+      failures.push(`.${c} is in PREVIEW_SKIPS but the page renders it now - drop the entry`);
+    }
+  }
+
+  return {
+    failures,
+    note: `${applied.size} atom-applied classes against docs/preview.html, ${Object.keys(PREVIEW_SKIPS).length} skipped`,
+  };
+}
+// --- catalog-integrity --------------------------------------------------------
+// Every catalog source hashes to the version its own manifest records.
+//
+// This is the upstream half of the overwrite guard. The guard asks "does the installed
+// source still hash to what the manifest says was delivered", and answers `modified` when
+// it does not. That answer is only meaningful if the pair was consistent when it shipped.
+// It was not, once: a consumer's `badge.tsx` hashed to df2255148d45 while its delivered
+// manifest recorded 95388483a287, and the installed file turned out to be a Loom
+// intermediate that existed only between a schema edit and the generator rewrite after
+// it. The consumer was told they had edited a file they had never opened, and quietly
+// stopped receiving fixes to it.
+//
+// The pair is written in two calls by the generator and copied in two more by the sync,
+// with no transaction at either end, so a process that dies between them leaves a split.
+// Nothing can make two filesystem writes atomic here; what is cheap is refusing to ship
+// the result. This fails the build, and sync.js now repairs the downstream half by
+// recognising the one case that is provably not a consumer edit.
+//
+// `$catalog.version` in a component schema overrides the content hash, which would make
+// this fail for a legitimate reason. No config sets one today; if one ever does, the
+// failure says so rather than looking like corruption.
+function checkCatalogIntegrity() {
+  const failures = [];
+  const crypto = require('crypto');
+  const hash = (str) => crypto.createHash('sha256').update(str).digest('hex').slice(0, 12);
+
+  const manifests = fs.readdirSync(CATALOG).filter((f) => f.endsWith('.manifest.json'));
+  if (!manifests.length) {
+    return { failures: ['no manifests found in catalog/, so no pair could be checked'], note: 'not run' };
+  }
+
+  let checked = 0;
+  for (const f of manifests) {
+    const name = f.replace(/\.manifest\.json$/, '');
+    let manifest;
+    try {
+      manifest = JSON.parse(fs.readFileSync(path.join(CATALOG, f), 'utf8'));
+    } catch (err) {
+      failures.push(`${name}: its manifest does not parse — ${err.message}`);
+      continue;
+    }
+
+    const srcName = manifest.file || (name === 'cn' ? 'cn.ts' : `${name}.tsx`);
+    const srcPath = path.join(CATALOG, srcName);
+    if (!fs.existsSync(srcPath)) {
+      failures.push(`${name}: its manifest names ${srcName}, which is not in the catalog — the pair is half delivered`);
+      continue;
+    }
+    if (!manifest.version) {
+      failures.push(`${name}: its manifest records no version, so the overwrite guard has nothing to compare an install against`);
+      continue;
+    }
+
+    // A delivered manifest that describes nothing. `dialog` and `select` shipped this way
+    // — the two components a consumer most needs to think before reaching for, carrying an
+    // empty string while badge and button carried paragraphs. Nothing noticed, because the
+    // description is only read by a human opening the file.
+    if (!String(manifest.description || '').trim()) {
+      failures.push(
+        `${name}: its manifest has no description. That is the only thing a consumer reads ` +
+        'when deciding whether to take this file, and it ships with every copy'
+      );
+    }
+
+    checked++;
+    const actual = hash(fs.readFileSync(srcPath, 'utf8'));
+    if (actual !== manifest.version) {
+      failures.push(
+        `${name}: ${srcName} hashes to ${actual} but its manifest records ${manifest.version}. ` +
+        'The pair is split, and shipping it tells every consumer who installs it that they ' +
+        'edited the file. Regenerate the catalog; if a schema sets $catalog.version, that ' +
+        'override is the cause and this check has to learn about it'
+      );
+    }
+  }
+
+  return { failures, note: `${checked} source/manifest pairs` };
+}
+
 function verify() {
   const atoms = atomNames();
   const checks = [
     ['css-parse', checkCssParse()],
     ['doc-counts', checkDocCounts(atoms)],
+    ['catalog-integrity', checkCatalogIntegrity()],
     ['manifest-deps', checkManifestDeps(atoms)],
     ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
     ['class-coverage', checkClassCoverage()],
+    ['preview-coverage', checkPreviewCoverage()],
     ['atom-class-coverage', checkAtomClassCoverage()],
     ['class-box-model', checkClassBoxModel()],
     ['phantom-parts', checkPhantomParts()],
@@ -1143,6 +1469,8 @@ function verify() {
     ['base-config-provenance', checkBaseConfigProvenance()],
     ['dead-exports', checkDeadExports()],
     ['tone-fallbacks', checkToneFallbacks()],
+    ['tone-matrix', checkToneMatrix()],
+    ['theme-init-parity', checkThemeInitParity()],
     ['focus-ring', checkFocusRing()],
     ['touch-target', checkTouchTarget()],
     ['contrast', checkContrast()],

@@ -1,4 +1,4 @@
-const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, buildToneLookup, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
@@ -18,7 +18,9 @@ function generateBadge(name, config, meta) {
   // Button's does, and `intensity` picks the suffix.
   const treatments = config.treatments || ['filled', 'outline'];
   const intensities = config.intensities || ['solid', 'soft'];
-  const { colorNames, toneFamily } = buildColorVars(config.colors || {});
+  const { colorNames, toneFamily, toneClass } = buildColorVars(config.colors || {});
+  // Shared with button, so the two cannot drift apart the way they did before.
+  const tones = buildToneLookup('badge', colorNames, toneFamily, toneClass);
 
   // Text-bearing sizes
   const sizes = filterSizes(config.sizes || {});
@@ -75,12 +77,7 @@ ${treatments.map(v => `      '${v}': '${TREATMENT_CLASSES[v]}',`).join('\n')}
   },
 });
 
-// The family behind each colour; \`intensity\` picks the suffix. One declaration in the
-// schema therefore reaches both tone classes, instead of pinning this component to
-// whichever one its \`bg\` token happened to name.
-const badgeTone: Record<string, string> = {
-${colorNames.map(c => `  ${c}: '${toneFamily[c]}',`).join('\n')}
-};
+${tones.declaration}
 
 type BadgeSize = 'sm' | 'md' | 'lg';
 type BadgeVariant = ${treatments.map(v => `'${v}'`).join(' | ')};
@@ -114,7 +111,7 @@ type BadgeProps = React.HTMLAttributes<HTMLElement>
  */
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ variant = '${dflt.variant || 'filled'}', color = '${dflt.color || 'primary'}', intensity = '${dflt.intensity || 'solid'}', size = '${dflt.size || 'md'}', asChild = false, leadingIcon, trailingIcon, className, children, ...props }, ref) => {
-    const tone = 'tone-' + badgeTone[color] + (intensity === 'soft' ? '-soft' : '');
+    const tone = ${tones.expression('color', 'intensity')};
     const computedClasses = cn(badgeVariants({ variant }), tone);
 
     if (asChild) {

@@ -46,6 +46,24 @@
       "info-container": "info.800"
     }
   },
+  "$textShades": {
+    "light": {
+      "primary-text": "primary.600",
+      "secondary-text": "secondary.800",
+      "error-text": "error.600",
+      "success-text": "success.800",
+      "warning-text": "warning.800",
+      "info-text": "info.700"
+    },
+    "dark": {
+      "primary-text": "primary.200",
+      "secondary-text": "secondary.300",
+      "error-text": "error.200",
+      "success-text": "success.400",
+      "warning-text": "warning.300",
+      "info-text": "info.200"
+    }
+  },
   "default-mode": "dark",
   "palette": {
     "primary": {
@@ -154,6 +172,7 @@
       "primary": {
         "primary": "#54159d",
         "on-primary": "#FFFFFF",
+        "primary-text": "#54159d",
         "primary-container": "#e5dcef",
         "on-primary-container": "#240f3e",
         "primary-fixed": "#cab1e7",
@@ -164,6 +183,7 @@
       "secondary": {
         "secondary": "#357d7b",
         "on-secondary": "#FFFFFF",
+        "secondary-text": "#224f4d",
         "secondary-container": "#e0ebea",
         "on-secondary-container": "#1a3332",
         "secondary-fixed": "#bedad9",
@@ -196,24 +216,28 @@
       "error": {
         "error": "#9c1717",
         "on-error": "#FFFFFF",
+        "error-text": "#9c1717",
         "error-container": "#efdcdc",
         "on-error-container": "#3d0f0f"
       },
       "success": {
         "success": "#127d3f",
         "on-success": "#FFFFFF",
+        "success-text": "#0e6231",
         "success-container": "#dcefe4",
         "on-success-container": "#0f3d23"
       },
       "warning": {
         "warning": "#7d5912",
         "on-warning": "#FFFFFF",
+        "warning-text": "#62460e",
         "warning-container": "#efe9dc",
         "on-warning-container": "#3d2e0f"
       },
       "info": {
         "info": "#17599c",
         "on-info": "#FFFFFF",
+        "info-text": "#12477d",
         "info-container": "#dce6ef",
         "on-info-container": "#0f263d"
       },
@@ -225,6 +249,7 @@
       "primary": {
         "primary": "#cab1e7",
         "on-primary": "#240f3e",
+        "primary-text": "#cab1e7",
         "primary-container": "#350d63",
         "on-primary-container": "#e5dcef",
         "primary-fixed": "#cab1e7",
@@ -235,6 +260,7 @@
       "secondary": {
         "secondary": "#82cac7",
         "on-secondary": "#1a3332",
+        "secondary-text": "#82cac7",
         "secondary-container": "#224f4d",
         "on-secondary-container": "#e0ebea",
         "secondary-fixed": "#bedad9",
@@ -267,24 +293,28 @@
       "error": {
         "error": "#e86363",
         "on-error": "#3d0f0f",
+        "error-text": "#e7b1b1",
         "error-container": "#620e0e",
         "on-error-container": "#efdcdc"
       },
       "success": {
         "success": "#20df70",
         "on-success": "#0f3d23",
+        "success-text": "#20df70",
         "success-container": "#0e6231",
         "on-success-container": "#dcefe4"
       },
       "warning": {
         "warning": "#dfa020",
         "on-warning": "#3d2e0f",
+        "warning-text": "#e8bc63",
         "warning-container": "#62460e",
         "on-warning-container": "#efe9dc"
       },
       "info": {
         "info": "#63a6e8",
         "on-info": "#0f263d",
+        "info-text": "#b1cce7",
         "info-container": "#0e3862",
         "on-info-container": "#dce6ef"
       },

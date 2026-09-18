@@ -399,6 +399,62 @@ function buildTypographyClasses(config) {
   return classes.join(' ');
 }
 
+/**
+ * Emit the tone lookup a component with an `intensity` axis needs.
+ *
+ * `color` picks a family and `intensity` picks the suffix, so what is wanted is ONE class
+ * built from two choices — `tone-error` against `tone-error-soft`. cva cannot express
+ * that: each of its axes contributes its own class independently, so saying it there
+ * means a compound matrix of colours times intensities. A lookup on the family is the
+ * same statement without the entries, and cva keeps the treatment.
+ *
+ * Shared by badge and button rather than written twice. They diverged once already —
+ * badge's schema declared containers and button's declared base roles, so each could
+ * reach exactly one intensity and neither could reach the other's — and the fix is worth
+ * only one copy.
+ *
+ * A colour with no family is emitted separately and ignores intensity. `inherit` is the
+ * case: it paints nothing and reads currentColor, so there is no soft form to select.
+ * buildColorVars marks those with `toneFamily[name] === null`. When a component has none,
+ * the second map is omitted entirely, so a component that never declares such a colour
+ * emits exactly what it emitted before this existed.
+ */
+function buildToneLookup(varName, colorNames, toneFamily, toneClass) {
+  const familyColors = colorNames.filter((c) => toneFamily[c] !== null);
+  const fixedColors = colorNames.filter((c) => toneFamily[c] === null);
+
+  const familyMap =
+    `// The family behind each colour; \`intensity\` picks the suffix. One declaration in the\n` +
+    `// schema therefore reaches both tone classes, instead of pinning this component to\n` +
+    `// whichever one its \`bg\` token happened to name.\n` +
+    `const ${varName}Tone: Record<string, string> = {\n` +
+    familyColors.map((c) => `  ${c}: '${toneFamily[c]}',`).join('\n') +
+    `\n};`;
+
+  if (!fixedColors.length) {
+    return {
+      declaration: familyMap,
+      expression: (color, intensity) =>
+        `'tone-' + ${varName}Tone[${color}] + (${intensity} === 'soft' ? '-soft' : '')`,
+    };
+  }
+
+  const fixedMap =
+    `\n\n// Colours with no family. These paint nothing and read currentColor, so they resolve to\n` +
+    `// one class and ignore \`intensity\` — there is no soft form of "no colour".\n` +
+    `const ${varName}ToneFixed: Record<string, string> = {\n` +
+    fixedColors.map((c) => `  ${c}: '${toneClass[c]}',`).join('\n') +
+    `\n};`;
+
+  return {
+    declaration: familyMap + fixedMap,
+    expression: (color, intensity) =>
+      `${varName}ToneFixed[${color}] ?? 'tone-' + ${varName}Tone[${color}] + ` +
+      `(${intensity} === 'soft' ? '-soft' : '')`,
+  };
+}
+
+
 module.exports = {
   expandSizeConstants,
   loadAllConfigs,
@@ -414,6 +470,7 @@ module.exports = {
   TREATMENT_CLASSES,
   ICON_SLOT_CLASS,
   buildColorVars,
+  buildToneLookup,
   buildSizeStyles,
   buildTypographyClasses,
   resolveBase,

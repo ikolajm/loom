@@ -2,8 +2,9 @@
   "name": "button",
   "kind": "atom",
   "category": "button",
-  "description": "Primary action button — orthogonal variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral/inherit). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons. The `inherit` color reads currentColor — for icon-button affordances embedded in colored surfaces (e.g. a Banner dismiss) that must take the parent's foreground.",
-  "version": "537b5d1b9868",
+  "file": "button.tsx",
+  "description": "Primary action button — variant (filled/outline/ghost) × color (primary/secondary/destructive/success/warning/neutral/inherit) × intensity (solid/soft). Sizes determine padding/typography. Supports iconOnly mode, leading/trailing icon slots, loading state. Slottable composition for asChild alongside icons. `intensity` picks the strength of the family `color` selects: solid is the base role, soft its container — the same axis Badge carries, so the two answer to one vocabulary. `inherit` reads currentColor and ignores intensity, having no family: use it for an icon affordance on a coloured surface that must take the parent’s foreground, and, with variant=ghost, for a button whose appearance the consumer’s own class owns — that pair paints nothing, which is what loom.base already gives a bare button. It still carries data-size, so it takes its tier’s height, padding and action font; markup hand-written as `button interactive control` takes none of those.",
+  "version": "24ffc469f001",
   "dependencies": [
     "cn"
   ],
