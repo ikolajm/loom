@@ -294,8 +294,10 @@ What went with it and has no replacement: `story-coverage`, which asserted every
 rendered somewhere. A static page cannot render TSX. After appearance moved into the class
 layer the page does show everything an atom *looks* like, and what remains in the TSX is
 behavior — focus traps, portals, keyboard nav — which a gallery never verified by being
-looked at either. `atom-class-coverage` covers the seam between them: every class an atom
-applies must exist in the CSS.
+looked at either. The seam between them is closed at generation:
+`cls()` resolves every class an atom applies against `classManifest()`, the set the
+stylesheets actually emit, so a name the CSS does not define stops the build.
+`atom-class-coverage` re-checks the emitted catalog as a backstop.
 
 ---
 

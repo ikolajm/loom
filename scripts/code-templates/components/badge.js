@@ -1,4 +1,4 @@
-const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, buildToneLookup, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 function generateBadge(name, config, meta) {
@@ -66,10 +66,10 @@ import { cva } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
-const badgeVariants = cva('badge', {
+const badgeVariants = cva('${cls('badge', 'badge')}', {
   variants: {
     variant: {
-${treatments.map(v => `      '${v}': '${TREATMENT_CLASSES[v]}',`).join('\n')}
+${treatments.map(v => `      '${v}': '${cls(TREATMENT_CLASSES[v], 'badge')}',`).join('\n')}
     },
   },
   defaultVariants: {
@@ -124,9 +124,9 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
               fragment and put className on it: React warns and drops it, so asChild
               rendered the consumer's element carrying none of the badge's classes. */}
           {[
-            leadingIcon && <span key="lead" className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>,
+            leadingIcon && <span key="lead" className={'${cls(ICON_SLOT_CLASS, 'badge')}'}>{leadingIcon}</span>,
             <Slottable key="label">{children}</Slottable>,
-            trailingIcon && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
+            trailingIcon && <span key="trail" className={'${cls(ICON_SLOT_CLASS, 'badge')}'}>{trailingIcon}</span>,
           ]}
         </Slot>
       );
@@ -134,9 +134,9 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
     return (
       <span ref={ref} className={cn(computedClasses, className)} data-size={size} {...props}>
-        {leadingIcon && <span className={'${ICON_SLOT_CLASS}'}>{leadingIcon}</span>}
+        {leadingIcon && <span className={'${cls(ICON_SLOT_CLASS, 'badge')}'}>{leadingIcon}</span>}
         {children}
-        {trailingIcon && <span className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>}
+        {trailingIcon && <span className={'${cls(ICON_SLOT_CLASS, 'badge')}'}>{trailingIcon}</span>}
       </span>
     );
   }

@@ -1,4 +1,4 @@
-const { buildSizeStyles } = require('../shared');
+const { buildSizeStyles, cls } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
 /**
@@ -13,7 +13,7 @@ function closeButton(alias, pad) {
   // the cascade (same footgun as the carousel arrows).
   return [
     `${pad}{showClose && (`,
-    `${pad}  <div className="dialog-close">`,
+    `${pad}  <div className="${cls('dialog-close', 'dialog')}">`,
     `${pad}    <${alias}.Close asChild>`,
     `${pad}      <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">`,
     `${pad}        <X />`,
@@ -55,7 +55,7 @@ const DialogOverlay = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay ref={ref} className={cn('dialog-overlay', className)} {...props} />
+  <DialogPrimitive.Overlay ref={ref} className={cn('${cls('dialog-overlay', 'dialog')}', className)} {...props} />
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
@@ -67,7 +67,7 @@ const DialogContent = forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={cn('dialog dialog-fixed', className)}
+      className={cn('${cls('dialog dialog-fixed', 'dialog')}', className)}
       data-size={size}
       data-variant="default"
       {...props}
@@ -81,7 +81,7 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('dialog-header', className)} {...props} />
+    <div ref={ref} className={cn('${cls('dialog-header', 'dialog')}', className)} {...props} />
   )
 );
 DialogHeader.displayName = 'DialogHeader';
@@ -90,7 +90,7 @@ const DialogTitle = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title ref={ref} className={cn('dialog-title', className)} {...props} />
+  <DialogPrimitive.Title ref={ref} className={cn('${cls('dialog-title', 'dialog')}', className)} {...props} />
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
@@ -98,13 +98,13 @@ const DialogDescription = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description ref={ref} className={cn('dialog-description', className)} {...props} />
+  <DialogPrimitive.Description ref={ref} className={cn('${cls('dialog-description', 'dialog')}', className)} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 const DialogFooter = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('dialog-footer', className)} {...props} />
+    <div ref={ref} className={cn('${cls('dialog-footer', 'dialog')}', className)} {...props} />
   )
 );
 DialogFooter.displayName = 'DialogFooter';

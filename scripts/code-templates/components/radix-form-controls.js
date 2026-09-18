@@ -1,4 +1,4 @@
-const { buildVariantStyles, buildSizeStyles } = require('../shared');
+const { buildVariantStyles, buildSizeStyles, cls } = require('../shared');
 const { filterSizes, resolveConfig, buildSizeStylesWithText } = require('./helpers');
 
 function generateRadixSelect(name, config, meta) {
@@ -33,7 +33,7 @@ const SelectTrigger = forwardRef<
   return (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn('input control interactive', className)}
+    className={cn('${cls('input control interactive', 'select')}', className)}
     data-size={size}
     aria-invalid={hasError || undefined}
     style={{ justifyContent: 'space-between', cursor: 'pointer' }}
@@ -41,7 +41,7 @@ const SelectTrigger = forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <span className="icon-slot" style={{ color: 'var(--on-surface-variant)' }}>
+      <span className="${cls('icon-slot', 'select')}" style={{ color: 'var(--on-surface-variant)' }}>
         <ChevronDown />
       </span>
     </SelectPrimitive.Icon>
@@ -62,7 +62,7 @@ const SelectContent = forwardRef<
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
-      className={cn('surface-1 elevate-2', className)}
+      className={cn('${cls('surface-1 elevate-2', 'select')}', className)}
       style={{
         position: 'relative',
         zIndex: 'var(--z-popover)',
@@ -93,13 +93,13 @@ const SelectItem = forwardRef<
 >(({ size = 'sm', className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={cn('list-item interactive control', className)}
+    className={cn('${cls('list-item interactive control', 'select')}', className)}
     data-size={size}
     style={{ borderRadius: 'var(--radius-component)', paddingInlineEnd: 'var(--space-8)', userSelect: 'none' }}
     {...props}
   >
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    <span className="icon-slot" style={{ position: 'absolute', insetInlineEnd: 'var(--space-2)' }}>
+    <span className="${cls('icon-slot', 'select')}" style={{ position: 'absolute', insetInlineEnd: 'var(--space-2)' }}>
       <SelectPrimitive.ItemIndicator>
         <Check />
       </SelectPrimitive.ItemIndicator>
@@ -129,7 +129,7 @@ const SelectLabel = forwardRef<
 >(({ size = 'sm', className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn('label', className)}
+    className={cn('${cls('label', 'select')}', className)}
     data-size={size}
     style={{ color: 'var(--on-surface-variant)', paddingInline: 'var(--space-3)', paddingBlock: 'var(--space-1)' }}
     {...props}

@@ -1797,6 +1797,41 @@ function generate() {
   };
 }
 
+/**
+ * Every class name the stylesheets emit, as one set — the thing an atom is allowed to name.
+ *
+ * Recovered by parsing this run's own output rather than assembled from the pieces that
+ * produce it, because the pieces do not enumerate. Three mechanisms mint a class here: a
+ * loop over data (`.tone-*` per colour family, `.text-*` per type role), a shared constant
+ * (TREATMENT_CLASSES, ICON_SLOT_CLASS), and hand-written CSS inside a template literal
+ * (`.interactive`, `.control`, `.surface-N`, the dialog parts). Only the first enumerates
+ * for free, and no rearrangement of componentPlan(), BASE_RULES or APPEARANCE_ONLY reaches
+ * the other two — componentPlan() covers about twenty of the eighty-eight.
+ *
+ * So this is the same postcss scan atom-class-coverage was doing after the fact, moved to
+ * before it. The technique is not the difference; the timing and the input are. It reads
+ * the strings this process just built, in memory, so the set is exact by construction
+ * rather than by agreement with a file on disk. Nothing is written, nothing has to run
+ * first, and `--only components` keeps working standalone.
+ *
+ * Reads all four files rather than the two that carry classes today, so a class appearing
+ * somewhere new cannot fall outside the set silently.
+ */
+let _classManifest = null;
+
+function classManifest() {
+  if (_classManifest) return _classManifest;
+  const postcss = require('postcss');
+  const names = new Set();
+  for (const css of Object.values(generate())) {
+    postcss.parse(css).walkRules((rule) => {
+      for (const m of rule.selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(m[1]);
+    });
+  }
+  _classManifest = names;
+  return names;
+}
+
 // --- CLI ---
 if (require.main === module) {
   const args = process.argv.slice(2);
@@ -1816,4 +1851,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generate, generateTokens, generateLayer, generateComponents, generateMain, FILES, componentPlan, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };
+module.exports = { generate, generateTokens, generateLayer, generateComponents, generateMain, FILES, componentPlan, classManifest, APPEARANCE_ONLY, BASE_RULES, NO_BOX, SELF_PROPS, SUB_PART_RULES };

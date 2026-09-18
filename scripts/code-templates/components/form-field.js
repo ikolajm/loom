@@ -1,3 +1,5 @@
+const { cls } = require('../shared');
+
 function generateFormField() {
   return `import { forwardRef, createContext, useContext } from 'react';
 import { cn } from './cn';
@@ -24,7 +26,7 @@ type FormFieldProps = React.HTMLAttributes<HTMLDivElement> & {
 const FormField = forwardRef<HTMLDivElement, FormFieldProps>(
   ({ error, className, children, ...props }, ref) => (
     <FormFieldContext.Provider value={{ error }}>
-      <div ref={ref} className={cn('form-field', className)} {...props}>
+      <div ref={ref} className={cn('${cls('form-field', 'form-field')}', className)} {...props}>
         {children}
       </div>
     </FormFieldContext.Provider>

@@ -1,4 +1,4 @@
-const { buildSizeStyles, buildTypographyClasses, buildColorVars, buildToneLookup, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { buildSizeStyles, buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 const { filterSizes, buildSizeStylesWithText } = require('./helpers');
 
 function generateButton(name, config, meta) {
@@ -35,10 +35,10 @@ import { cva } from 'class-variance-authority';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cn } from './cn';
 
-const buttonVariants = cva('button interactive control', {
+const buttonVariants = cva('${cls('button interactive control', 'button')}', {
   variants: {
     variant: {
-${treatments.map((k) => `      ${k}: '${TREATMENT_CLASSES[k]}',`).join('\n')}
+${treatments.map((k) => `      ${k}: '${cls(TREATMENT_CLASSES[k], 'button')}',`).join('\n')}
     },
   },
   defaultVariants: {
@@ -67,7 +67,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
   };
 
 const LoadingSpinner = () => (
-  <svg className="spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg className="${cls('spinner', 'button')}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
     <path d="M12 2 A 10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
   </svg>
@@ -91,7 +91,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {iconOnly ? (
-          <span className={'${ICON_SLOT_CLASS}'}>
+          <span className={'${cls(ICON_SLOT_CLASS, 'button')}'}>
             {loading ? <LoadingSpinner /> : children}
           </span>
         ) : (
@@ -101,9 +101,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           // warns and drops it, so asChild rendered the consumer's element with none of
           // the button's classes: no display, no size, and a raw svg at intrinsic size.
           [
-            effectiveLeadingIcon && <span key="lead" className={'${ICON_SLOT_CLASS}'}>{effectiveLeadingIcon}</span>,
+            effectiveLeadingIcon && <span key="lead" className={'${cls(ICON_SLOT_CLASS, 'button')}'}>{effectiveLeadingIcon}</span>,
             <Slottable key="label">{children}</Slottable>,
-            trailingIcon && <span key="trail" className={'${ICON_SLOT_CLASS}'}>{trailingIcon}</span>,
+            trailingIcon && <span key="trail" className={'${cls(ICON_SLOT_CLASS, 'button')}'}>{trailingIcon}</span>,
           ]
         )}
       </Comp>

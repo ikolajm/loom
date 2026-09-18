@@ -1259,16 +1259,31 @@ function checkTypecheck() {
 // thing being checked stops being checked.
 const CLASS_GAPS = {};
 
+// The class half is a BACKSTOP now, not the mechanism. Every naming site in the component
+// templates resolves through shared.js's `cls()`, which throws at generation against
+// classManifest() — so a name that reached a .tsx has already been checked, and this
+// re-check is tautological for every site that went through it. What it still catches is
+// the site that did not: a template author writing a literal into the JSX directly.
+//
+// It is strict now, and that is the whole point of the change. It used to fail only on a
+// TAILWIND-SHAPED unknown — a BARE set and a PREFIX regex of utility prefixes — so an
+// unknown name shaped like a Loom class passed. Renaming `.dialog-fixed` to
+// `.dialog-fixd` in the catalog passed all twenty-three gates at exit 0; renaming it to
+// `.rounded-xl` failed. Same absence from the CSS, different spelling. With the manifest
+// to check against there is no reason to guess at shape: a token in a className is a
+// class, and a class the stylesheets do not emit is a defect whatever it looks like.
+//
+// The fifth pattern is the one preview-coverage already carried and this check did not,
+// which is why `treat-filled`, `treat-outline`, `treat-ghost` and `tone-inherit` were
+// invisible here — they sit as cva variant VALUES, and none of the other four patterns
+// reaches a value. Fully interpolated names (`'tone-' + badgeTone[color] + ...`) are still
+// out of reach of any scan; those are resolved at generation by buildToneLookup and
+// checked against the emitted CSS by tone-matrix.
 function checkAtomClassCoverage() {
   if (!sheets()) return { failures: [], note: 'postcss not installed — skipped' };
   if (!parseComplete()) return NOT_PARSED;
-  const defined = new Set(allRules().flatMap(({ selector }) =>
-    (selector.match(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g) || []).map((c) => c.slice(1))));
-
-  // Tailwind-shaped: a utility prefix followed by a dash, or a bare utility word. A class
-  // Loom does not define and that looks like a utility is a class nothing will style.
-  const BARE = new Set(['flex', 'grid', 'block', 'hidden', 'relative', 'absolute', 'fixed', 'truncate', 'shrink-0', 'grow']);
-  const PREFIX = /^!?-?(p|m|px|py|pt|pb|pl|pr|mx|my|ml|mr|w|h|gap|space|text|bg|border|rounded|shadow|z|inset|top|left|right|bottom|size|flex|items|justify|grid|opacity|cursor|overflow|animate|transition|duration|ease|translate|ring|outline|font|leading|tracking|hover|fill|stroke)(-|$)/;
+  const { classManifest } = require('./generate-tokens-css');
+  const defined = classManifest();
 
   const failures = [];
   let checked = 0;
@@ -1282,15 +1297,19 @@ function checkAtomClassCoverage() {
       ...src.matchAll(/className="([^"]*)"/g),
       ...src.matchAll(/cva\(\s*'([^']*)'/g),
       ...src.matchAll(/CLASSES = '([^']*)'/g),
+      // Anchored at both ends so the bare `'tone-'` prefix in the concatenated
+      // expression is not read as a class. It is a fragment, not a name.
+      ...src.matchAll(/'(tone-[a-z][a-z-]*[a-z]|treat-[a-z][a-z-]*[a-z])'/g),
     ];
     for (const m of strings) {
       for (const token of m[1].split(/\s+/).filter(Boolean)) {
         checked += 1;
-        const base = token.replace(/^.*:/, '').replace(/\[.*\]/, '').replace(/^!/, '');
-        if (defined.has(base) || allowed.has(token)) continue;
-        if (BARE.has(base) || PREFIX.test(base)) {
-          failures.push(`${name} applies \`${token}\`, which no rule in the emitted CSS defines — it will render as nothing`);
-        }
+        if (defined.has(token) || allowed.has(token)) continue;
+        failures.push(
+          `${name} applies \`${token}\`, which no rule in the emitted CSS defines — it will ` +
+          'render as nothing. Route the name through cls() in the template so this fails at ' +
+          'generation instead of here'
+        );
       }
     }
   }
@@ -1569,7 +1588,7 @@ function checkPreviewCoverage() {
       ...src.matchAll(/className="([^"]*)"/g),
       ...src.matchAll(/cva\(\s*'([^']*)'/g),
       ...src.matchAll(/CLASSES = '([^']*)'/g),
-      ...src.matchAll(/'(tone-[a-z-]*|treat-[a-z-]*)'/g),
+      ...src.matchAll(/'(tone-[a-z][a-z-]*[a-z]|treat-[a-z][a-z-]*[a-z])'/g),
     ];
     for (const m of strings) {
       for (const t of m[1].split(/\s+/).filter(Boolean)) if (emitted.has(t)) applied.add(t);

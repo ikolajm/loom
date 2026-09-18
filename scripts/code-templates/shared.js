@@ -180,6 +180,42 @@ const TREATMENT_CLASSES = {
 };
 
 /**
+ * Resolve a class string against the set the stylesheets actually emit. Throws on a name
+ * no rule defines.
+ *
+ * This is the one gate that runs at the moment a name is minted rather than after the
+ * artifact is on disk, and it exists because the after-the-fact ones do not close the
+ * seam. `atom-class-coverage` only fails on a name shaped like a Tailwind utility — its
+ * BARE set and PREFIX regex — so renaming `.dialog-fixed` to `.dialog-fixd` in the
+ * template passed the entire gate list at exit 0, while renaming it to `.rounded-xl`
+ * failed. Both names are equally absent from the CSS; only their shape differed.
+ * `preview-coverage` filters its set to already-emitted names before comparing, so a
+ * phantom does not fail it either — it silently leaves the population, and the count in
+ * the note drops with nothing going red.
+ *
+ * Required lazily. generate-tokens-css.js does not import this module, so there is no
+ * cycle, but a top-level import would force a full CSS generation at load time for every
+ * consumer of shared.js — including ones that never mint a class.
+ *
+ * `where` is the atom, so the error names the file to open rather than the mechanism.
+ */
+function cls(spec, where) {
+  const { classManifest } = require('./generate-tokens-css');
+  const manifest = classManifest();
+  const names = String(spec).split(/\s+/).filter(Boolean);
+  const unknown = names.filter((n) => !manifest.has(n));
+  if (unknown.length) {
+    const subject = where ? `${where} names` : 'a component template names';
+    throw new Error(
+      `${subject} ${unknown.map((n) => `\`${n}\``).join(', ')}, which no stylesheet emits. ` +
+      'An atom can only apply a class the class layer defines — emit the rule in ' +
+      'generate-tokens-css.js, or fix the name.'
+    );
+  }
+  return names.join(' ');
+}
+
+/**
  * Map an atom's declared color entry onto a tone class from loom.css.
  *
  * The tone vocabulary belongs to the color system, not to the atom: every family carries
@@ -423,6 +459,18 @@ function buildToneLookup(varName, colorNames, toneFamily, toneClass) {
   const familyColors = colorNames.filter((c) => toneFamily[c] !== null);
   const fixedColors = colorNames.filter((c) => toneFamily[c] === null);
 
+  // Resolve every pair the atom can express, here, where the family list is still in hand.
+  // The emitted TSX builds these by concatenation — `'tone-' + badgeTone[color] +
+  // (intensity === 'soft' ? '-soft' : '')` — so no scan of the generated source ever sees
+  // the string `tone-info-soft`, which atom-class-coverage states as its own blind spot.
+  // The concatenation has exactly two shapes and both are known at this point, so the
+  // whole matrix checks in four lines.
+  for (const c of familyColors) {
+    cls(`tone-${toneFamily[c]}`, `${varName} color "${c}"`);
+    cls(`tone-${toneFamily[c]}-soft`, `${varName} color "${c}" at soft intensity`);
+  }
+  for (const c of fixedColors) cls(toneClass[c], `${varName} color "${c}"`);
+
   const familyMap =
     `// The family behind each colour; \`intensity\` picks the suffix. One declaration in the\n` +
     `// schema therefore reaches both tone classes, instead of pinning this component to\n` +
@@ -467,6 +515,7 @@ module.exports = {
   borderWidthToClass,
   maxWidthToClass,
   buildVariantStyles,
+  cls,
   TREATMENT_CLASSES,
   ICON_SLOT_CLASS,
   buildColorVars,

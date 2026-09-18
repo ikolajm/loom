@@ -237,6 +237,18 @@ everything green, because its appearance was Tailwind utilities that resolved th
 bridge that had been removed — present in the TSX, absent from the CSS, and invisible to
 tsc, which does not read CSS at all.
 
+**The first half of that is enforced a stage earlier now, and this check is the backstop.**
+`generate-tokens-css.js` exports `classManifest()` — every class name the stylesheets
+emit, parsed from the run's own output — and `shared.js`'s `cls()` resolves each naming
+site in the component templates against it, so a class the CSS does not define stops
+generation with the atom named. `buildToneLookup` resolves every colour/intensity pair the
+same way, which reaches the interpolated names (`'tone-' + badgeTone[color] + ...`) that no
+scan of the emitted source can see.
+
+What the gate still covers is a template that writes a class literal into the JSX without
+going through `cls()`. It is strict for that reason: it used to fail only on a
+Tailwind-*shaped* unknown, so a phantom spelled like a Loom class passed every check.
+
 `base-config-provenance` is the one that guards the committed set. It regenerates
 `spec/config/base/` in memory from `answers.example.json` and fails if the tracked
 files no longer match — which is what makes hand-editing the committed set an error
