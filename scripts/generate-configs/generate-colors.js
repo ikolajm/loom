@@ -18,6 +18,8 @@ const {
 // WCAG 2.1 AA for text. Mirrored by the `contrast` check in code-templates/verify.js,
 // which is what actually fails the build — this constant only steers the pick.
 const AA_TEXT = 4.5;
+// WCAG 1.4.11: a border is a non-text boundary, so it answers 3:1 rather than 4.5:1.
+const AA_NON_TEXT = 3.0;
 // Which surface tier a {readable.*} role must clear. The most raised one Loom ships:
 // one value has to survive every background it can land on. Loosening this to
 // 'surface' re-creates the debt on every raised tier.
@@ -85,7 +87,8 @@ function generate(answers, standards) {
       roles[mode][group] = {};
       for (const [role, template] of Object.entries(groupRoles)) {
         if (typeof template === 'string'
-            && (template.startsWith('{fill.') || template.startsWith('{readable.'))) {
+            && (template.startsWith('{fill.') || template.startsWith('{readable.')
+              || template.startsWith('{boundary.'))) {
           // Reserve the key so a later pass overwrites in place. Creating it there
           // instead would append it after every first-pass role and reorder the emitted
           // JSON — a 70-line diff for a handful of changed values.
@@ -185,16 +188,30 @@ function generate(answers, standards) {
   // name, so a colour that is not a ramp stop has nothing to alias to — the same
   // constraint that produced $fillShades.
   const textShades = {};
+  const borderShades = {};
+
+  // Two kinds through one pass. They differ only in the threshold and where the
+  // resolved shade is recorded: a label is text and answers WCAG 1.4.3 at 4.5:1, a
+  // border is a non-text boundary and answers 1.4.11 at 3:1. Running them as one loop
+  // is deliberate — a second copy is how the two would drift, and the shape that
+  // matters (nearest passing shade on the family ramp, resolved against the most
+  // raised tier) is identical.
+  const NEAREST_PASSING = [
+    { prefix: '{readable.', re: /\{readable\.(\w+)\.(\w+)\}/, min: AA_TEXT, into: textShades },
+    { prefix: '{boundary.', re: /\{boundary\.(\w+)\.(\w+)\}/, min: AA_NON_TEXT, into: borderShades },
+  ];
 
   for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
     const backdrop = roles[mode]?.surface?.[READABLE_AGAINST];
     for (const [group, groupRoles] of Object.entries(modeRoles)) {
       for (const [role, template] of Object.entries(groupRoles)) {
-        if (typeof template !== 'string' || !template.startsWith('{readable.')) continue;
-        const m = template.match(/\{readable\.(\w+)\.(\w+)\}/);
+        if (typeof template !== 'string') continue;
+        const kind = NEAREST_PASSING.find((k) => template.startsWith(k.prefix));
+        if (!kind) continue;
+        const m = template.match(kind.re);
         if (!m || !palette[m[1]] || !backdrop || !String(backdrop).startsWith('#')) {
           roles[mode][group][role] = m ? palette[m[1]]?.[m[2]] || template : template;
-          if (m) (textShades[mode] = textShades[mode] || {})[role] = `${m[1]}.${m[2]}`;
+          if (m) (kind.into[mode] = kind.into[mode] || {})[role] = `${m[1]}.${m[2]}`;
           continue;
         }
         const [, family, startShade] = m;
@@ -202,14 +219,14 @@ function generate(answers, standards) {
         const startIdx = shades.indexOf(startShade);
         const passing = shades
           .map((sh, i) => ({ sh, i, hex: palette[family][sh] }))
-          .filter((c) => contrastRatio(c.hex, backdrop) >= AA_TEXT)
+          .filter((c) => contrastRatio(c.hex, backdrop) >= kind.min)
           .sort((a, b) => Math.abs(a.i - startIdx) - Math.abs(b.i - startIdx));
-        // No passing shade keeps the start, and the tone-contrast check fails the build
-        // loudly. A brand whose ramp cannot produce a legible label is a brand problem,
-        // and shipping it quietly is the failure this replaces.
+        // No passing shade keeps the start, and the tone-contrast / border-contrast
+        // checks fail the build loudly. A brand whose ramp cannot produce a legible
+        // label is a brand problem, and shipping it quietly is the failure this replaces.
         const landed = passing.length ? passing[0].sh : startShade;
         roles[mode][group][role] = palette[family][landed] || template;
-        (textShades[mode] = textShades[mode] || {})[role] = `${family}.${landed}`;
+        (kind.into[mode] = kind.into[mode] || {})[role] = `${family}.${landed}`;
       }
     }
   }
@@ -230,6 +247,11 @@ function generate(answers, standards) {
     // $fillShades and for the same reason: Figma must alias the primitive the code
     // shipped, not the one the template asked for.
     $textShades: textShades,
+
+    // Resolved shade per {boundary.*} role, per mode. Same job as $textShades at the
+    // non-text threshold — without it a {boundary.*} template travels raw into the
+    // Figma plugin console, which is what $fillShades' own comment records happening.
+    $borderShades: borderShades,
 
     // Which mode loads first. Lives here, with the generated colors, because it is a
     // per-project answer: standards.json declares itself "values locked across all

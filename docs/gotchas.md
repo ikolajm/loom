@@ -134,6 +134,61 @@ shape of what is coming, and it does both without moving, so there is nothing to
 
 ---
 
+## The target floor moves between a laptop and a phone, and your CSS does not say so
+
+**Symptom.** A `data-size="sm"` button measures 32px on your laptop and 44px on your
+phone. Same build, same stylesheet, no breakpoint you wrote. A dense table of small
+controls looks right in review and loosens up on the device.
+
+Loom authors it once, in the class layer:
+
+```css
+@layer loom.components {
+  @media (pointer: coarse) {
+    .interactive,
+    .control { min-height: var(--touch-min); }
+  }
+}
+```
+
+`--touch-min` is 44px — WCAG 2.2 SC 2.5.5 Target Size (Enhanced), the AAA figure, which
+is also what Apple's HIG asks. `height` still ramps underneath; this only clamps.
+
+**Why it is conditioned rather than always on.** The three `controlHeight` ladders already
+encode the split. Every tier of every role in `compact` sits at or above 28px and in
+`standard` at or above 32px, so both clear SC 2.5.8 Target Size (Minimum) — the AA figure,
+24px — on their own. Only `touch` reaches 44. Clamping unconditionally imposed AAA on two
+ladders built to AA, and overrode the `controlHeight` answer, which is the mechanism a
+product has for stating its own input context.
+
+**The hole, which is deliberate and not an oversight.** `pointer` reports the *primary*
+pointer. A touchscreen laptop is `pointer: fine` with `any-pointer: coarse`, so a finger
+on that screen gets the fine ladder and a 28px target. `any-pointer: coarse` would catch
+it — and would also resolve nearly every current laptop to 44, which takes the dense case
+away from the hardware most likely to want it. No media query separates *can be touched*
+from *is being touched*.
+
+If you need the 44px guarantee on every pointer, that is what answering `controlHeight:
+touch` is for. It is a product decision, not a device test.
+
+**Taking it back.** The block is layered, so any unlayered rule of yours outranks it
+whatever the specificity:
+
+```css
+.interactive, .control { min-height: 0; }
+```
+
+Your ladder's declared heights render again on every pointer. That is a deliberate
+affordance — a target size is a decision a consumer may legitimately take back, unlike
+the print and reduced-motion blocks, which stay unlayered precisely so you cannot beat
+them casually.
+
+**The rule:** if the small tier has to stay small under a finger, say so in the answers
+file, not in a media query of your own. Overriding the floor per-breakpoint reintroduces
+exactly the build that is compliant on one device and not on another.
+
+---
+
 ## Config resolution — a stale local set silently outranks a fresh committed one
 
 **Symptom.** You change a value in `spec/direction-mappings.json`, regenerate the committed base, confirm the new value in `spec/config/base/`, and the emitted `tokens.css` still carries the old one. Everything reports success.

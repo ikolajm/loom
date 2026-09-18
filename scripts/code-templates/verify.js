@@ -506,6 +506,89 @@ function checkBaseConfigProvenance() {
   return { failures, note: `${generators.length} configs + standards` };
 }
 
+// --- config-parity -----------------------------------------------------------
+// The committed base set is verified by base-config-provenance. The set that actually
+// FEEDS the generator is not: config-paths.js prefers spec/config/local/ whenever it has
+// the file, and local is git-ignored, so nothing in a clone can check it.
+//
+// That gap is not theoretical. docs/gotchas.md carries it as a trap — "a stale local set
+// silently outranks a fresh committed one" — and it has now bitten twice in one session:
+// removing the `fab` height role left three dead --height-fab-* tokens emitting from a
+// stale local with all gates green, and two break tests written against a mutated
+// standards.json passed, because verify read a local set generated before the mutation.
+//
+// This cannot be a provenance check. Local IS a brand and its VALUES are supposed to
+// differ — that is the whole point of the slot, and base-config-provenance's own comment
+// says a check that reads whatever is local checks nothing. What must not differ is the
+// SHAPE: a brand changes what a token is, never which tokens exist. So this compares key
+// paths and ignores every value.
+//
+// Absent local set passes and says so — a fresh clone has none, and that is the
+// supported state rather than a failure.
+function checkConfigParity() {
+  const { COMMITTED_ROOT, LOCAL_ROOT } = require('../config-paths');
+  const FILES = ['colors.json', 'spacing.json', 'sizing.json', 'typography.json', 'effects.json'];
+
+  // Every key path in the object, values discarded. Arrays are compared by index, because
+  // a config array is a fixed ladder rather than a bag — a brand with a different number
+  // of ramp stops is a shape change and should report.
+  const keyPaths = (node, prefix, out) => {
+    if (node === null || typeof node !== 'object') return out;
+    const entries = Array.isArray(node)
+      ? node.map((v, i) => [String(i), v])
+      : Object.entries(node);
+    for (const [k, v] of entries) {
+      const at = prefix ? prefix + '.' + k : k;
+      out.add(at);
+      keyPaths(v, at, out);
+    }
+    return out;
+  };
+
+  const failures = [];
+  let compared = 0;
+  let present = 0;
+
+  for (const file of FILES) {
+    const localPath = path.join(LOCAL_ROOT, 'base', file);
+    if (!fs.existsSync(localPath)) continue;
+    present++;
+    const basePath = path.join(COMMITTED_ROOT, 'base', file);
+    if (!fs.existsSync(basePath)) {
+      failures.push(`local has base/${file} but the committed set does not`);
+      continue;
+    }
+    const a = keyPaths(JSON.parse(fs.readFileSync(basePath, 'utf8')), '', new Set());
+    const b = keyPaths(JSON.parse(fs.readFileSync(localPath, 'utf8')), '', new Set());
+    compared += a.size;
+
+    // $note is prose and $derived records which families were invented for THAT brand.
+    // Both are per-brand by construction and neither declares a token.
+    const skip = (k) => k.split('.').some((seg) => seg === '$note' || seg === '$derived');
+    const missing = [...a].filter((k) => !b.has(k) && !skip(k));
+    const extra = [...b].filter((k) => !a.has(k) && !skip(k));
+
+    // Report a handful, not a wall: a stale local usually differs by a whole subtree and
+    // the first few name it.
+    const show = (list) => list.slice(0, 4).join(', ') + (list.length > 4 ? `, +${list.length - 4} more` : '');
+    if (missing.length) {
+      failures.push(
+        `local base/${file} is missing ${missing.length} key(s) the committed set declares — ${show(missing)}`
+        + ' — regenerate it: npm run configs -- --input <your answers>'
+      );
+    }
+    if (extra.length) {
+      failures.push(
+        `local base/${file} declares ${extra.length} key(s) the committed set does not — ${show(extra)}`
+        + ' — usually a stale set left behind by a schema change; regenerate it'
+      );
+    }
+  }
+
+  if (!present) return { failures, note: 'no local config set — a clone builds from the committed base' };
+  return { failures, note: `${present} local config file(s), ${compared} key paths against the committed shape` };
+}
+
 // --- dead-exports ------------------------------------------------------------
 // A name on module.exports that nothing references, in any file including its own.
 //
@@ -739,9 +822,13 @@ function checkFocusRing() {
 // ladder must sit at or above the minimum, checked against direction-mappings rather than
 // against the one resolved config, so a ladder edit cannot quietly drop below it.
 //
-// Only `touch` is checked. `compact` is deliberately below the minimum — it is for
-// pointer-driven dashboards — so asserting the floor everywhere would be asserting that
-// every product is a phone.
+// Every ladder is checked, each against the level it is built for. `touch` answers the
+// AAA figure (2.5.5, 44px) because that is what it exists to promise. `compact` and
+// `standard` answer the AA minimum (2.5.8, 24px), which they clear on their own — 28px
+// and 32px are their smallest tiers — and which nothing asserted while the unconditional
+// clamp was hiding them at 44. Now that the floor is conditioned on `pointer: coarse`,
+// those two render at their declared heights on a fine pointer, so the AA floor is the
+// thing standing between a ladder edit and an undersized target.
 function checkTouchTarget() {
   const standards = readJson('spec/config/standards.json');
   const mappings = readJson('spec/direction-mappings.json');
@@ -751,15 +838,26 @@ function checkTouchTarget() {
   const failures = [];
   let checked = 0;
 
-  const ladder = mappings['control-height'].touch['semantic-height'];
-  for (const [role, tiers] of Object.entries(ladder)) {
-    for (const [tier, token] of Object.entries(tiers)) {
-      checked++;
-      const px = parseFloat(primitives[token]);
-      if (Number.isNaN(px)) {
-        failures.push(`control-height.touch.${role}.${tier} — "${token}" is not a component-height primitive`);
-      } else if (px < min) {
-        failures.push(`control-height.touch.${role}.${tier} — ${token} is ${px}px, under the ${min}px touch minimum`);
+  // WCAG 2.2 SC 2.5.8 Target Size (Minimum). Lives here with AA_TEXT and AA_NON_TEXT
+  // rather than in standards.json: it is a figure the spec fixes, not one a brand answers.
+  const AA_TARGET = 24;
+
+  for (const [name, cfg] of Object.entries(mappings['control-height'])) {
+    if (name.startsWith('$')) continue;
+    const floor = name === 'touch' ? min : AA_TARGET;
+    const level = name === 'touch' ? 'AAA 2.5.5' : 'AA 2.5.8';
+    for (const [role, tiers] of Object.entries(cfg['semantic-height'] || {})) {
+      if (role.startsWith('$')) continue;
+      for (const [tier, token] of Object.entries(tiers)) {
+        checked++;
+        const px = parseFloat(primitives[token]);
+        if (Number.isNaN(px)) {
+          failures.push(`control-height.${name}.${role}.${tier} — "${token}" is not a component-height primitive`);
+        } else if (px < floor) {
+          failures.push(
+            `control-height.${name}.${role}.${tier} — ${token} is ${px}px, under the ${floor}px ${level} floor`
+          );
+        }
       }
     }
   }
@@ -770,7 +868,7 @@ function checkTouchTarget() {
   // the floor is now the answerer's to hold. The ladder above is still verified; nothing
   // verifies that anyone selects it.
 
-  return { failures, note: `${checked} touch-ladder tiers against ${min}px` };
+  return { failures, note: `${checked} control tiers — touch against ${min}px, compact and standard against ${AA_TARGET}px` };
 }
 
 // --- contrast ---------------------------------------------------------------
@@ -931,11 +1029,23 @@ function checkToneContrast() {
 // A token is not what renders: at `opacity-muted` a pair that clears 4.5:1 as declared
 // composites toward its background and can land far below it.
 //
-// 3:1 rather than 4.5 because `muted`'s uses — the dismiss controls on badge, toast and
-// file-upload — all wrap an icon glyph, so WCAG 1.4.11 non-text applies.
-// If it ever lands on text, re-measure rather than bump this: 22 of the 50 pairs fall
-// under 4.5:1 once composited. `disabled` is excluded — WCAG 1.4.3 exempts inactive
-// components, and it is dim by intent.
+// READ THE SCOPE BEFORE TRUSTING THE GREEN. This is a BRAND check, not a check on shipped
+// rendering. Nothing in the class layer reads --opacity-muted — the dismiss controls this
+// was written for (badge, toast, file-upload) are all gone, and standards.json's note on
+// the role records why it is kept anyway. So the question it answers is conditional: IF
+// anything ever composites an `on-X` over its `X` at muted, would this brand survive it?
+// That is worth gating because the token is published to Figma with its code syntax, so a
+// designer can reach for it and hand an engineer a value with no measurement behind it.
+// It is not evidence that anything renders at muted today, and it will not go red when a
+// component starts doing so incorrectly.
+//
+// It does catch real brand defects: pb2's brand fails here at 2.99:1 on `on-secondary`,
+// which nothing had recorded before this ran against it.
+//
+// 3:1 rather than 4.5 because muted's intended uses all wrap an icon glyph, so WCAG 1.4.11
+// non-text applies. If it ever lands on text, re-measure rather than bump this: 22 of the
+// 50 pairs fall under 4.5:1 once composited. `disabled` is excluded — WCAG 1.4.3 exempts
+// inactive components, and it is dim by intent.
 const AA_NON_TEXT = 3.0;
 
 function compositeOver(fgHex, bgHex, alpha) {
@@ -990,7 +1100,160 @@ function checkCompositedContrast() {
     check('on-surface-variant', 'surface');
   }
 
-  return { failures, note: `${pairs} pairs at muted opacity ${muted} against ${AA_NON_TEXT}:1` };
+  return { failures, note: `${pairs} brand pairs at muted opacity ${muted} against ${AA_NON_TEXT}:1 — conditional, no CSS consumer` };
+}
+
+// --- border-contrast ---------------------------------------------------------
+// The colour a treatment paints its EDGE with, against the surfaces that edge can land on.
+//
+// `tone-contrast` measures --tone-text and stops there. --tone-border is a separate role
+// read by .treat-outline and by badge's and button's outline rules, and until this existed
+// nothing measured it at all — the gap the tone-text flow named on its way past.
+//
+// 3:1, not 4.5: WCAG 1.4.11 puts a non-text boundary at 3:1. Same four tiers and the same
+// worst-case argument as tone-contrast — --tone-border is one value and nothing tells a
+// badge which tier it landed on, so surface-3 is in scope or the guarantee is not one.
+//
+// It reads {family}-border, the role .tone-{family} assigns. That role is resolved by the
+// same nearest-passing-shade pass as {family}-text, at 3:1 instead of 4.5:1 — the pass
+// runs both kinds in one loop so they cannot drift. Its absence is itself a failure: a
+// family that qualifies for a tone but declares no border role emits
+// `--tone-border: var(--{family}-border)` pointing at nothing, and an invalid custom
+// property reference drops the whole declaration, so the border falls back to --outline
+// silently.
+const BORDER_CONTRAST_PARKS = {};
+
+function checkBorderContrast() {
+  const colors = loadConfig('base/colors.json');
+  const failures = [];
+  const hit = new Set();
+  let pairs = 0;
+
+  for (const mode of Object.keys(colors.roles || {})) {
+    const groups = colors.roles[mode];
+    const flat = {};
+    for (const group of Object.values(groups)) {
+      for (const [role, value] of Object.entries(group)) {
+        if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
+      }
+    }
+
+    // Same four-role qualification test as tone-contrast, restated for the same reason.
+    const families = Object.keys(groups).filter((f) => f !== 'neutral'
+      && [f, 'on-' + f, f + '-container', 'on-' + f + '-container'].every((k) => k in flat));
+
+    for (const family of families) {
+      const edge = flat[family + '-border'];
+      if (!edge) {
+        failures.push(
+          mode + ': ' + family + ' qualifies for a tone but declares no ' + family
+          + '-border role, so .tone-' + family + ' points --tone-border at an undefined property'
+        );
+        continue;
+      }
+
+      for (const surface of TONE_SURFACES) {
+        if (!flat[surface]) continue;
+        pairs++;
+        const ratio = contrastRatio(edge, flat[surface]);
+        if (ratio >= AA_NON_TEXT) continue;
+
+        const key = mode + ':' + family + ':' + surface;
+        const park = BORDER_CONTRAST_PARKS[key];
+        // Mark it seen either way. A park whose hexes no longer match is reported on the
+        // failure line below; letting the stale-park sweep fire too would add a second
+        // message saying it no longer fails, which is the one thing that is not true.
+        if (park) hit.add(key);
+        // Parked by hex pair, not by role name: a brand whose ramp moves un-parks itself
+        // rather than carrying a stale exemption for a colour that is no longer there.
+        if (park && park.pair[0] === edge && park.pair[1] === flat[surface]) continue;
+        failures.push(
+          mode + ': tone-' + family + ' border (' + edge + ') on ' + surface
+          + ' (' + flat[surface] + ') — ' + ratio.toFixed(2) + ':1, needs ' + AA_NON_TEXT
+          + ' — reached by .treat-outline'
+          + (park ? ' (parked, but for ' + park.pair.join(' on ') + ' — the ramp moved)' : '')
+        );
+      }
+    }
+  }
+
+  // A park that no longer describes a failure is a lie the next reader inherits.
+  for (const key of Object.keys(BORDER_CONTRAST_PARKS)) {
+    if (!hit.has(key)) {
+      failures.push(key + ' is in BORDER_CONTRAST_PARKS but no longer fails — drop the entry');
+    }
+  }
+
+  return {
+    failures,
+    note: pairs + ' tone-border/surface pairs against WCAG 1.4.11 ' + AA_NON_TEXT + ':1, '
+      + Object.keys(BORDER_CONTRAST_PARKS).length + ' parked',
+  };
+}
+
+// --- figma-assembly ----------------------------------------------------------
+// The Figma half is the one piece of the pipeline that `npm run generate` never touches:
+// `npm run figma` is a separate command, so its scripts can rot for as long as nobody
+// runs it. They had not been run at all until the day this was written, which is exactly
+// how long a break would have gone unnoticed.
+//
+// Built in memory from the assembler's own exports — no temp files, no side effects, the
+// same shape as base-config-provenance. It does NOT paste them into Figma; a plugin
+// console is the half a check cannot reach, and that stays a human pass.
+//
+// Two things, and they are the two that fail silently:
+//
+//   Every script must COMPILE. They are assembled by slicing templates at a marker and
+//   prepending a JSON config line, so a template edit that unbalances a brace produces a
+//   file that is written happily and throws only when a designer pastes it.
+//
+//   No role template may survive unresolved. `{fill.*}`, `{readable.*}` and `{boundary.*}`
+//   are resolved by the assembler against $fillShades / $textShades / $borderShades so
+//   Figma aliases the primitive the CODE shipped, not the one the template asked for. Miss
+//   a branch and the literal string travels into the plugin console — which the resolver's
+//   own comment records having happened once already, and which nearly happened again when
+//   {boundary.*} was added and needed a third branch.
+//
+// `{palette.*}` is deliberately NOT a failure. It is the alias path Figma needs, and it is
+// what a resolved role looks like on the other side.
+const FIGMA_RAW_TEMPLATE = /\{(fill|readable|boundary)\.[A-Za-z0-9._-]+\}/g;
+
+function checkFigmaAssembly() {
+  const vm = require('vm');
+  const failures = [];
+  let scripts = 0;
+  let bytes = 0;
+
+  let built;
+  try {
+    const { buildSharedUtils, buildAllSteps } = require('../assemble-figma');
+    built = [{ name: '00_shared-utils', script: buildSharedUtils() }, ...buildAllSteps()];
+  } catch (err) {
+    return { failures: [`the assembler threw before emitting anything — ${err.message}`], note: 'not run' };
+  }
+
+  if (!built.length) return { failures: ['the assembler emitted no scripts'], note: 'not run' };
+
+  for (const { name, script } of built) {
+    scripts++;
+    bytes += script.length;
+    // Compiles without running: these call the `figma` global, which does not exist here.
+    try {
+      new vm.Script(script, { filename: `${name}.js` });
+    } catch (err) {
+      failures.push(`${name}.js does not parse — ${err.message}`);
+    }
+    const raw = [...new Set(script.match(FIGMA_RAW_TEMPLATE) || [])];
+    if (raw.length) {
+      failures.push(
+        `${name}.js carries ${raw.length} unresolved role template(s) — ${raw.slice(0, 3).join(', ')}`
+        + (raw.length > 3 ? `, +${raw.length - 3} more` : '')
+        + ' — the assembler needs a resolver branch for that kind, or the literal reaches the plugin console'
+      );
+    }
+  }
+
+  return { failures, note: `${scripts} scripts, ${bytes} chars, compiled and swept for unresolved role templates` };
 }
 
 // --- typecheck ---------------------------------------------------------------
@@ -1202,6 +1465,10 @@ function checkToneMatrix() {
 // from the same module, so comparing the generators would compare a value to itself.
 function checkThemeInitParity() {
   const failures = [];
+  // Counted and reported so that REMOVING an assertion is visible. The 'went
+  // unchecked' failures below cover a regex that stops matching; nothing covered an
+  // edit that quietly drops a comparison, and the note is where that would show.
+  let asserted = 0;
   const initPath = path.join(CATALOG, 'theme-init.js');
   const provPath = path.join(CATALOG, 'theme-provider.tsx');
 
@@ -1218,6 +1485,7 @@ function checkThemeInitParity() {
   // Storage key.
   const initKey = init.match(/localStorage\.getItem\('([^']+)'\)/);
   const provKey = prov.match(/const STORAGE_KEY = '([^']+)';/);
+  if (initKey && provKey) asserted++;
   if (!initKey || !provKey) {
     failures.push('could not read the storage key out of both files, so parity went unchecked');
   } else if (initKey[1] !== provKey[1]) {
@@ -1231,6 +1499,7 @@ function checkThemeInitParity() {
   const provDefault = prov.match(/const DEFAULT_THEME: Theme = '([^']+)';/);
   const initDefaults = [...init.matchAll(/: '(light|dark)';\n/g)].map((m) => m[1])
     .concat([...init.matchAll(/setAttribute\('data-theme', '(light|dark)'\)/g)].map((m) => m[1]));
+  if (provDefault && initDefaults.length) asserted++;
   if (!provDefault) {
     failures.push('could not read DEFAULT_THEME out of theme-provider.tsx, so parity went unchecked');
   } else {
@@ -1248,6 +1517,7 @@ function checkThemeInitParity() {
 
   // The snippet must never be loadable as an external script: deferred it runs after the
   // paint it exists to precede, and undeferred it costs a round trip before it.
+  asserted++;
   if (!/paste/i.test(init)) {
     failures.push('theme-init.js no longer says it must be pasted inline - a consumer who <script src>s it gets the flash back and no error');
   }
@@ -1255,6 +1525,7 @@ function checkThemeInitParity() {
   // The provider must not stamp the attribute from an effect that runs on mount with a
   // fixed theme. That is the defect this pair was built to fix: the effect wrote
   // DEFAULT_THEME over the snippet's value before the stored choice had applied.
+  asserted++;
   const sysEffect = prov.match(/useEffect\(\(\) => \{\s*if \(theme !== 'system'\) return;/);
   if (!sysEffect) {
     failures.push(
@@ -1263,7 +1534,10 @@ function checkThemeInitParity() {
     );
   }
 
-  return { failures, note: 'storage key, default mode and mount behaviour across both halves' };
+  return {
+    failures,
+    note: `${asserted} of 4 parity assertions ran — storage key, default mode, paste mode, system effect`,
+  };
 }
 
 // --- preview-coverage ---------------------------------------------------------
@@ -1467,6 +1741,7 @@ function verify() {
     ['phantom-parts', checkPhantomParts()],
     ['variant-keys', checkVariantKeys()],
     ['base-config-provenance', checkBaseConfigProvenance()],
+    ['config-parity', checkConfigParity()],
     ['dead-exports', checkDeadExports()],
     ['tone-fallbacks', checkToneFallbacks()],
     ['tone-matrix', checkToneMatrix()],
@@ -1476,6 +1751,8 @@ function verify() {
     ['contrast', checkContrast()],
     ['tone-contrast', checkToneContrast()],
     ['composited-contrast', checkCompositedContrast()],
+    ['border-contrast', checkBorderContrast()],
+    ['figma-assembly', checkFigmaAssembly()],
     ['typecheck', checkTypecheck()],
   ];
 

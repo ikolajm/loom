@@ -77,7 +77,7 @@
       "color": "primary"
     },
     "opacity": {
-      "$note": "State opacities. Universal and code-only, like transition and easing — they describe what a disabled or de-emphasised control looks like, not which brand it belongs to. Emitted as --opacity-{role}; atoms write opacity-(--opacity-disabled) rather than opacity-disabled, because Tailwind v4 has no --opacity-* theme namespace and @theme therefore cannot generate an opacity-{name} utility. Reaching for @theme appears to work: the variable is emitted and the utility silently never is. `muted` carries a direction as well as a value — a secondary control rests at muted and returns to full on hover, never the reverse. Two of the four sibling dismiss controls did the opposite before this was settled, which is how the role came to mean two things.",
+      "$note": "State opacities. Universal and code-only, like transition and easing — they describe what a disabled or de-emphasised control looks like, not which brand it belongs to. Emitted as --opacity-{role}. `disabled` is read by the class layer, on .control:disabled. `muted` is NOT: its consumer was badge's dismiss control, which was removed when badge became a label that is never a target, and its three siblings (toast, file-upload) left with the catalog reduction. The role is kept rather than cut because it is published to Figma as opacity/muted with var(--opacity-muted) as its code syntax, so a designer can still reach for it, and because its direction is settled and easy to get backwards: a secondary control rests at muted and returns to full on hover, never the reverse. Two of the four sibling dismiss controls did the opposite before that was fixed. A future component wanting it writes opacity: var(--opacity-muted) and the hover return; there is no class for it, because a class for a component that does not exist yet is structure ahead of need. Nothing here is Tailwind-shaped any more — the note used to explain why atoms wrote opacity-(--opacity-disabled) as a bridge utility, and the bridge is gone.",
       "disabled": 0.5,
       "muted": 0.7
     },
@@ -95,6 +95,7 @@
           "primary": "{fill.primary.600}",
           "on-primary": "#FFFFFF",
           "primary-text": "{readable.primary.600}",
+        "primary-border": "{boundary.primary.600}",
           "primary-container": "{fill.primary.100}",
           "on-primary-container": "{palette.primary.900}",
           "primary-fixed": "{fill.primary.200}",
@@ -106,6 +107,7 @@
           "secondary": "{fill.secondary.600}",
           "on-secondary": "#FFFFFF",
           "secondary-text": "{readable.secondary.600}",
+        "secondary-border": "{boundary.secondary.600}",
           "secondary-container": "{fill.secondary.100}",
           "on-secondary-container": "{palette.secondary.900}",
           "secondary-fixed": "{fill.secondary.200}",
@@ -139,6 +141,7 @@
           "error": "{fill.error.600}",
           "on-error": "#FFFFFF",
           "error-text": "{readable.error.600}",
+        "error-border": "{boundary.error.600}",
           "error-container": "{fill.error.100}",
           "on-error-container": "{palette.error.900}"
         },
@@ -146,6 +149,7 @@
           "success": "{fill.success.600}",
           "on-success": "#FFFFFF",
           "success-text": "{readable.success.600}",
+        "success-border": "{boundary.success.600}",
           "success-container": "{fill.success.100}",
           "on-success-container": "{palette.success.900}"
         },
@@ -153,6 +157,7 @@
           "warning": "{fill.warning.600}",
           "on-warning": "#FFFFFF",
           "warning-text": "{readable.warning.600}",
+        "warning-border": "{boundary.warning.600}",
           "warning-container": "{fill.warning.100}",
           "on-warning-container": "{palette.warning.900}"
         },
@@ -160,6 +165,7 @@
           "info": "{fill.info.600}",
           "on-info": "#FFFFFF",
           "info-text": "{readable.info.600}",
+        "info-border": "{boundary.info.600}",
           "info-container": "{fill.info.100}",
           "on-info-container": "{palette.info.900}"
         },
@@ -173,6 +179,7 @@
           "primary": "{fill.primary.300}",
           "on-primary": "{palette.primary.900}",
           "primary-text": "{readable.primary.300}",
+        "primary-border": "{boundary.primary.300}",
           "primary-container": "{fill.primary.800}",
           "on-primary-container": "{palette.primary.100}",
           "primary-fixed": "{fill.primary.200}",
@@ -184,6 +191,7 @@
           "secondary": "{fill.secondary.300}",
           "on-secondary": "{palette.secondary.900}",
           "secondary-text": "{readable.secondary.300}",
+        "secondary-border": "{boundary.secondary.300}",
           "secondary-container": "{fill.secondary.800}",
           "on-secondary-container": "{palette.secondary.100}",
           "secondary-fixed": "{fill.secondary.200}",
@@ -217,6 +225,7 @@
           "error": "{fill.error.400}",
           "on-error": "{palette.error.900}",
           "error-text": "{readable.error.400}",
+        "error-border": "{boundary.error.400}",
           "error-container": "{fill.error.800}",
           "on-error-container": "{palette.error.100}"
         },
@@ -224,6 +233,7 @@
           "success": "{fill.success.400}",
           "on-success": "{palette.success.900}",
           "success-text": "{readable.success.400}",
+        "success-border": "{boundary.success.400}",
           "success-container": "{fill.success.800}",
           "on-success-container": "{palette.success.100}"
         },
@@ -231,6 +241,7 @@
           "warning": "{fill.warning.400}",
           "on-warning": "{palette.warning.900}",
           "warning-text": "{readable.warning.400}",
+        "warning-border": "{boundary.warning.400}",
           "warning-container": "{fill.warning.800}",
           "on-warning-container": "{palette.warning.100}"
         },
@@ -238,6 +249,7 @@
           "info": "{fill.info.400}",
           "on-info": "{palette.info.900}",
           "info-text": "{readable.info.400}",
+        "info-border": "{boundary.info.400}",
           "info-container": "{fill.info.800}",
           "on-info-container": "{palette.info.100}"
         },

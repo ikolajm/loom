@@ -49,7 +49,7 @@
   },
 
   "control-height": {
-    "$note": "Tier 2 — the height ladder atoms resolve against. Seven roles, grouped by what a control IS rather than by the numbers it happens to carry today; an atom picks its role once and inherits every ladder. Not supplied by style-direction: height is ergonomics, not style, and a brutalist dashboard and a brutalist phone app owe different tap targets. Roles are consumed as `height/<role>-<tier>` in config/components/*.json and emitted as --height-<role>-<tier>. Non-controls (avatar portraits, stepper indicators) stay on ch-* primitives and are deliberately absent here.",
+    "$note": "Tier 2 — the height ladder atoms resolve against. Six roles, grouped by what a control IS rather than by the numbers it happens to carry today; an atom picks its role once and inherits every ladder. Not supplied by style-direction: height is ergonomics, not style, and a brutalist dashboard and a brutalist phone app owe different tap targets. Roles are consumed as `height/<role>-<tier>` in config/components/*.json and emitted as --height-<role>-<tier>. Non-controls (avatar portraits) stay on ch-* primitives and are deliberately absent here.",
 
     "compact": {
       "$note": "Information-dense surfaces read by a pointer. Below the 44px touch minimum by design — do not resolve this for a product that ships to a phone.",
@@ -59,8 +59,7 @@
         "nav-item": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
         "menu-item": { "sm": "ch-2", "md": "ch-3", "lg": "ch-4" },
         "bar": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
-        "bottom-bar": { "sm": "ch-7", "md": "ch-8" },
-        "fab": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" }
+        "bottom-bar": { "sm": "ch-7", "md": "ch-8" }
       }
     },
 
@@ -72,8 +71,7 @@
         "nav-item": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
         "menu-item": { "sm": "ch-3", "md": "ch-4", "lg": "ch-5" },
         "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
-        "bottom-bar": { "sm": "ch-8", "md": "ch-9" },
-        "fab": { "sm": "ch-4", "md": "ch-6", "lg": "ch-8" }
+        "bottom-bar": { "sm": "ch-8", "md": "ch-9" }
       }
     },
 
@@ -85,8 +83,7 @@
         "nav-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
         "menu-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
         "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
-        "bottom-bar": { "sm": "ch-8", "md": "ch-9" },
-        "fab": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" }
+        "bottom-bar": { "sm": "ch-8", "md": "ch-9" }
       }
     }
   },

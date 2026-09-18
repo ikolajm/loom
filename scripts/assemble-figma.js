@@ -173,6 +173,7 @@ function buildAllSteps() {
         // it travels through the same door as {fill.*} and for the same reason.
         const resolved = template && typeof template === 'string'
           ? (template.startsWith('{fill.') ? ['$fillShades', colors.$fillShades]
+            : template.startsWith('{boundary.') ? ['$borderShades', colors.$borderShades]
             : template.startsWith('{readable.') ? ['$textShades', colors.$textShades]
             : null)
           : null;

@@ -1,31 +1,4 @@
 {
-  "stepper": {
-    "$note": "Multi-step progress indicator. Horizontal or vertical orientation. Each step is independently validatable. Back navigation preserves state. Step indicator uses pill radius (circular number/icon).",
-    "step-state": {
-      "incomplete": { "indicator-bg": "color/surface/surface-1", "indicator-fg": "color/surface/on-surface-variant", "label-fg": "color/surface/on-surface-variant", "connector": "color/outline/outline-subtle" },
-      "active":     { "indicator-bg": "color/primary/primary", "indicator-fg": "color/primary/on-primary", "label-fg": "color/surface/on-surface", "connector": "color/outline/outline-subtle" },
-      "completed":  { "indicator-bg": "color/primary/primary", "indicator-fg": "color/primary/on-primary", "label-fg": "color/surface/on-surface", "connector": "color/primary/primary" },
-      "error":      { "indicator-bg": "color/error/error", "indicator-fg": "color/error/on-error", "label-fg": "color/error/error", "connector": "color/outline/outline-subtle" }
-    },
-    "label-typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "description-typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "sm": { "indicator-size": "height/ch-1", "connector-width": "border-width/bw-1", "gap": "{scale.2}", "label-text": "action/sm" },
-      "md": { "indicator-size": "height/ch-3", "connector-width": "border-width/bw-1", "gap": "{scale.3}", "label-text": "action/md" },
-      "lg": { "indicator-size": "height/ch-5", "connector-width": "border-width/bw-2", "gap": "{scale.4}", "label-text": "action/lg" }
-    },
-    "default": { "size": "md" }
-  },
 
   "carousel": {
     "$catalog": { "dependencies": ["cn", "button"] },

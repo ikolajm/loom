@@ -36,11 +36,6 @@
     "bottom-bar": {
       "sm": "ch-8",
       "md": "ch-9"
-    },
-    "fab": {
-      "sm": "ch-4",
-      "md": "ch-6",
-      "lg": "ch-8"
     }
   }
 }

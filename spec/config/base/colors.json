@@ -64,6 +64,24 @@
       "info-text": "info.200"
     }
   },
+  "$borderShades": {
+    "light": {
+      "primary-border": "primary.600",
+      "secondary-border": "secondary.700",
+      "error-border": "error.600",
+      "success-border": "success.700",
+      "warning-border": "warning.700",
+      "info-border": "info.600"
+    },
+    "dark": {
+      "primary-border": "primary.200",
+      "secondary-border": "secondary.300",
+      "error-border": "error.200",
+      "success-border": "success.400",
+      "warning-border": "warning.400",
+      "info-border": "info.300"
+    }
+  },
   "default-mode": "dark",
   "palette": {
     "primary": {
@@ -173,6 +191,7 @@
         "primary": "#54159d",
         "on-primary": "#FFFFFF",
         "primary-text": "#54159d",
+        "primary-border": "#54159d",
         "primary-container": "#e5dcef",
         "on-primary-container": "#240f3e",
         "primary-fixed": "#cab1e7",
@@ -184,6 +203,7 @@
         "secondary": "#357d7b",
         "on-secondary": "#FFFFFF",
         "secondary-text": "#224f4d",
+        "secondary-border": "#2b6462",
         "secondary-container": "#e0ebea",
         "on-secondary-container": "#1a3332",
         "secondary-fixed": "#bedad9",
@@ -217,6 +237,7 @@
         "error": "#9c1717",
         "on-error": "#FFFFFF",
         "error-text": "#9c1717",
+        "error-border": "#9c1717",
         "error-container": "#efdcdc",
         "on-error-container": "#3d0f0f"
       },
@@ -224,6 +245,7 @@
         "success": "#127d3f",
         "on-success": "#FFFFFF",
         "success-text": "#0e6231",
+        "success-border": "#127d3f",
         "success-container": "#dcefe4",
         "on-success-container": "#0f3d23"
       },
@@ -231,6 +253,7 @@
         "warning": "#7d5912",
         "on-warning": "#FFFFFF",
         "warning-text": "#62460e",
+        "warning-border": "#7d5912",
         "warning-container": "#efe9dc",
         "on-warning-container": "#3d2e0f"
       },
@@ -238,6 +261,7 @@
         "info": "#17599c",
         "on-info": "#FFFFFF",
         "info-text": "#12477d",
+        "info-border": "#17599c",
         "info-container": "#dce6ef",
         "on-info-container": "#0f263d"
       },
@@ -250,6 +274,7 @@
         "primary": "#cab1e7",
         "on-primary": "#240f3e",
         "primary-text": "#cab1e7",
+        "primary-border": "#cab1e7",
         "primary-container": "#350d63",
         "on-primary-container": "#e5dcef",
         "primary-fixed": "#cab1e7",
@@ -261,6 +286,7 @@
         "secondary": "#82cac7",
         "on-secondary": "#1a3332",
         "secondary-text": "#82cac7",
+        "secondary-border": "#82cac7",
         "secondary-container": "#224f4d",
         "on-secondary-container": "#e0ebea",
         "secondary-fixed": "#bedad9",
@@ -294,6 +320,7 @@
         "error": "#e86363",
         "on-error": "#3d0f0f",
         "error-text": "#e7b1b1",
+        "error-border": "#e7b1b1",
         "error-container": "#620e0e",
         "on-error-container": "#efdcdc"
       },
@@ -301,6 +328,7 @@
         "success": "#20df70",
         "on-success": "#0f3d23",
         "success-text": "#20df70",
+        "success-border": "#20df70",
         "success-container": "#0e6231",
         "on-success-container": "#dcefe4"
       },
@@ -308,6 +336,7 @@
         "warning": "#dfa020",
         "on-warning": "#3d2e0f",
         "warning-text": "#e8bc63",
+        "warning-border": "#dfa020",
         "warning-container": "#62460e",
         "on-warning-container": "#efe9dc"
       },
@@ -315,6 +344,7 @@
         "info": "#63a6e8",
         "on-info": "#0f263d",
         "info-text": "#b1cce7",
+        "info-border": "#63a6e8",
         "info-container": "#0e3862",
         "on-info-container": "#dce6ef"
       },

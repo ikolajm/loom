@@ -685,7 +685,6 @@ const CELL_SIZED = new Set(['table']);
  */
 const BASE_RULES = {
   badge: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-  banner: ['display: flex;', 'align-items: center;'],
   'bottom-nav': ['display: flex;', 'align-items: center;', 'justify-content: space-around;', 'width: 100%;'],
   breadcrumbs: ['display: flex;', 'align-items: center;'],
   button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
@@ -694,7 +693,6 @@ const BASE_RULES = {
   // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
   dialog: ['display: flex;', 'flex-direction: column;', 'width: 100%;'],
   'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
-  fab: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
   'form-field': ['display: flex;', 'flex-direction: column;'],
   'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
   // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
@@ -726,7 +724,6 @@ const BASE_RULES = {
   // block below — a frozen spinner does not read as calm, it reads as hung.
   spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;',
             'animation: spin 1s linear infinite;'],
-  stepper: ['display: flex;', 'align-items: center;', 'width: 100%;'],
   textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
@@ -774,15 +771,15 @@ const SUB_PART_RULES = {
 const SUB_PART_KEYS = new Set([]);
 
 const APPEARANCE_ONLY = new Set([
-  'badge', 'banner', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'empty-state',
-  'fab', 'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
-  'dialog', 'separator', 'sidebar', 'skeleton', 'spinner', 'stepper', 'table',
+  'badge', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'empty-state',
+  'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
+  'dialog', 'separator', 'sidebar', 'skeleton', 'spinner', 'table',
   'textarea', 'toolbar', 'top-bar', 'avatar-group',
 ]);
 
 const TEXT_FAMILY = {
-  badge: 'label', banner: 'body', 'bottom-nav': 'label', breadcrumbs: 'body',
-  button: 'action', card: 'body', dialog: 'body', 'empty-state': 'body', fab: 'action',
+  badge: 'label', 'bottom-nav': 'label', breadcrumbs: 'body',
+  button: 'action', card: 'body', dialog: 'body', 'empty-state': 'body',
   'helper-text': 'label', input: 'input', kbd: 'label', label: 'action',
   'list-item': 'body', spinner: null, skeleton: 'body', table: 'body',
   textarea: 'input', toolbar: 'body', 'top-bar': 'title',
@@ -1227,14 +1224,15 @@ function buildSection15_Tones() {
     // decides. The label now reads the family's text role, resolved per mode against the
     // most raised surface tier; see the third pass in generate-colors.js.
     //
-    // --tone-border deliberately still reads the base role. A border is a non-text
-    // boundary, which WCAG 1.4.11 puts at 3:1 rather than 4.5:1, and the brand line is
-    // most of what an outline treatment is for. Worth knowing it is not free: on the
-    // first consumer's brand, dark `secondary` scores 2.20 against surface-3, so the
-    // boundary threshold has cases of its own. Nothing measures that pairing yet.
+    // --tone-border reads its own role too, resolved at 3:1 rather than 4.5:1 —
+    // WCAG 1.4.11 puts a non-text boundary there. It used to read the base role, on the
+    // reasoning that the brand line is most of what an outline treatment is for. That
+    // reasoning survives the change: resolving at 3:1 leaves ten of twelve family/mode
+    // pairs on exactly the shade they already had, and moves the other two by one ramp
+    // step — and those two were the ones failing. Measured, not assumed.
     const edge = f === 'neutral'
       ? ['  --tone-text: var(--on-surface);', '  --tone-border: var(--outline);']
-      : [`  --tone-text: var(--${f}-text);`, `  --tone-border: var(--${f});`];
+      : [`  --tone-text: var(--${f}-text);`, `  --tone-border: var(--${f}-border);`];
     lines.push(`.tone-${f} {`, `  --tone-bg: var(--${f});`, `  --tone-fg: var(--on-${f});`, ...edge, '}', '');
     lines.push(`.tone-${f}-soft {`, `  --tone-bg: var(--${f}-container);`, `  --tone-fg: var(--on-${f}-container);`, ...edge, '}', '');
   }
@@ -1336,53 +1334,11 @@ function buildSection11_InteractiveStates() {
 
 function buildSection14_Animations() {
   return `/* === Animation Keyframes === */
-@keyframes accordion-down {
-  from { height: 0; opacity: 0; }
-  to { height: var(--radix-accordion-content-height); opacity: 1; }
-}
-
-@keyframes accordion-up {
-  from { height: var(--radix-accordion-content-height); opacity: 1; }
-  to { height: 0; opacity: 0; }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes scale-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes slide-in-from-top {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes slide-in-from-bottom {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes slide-in-from-left {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
-}
-
-@keyframes slide-in-from-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-
-/* Consumed by .spinner. The other keyframes here are named for atoms to reach for;
-   this one the layer uses itself. */
+/* Consumed by .spinner. The Tailwind-era keyframes that sat here — accordion, fade,
+   scale and the four slide-ins — were reachable only through the \`--animate-*\`
+   registrations that went out with the bridge, so nothing could name them. Cut.
+   What a <dialog> does on open is an open question and is a \`::backdrop\` plus
+   \`transition-behavior: allow-discrete\` question, not a keyframe one. */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -1576,17 +1532,30 @@ function generateLayer() {
  * README's claim true — appearance in the class layer, behavior in the atom.
  */
 /**
- * The target floor: if it is interactive it is 44px, on every pointer.
+ * The target floor: if it is interactive and the pointer is coarse, it is 44px.
  *
  * `--touch-min` is what standards.json declares, and it is the WCAG 2.2 AAA figure
  * (2.5.5) rather than the AA one — AA asks 24x24 (2.5.8). Apple's HIG says the same 44.
  *
- * This is deliberately not conditioned on `pointer: coarse`. A media query would let the
- * same build be compliant on a phone and not on a laptop, and a target is hard to hit
- * with a trackpad and a tremor too. The cost is real and worth stating: on the compact
- * and standard directions the control ladder starts below 44, so the small tier stops
- * being small for anything interactive — compact goes 24/32/40 to 44/44/44, standard
- * 32/40/48 to 44/44/48. `height` still ramps; this clamps it.
+ * Conditioned on `pointer: coarse`, which is a reversal — this shipped unconditional, on
+ * the argument that a media query lets the same build be compliant on a phone and not on
+ * a laptop. What that argument missed is that the three ladders already encode the split.
+ * Every tier of every role in `compact` is at or above 28px and in `standard` at or above
+ * 32px, so both clear the AA minimum on their own; only `touch` reaches 44. An
+ * unconditional clamp therefore imposed AAA on two ladders built to AA and overrode the
+ * `controlHeight` answer, which is the mechanism a product has for stating its own input
+ * context.
+ *
+ * The known hole, accepted deliberately rather than missed: `pointer` reports the PRIMARY
+ * pointer, so a touchscreen laptop is `pointer: fine` with `any-pointer: coarse`, and a
+ * finger on that screen gets the fine ladder. `any-pointer: coarse` would catch it and
+ * would also resolve nearly every current laptop to 44, which takes the dense case away
+ * from the hardware most likely to want it. No media query separates "can be touched"
+ * from "is being touched"; a product that needs that guarantee answers `controlHeight:
+ * touch` and gets 44 on every pointer.
+ *
+ * `height` still ramps; this clamps it. Under a coarse pointer compact's control ladder
+ * renders 44/44/44 and standard's 44/44/48.
  *
  * Layered rather than unlayered, unlike the print and reduced-motion blocks: those are
  * environmental overrides a consumer should not casually beat, while a target size is a
@@ -1594,9 +1563,11 @@ function generateLayer() {
  */
 function buildSectionTargetFloor() {
   return `/* === Target floor === */
-.interactive,
-.control {
-  min-height: var(--touch-min);
+@media (pointer: coarse) {
+  .interactive,
+  .control {
+    min-height: var(--touch-min);
+  }
 }`;
 }
 
@@ -1649,10 +1620,87 @@ dialog.dialog:not([open]) {
   inset: 0;
   z-index: var(--z-modal);
   background-color: var(--scrim);
+  transition: opacity var(--transition) var(--easing);
 }
 
 dialog::backdrop {
   background-color: var(--scrim);
+}
+
+/* === Dialog entry === */
+
+/* Entry only, and deliberately not exit.
+   
+   The scrim is what makes an unanimated dialog read cheap — a viewport going half-black
+   between two frames — so that is what this softens. The panel comes with it because a
+   scrim that fades under a panel that does not is worse than neither moving.
+
+   Both durations are --transition, which the reduced-motion block in tokens.css already
+   redefines to 0.01ms. So this honors prefers-reduced-motion for free and cannot drift
+   from the rest of the system — the reason to build it out of the existing token rather
+   than a duration of its own.
+
+   EXIT IS LEFT INSTANT ON PURPOSE, AND THAT IS WHY display AND overlay ARE NOT IN THE
+   TRANSITION LIST. The usual recipe includes them with allow-discrete so the element
+   stays rendered while it fades out. With no exit animation to wait for, they would only
+   defer display: none by the full duration and nothing would move in the meantime — the
+   dialog sitting on screen after the click, then vanishing. Worse than instant, which is
+   what this is meant to improve on. A native <dialog> could transition out through
+   allow-discrete, but the portaled path cannot: Radix removes the node on close,
+   so an exit transition has to select on its data-state="closed" attribute — a
+   framework contract, in the one layer that is supposed to have none. Entry needs no such
+   thing, because @starting-style applies whenever the element is inserted, which is true
+   of a portal mount and a showModal() alike. A consumer who wants an exit adds their own
+   selector in their own CSS, where knowing about Radix is fine.
+
+   Degrades to exactly today's behaviour where @starting-style or allow-discrete is
+   missing: no transition, nothing broken. */
+dialog.dialog {
+  transition:
+    opacity var(--transition) var(--easing),
+    transform var(--transition) var(--easing);
+}
+
+dialog.dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  dialog.dialog[open] {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+dialog.dialog::backdrop {
+  transition: background-color var(--transition) var(--easing);
+}
+
+@starting-style {
+  dialog.dialog[open]::backdrop {
+    background-color: transparent;
+  }
+}
+
+/* The portaled half. .dialog-fixed already carries the centring transform, so the
+   starting state has to restate it — a bare scale() here would drop the translate and
+   the panel would fly in from the corner. */
+.dialog-fixed {
+  transition:
+    opacity var(--transition) var(--easing),
+    transform var(--transition) var(--easing);
+}
+
+@starting-style {
+  .dialog-fixed {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  .dialog-overlay {
+    opacity: 0;
+  }
 }
 
 .dialog-header {

@@ -1,6 +1,6 @@
 {
   "$note": "Atoms by group, and the carrier for the $inputs staleness stamp. The sync delivers the whole catalog every run, so deleting a file you do not want is temporary — it returns on the next sync, because a missing file and a never-installed one are the same thing on disk. An unimported component is tree-shaken and costs nothing shipped, which is why this is a note rather than a pick list. Generated from the catalog; do not hand-edit.",
-  "$inputs": "0e6885f0bebd",
+  "$inputs": "afab3da40fe4",
   "button": [
     "badge",
     "button"
