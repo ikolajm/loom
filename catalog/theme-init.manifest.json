@@ -4,7 +4,6 @@
   "category": "utility",
   "file": "theme-init.js",
   "description": "Blocking <head> snippet that sets data-theme and color-scheme before first paint. Paste its body inline; do not load it with <script src>. Without it ThemeProvider still works, one frame late.",
-  "version": "cdd694b3d4d9",
   "dependencies": [],
   "npmDependencies": [],
   "tokens": [],

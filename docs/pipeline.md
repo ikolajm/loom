@@ -200,11 +200,19 @@ consumer source trees with nothing ignoring it.
 ### `verify` is the gate, and it runs last
 
 The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
-`interactive-implies-control`, `class-coverage`, `atom-class-coverage`,
-`class-box-model`, `phantom-parts`, `variant-keys`, `base-config-provenance`,
-`tone-fallbacks`, `focus-ring`, `touch-target`, `contrast`,
-`composited-contrast`, `typecheck`. Any failure exits non-zero, so a full
-`npm run generate` cannot report success over broken output.
+`interactive-implies-control`, `class-coverage`, `preview-coverage`,
+`atom-class-coverage`, `class-box-model`, `phantom-parts`, `variant-keys`,
+`base-config-provenance`, `config-parity`, `dead-exports`, `tone-fallbacks`,
+`tone-matrix`, `theme-init-parity`, `focus-ring`, `touch-target`, `contrast`,
+`tone-contrast`, `border-contrast`, `figma-assembly`, `typecheck`. Any failure exits
+non-zero, so a full `npm run generate` cannot report success over broken output.
+
+That list is itself gated. It is prose, and prose drifts: it named fourteen of the
+sixteen checks that existed, was corrected by hand, then sat at sixteen while nine
+more gates landed — including the one guarding the Figma half. `doc-counts` now reads
+this paragraph and compares it to the registry in `verify.js`, names and order both, so
+a gate added without a line here fails the build that adds it, and a gate removed
+without one fails the build that removes it.
 
 `css-parse` runs first and is the one the others stand on. Every check here read the
 stylesheets as text until postcss, which is how generated output with a syntax error
@@ -287,17 +295,20 @@ of one combination rather than the rule that generates it.
 
 ## The consumer path
 
-`npm run sync <project-dir> [--force] [--refresh]` — `scripts/sync.js`.
+`npm run sync <project-dir> [--tokens] [--refresh]` — `scripts/sync.js`.
 
 1. `--refresh` regenerates the catalog first.
 2. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
    pick list: at five atoms the dependency graph is one edge — everything needs `cn`,
    which copies unconditionally anyway — so resolving a subset walked a graph to return
    what it was handed. The consumer deletes what they do not want.
-3. An atom the consumer has edited locally is **skipped and named in the summary**,
-   never overwritten without `--force`. Skipping rather than prompting is deliberate:
-   this runs unattended in CI,
-   where a `[y/N]` prompt hangs a build instead of protecting anything.
+3. Every delivered file is **overwritten unconditionally**, and carries a generated
+   header saying so. There is no edit detection: the files live in a directory of Loom's
+   own, editing one is out of contract, and a change worth keeping goes at the call site —
+   className, a prop, a wrapper — where it survives a resync by construction. The
+   overwrite guard this replaces, with its staleness stamp and repair verdicts, was about
+   470 lines answering "what if another repo is in a strange state"; with one consumer you
+   own, the answer is to resync and read the diff.
 
 `sync.js` prints the union of the manifests' `npmDependencies` as a single install
 line. It reports; it never installs.

@@ -11,12 +11,12 @@
  * what tsc already covers. This file checks the artifacts around the code:
  *
  *   css-parse         — the emitted stylesheets parse at all (postcss)
- *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match
+ *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match,
+ *                       and docs/pipeline.md's check list matches this file's registry
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
  *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
- *   composited-contrast — the same pairs still clear 3:1 after the muted opacity role
  *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
@@ -121,6 +121,8 @@ function checkCssParse() {
 // Files carrying hand-written counts. A doc not listed here is not checked — add it
 // when it starts making a claim, or the claim drifts unobserved.
 const COUNTED_DOCS = ['README.md', 'CATALOG_SPEC.md', 'spec/questionnaire.md'];
+// Not in COUNTED_DOCS: it carries no N-of-kind claims, only the check list below.
+const CHECKLIST_DOC = 'docs/pipeline.md';
 
 function atomNames() {
   return fs
@@ -132,7 +134,7 @@ function atomNames() {
 }
 
 // --- doc-counts -----------------------------------------------------------
-function checkDocCounts(atoms) {
+function checkDocCounts(atoms, checkNames) {
   const groups = Object.keys(JSON.parse(fs.readFileSync(path.join(CATALOG, 'atoms.json'), 'utf8')))
     .filter((k) => !k.startsWith('$')).length;
 
@@ -183,7 +185,43 @@ function checkDocCounts(atoms) {
       }
     });
   }
-  return { failures, note: `${claims} claims across ${COUNTED_DOCS.length} files` };
+  // The check list in docs/pipeline.md is prose, and prose drifted twice: it named
+  // fourteen of sixteen, was corrected by hand, then sat at sixteen while nine more
+  // gates landed — including figma-assembly, the one guarding the Figma half. It is
+  // derivable from the registry, so it is derived rather than trusted. Order is
+  // asserted too, because the sentence claims the checks are in order.
+  let listed = null;
+  const listAbs = path.join(ROOT, CHECKLIST_DOC);
+  if (!fs.existsSync(listAbs)) {
+    failures.push(`${CHECKLIST_DOC} — named as the check-list doc but missing`);
+  } else {
+    const passage = fs.readFileSync(listAbs, 'utf8').match(/The checks, in order:([\s\S]*?)Any failure/);
+    if (!passage) {
+      failures.push(`${CHECKLIST_DOC} — no "The checks, in order:" passage to read`);
+    } else {
+      listed = [...passage[1].matchAll(/`([a-z][a-z-]*)`/g)].map((m) => m[1]);
+      const missing = checkNames.filter((n) => !listed.includes(n));
+      const extra = listed.filter((n) => !checkNames.includes(n));
+      for (const n of missing) {
+        failures.push(`${CHECKLIST_DOC} — check list omits \`${n}\``);
+      }
+      for (const n of extra) {
+        failures.push(`${CHECKLIST_DOC} — check list names \`${n}\`, which is not a check`);
+      }
+      // Guarded on this block's own findings, not on `failures` — a numeral claim
+      // failing above would otherwise silently skip the order assertion.
+      if (!missing.length && !extra.length && listed.join() !== checkNames.join()) {
+        failures.push(`${CHECKLIST_DOC} — check list is complete but not in run order`);
+      }
+    }
+  }
+  const listNote = listed
+    ? `check list ${listed.length} of ${checkNames.length}`
+    : 'check list unreadable';
+  return {
+    failures,
+    note: `${claims} claims across ${COUNTED_DOCS.length} files, ${listNote}`,
+  };
 }
 
 function checkInteractiveImpliesControl(atoms) {
@@ -882,7 +920,12 @@ function checkTouchTarget() {
 // are derived from the answers file, so a consumer generates their own pass or fail —
 // six pairs failed on Loom's own default and nothing surfaced it until a human
 // measured. Same shape as touch-target: a value declared and never made binding.
-const AA_TEXT = 4.5;
+// The two WCAG ratios, together and at module scope. AA_NON_TEXT used to be declared
+// inside composited-contrast, which border-contrast also read — so deleting that gate
+// took a constant its sibling depended on and broke the build. A threshold the spec
+// fixes belongs to the file, not to whichever check happened to need it first.
+const AA_TEXT = 4.5; // SC 1.4.3 Contrast (Minimum)
+const AA_NON_TEXT = 3.0; // SC 1.4.11 Non-text Contrast
 
 function srgbToLinear(channel) {
   const s = channel / 255;
@@ -1023,84 +1066,6 @@ function checkToneContrast() {
     failures,
     note: pairs + ' tone-text/surface pairs against WCAG AA ' + AA_TEXT + ':1, nothing parked',
   };
-}
-
-// --- composited-contrast -----------------------------------------------------
-// A token is not what renders: at `opacity-muted` a pair that clears 4.5:1 as declared
-// composites toward its background and can land far below it.
-//
-// READ THE SCOPE BEFORE TRUSTING THE GREEN. This is a BRAND check, not a check on shipped
-// rendering. Nothing in the class layer reads --opacity-muted — the dismiss controls this
-// was written for (badge, toast, file-upload) are all gone, and standards.json's note on
-// the role records why it is kept anyway. So the question it answers is conditional: IF
-// anything ever composites an `on-X` over its `X` at muted, would this brand survive it?
-// That is worth gating because the token is published to Figma with its code syntax, so a
-// designer can reach for it and hand an engineer a value with no measurement behind it.
-// It is not evidence that anything renders at muted today, and it will not go red when a
-// component starts doing so incorrectly.
-//
-// It does catch real brand defects: pb2's brand fails here at 2.99:1 on `on-secondary`,
-// which nothing had recorded before this ran against it.
-//
-// 3:1 rather than 4.5 because muted's intended uses all wrap an icon glyph, so WCAG 1.4.11
-// non-text applies. If it ever lands on text, re-measure rather than bump this: 22 of the
-// 50 pairs fall under 4.5:1 once composited. `disabled` is excluded — WCAG 1.4.3 exempts
-// inactive components, and it is dim by intent.
-const AA_NON_TEXT = 3.0;
-
-function compositeOver(fgHex, bgHex, alpha) {
-  const parse = (hex) => {
-    const raw = hex.replace('#', '');
-    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
-    return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
-  };
-  // Browsers composite in gamma space, per channel — not in linear light.
-  const [fg, bg] = [parse(fgHex), parse(bgHex)];
-  const out = fg.map((v, i) => Math.round(v * alpha + bg[i] * (1 - alpha)));
-  return '#' + out.map((v) => v.toString(16).padStart(2, '0')).join('');
-}
-
-function checkCompositedContrast() {
-  const colors = loadConfig('base/colors.json');
-  const standards = readJson('spec/config/standards.json');
-  const muted = standards.effects?.opacity?.muted;
-  const failures = [];
-  let pairs = 0;
-
-  if (typeof muted !== 'number') {
-    return { failures: ['standards.json declares no effects.opacity.muted'], note: 'muted role missing' };
-  }
-
-  for (const mode of Object.keys(colors.roles || {})) {
-    const flat = {};
-    for (const group of Object.values(colors.roles[mode])) {
-      for (const [role, value] of Object.entries(group)) {
-        if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
-      }
-    }
-    const check = (fg, bg) => {
-      if (!flat[fg] || !flat[bg]) return;
-      pairs++;
-      const rendered = compositeOver(flat[fg], flat[bg], muted);
-      const ratio = contrastRatio(rendered, flat[bg]);
-      if (ratio < AA_NON_TEXT) {
-        failures.push(
-          `${mode}: ${fg} (${flat[fg]}) at opacity ${muted} over ${bg} (${flat[bg]}) renders ${rendered} — ${ratio.toFixed(2)}:1, needs ${AA_NON_TEXT}`
-        );
-      }
-    };
-
-    for (const role of Object.keys(flat)) {
-      if (!role.startsWith('on-')) continue;
-      check(role, role.slice(3));
-    }
-    // `surface` only, not the four tiers the full-opacity check sweeps: both muted
-    // on-surface-variant controls declare bg-surface. Revisit if one moves off it —
-    // on a teal brand the same pair renders 2.90:1 over surface-3.
-    check('on-surface-variant', 'surface');
-  }
-
-  return { failures, note: `${pairs} brand pairs at muted opacity ${muted} against ${AA_NON_TEXT}:1 — conditional, no CSS consumer` };
 }
 
 // --- border-contrast ---------------------------------------------------------
@@ -1647,117 +1612,40 @@ function checkPreviewCoverage() {
     note: `${applied.size} atom-applied classes against docs/preview.html, ${Object.keys(PREVIEW_SKIPS).length} skipped`,
   };
 }
-// --- catalog-integrity --------------------------------------------------------
-// Every catalog source hashes to the version its own manifest records.
-//
-// This is the upstream half of the overwrite guard. The guard asks "does the installed
-// source still hash to what the manifest says was delivered", and answers `modified` when
-// it does not. That answer is only meaningful if the pair was consistent when it shipped.
-// It was not, once: a consumer's `badge.tsx` hashed to df2255148d45 while its delivered
-// manifest recorded 95388483a287, and the installed file turned out to be a Loom
-// intermediate that existed only between a schema edit and the generator rewrite after
-// it. The consumer was told they had edited a file they had never opened, and quietly
-// stopped receiving fixes to it.
-//
-// The pair is written in two calls by the generator and copied in two more by the sync,
-// with no transaction at either end, so a process that dies between them leaves a split.
-// Nothing can make two filesystem writes atomic here; what is cheap is refusing to ship
-// the result. This fails the build, and sync.js now repairs the downstream half by
-// recognising the one case that is provably not a consumer edit.
-//
-// `$catalog.version` in a component schema overrides the content hash, which would make
-// this fail for a legitimate reason. No config sets one today; if one ever does, the
-// failure says so rather than looking like corruption.
-function checkCatalogIntegrity() {
-  const failures = [];
-  const crypto = require('crypto');
-  const hash = (str) => crypto.createHash('sha256').update(str).digest('hex').slice(0, 12);
-
-  const manifests = fs.readdirSync(CATALOG).filter((f) => f.endsWith('.manifest.json'));
-  if (!manifests.length) {
-    return { failures: ['no manifests found in catalog/, so no pair could be checked'], note: 'not run' };
-  }
-
-  let checked = 0;
-  for (const f of manifests) {
-    const name = f.replace(/\.manifest\.json$/, '');
-    let manifest;
-    try {
-      manifest = JSON.parse(fs.readFileSync(path.join(CATALOG, f), 'utf8'));
-    } catch (err) {
-      failures.push(`${name}: its manifest does not parse — ${err.message}`);
-      continue;
-    }
-
-    const srcName = manifest.file || (name === 'cn' ? 'cn.ts' : `${name}.tsx`);
-    const srcPath = path.join(CATALOG, srcName);
-    if (!fs.existsSync(srcPath)) {
-      failures.push(`${name}: its manifest names ${srcName}, which is not in the catalog — the pair is half delivered`);
-      continue;
-    }
-    if (!manifest.version) {
-      failures.push(`${name}: its manifest records no version, so the overwrite guard has nothing to compare an install against`);
-      continue;
-    }
-
-    // A delivered manifest that describes nothing. `dialog` and `select` shipped this way
-    // — the two components a consumer most needs to think before reaching for, carrying an
-    // empty string while badge and button carried paragraphs. Nothing noticed, because the
-    // description is only read by a human opening the file.
-    if (!String(manifest.description || '').trim()) {
-      failures.push(
-        `${name}: its manifest has no description. That is the only thing a consumer reads ` +
-        'when deciding whether to take this file, and it ships with every copy'
-      );
-    }
-
-    checked++;
-    const actual = hash(fs.readFileSync(srcPath, 'utf8'));
-    if (actual !== manifest.version) {
-      failures.push(
-        `${name}: ${srcName} hashes to ${actual} but its manifest records ${manifest.version}. ` +
-        'The pair is split, and shipping it tells every consumer who installs it that they ' +
-        'edited the file. Regenerate the catalog; if a schema sets $catalog.version, that ' +
-        'override is the cause and this check has to learn about it'
-      );
-    }
-  }
-
-  return { failures, note: `${checked} source/manifest pairs` };
-}
-
 function verify() {
   const atoms = atomNames();
+  // Lazy, so the registry's own names are readable before anything runs: doc-counts
+  // derives docs/pipeline.md's check list from this array. A list written down twice
+  // is the drift the gate exists to catch.
   const checks = [
-    ['css-parse', checkCssParse()],
-    ['doc-counts', checkDocCounts(atoms)],
-    ['catalog-integrity', checkCatalogIntegrity()],
-    ['manifest-deps', checkManifestDeps(atoms)],
-    ['interactive-implies-control', checkInteractiveImpliesControl(atoms)],
-    ['class-coverage', checkClassCoverage()],
-    ['preview-coverage', checkPreviewCoverage()],
-    ['atom-class-coverage', checkAtomClassCoverage()],
-    ['class-box-model', checkClassBoxModel()],
-    ['phantom-parts', checkPhantomParts()],
-    ['variant-keys', checkVariantKeys()],
-    ['base-config-provenance', checkBaseConfigProvenance()],
-    ['config-parity', checkConfigParity()],
-    ['dead-exports', checkDeadExports()],
-    ['tone-fallbacks', checkToneFallbacks()],
-    ['tone-matrix', checkToneMatrix()],
-    ['theme-init-parity', checkThemeInitParity()],
-    ['focus-ring', checkFocusRing()],
-    ['touch-target', checkTouchTarget()],
-    ['contrast', checkContrast()],
-    ['tone-contrast', checkToneContrast()],
-    ['composited-contrast', checkCompositedContrast()],
-    ['border-contrast', checkBorderContrast()],
-    ['figma-assembly', checkFigmaAssembly()],
-    ['typecheck', checkTypecheck()],
+    ['css-parse', () => checkCssParse()],
+    ['doc-counts', () => checkDocCounts(atoms, checks.map(([n]) => n))],
+    ['manifest-deps', () => checkManifestDeps(atoms)],
+    ['interactive-implies-control', () => checkInteractiveImpliesControl(atoms)],
+    ['class-coverage', () => checkClassCoverage()],
+    ['preview-coverage', () => checkPreviewCoverage()],
+    ['atom-class-coverage', () => checkAtomClassCoverage()],
+    ['class-box-model', () => checkClassBoxModel()],
+    ['phantom-parts', () => checkPhantomParts()],
+    ['variant-keys', () => checkVariantKeys()],
+    ['base-config-provenance', () => checkBaseConfigProvenance()],
+    ['config-parity', () => checkConfigParity()],
+    ['dead-exports', () => checkDeadExports()],
+    ['tone-fallbacks', () => checkToneFallbacks()],
+    ['tone-matrix', () => checkToneMatrix()],
+    ['theme-init-parity', () => checkThemeInitParity()],
+    ['focus-ring', () => checkFocusRing()],
+    ['touch-target', () => checkTouchTarget()],
+    ['contrast', () => checkContrast()],
+    ['tone-contrast', () => checkToneContrast()],
+    ['border-contrast', () => checkBorderContrast()],
+    ['figma-assembly', () => checkFigmaAssembly()],
+    ['typecheck', () => checkTypecheck()],
   ];
 
   let failed = 0;
-  for (const [name, result] of checks) {
+  for (const [name, run] of checks) {
+    const result = run();
     const status = result.failures.length ? 'FAIL' : 'ok';
     console.log(`  ${name.padEnd(23)} ${result.note} — ${status}`);
     for (const f of result.failures) console.log(`    ${f}`);

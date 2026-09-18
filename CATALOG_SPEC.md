@@ -166,7 +166,7 @@ A local edit is still never overwritten — see [Override mechanism](#override-m
 independent of how files are chosen and is the more valuable half of the sync.
 ## Manifests
 
-Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON, `version` stamp from generation time).
+Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON). There is no `version` field: it recorded a content hash that only the overwrite guard read, and both were cut.
 
 `catalog/[component].manifest.json`:
 
@@ -304,10 +304,10 @@ applies must exist in the CSS.
 Every atom is produced through the same pipeline. The mechanical pieces:
 
 1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
-2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/`. Tokens ship as a substrate bundle.
+2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/loom/`, overwriting unconditionally. Tokens ship as a substrate bundle.
 3. **No scaffold output.** There was a `scaffold/` tier — an `init.sh` writing a Next root layout, a `globals.css` and a provider mount into the consuming project, requiring `src/app/`. It was cut on the same ground as the playground: the substrate is plain CSS and the components plain React, so the only thing in the repo that assumed a framework was the script wiring them up, and the first consumer to take the reduced Loom is on Vite. `ThemeProvider` is a catalog component now, the `::selection` and scrollbar rules it used to write are in `loom.base`, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Mounting a provider and writing a root layout are the consuming framework's business.
 4. **Preview page.** `docs/preview.html` — the class layer rendered on the three stylesheets and nothing else.
-5. **Staleness stamp.** `generate` writes `$inputs` into `catalog/atoms.json` — a hash over the component schemas and code templates, the two things that decide what `catalog/*.tsx` contains. `sync.js` recomputes it and reports a mismatch. Hashed rather than compared by mtime because `git checkout` rewrites timestamps, so a fresh clone would warn on its first sync and every one after — the kind of false positive that trains people to ignore the message. Token configs are deliberately outside the hash: the substrate regenerates on every sync, so a brand change must not read as a stale catalog. Both sides import [`scripts/catalog-stamp.js`](scripts/catalog-stamp.js) so the definition of "the inputs" cannot drift between the thing that stamps and the thing that checks; the full reasoning is in that file's header rather than mirrored here.
+5. **No staleness stamp and no overwrite guard.** Both existed and were cut. The stamp hashed the schemas and templates into `catalog/atoms.json` so a sync could say "these atoms predate your edits"; the guard compared each installed file against the catalog and skipped the ones a consumer had touched, with a third verdict for a pair delivered split. Together with their test they were about 470 lines, and every one of them answered the same question — what if a repo you do not control is in a strange state. Delivered files now carry a generated header and are overwritten on every sync. A change worth keeping goes at the call site, where it survives by construction rather than by detection.
 
 ---
 

@@ -4,7 +4,6 @@
   "category": "button",
   "file": "badge.tsx",
   "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button with a trailing icon, so one intent keeps one tab stop and one name. Visual treatments: filled, outline, ghost. Colour and intensity are the other two axes: color picks the family and intensity picks solid or soft, the same eight colours and the same two intensities Button carries, so the two components answer to one vocabulary. `inherit` reads currentColor and ignores intensity, having no family. Ghost was added because the class layer already emits .treat-ghost and Button already exposed it — badge declaring two of three was an omission rather than a restriction, and it left the component unable to reach a treatment the CSS supports. Use it where the label carries the meaning and the box would be noise: a column of status words reads better as coloured text than as a column of outlines. CAUTION, and the reason this is written here: ghost paints no fill and no border, so --tone-text against the surface behind it is the only thing making the label legible. The tone-contrast check measures exactly that pairing, and on the committed default 15 of 48 combinations are below AA — secondary and success in light, error and info in dark, worse on every raised tier. An outline badge degrades to a visible box when its label is faint; a ghost badge degrades to nothing. Read tone-contrast before choosing it.",
-  "version": "d8566a25cb0e",
   "dependencies": [
     "cn"
   ],

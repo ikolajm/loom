@@ -4,7 +4,6 @@
   "category": "utility",
   "file": "theme-provider.tsx",
   "description": "Theme context — light/dark/system, persisted, writes data-theme. Pair it with theme-init.js, which sets the first frame.",
-  "version": "b5722564bdf3",
   "dependencies": [],
   "npmDependencies": [],
   "tokens": [],
