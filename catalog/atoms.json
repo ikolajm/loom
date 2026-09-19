@@ -5,8 +5,11 @@
     "button"
   ],
   "form": [
+    "checkbox",
     "form-field",
-    "select"
+    "radio",
+    "select",
+    "switch"
   ],
   "layout": [
     "dialog"

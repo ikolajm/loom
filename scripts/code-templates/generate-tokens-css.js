@@ -195,6 +195,12 @@ function buildSection7_TypographyFonts() {
 function buildSection8_ZIndex() {
   return [
     '/* === Z-Index === */',
+    '/* Consumer API. Only --z-modal is read by anything Loom emits, because .dialog is the',
+    ' * one layered thing it ships; the other four exist for the components you build on top.',
+    ' * A stacking scale is worth nothing incomplete — two values order nothing — so the set',
+    ' * is whole even though most of it has no reader here. Reach for one of these rather',
+    ' * than writing `z-index: 1`, which is what a consumer did for a sticky table header',
+    ' * before this comment existed. */',
     '--z-dropdown: 1000;',
     '--z-sticky: 1100;',
     '--z-modal: 1200;',
@@ -506,11 +512,12 @@ function buildComponentClass(name, cfg, textFamily) {
     if (y) d.push(`padding-block: ${y};`);
     if (gap) d.push(`gap: ${gap};`);
     if (src.radius) d.push(`border-radius: ${CSS_TOKEN(src.radius, 'radius-')};`);
-    if (src.height) d.push(`height: ${CSS_TOKEN(src.height, 'height-')};`);
+    if (src.height) d.push(`height: ${CSS_SPACE(src.height) || CSS_TOKEN(src.height, 'height-')};`);
     if (src['min-height']) d.push(`min-height: ${CSS_TOKEN(src['min-height'], 'height-')};`);
     // A square: one token driving both axes (dot, spinner, the icon-only fab).
     if (src.size) {
-      const sz = CSS_TOKEN(src.size, src.size.startsWith('icon/') ? '' : 'height-');
+      const sz = CSS_SPACE(src.size)
+        || CSS_TOKEN(src.size, src.size.startsWith('icon/') ? '' : 'height-');
       d.push(`width: ${sz};`, `height: ${sz};`);
     }
     if (src.width) d.push(`width: ${CSS_SPACE(src.width) || CSS_TOKEN(src.width, 'height-')};`);
@@ -598,7 +605,7 @@ function buildComponentClass(name, cfg, textFamily) {
         else if (prop === 'x-padding') { const g = CSS_SPACE(v); if (g) d.push(`padding-inline: ${g};`); }
         else if (prop === 'y-padding') { const g = CSS_SPACE(v); if (g) d.push(`padding-block: ${g};`); }
         else if (prop === 'radius') d.push(`border-radius: ${CSS_TOKEN(v, 'radius-')};`);
-        else if (prop === 'height') d.push(`height: ${CSS_TOKEN(v, 'height-')};`);
+        else if (prop === 'height') d.push(`height: ${CSS_SPACE(v) || CSS_TOKEN(v, 'height-')};`);
         else if (prop === 'width') { const g = CSS_SPACE(v); d.push(`width: ${g || CSS_TOKEN(v, 'height-')};`); }
       }
       if (d.length) out.push(`.${name}[data-size="${t}"] ${sel} {`, ...d.map((l) => `  ${l}`), '}', '');
@@ -629,7 +636,15 @@ function buildComponentClass(name, cfg, textFamily) {
     const sides = ['top', 'right', 'bottom', 'left']
       .map((side) => [side, v[`border-${side}`]])
       .filter(([, raw]) => raw !== undefined);
-    d.push(border ? `border: var(--bw-1) solid ${border};` : 'border: 0;');
+    // The zero fallback removes a rule rather than omitting one, so a component whose
+    // size ladder ramps `border-width` must be exempt from it: the ladder is the statement
+    // that a border draws, and zeroing it at equal specificity and later source order is
+    // how `.spinner` emitted three widths that could never render.
+    const rampsBorder = Object.values(cfg.sizes || {})
+      .filter((t) => t && typeof t === 'object')
+      .some((t) => t['border-width'] !== undefined);
+    if (border) d.push(`border: var(--bw-1) solid ${border};`);
+    else if (!rampsBorder) d.push('border: 0;');
     for (const [side, raw] of sides) {
       const c = CSS_COLOR(raw);   // `"none"` resolves to nothing; the border: 0 above covers it
       if (c) d.push(`border-${side}: var(--bw-1) solid ${c};`);
@@ -713,12 +728,51 @@ const BASE_RULES = {
   // showing the shape of what is coming, and it does both without moving. The pulse it
   // used to carry was also the only thing a reduced-motion user had to be spared from,
   // and what they would have been served instead is exactly this block.
+  // The UA draws the box, the mark and the checked fill; accent-color points all three at
+  // the brand. That is the whole styling contract, and it is deliberately smaller than the
+  // schema once was: a custom box needs a mark, a mark needs a pseudo-element on a replaced
+  // element, and that is a cross-engine bet this repo will not make. What is given up is a
+  // custom radius and an unchecked fill. What is kept is native indeterminate, native focus
+  // and a control that works with no framework and no markup contract.
+  checkbox: ['accent-color: var(--primary);', 'display: inline-block;', 'flex-shrink: 0;',
+             'margin: 0;', 'cursor: pointer;'],
+  radio: ['accent-color: var(--primary);', 'display: inline-block;', 'flex-shrink: 0;',
+          'margin: 0;', 'cursor: pointer;'],
+  // No native switch exists to point accent-color at, so this one is drawn. The thumb is a
+  // radial gradient rather than a pseudo-element for the same reason as above — an <input>
+  // is replaced — and it takes `currentColor`, so the two states differ by `color` alone and
+  // the thumb crossfades with the track instead of being redeclared.
+  switch: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
+           'cursor: pointer;', 'background-repeat: no-repeat;',
+           'background-image: radial-gradient(circle closest-side, currentColor 100%, transparent 100%);',
+           'transition: background-color var(--transition) var(--easing),'
+             + ' background-position var(--transition) var(--easing),'
+             + ' color var(--transition) var(--easing);'],
   skeleton: ['width: 100%;', 'border-radius: var(--radius-component);'],
+  // A divider, and the only reason it is a class rather than a line a consumer writes: the
+  // role is the decision. --outline is the boundary a control draws around itself and
+  // --outline-subtle is the one a page draws between two things, and nothing but this rule
+  // says which a divider takes. `border: 0` and `margin: 0` clear the UA's own <hr>, which
+  // this is usually applied to; on a <div> both are inert. Horizontal only — a vertical
+  // divider is `border-block-start: 0; border-inline-start: …` at the call site, and no
+  // consumer has needed one yet.
+  separator: ['border: 0;', 'margin: 0;',
+              'border-block-start: var(--bw-1) solid var(--outline-subtle);'],
   // The layer's one animation, and the only class that is meaningless without it: a
   // spinner that does not turn is a circle. Deliberately outside the reduced-motion
   // block below — a frozen spinner does not read as calm, it reads as hung.
+  // Not a recovery like the rest of this table — a correction. The schema ramps
+  // `border-width` across all three tiers, which is only a statement about anything if a
+  // border draws; nothing declared a style, a colour or a radius, so the ladder put a
+  // width on a box with no ring and the class rendered as an empty spinning square. It
+  // looked fine everywhere it was used in this repo, because both usages nest an svg that
+  // draws the ring itself; the first consumer to write a bare <span class="spinner"> got
+  // nothing and wrote these four lines by hand. `currentColor` so a variant's `color` is
+  // the ring, one transparent edge so the rotation reads.
   spinner: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;',
-            'animation: spin 1s linear infinite;'],
+            'animation: spin 1s linear infinite;', 'border-style: solid;',
+            'border-color: currentColor;', 'border-top-color: transparent;',
+            'border-radius: var(--br-999);'],
   textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
@@ -731,6 +785,9 @@ const BASE_RULES = {
 const NO_BOX = {
   skeleton: 'a plain block; the atom declared no display either',
   table: 'the element is display: table already',
+  'visually-hidden': 'position: absolute takes it out of flow, so the 1px box is not inert. '
+    + 'It is applied to whatever element already carries the text — a span, a div, a caption — '
+    + 'and declaring a display here would change that element for no benefit',
 };
 
 /**
@@ -751,11 +808,6 @@ const SUB_PART_RULES = {
   'sidebar-item': ['display: flex;', 'align-items: center;', 'width: 100%;',
                    'border-radius: var(--radius-component);'],
   'pagination-item': ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-  'stepper-indicator': ['display: flex;', 'align-items: center;', 'justify-content: center;',
-                        'flex-shrink: 0;', 'border-radius: var(--radius-pill);'],
-  // `flex-1 h-px` in the atom — a flex child, so its height applied only because the
-  // parent blockified it. `display: block` is that behaviour, stated.
-  'stepper-connector': ['display: block;', 'flex: 1 1 0%;'],
 };
 
 // Sub-part vocabularies. A component declaring one describes its internals, and naming
@@ -769,7 +821,8 @@ const APPEARANCE_ONLY = new Set([
   'badge', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'empty-state',
   'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
   'dialog', 'separator', 'sidebar', 'skeleton', 'spinner', 'table',
-  'textarea', 'toolbar', 'top-bar', 'avatar-group',
+  'textarea', 'toolbar', 'top-bar',
+  'checkbox', 'radio', 'switch',
 ]);
 
 const TEXT_FAMILY = {
@@ -777,6 +830,7 @@ const TEXT_FAMILY = {
   button: 'action', card: 'body', dialog: 'body', 'empty-state': 'body',
   'helper-text': 'label', input: 'input', kbd: 'label', label: 'action',
   'list-item': 'body', spinner: null, skeleton: 'body', table: 'body',
+  checkbox: null, radio: null, switch: null,
   textarea: 'input', toolbar: 'body', 'top-bar': 'title',
 };
 
@@ -785,31 +839,44 @@ const TEXT_FAMILY = {
 const SCHEMA_KEY = { input: 'text-field' };
 
 function componentPlan() {
-  const sources = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite']
+  const sources = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation']
     .map((g) => load(`components/${g}.json`));
-  const find = (key) => {
+  const raw = (key) => {
     const k = SCHEMA_KEY[key] || key;
     for (const src of sources) if (src[k]) return src[k];
     return null;
+  };
+  // `checkbox` and `radio` declare nothing but a $base and a default: the ladder they ramp
+  // belongs to `toggle-base`. Without this they read as empty and emit no class, which is
+  // how a component can be fully specified and still ship nothing.
+  const find = (key) => {
+    const cfg = raw(key);
+    if (!cfg || !cfg.$base) return cfg;
+    const base = raw(cfg.$base);
+    return base ? { ...base, ...cfg } : cfg;
   };
 
   const emit = [];
   const skipped = { empty: [], subParts: [] };
   for (const name of [...APPEARANCE_ONLY].sort()) {
     const cfg = find(name);
-    if (!cfg) { skipped.empty.push(name); continue; }
+    // The skip below means "nothing declared to carry", and a BASE_RULES entry is
+    // something declared to carry — `.separator` is a rule with no ladder and no variant,
+    // so it has no schema the emitter can read and would otherwise fall out here.
+    const handWritten = Boolean(BASE_RULES[name]);
+    if (!cfg && !handWritten) { skipped.empty.push(name); continue; }
     if (CELL_SIZED.has(name)) continue;
-    const sizes = cfg.sizes || {};
+    const sizes = (cfg && cfg.sizes) || {};
     const keys = new Set(Object.keys(sizes.$constant || {}));
     for (const t of Object.keys(sizes)) {
       if (t.startsWith('$') || !sizes[t] || typeof sizes[t] !== 'object') continue;
       for (const k of Object.keys(sizes[t])) if (!k.startsWith('$')) keys.add(k);
     }
-    const hasVariants = Object.keys(cfg.variants || {}).length > 0;
-    if (!keys.size && !hasVariants) { skipped.empty.push(name); continue; }
+    const hasVariants = Object.keys((cfg && cfg.variants) || {}).length > 0;
+    if (!keys.size && !hasVariants && !handWritten) { skipped.empty.push(name); continue; }
     const sub = [...keys].filter((k) => SUB_PART_KEYS.has(k));
     if (sub.length) { skipped.subParts.push(`${name} (${sub.join(', ')})`); continue; }
-    emit.push({ name, cfg, textFamily: TEXT_FAMILY[name] });
+    emit.push({ name, cfg: cfg || {}, textFamily: TEXT_FAMILY[name] });
   }
   return { emit, skipped };
 }
@@ -821,10 +888,16 @@ function buildSectionComponentClasses() {
     ' *',
     ' * Shape only. Color composes: a tone class sets the fill, `.control` carries validity and',
     ' * disabled state, `.surface-N` and `.elevate-N` carry plane and lift.',
-    ' *',
-    ` * No class emitted for: ${skipped.empty.join(', ')} — nothing declared to carry.`,
-    ' * No class emitted for these until their internals are named:',
-    ...skipped.subParts.map((x) => ` *   ${x}`),
+    // Only stated when there is something to state: an empty list left a dangling
+    // sentence in the shipped stylesheet the day the last skip was resolved.
+    ...(skipped.empty.length || skipped.subParts.length ? [' *'] : []),
+    ...(skipped.empty.length
+      ? [` * No class emitted for: ${skipped.empty.join(', ')} — nothing declared to carry.`]
+      : []),
+    ...(skipped.subParts.length
+      ? [' * No class emitted for these until their internals are named:',
+         ...skipped.subParts.map((x) => ` *   ${x}`)]
+      : []),
     ' */',
   ];
   // Every component that ramps an icon sets --icon-size; this is the one rule that reads
@@ -1049,6 +1122,30 @@ button,
    and inside one .table right-aligns it, which is the convention money follows. */
 .numeric {
   font-variant-numeric: tabular-nums;
+}
+
+/* Text for assistive technology only: read out, never painted. Every app needs one of
+   these on day one — a label on an icon-only control, a table caption, the live region
+   that announces what changed — and hand-rolling it is how the half-broken versions get
+   written. display:none and visibility:hidden both remove the element from the
+   accessibility tree, which is the opposite of the point; this keeps it in the tree and
+   takes it out of the paint.
+
+   clip-path rather than the deprecated clip, and nowrap because a 1px box wraps every
+   word onto its own line, which some screen readers then read as separate lines. Do not
+   put a focusable element inside one: it stays tabbable and a sighted keyboard user lands
+   on something they cannot see. A skip link wants the focusable variant, which is a
+   different rule and not this one. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }`;
 }
 
@@ -1554,14 +1651,151 @@ function generateLayer() {
  * environmental overrides a consumer should not casually beat, while a target size is a
  * decision a consumer may legitimately take back.
  */
+// Square ladders that are not targets, and why. Everything else with a square ladder gets
+// a hit area, so a new one is opted out here deliberately rather than by being forgotten.
+const NOT_A_TARGET = {
+  spinner: 'a status indicator — nothing clicks it, so a hit area would invent a target',
+};
+
+// Fixed-size classes that take the clamp exemption but not the hit area, and why.
+//
+// An <input> is a replaced element and renders no ::before, so the overlay below is simply
+// not available to one — it is not a support question to hedge on, it is what the element
+// is. A toggle gets its target from the label that names it, which is markup no stylesheet
+// can supply. The clamp exemption still applies: without it a 20px checkbox stretches to a
+// 44px-tall rectangle under a coarse pointer, which is the distortion, not the fix.
+const TARGET_FROM_LABEL = {
+  checkbox: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
+  radio: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
+  switch: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
+};
+
+/**
+ * Tier selectors whose box has both axes fixed — one `size` driving both, or an explicit
+ * `width` and `height` together.
+ *
+ * A square was the first case found and is not the only one: a switch is 44x24 by
+ * declaration, and `min-height: var(--touch-min)` turns that into 44x44 just as surely as
+ * it turns a 40px icon button into a 44x40 rectangle. What breaks is a fixed aspect, not
+ * squareness.
+ *
+ * Derived from the same keys the emitter reads rather than listed by hand, because a list
+ * is a second place for it to drift from the ladder.
+ */
+function fixedSizeTierSelectors() {
+  const { emit } = componentPlan();
+  const sels = [];
+  for (const { name, cfg } of emit) {
+    if (NOT_A_TARGET[name]) continue;
+    const ladders = [['', cfg.sizes], ['icon-', cfg['icon-sizes']]];
+    for (const [prefix, ladder] of ladders) {
+      for (const [tier, spec] of Object.entries(ladder || {})) {
+        if (tier.startsWith('$') || !spec || typeof spec !== 'object') continue;
+        const bothAxes = spec.size || (spec.width && spec.height);
+        if (!bothAxes) continue;
+        sels.push(`.${name}[data-size="${prefix}${tier}"]`);
+      }
+    }
+  }
+  return sels;
+}
+
 function buildSectionTargetFloor() {
+  const squares = fixedSizeTierSelectors();
+  const withOverlay = squares.filter((sel) => !TARGET_FROM_LABEL[sel.slice(1).split('[')[0]]);
   return `/* === Target floor === */
 @media (pointer: coarse) {
   .interactive,
   .control {
     min-height: var(--touch-min);
   }
+
+  /* A box with both axes fixed is what the clamp above breaks. It sets min-height and
+     nothing else, so an icon-only button — width and height both the control height — came
+     out 44 tall and its own width wide on a touch device: distorted, and still under the
+     floor on the axis nobody clamped. Growing the box to 44 square instead would make an
+     icon button heavier than every control beside it, so the target grows and the box
+     does not.
+
+     The ::before is the target. It is centred on the element and reaches --touch-min in
+     both axes, or the element's own size where that is already larger, so a finger has a
+     compliant area to land on while the ring, the fill and the icon stay the size the
+     ladder drew. It overlaps whatever sits within half the floor of the control, which is
+     the cost of the approach and the reason spacing still matters around one.
+
+     ::before and not ::after, which is not a free choice: .interactive::after is the
+     hover and press overlay, inset to the element and rounded to inherit its radius.
+     Taking it here grew that tint to the size of the target, so a finger-sized rounded
+     square lit up outside a 40px icon button on every press.
+
+     A fixed-size ladder that is not a target says so in NOT_A_TARGET — .spinner ramps one and
+     nothing clicks it. One that is a target but cannot carry the overlay says so in
+     TARGET_FROM_LABEL — an <input> renders no ::before, so a checkbox takes the exemption
+     above and gets its target from the label beside it. The tier selector already outranks
+     the clamp on specificity, so this holds wherever it lands in the block. */
+${squares.map((sel) => `  ${sel},`).join('\n').replace(/,$/, ' {')}
+    min-height: 0;
+    position: relative;
+  }
+
+${withOverlay.map((sel) => `  ${sel}::before,`).join('\n').replace(/,$/, ' {')}
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, var(--touch-min));
+    height: max(100%, var(--touch-min));
+  }
 }`;
+}
+
+/**
+ * The switch thumb, and the two state colours it moves between.
+ *
+ * Everything else about a switch comes off the generic ladder — width, height, radius. A
+ * thumb does not, because it is a second box inside the first and the element it sits on is
+ * an <input>, which takes no pseudo-element. It is drawn as a radial gradient positioned
+ * against the track, so the ladder's own heights are read again here rather than restated.
+ *
+ * The thumb takes `currentColor`, which is why the states differ by `color` and
+ * `background-color` alone: the thumb and the track crossfade together instead of the
+ * gradient being redeclared and snapping.
+ *
+ * THUMB_SHARE is the one number here that was chosen rather than read. The schema fixes the
+ * track as a cohesive set and says nothing about what sits in it; 0.7 leaves an inset that
+ * reads as a gap at every tier without the small one going thin. Everything else — the
+ * thumb diameter and the inset at each tier — is derived from the declared height.
+ */
+const THUMB_SHARE = 0.7;
+
+function buildSectionSwitchThumb() {
+  const { emit } = componentPlan();
+  const sw = emit.find((e) => e.name === 'switch');
+  if (!sw) return '';
+  const states = sw.cfg.active || {};
+  const out = ['/* === Switch === */', ''];
+  for (const [key, sel] of [['false', '.switch'], ['true', '.switch:checked']]) {
+    const v = states[key] || {};
+    const track = CSS_COLOR(v['track-bg']);
+    const thumb = CSS_COLOR(v['thumb-bg']);
+    const d = [];
+    if (track) d.push(`  background-color: ${track};`);
+    if (thumb) d.push(`  color: ${thumb};`);
+    if (d.length) out.push(`${sel} {`, ...d, '}', '');
+  }
+  for (const [tier, spec] of Object.entries(sw.cfg.sizes || {})) {
+    if (tier.startsWith('$') || !spec || typeof spec !== 'object' || !spec.height) continue;
+    const h = parseFloat(spec.height);
+    const thumb = Math.round(h * THUMB_SHARE);
+    const inset = (h - thumb) / 2;
+    out.push(`.switch[data-size="${tier}"] {`,
+             `  background-size: ${thumb}px ${thumb}px;`,
+             `  background-position: left ${inset}px center;`, '}', '',
+             `.switch[data-size="${tier}"]:checked {`,
+             `  background-position: right ${inset}px center;`, '}', '');
+  }
+  return out.join('\n');
 }
 
 function buildSectionDialogParts() {
@@ -1740,6 +1974,8 @@ function generateComponents() {
     buildSectionComponentClasses(),
     '',
     buildSectionDialogParts(),
+    '',
+    buildSectionSwitchThumb(),
     '',
     buildSectionTargetFloor(),
   ].join('\n');

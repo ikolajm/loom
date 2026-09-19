@@ -54,33 +54,41 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
     loading?: boolean;
   };
 
-const LoadingSpinner = () => (
-  <svg className="${cls('spinner', 'button')}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
-    <path d="M12 2 A 10 10 0 0 1 22 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
-  </svg>
-);
-
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = '${dflt.variant || 'filled'}', color = '${dflt.color || 'primary'}', intensity = '${dflt.intensity || 'solid'}', size = 'md', asChild = false, iconOnly = false, leadingIcon, trailingIcon, loading = false, disabled, className, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     const tone = ${tones.expression('color', 'intensity')};
     const resolvedSize = iconOnly ? \`icon-\${size}\` : size;
-    const isDisabled = disabled || loading;
-    const effectiveLeadingIcon = loading ? <LoadingSpinner /> : leadingIcon;
+    // The ring is the class: it draws from the size tier's border-width and takes its
+    // colour from currentColor, so the button's own text colour carries it.
+    const spinner = <span className="${cls('spinner', 'button')}" data-size={size} aria-hidden="true" />;
+    const effectiveLeadingIcon = loading ? spinner : leadingIcon;
 
     return (
       <Comp
         ref={ref}
         className={cn(buttonVariants({ variant }), tone, className)}
         data-size={resolvedSize}
-        disabled={isDisabled}
+        disabled={disabled}
+        // Loading is transient and the user's focus is on this button, so it must not go
+        // native-disabled: the disabled attribute drops the element out of the
+        // accessibility tree and sends focus to body, which loses a keyboard user their
+        // place and leaves aria-busy announcing to nothing. aria-disabled keeps it
+        // focusable and announced; the click guard below is what actually stops the second
+        // submit. The disabled prop still maps to the real attribute — that state is
+        // persistent and nobody is standing on it. The class layer already styles
+        // [aria-disabled="true"] alongside :disabled, so both render the same.
+        aria-disabled={loading || undefined}
         aria-busy={loading || undefined}
         {...props}
+        onClick={(event) => {
+          if (loading) { event.preventDefault(); return; }
+          props.onClick?.(event);
+        }}
       >
         {iconOnly ? (
           <span className={'${cls(ICON_SLOT_CLASS, 'button')}'}>
-            {loading ? <LoadingSpinner /> : children}
+            {loading ? spinner : children}
           </span>
         ) : (
           // An array, not a fragment. Slot finds Slottable with React.Children.toArray,

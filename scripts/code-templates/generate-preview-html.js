@@ -45,9 +45,6 @@ const SIZES = ['sm', 'md', 'lg'];
 // the size a consumer's icon would: .icon-slot reserves var(--icon-size) and
 // .icon-slot > svg fills it, which a text glyph never does.
 const CLOSE_MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-const SPINNER_MARK = '<svg viewBox="0 0 24 24" fill="none" width="100%" height="100%" aria-hidden="true">'
-  + '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>'
-  + '<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
 
 // A swatch label has to stay readable on every stop of every ramp. The TSX preview did
 // this with `mix-blend-mode: difference` over white, which inverts the background — and
@@ -201,7 +198,7 @@ const CLASS_STRIP = [
     lede(`The spinner carries the layer's only animation; the skeleton is deliberately
       static, because it earns its place by reserving layout rather than by moving. Set
       reduced motion at the OS and reload: the spinner keeps turning on purpose.`),
-    row(`      <span class="spinner" data-size="md" data-variant="default">${SPINNER_MARK}</span>
+    row(`      <span class="spinner" data-size="md" data-variant="default" aria-label="Loading"></span>
       <div class="pv-field"><span class="skeleton" data-variant="default" style="height: var(--space-6)"></span></div>`),
   ].join(NL)),
 
@@ -320,6 +317,32 @@ const CLASS_STRIP = [
       </div>`),
   ].join(NL)),
 
+  section('Selection controls', [
+    lede(`The box, the tick and the circle are the browser's, pointed at the brand with
+      <code>accent-color</code>; the ladder sets the size and nothing else. That is what
+      buys native indeterminate, native focus and a control that needs no markup contract
+      &mdash; and it is what costs a custom radius and a custom unchecked fill. The switch
+      has no native counterpart to borrow, so the class layer draws it: a track, and a thumb
+      that is a radial gradient taking <code>currentColor</code>, which is why it slides and
+      crossfades rather than snapping.
+      <br><br>
+      <strong>Every one of them is inside its label, and that is the target.</strong> An
+      <code>&lt;input&gt;</code> is a replaced element and renders no
+      <code>::before</code>, so the hit area an icon-only button gets is not available here.
+      The label is what a finger lands on, which is markup no stylesheet can supply for you.`),
+    row(`      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="sm" checked> Small, checked</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md"> Medium</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="lg" checked> Large, checked</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" disabled checked> Disabled</label>`),
+    row(`      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md" checked> First</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md"> Second</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md" disabled> Disabled</label>`),
+    row(`      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="sm"> Small</label>
+      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="md" checked> Medium, on</label>
+      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="lg"> Large</label>
+      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="md" disabled checked> Disabled</label>`),
+  ].join(NL)),
+
 ].join(NL + NL);
 
 // --- Page-local layout -------------------------------------------------------
@@ -334,6 +357,9 @@ const PAGE_CSS = `    :root { color-scheme: light dark; }
     .pv-group { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
     .pv-key { flex: 0 0 8rem; }
     .pv-field { width: 14rem; }
+    /* Layout only, and deliberately so: the label is the target, so the demo has to
+       show one. Nothing here touches the control's own appearance. */
+    .pv-toggle { display: inline-flex; align-items: center; gap: var(--space-2); cursor: pointer; }
     .pv-ramp { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-3); }
     .pv-ramp-row { display: flex; flex-wrap: wrap; }
     .pv-shade { flex: 0 0 3.5rem; height: 2.5rem; display: flex; align-items: flex-end; justify-content: center; }

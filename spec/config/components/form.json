@@ -57,22 +57,9 @@
     "default": { "state": "default", "size": "md" }
   },
 
-  "date-picker": {
-    "$catalog": { "dependencies": ["cn", "popover", "calendar", "form-field"] },
-    "$base": "text-field",
-    "$note": "Text-field variant with a persistent calendar trailing icon that opens a Calendar in a Popover. The panel was deferred at authoring time and has since shipped — the atom composes popover + calendar.",
-    "icon-slots": {
-      "trailing": { "default-visible": true, "default-icon": "icon/calendar", "persistent": true }
-    },
-    "default": { "state": "default", "size": "md" }
-  },
 
   "toggle-base": {
-    "$note": "Shared visual foundation for binary toggle controls (checkbox, radio). Same state logic, same sizes, different shape.",
-    "checked": {
-      "false": { "bg": "color/surface/surface", "border": "color/outline/outline" },
-      "true":  { "bg": "color/primary/primary", "fg": "color/primary/on-primary", "border": "color/primary/primary" }
-    },
+    "$note": "Shared size ladder for the binary toggles. The box, the mark and the checked fill belong to the UA — accent-color points them at the brand — so the size of the indicator is the only decision left here.",
     "$exception": "Toggle indicator sizes are hardcoded — proportional to the control's visual weight, not derived from icon or component-height primitives.",
     "sizes": {
       "sm": { "size": "16px" },
@@ -83,18 +70,19 @@
 
   "checkbox": {
     "$base": "toggle-base",
-    "radius": "radius/component",
-    "default": { "checked": "false", "size": "md" }
+    "$catalog": { "dependencies": ["cn", "form-field"], "tokens": ["color", "sizing"], "composition": "none" },
+    "default": { "size": "md" }
   },
 
   "radio": {
     "$base": "toggle-base",
-    "radius": "radius/pill",
-    "$note": "Visually identical to checkbox but circular. Radio buttons operate in exclusive groups — only one selected at a time within a group.",
-    "default": { "checked": "false", "size": "md" }
+    "$catalog": { "dependencies": ["cn", "form-field"], "tokens": ["color", "sizing"], "composition": "none" },
+    "$note": "The same control as checkbox with the UA drawing a circle instead of a box, and exclusive within a name group. No radius of its own: the shape is the input type, not a token.",
+    "default": { "size": "md" }
   },
 
   "switch": {
+    "$catalog": { "dependencies": ["cn", "form-field"], "tokens": ["color", "sizing"], "composition": "none" },
     "active": {
       "false": { "track-bg": "color/surface/surface-1", "thumb-bg": "color/surface/on-surface-variant" },
       "true":  { "track-bg": "color/primary/primary", "thumb-bg": "color/primary/on-primary" }
@@ -109,97 +97,9 @@
     "default": { "active": "false", "size": "md" }
   },
 
-  "combobox": {
-    "$catalog": { "dependencies": ["cn", "popover", "form-field"] },
-    "$base": "text-field",
-    "$note": "Combines text input with filterable dropdown. Extends text-field for the trigger, adds dropdown panel styling. Keyboard navigation required (arrow keys, enter, escape). Single-select, multi-select, and creatable variants share the same config — variant logic is code-only.",
-    "icon-slots": {
-      "trailing": { "default-visible": true, "default-icon": "icon/chevron-down", "persistent": true }
-    },
-    "dropdown": {
-      "bg": "color/surface/surface-1",
-      "fg": "color/surface/on-surface",
-      "hover-bg": "color/surface/surface-2",
-      "shadow": "effects/shadow-2",
-      "radius": "radius/input"
-    },
-    "item": {
-      "sizes": {
-        "sm": { "height": "height/menu-item-sm", "x-padding": "{scale.2}", "gap": "{scale.1}", "text": "action/sm" },
-        "md": { "height": "height/menu-item-md", "x-padding": "{scale.3}", "gap": "{scale.2}", "text": "action/md" },
-        "lg": { "height": "height/menu-item-lg", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/lg" }
-      }
-    },
-    "empty": {
-      "fg": "color/surface/on-surface-variant",
-      "text": "body/sm"
-    },
-    "default": { "state": "default", "size": "md" }
-  },
 
-  "slider": {
-    "$note": "Single value or range slider. Track + thumb model. Range variant has two thumbs — code-only distinction, same visual config. Always pair with a visible value label.",
-    "variants": {
-      "default": { "track-bg": "color/surface/surface-1", "fill-bg": "color/primary/primary", "thumb-bg": "color/primary/primary" }
-    },
-    "sizes": {
-      "$constant": { "track-radius": "radius/pill", "thumb-radius": "radius/pill" },
-      "sm": { "track-height": "{scale.1}", "thumb-size": "16px" },
-      "md": { "track-height": "{scale.1}", "thumb-size": "20px" },
-      "lg": { "track-height": "{scale.2}", "thumb-size": "24px" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
-  "file-upload": {
-    "$note": "Dropzone — drag-and-drop / click-to-browse area, dashed while it is still asking for a file and solid once an upload has settled (see `settled`). Single-variant (the dropzone IS the atom; a button trigger is just a button). The dropzone is stateless — it fires onFilesSelected and owns no file array; the FileUploadItem subcomponent renders the selected-files list the consumer maps over. `dragover` is an internal runtime state (drag highlight), NOT a consumer-facing variant. `uploading` is code-only.",
-    "variants": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline", "icon-fg": "color/surface/on-surface-variant" }
-    },
-    "dragover": { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container", "border": "color/primary/primary", "icon-fg": "color/primary/primary" },
-    "settled": {
-      "$note": "Border style carries whether the dropzone is still asking for a file. Dashed reads as an open target; once an upload has resolved the box is reporting, not inviting, so it takes a full stroke. `uploading` stays dashed — nothing has been uploaded yet.",
-      "border-style": "solid",
-      "success": { "border": "color/success/success", "icon-fg": "color/success/success" },
-      "error": { "border": "color/error/error", "icon-fg": "color/error/error" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/card", "border-style": "dashed", "border-width": "border-width/bw-2" },
-      "sm": { "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
-      "md": { "x-padding": "{scale.6}", "y-padding": "{scale.6}", "gap": "{scale.3}", "icon-size": "icon/icon-3" },
-      "lg": { "x-padding": "{scale.8}", "y-padding": "{scale.8}", "gap": "{scale.4}", "icon-size": "icon/icon-4" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
-  "input-otp": {
-    "$note": "One-time password input. Row of individual character cells. Auto-advance on digit entry, paste support required. Separated boxes variant — each cell is a standalone input box.",
-    "state": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline" },
-      "focused": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/primary/primary" },
-      "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 600,
-      "letter-spacing": "0.1em",
-      "text-transform": "none"
-    },
-    "$exception": "OTP cells are square — width equals height. Monospace-like letter-spacing ensures centered digits. Cell sizes are hardcoded to maintain square proportions.",
-    "sizes": {
-      "$constant": { "radius": "radius/input" },
-      "sm": { "cell-size": "height/control-sm", "gap": "{scale.2}", "text": "title/sm", "border-width": "border-width/bw-1" },
-      "md": { "cell-size": "height/control-md", "gap": "{scale.2}", "text": "title/md", "border-width": "border-width/bw-1" },
-      "lg": { "cell-size": "height/control-lg", "gap": "{scale.3}", "text": "title/lg", "border-width": "border-width/bw-2" }
-    },
-    "default": { "state": "default", "size": "md" }
-  },
 
   "form-field": {
     "$catalog": {
@@ -241,58 +141,7 @@
       "lg": { "line-height": "20px" }
     },
     "default": { "state": "default", "size": "md" }
-  },
-
-  "calendar": {
-    "$note": "Calendar grid panel for date selection. Used standalone (scheduling views) or as the dropdown panel inside date-picker. Day cells are buttons semantically (interactive, trigger selection). Full keyboard navigation (arrow keys between days, page up/down for months).",
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-2" }
-    },
-    "day": {
-      "state": {
-        "default":  { "bg": "transparent", "fg": "color/surface/on-surface" },
-        "selected": { "bg": "color/primary/primary", "fg": "color/primary/on-primary" },
-        "today":    { "bg": "transparent", "fg": "color/primary/primary", "border": "color/primary/primary" },
-        "hover":    { "bg": "color/surface/surface-2", "fg": "color/surface/on-surface" },
-        "disabled": { "bg": "transparent", "fg": "color/surface/on-surface-variant" },
-        "range":    { "bg": "color/primary/primary-container", "fg": "color/primary/on-primary-container" }
-      }
-    },
-    "header-typography": {
-      "font-family": "body",
-      "font-weight": 600,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "day-typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/card", "day-radius": "radius/component" },
-      "compact": { "width": "208px", "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}", "header-text": "action/sm", "nav-height": "16px", "day-text": "action/sm", "nav-icon": "icon/icon-1" },
-      "sm": { "width": "240px", "x-padding": "{scale.2}", "y-padding": "{scale.2}", "gap": "{scale.1}", "header-text": "action/md", "nav-height": "20px", "day-text": "action/sm", "nav-icon": "icon/icon-1" },
-      "md": { "width": "280px", "x-padding": "{scale.3}", "y-padding": "{scale.3}", "gap": "{scale.1}", "header-text": "action/md", "nav-height": "20px", "day-text": "action/md", "nav-icon": "icon/icon-2" },
-      "lg": { "width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.4}", "gap": "{scale.2}", "header-text": "action/lg", "nav-height": "24px", "day-text": "action/lg", "nav-icon": "icon/icon-2" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
-
-  "time-picker": {
-    "$catalog": {
-      "category": "form",
-      "dependencies": ["cn", "select"],
-      "tokens": ["color", "typography", "spacing", "sizing"],
-      "composition": "none"
-    },
-    "$note": "Option A — composes Select (no input masking). Paired with date-picker. `use24Hour` drops the period select and switches the hour range; `minuteStep` controls the minute options.",
-    "sizes": {
-      "sm": {},
-      "md": {},
-      "lg": {}
-    },
-    "default": { "size": "md" }
   }
+
+
 }

@@ -1,0 +1,21 @@
+{
+  "name": "radio",
+  "kind": "atom",
+  "category": "form",
+  "file": "radio.tsx",
+  "dependencies": [
+    "cn",
+    "form-field"
+  ],
+  "npmDependencies": [],
+  "tokens": [
+    "color",
+    "sizing"
+  ],
+  "composition": "none",
+  "sizes": [
+    "sm",
+    "md",
+    "lg"
+  ]
+}

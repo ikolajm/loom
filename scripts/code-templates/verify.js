@@ -322,7 +322,7 @@ const UNCONSUMED_VARIANT_KEYS = {
 };
 
 function checkVariantKeys() {
-  const configs = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite']
+  const configs = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation']
     .map((g) => {
       const f = path.join(ROOT, `spec/config/components/${g}.json`);
       return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};

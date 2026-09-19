@@ -19,7 +19,6 @@ const path = require('path');
 
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
-const { kindOf } = require('./shared');
 const { buildCnUtility } = require('./components/cn');
 const { buildThemeProvider } = require('./components/theme-provider');
 const { buildThemeInit } = require('./components/theme-init');
@@ -97,7 +96,6 @@ const CATEGORY_MAP = {
   'Feedback': 'feedback',
   'Data Display': 'data-display',
   'Navigation': 'navigation',
-  'Composite': 'composite',
 };
 
 function extractAxisKeys(obj) {
@@ -161,7 +159,12 @@ function buildManifest(def, config, src) {
     name: def.key,
     // `kind` is atom-vs-pattern (what the thing is). `composition` further down is
     // asChild/Slot mechanics (how it renders). Different axes, easily confused.
-    kind: kindOf(def.key),
+    // Every registry entry is an atom. `kind` was classified against a PATTERN_IDS list
+    // that outlived the catalog it triaged: of its twenty-three names, fifteen were
+    // components that no longer exist and the other eight are class-layer-only, so not one
+    // of them could ever reach this line. The field stays because manifests carry it and
+    // `doc-counts` reads it; the classifier does not, because it classified nothing.
+    kind: 'atom',
     category: cat.category || CATEGORY_MAP[def.category] || 'misc',
     // The delivered filename, so nothing downstream has to know which atoms are not
     // .tsx. sync.js used to carry `atom === 'cn' ? 'cn.ts' : ...`, which was one special
@@ -284,7 +287,7 @@ function generate(registry, outputDir, configs) {
 
   // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.
-  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation', 'composite'];
+  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation'];
   const byGroup = {};
   for (const a of atoms) (byGroup[a.category] ||= []).push(a.name);
   const grouped = {};
@@ -296,6 +299,23 @@ function generate(registry, outputDir, configs) {
     ...grouped,
   }, null, 2) + '\n');
   console.log('  atoms.json (catalog index by group)');
+
+  // The other half of the product needs an index too. `atoms.json` says which components
+  // ship; this says which class names the stylesheets define, which is the question a
+  // consumer has to answer before naming a class of their own and which nothing published
+  // could answer until now. Written from the same run's emitted CSS rather than from a
+  // list, so it cannot disagree with what shipped.
+  const { classManifest } = require('./generate-tokens-css');
+  const classes = [...classManifest()].sort();
+  fs.writeFileSync(path.join(CATALOG_DIR, 'classes.json'), JSON.stringify({
+    $note: 'Every class name the Loom stylesheets define, parsed out of the CSS this run '
+      + 'emitted. Check here before naming a class of your own. A name you reuse is not an '
+      + 'error: everything Loom emits sits in @layer loom.*, so your unlayered rule wins '
+      + 'property by property — which is the override mechanism, and is also why an '
+      + 'accidental reuse is quiet. Generated; do not hand-edit.',
+    classes,
+  }, null, 2) + '\n');
+  console.log(`  classes.json (${classes.length} class names the stylesheets define)`);
 
   console.log(`\nCatalog: ${count + 1} atoms → ${CATALOG_DIR}`);
   return count + 1;

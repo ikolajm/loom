@@ -54,7 +54,6 @@ function loadAllConfigs() {
     dataDisplayConfig: loadComponents('components/data-display.json'),
     layoutConfig: loadComponents('components/layout.json'),
     navigationConfig: loadComponents('components/navigation.json'),
-    compositeConfig: loadComponents('components/composite.json'),
   };
 }
 
@@ -195,47 +194,11 @@ function resolveBase(allComponents, configKey) {
   return merged;
 }
 
-// --- Catalog kind ---
-//
-// Two things live in this catalog and it only had one word for them. An **atom** is a
-// primitive you compose with — one control, one mark, one piece of content. A
-// **pattern** is an arrangement already composed for you, solving an assembly you
-// would otherwise repeat. Both are first-class and installed identically; the split is
-// vocabulary, not a tier. Nothing branches on it.
-//
-// It has to be declared. Two mechanical derivations were tried and both measure a
-// different axis:
-//   - The Figma `build-pattern-*` prefix marks "cannot be emitted by the standard
-//     variant × size builder" — which is why `number` and `relative-time` carry it.
-//   - Manifest `dependencies` marks "imports another atom" — which makes `input` a
-//     composer (it imports form-field for error context) and a self-contained shell a primitive
-//     (it reimplements an input inline rather than importing one). Exactly backwards.
-//
-// The test that does hold: could a competent consumer assemble this from other Loom
-// atoms without inventing anything? If yes, it is a pattern. Default is `atom`; only
-// the exceptions are listed, so this stays one auditable list instead of 66 fields.
-const PATTERN_IDS = new Set([
-  // Compose several controls into a working arrangement
-  'combobox', 'date-picker', 'time-picker', 'file-upload',
-  // Menu and overlay arrangements built from a trigger + surface + item rows
-  'dropdown-menu', 'context-menu', 'command-palette', 'navigation-menu',
-  // Structural page furniture
-  'top-bar', 'sidebar', 'bottom-nav', 'breadcrumbs', 'pagination', 'toolbar',
-  // Repeating-item arrangements
-  'list-item', 'accordion', 'avatar-group', 'tree-view', 'stepper', 'carousel',
-  // Composed states
-  'empty-state', 'fab-menu', 'toggle-group',
-]);
-
-/** `atom` unless listed above. See PATTERN_IDS for why this is authored, not derived. */
-function kindOf(key) {
-  return PATTERN_IDS.has(key) ? 'pattern' : 'atom';
-}
 
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
-  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig, compositeConfig } = configs;
+  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig } = configs;
   return {
     // === Actions ===
     'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions' },
@@ -244,6 +207,9 @@ function getComponentRegistry(configs) {
 
     // === Inputs ===
     'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', variantKey: 'state' },
+    'Checkbox': { generator: 'toggles#generateCheckbox', source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
+    'Radio': { generator: 'toggles#generateRadio', source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
+    'Switch': { generator: 'toggles#generateSwitch', source: formConfig, key: 'switch', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
     'FormField': { generator: 'form-field#generateFormField', source: formConfig, key: 'form-field', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noIconSlots: true, noChildren: true, textFamily: 'body', category: 'Inputs' },
 
     // === Layout ===
@@ -363,6 +329,4 @@ module.exports = {
   buildTypographyClasses,
   resolveBase,
   getComponentRegistry,
-  kindOf,
-  PATTERN_IDS,
 };
