@@ -1,10 +1,9 @@
 /**
  * Shared helpers for the Figma styles steps.
  *
- * These lived in `figma-components/utils/resolvers.js` until the component pipeline was
- * cut. Step 14 (text styles) is the only remaining consumer, and it depended on them
- * through the assembled shared bundle rather than through its own file — which hid a
- * trap: `text-styles.js` carried its own copies of `FONT_WEIGHT_OVERRIDES`,
+ * Step 14 (text styles) is the only consumer, and it reaches them through the assembled
+ * shared bundle rather than through its own file — which hid a trap:
+ * `text-styles.js` carried its own copies of `FONT_WEIGHT_OVERRIDES`,
  * `weightToStyleName` and `parseLetterSpacing` above its `// --- Pipeline ---` marker,
  * and the assembler strips everything above that marker. The local copies never ran.
  *

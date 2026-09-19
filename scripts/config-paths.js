@@ -31,8 +31,8 @@ const COMMITTED_ROOT = path.resolve(__dirname, '../spec/config');
  * Where the local (brand) config set lives. `spec/config/local/` by default.
  *
  * `LOOM_LOCAL_CONFIG` redirects it, which is what makes a brand generation not evict the
- * one already there. `spec/config/local/` is a single slot: generating pb2's brand
- * overwrote loom-test's, and the only way to get it back was a manual copy. A consumer
+ * one already there. `spec/config/local/` is a single slot: generating one project's
+ * brand overwrote another's, and the only way to get it back was a manual copy. A consumer
  * regenerating its own substrate has no business mutating this repo at all.
  *
  * An environment variable rather than a flag because it has to survive two process

@@ -80,9 +80,9 @@ derived from `primary` by a small hue rotation (analogous, +30° and +60°) when
 supply them. Supply a hex to override the derivation. All three produce a full semantic ramp.
 
 **A derived color is a placeholder, not a decision.** The generated ramp is structurally
-identical to a chosen one, so nothing downstream can tell them apart — which is why the
-generated `colors.json` records which is which in its `$note` and `$derived` fields, and
-every derived variable in Figma carries a description saying so. The rotation is deliberately
+identical to a chosen one, so nothing downstream can tell them apart by looking — which is
+why the pipeline records which is which, and says so on the face of every derived Figma
+variable. The rotation is deliberately
 small: complementary and triadic derivations are correct color theory and the wrong default,
 because a teal primary produced a fire-engine red secondary that shipped into the tokens
 looking exactly as intentional as the primary. Supply your own the moment you have one.
@@ -183,7 +183,6 @@ no token.
 
 ---
 
-All 6 components are installed by every sync, along with `cn` and `theme-init` — there is
-no subset mechanism, and a deleted atom returns on the next run (see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md); an
-unimported atom is tree-shaken, so carrying one costs a file rather than bytes). The
-generated index is [`catalog/atoms.json`](../catalog/atoms.json).
+Every sync installs the whole catalog — there is no subset mechanism; see
+[`CATALOG_SPEC.md`](../CATALOG_SPEC.md) for why. The generated index is
+[`catalog/atoms.json`](../catalog/atoms.json).

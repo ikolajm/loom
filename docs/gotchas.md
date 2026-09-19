@@ -4,23 +4,6 @@ Traps the generated code embodies but can't explain. The code holds the *fix*; t
 
 ---
 
-## A custom class of your own, shipped unlayered, outranks all of Loom
-
-**The rule.** Unlayered author CSS beats layered author CSS regardless of source order and
-regardless of specificity. Every rule Loom ships is inside `@layer`, deliberately, so
-anything you write unlayered wins over it — that is the override mechanism working.
-
-**The trap is your own classes.** Ship `.card-actions { position: relative }` unlayered and
-it silently outranks *everything* Loom layers for `position`, including on elements where
-you meant Loom's rule to hold. `.interactive` hard-sets `position: relative`, so an element
-carrying both gets yours and nothing reports it. No class-merging helper can catch this:
-it sees two class names from different vocabularies and has no idea both set the same
-property. Put your own classes in a layer too, and the cascade order is something you
-state rather than something you discover.
-
-The same mechanism bites from the other direction with a consumer reset, which is the last
-section of this file and the more common way an install looks broken.
-
 ## Radix `Slot` — `asChild` silently applies no classes when children are wrapped in a fragment
 
 `Slot` locates the consumer's element through `Slottable` using `React.Children.toArray`,
@@ -43,51 +26,31 @@ call on component internals, parked visibly rather than guessed at.
 
 ---
 
-## Figma Plugin API
+## Figma — the paste is a console session, not a build
 
-Operational reference for the Figma Plugin API — data formats, gotchas, validated patterns.
+Everything the Figma half does happens in a plugin console that keeps scope between
+pastes, which is where its failure modes come from. What the API itself requires is
+embodied in `scripts/figma-*/` and commented at the call site; what follows is only what
+reading those files does not tell you.
 
-**Data formats**
-- **Color values are 0–1 floats**, not 0–255. `#3B82F6` → `{ r: 0.231, g: 0.51, b: 0.965, a: 1 }`.
-- **Line height** takes an object: `{ value: 24, unit: "PIXELS" }`, not a bare number.
-- **Letter spacing** takes an object: `{ value: 0.01, unit: "PERCENT" }` or `{ …, unit: "PIXELS" }`.
-- **Font weight binding uses FLOAT** (400, 500, 600, 700), not STRING.
+**Plugin code has a 50,000-character maximum.** That limit is the whole reason for the
+shared-utils architecture — paste `00_shared-utils.js` once, then run small step scripts
+against the globals it defines — rather than emitting one self-contained script per step.
 
-**Font loading**
-- Must `await figma.loadFontAsync(...)` before setting any font-dependent property.
-- Style names are font-specific (Inter: "Semi Bold" with a space; JetBrains Mono has no SemiBold, 600→"Medium"; Source Sans 3: "SemiBold" no space).
-- **Always load Inter Regular as fallback** — `figma.createText()` needs it before `.characters` can be set, even if you override the font after.
+**A Figma deliverable only changes on re-paste.** Regenerating updates
+`generated/figma-scripts/`, not any file you already built: an existing Figma file keeps
+its old variables and styles until you run the paste again. "The generator is fixed" and
+"the file is fixed" are separate claims, and only the second is checkable by looking.
 
-**Script limits & architecture**
-- Plugin code has a **50,000-character max**. Batch large operations.
-- **Shared-utils architecture:** paste the utils bundle once, then run small step scripts that reference globals — 50–70% size reduction per script.
-- Variable IDs are session-specific. Get references in the same script; don't hardcode IDs across runs.
-- Wrap step scripts in async IIFEs (console scope collisions are real).
-- **A Figma deliverable only changes on re-paste.** Regenerating the scripts updates `generated/figma-scripts/`, not any file you already built — an existing Figma file keeps the old variables and styles until you re-run the paste. So "the generator is fixed" and "the file is fixed" are separate claims, and only the second one is checkable by looking.
-- **Re-pasting the shared-utils bundle throws `redeclaration of const X` and *silently halts*.** Console scope persists across pastes, and top-level `const`/`let` can't be redeclared — so a second paste of `00` dies at the first collision and every helper below it never reloads (a fix you just made silently won't take). `assemble-figma.js` emits the bundle with top-level `const`/`let` rewritten to `var` so re-pastes redefine cleanly. One exception: the first hop *out of* a `const`-era console session still needs a reload (a `var` can't redeclare an existing `const`).
+**Re-pasting `00` into a console that has already run it silently halts.** Top-level
+`const`/`let` cannot be redeclared, so the second paste dies at the first collision and
+every helper below it never reloads — including the fix you just made. `assemble-figma.js`
+emits the bundle with top-level declarations rewritten to `var` so re-pastes redefine
+cleanly; the one case left is the first hop out of a `const`-era session, which needs a
+console reload.
 
-**Fonts**
-- **A family being available says nothing about the weight you want.** `Space Mono` is in Figma, the parity check said `✓`, and step 14 then died on `The font "Space Mono SemiBold" could not be loaded` — the family ships Regular and Bold only, and the ramp asks for 400/500/600/700. `listAvailableFontsAsync()` returns family *and* style; keeping only the family is what forced a `FONT_WEIGHT_OVERRIDES` table, which was a list of the four families someone had already crashed on. The fifth crashed the same way. `fontStyle()` now snaps to the nearest weight the family actually ships, and `reportFontParity()` reports the ramp's weights rather than just its families.
-- **The snap is not a policy — it is what the browser already does.** Google Fonts returns HTTP 200 for `Space+Mono:wght@400;500;600;700` and silently serves only 400 and 700, so CSS font matching resolves 600 → 700 and 500 → 400 on the page. Figma was the only side that refused to build rather than falling back. Snapping makes the file agree with the render. If you ever want a *different* answer than the browser's, that is what `FONT_WEIGHT_OVERRIDES` is still for.
-
-**API quirks**
-- **`setBoundVariable()` does NOT work on effect styles** — set `boundVariables` directly on the effect object, then reassign the whole array.
-- **`clipsContent` on frames clips shadows** — set `clipsContent = false` on documentation/section frames where shadows must show.
-- **`figma.currentPage` is read-only** — use `await figma.setCurrentPageAsync(page)`.
-- **No shadow variables** — shadows are effect styles only (individual offset/blur/spread *can* bind to FLOAT vars).
-- **`primaryAxisSizingMode`** — `'FILL'` is invalid; use `'FIXED'` / `'AUTO'`, or layout sizing on the parent.
-- **Text overflow in fixed parents** — `textAutoResize` won't help; set `layoutSizingHorizontal = 'FILL'` on the text node.
-- **Free-plan mode limit** — free accounts may allow only 1 mode per collection.
-
-**Validated patterns**
-
-| Pattern | Mechanism |
-|---------|-----------|
-| Variable aliasing across collections | `setValueForMode(modeId, { type: "VARIABLE_ALIAS", id: var.id })` |
-| Text style binding | `style.setBoundVariable("fontSize", var)` (fontSize, lineHeight, fontFamily, fontWeight) |
-| Effect style binding | set `boundVariables` on the effect object, reassign array to style |
-| Code syntax | `variable.setVariableCodeSyntax("WEB", "var(--name)")` |
-| Slash naming = folder grouping | `color/primary/500` groups as `color/ > primary/ > 500` in the Variables panel |
+**Variable IDs are session-specific.** A step resolves the references it needs in its own
+run. An ID carried across runs points at nothing, and does so without complaining.
 
 ---
 
@@ -102,23 +65,18 @@ Fonts are the one token where the two surfaces have **different capabilities**, 
 
 A page's fonts and Figma's fonts are **separate availabilities** (Figma = system fonts + its own set + org uploads), so a name can load in code yet be absent in Figma. Each surface is checked against its *own* authoritative source. There is deliberately **no curated shortlist**: one was shipped and cut, because it drifts, it is environment-specific, and naming safe typefaces is Loom having an opinion about brand. It also promised more than it held — Space Mono was *on* it and still killed a paste on a missing weight.
 
-- **Code side** — **Loom names the family and loads nothing.** `tokens.css` emits
-  `--font-heading` / `--font-body` as `'Your Family', system-ui, sans-serif`; putting the
-  bytes on the page is yours, by whatever route your framework prefers — a Google Fonts
-  `<link>`, a self-hosted `@font-face`, `next/font`. Until you do, the fallback renders
-  and nothing reports it. **This is the trap**: the token is correct, the build is green,
-  every gate passes, and the page is in system sans. It is invisible to anyone with the
-  family installed locally, which usually includes whoever picked it. Check by loading
-  the page on a machine that does not have it, or by reading the computed font family
-  rather than the custom property. Loom loads no webfont on purpose — nothing
-  framework-agnostic can, and guessing wrong costs a render-blocking request.
-- **Figma side** — `figma.listAvailableFontsAsync()` at paste time is authoritative; any missing family **substitutes Inter** (logged) so the build completes instead of throwing.
+[`spec/questionnaire.md`](../spec/questionnaire.md#fonts--heading--body) states what the
+answer does on each surface. What belongs here is why only one of them warns.
 
-One placement, and it is authoritative rather than heuristic: the Figma preflight
+There is one check, and it is authoritative rather than heuristic: the Figma preflight
 (`scripts/figma-styles/_shared.js`: `reportFontParity` / `resolveFamily` / `safeLoadFont`).
 **Nothing warns on the code side, at any point** — that was the config-time check against
-the shortlist, and it went with it. The code-side failure is silent by construction, which
-is why it is written up above rather than gated.
+the shortlist, and it went with it. The code-side failure is silent by construction rather
+than by omission, which is why it is written down here instead of gated: Loom loads no
+webfont on purpose, because nothing framework-agnostic can and guessing wrong costs a
+render-blocking request. Checking it means loading the page on a machine without the
+family, or reading the computed font family rather than the custom property — the token
+is correct either way.
 
 **A family being available says nothing about the weight you want.** `listAvailableFontsAsync()` answers with family *and* style; keeping only the family leaves `fontStyle()` guessing a style name and `loadFontAsync` throwing when the guess is absent. The ramp asks 400/500/600/700 and many families ship fewer; Space Mono ships Regular and Bold — `reportFontParity` reported the family present three lines before the paste died on the missing 600, because it checked the family and not the weights. `fontStyle()` now snaps to the nearest weight the family actually ships (ties heavier, italics excluded), which is what CSS font matching already does on the page; Figma was the only surface refusing to build rather than falling back. `FONT_WEIGHT_OVERRIDES` is still checked first, now as the way to pin a choice deliberately unlike the browser's rather than as the workaround for a crash.
 
@@ -333,7 +291,7 @@ is `border: 0`, which actively removes the rule. The app header lost its bottom 
 the sidebar its right one, in the same rewrite whose premise was that appearance had moved
 somewhere safe.
 
-It was found by hand-porting a consumer off `top-bar.tsx`, comparing what the atom drew
+It was found by hand-porting a consumer off the `top-bar` atom, comparing what it drew
 against what the class draws. Nothing else would have: the schema was right, the class was
 present, `class-coverage` passed, and a missing 1px rule is not what anyone notices on a
 gallery page.
@@ -341,7 +299,8 @@ gallery page.
 **A declared key disappearing is now a three-time pattern** — `item-x-padding` split wrong,
 `rail-width` was read as a part, `border-bottom` was never read. `variant-keys` in
 verify.js is the guard: every key a variant declares is either consumed or parked by name
-in `UNCONSUMED_VARIANT_KEYS` with a reason. Ten are parked today. A key the emitter cannot
+in `UNCONSUMED_VARIANT_KEYS` with a reason, and the gate's own line reports how many are
+parked. A key the emitter cannot
 express yet is fine; a key that vanishes without anyone noticing is not.
 
 ### The deliverable is gitignored, so review it with `npm run diff-emit`
@@ -422,7 +381,7 @@ page-local CSS that might flatter the classes under test; the reasoning was righ
 mechanism does not work. `preview-coverage` did not catch it either: the class was
 rendered, which is all that check asserts — it was just never hidden.
 
-## Loom ships in cascade layers, so any unlayered reset outranks all of it
+## Loom ships in cascade layers, so anything unlayered outranks all of it
 
 Everything Loom emits sits in a Loom-owned layer — `loom.tokens`, `loom.base`, `loom.components`.
 Unlayered CSS beats layered CSS **regardless of specificity** — that is the cascade
@@ -459,10 +418,18 @@ precedence silently falls back to first appearance. That applies to the statemen
 one line reverses the whole cascade. A reset file that wraps itself in `@layer loom.reset`
 and is imported before `tokens.css` cannot be minified into the wrong order.
 
-Found in pb2 (Paperboy v2). The buttons had correct tone and treatment classes and were
+Found in a consuming app. The buttons had correct tone and treatment classes and were
 diagnosed twice as a markup problem before anyone looked at the layer.
 
 **The symptom tells you which defect it is**, because treatments carry tone fallbacks: a
 treatment used alone renders a neutral fill or the outline role rather than nothing. If `background-color` computes to transparent on an element whose `--tone-*`
 properties are resolving, a class is not missing; something unlayered is outranking the
 layer.
+
+**The same rule bites from the other direction, through your own classes.** Ship
+`.card-actions { position: relative }` unlayered and it outranks *everything* Loom layers
+for `position`, including where you meant Loom's rule to hold — `.interactive` hard-sets
+`position: relative`, so an element carrying both gets yours and nothing reports it. No
+class-merging helper can catch it: it sees two names from different vocabularies and has
+no idea both set the same property. Put your own classes in a layer too, and the cascade
+order is something you state rather than something you discover.

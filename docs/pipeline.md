@@ -18,8 +18,8 @@ the whole surface.
 | Command | Entry point | Reads | Writes |
 |---|---|---|---|
 | `npm run configs` | `scripts/generate-configs/index.js` | `spec/answers.json`, `spec/direction-mappings.json`, `spec/config/standards.json` | `spec/config/local/base/*.json` (git-ignored) |
-| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — stylesheets, `components/`, `HANDOFF.md` — plus `catalog/` and `docs/preview.html` |
-| `npm run figma` | `scripts/assemble-figma.js` | the resolved config set | `generated/figma-scripts/` — 17 paste scripts |
+| `npm run generate` | `scripts/code-templates/orchestrator.js` | the resolved config set | `generated/` — the stylesheets — plus `catalog/` and `docs/preview.html` |
+| `npm run figma` | `scripts/assemble-figma.js` | the resolved config set | `generated/figma-scripts/` — the paste scripts |
 
 They are strictly ordered. `configs` writes the config set that the other two read;
 running `generate` before it uses whatever config set is currently resolved, which on
@@ -44,8 +44,6 @@ entry point for a REPL or a one-off script, not something a run log surfaces. Th
 naming in the `configs` log is a different mechanism: `resolve-intent.js` returns a
 `sources` map per Tier 2 key, which the log prints.
 
-Deleting `spec/config/local/` reverts you to Loom's default look with no other step.
-
 Two files are never generated and have no local counterpart in practice:
 
 - **`spec/config/standards.json`** — values locked across all projects: the spacing
@@ -54,7 +52,7 @@ Two files are never generated and have no local counterpart in practice:
   read it for structure and fill it with your values. It is the reason
   `generate-spacing.js` is the smallest generator here: the scale already exists, and
   density only picks which scale steps each category points at.
-- **`spec/config/components/*.json`** — the seven component schemas. Hand-authored,
+- **`spec/config/components/*.json`** — the component schemas, one file per group. Hand-authored,
   not derived from answers.
 
 ## Stage 1 — `answers.json` → config set
@@ -91,10 +89,10 @@ check fails on a leak that isn't there.
 `productType` is refused with an error rather than ignored: it supplied `controlHeight`,
 so ignoring it drops a touch product off the touch ladder with no message anywhere.
 
-### Five generators, five files
+### One generator per config file
 
 Each takes `(answers, standards, mappings)` and returns an object written as one
-JSON file. Four of them are lookups; one computes.
+JSON file. All but one are lookups; `generate-colors.js` is the one that computes.
 
 | Generator | Answer keys consumed | Mapping block | Emits |
 |---|---|---|---|
@@ -179,10 +177,9 @@ redirects.
 | `tokens` | `tokens.css`, `loom.css`, `loom.components.css`, `main.css` |
 | `components` | `catalog/*.tsx` + `*.manifest.json` + `cn.ts` + `atoms.json` — written to `catalog/`, not the output dir |
 | `preview-html` | `docs/preview.html` — written to the repo, not the output dir |
-| `handoff` | `HANDOFF.md` |
 | `verify` | nothing — runs the invariant checks and fails the run |
 
-`loadAllConfigs()` reads six token/standards files plus the seven component schemas.
+`loadAllConfigs()` reads the token and standards files plus every component schema.
 On the way in it applies **`$constant` expansion**: a component's `sizes.$constant`
 block is merged into every size tier, with a value declared on a tier winning. This
 happens at load so every generator downstream sees fully-populated tiers. The point
@@ -297,10 +294,6 @@ resolver outranking a fresh committed set, and the unresolved template reached t
 Figma console before anything complained. Failing in Node names the cause and the fix;
 failing in the plugin console names neither.
 
-Figma receives the token half only. No components: it has no notion of a class, so the
-class layer has no representation there, and a Figma component was only ever a snapshot
-of one combination rather than the rule that generates it.
-
 ---
 
 ## The consumer path
@@ -311,13 +304,10 @@ of one combination rather than the rule that generates it.
 2. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
    pick list: the dependency graph is one edge — everything needs `cn`, which copies
    unconditionally anyway — so resolving a subset would walk a graph to return what it
-   was handed. The consumer deletes what they do not want.
+   was handed.
 3. Every delivered file is **overwritten unconditionally**, and carries a generated
-   header saying so. There is no edit detection: the files live in a directory of Loom's
-   own, editing one is out of contract, and a change worth keeping goes at the call site —
-   className, a prop, a wrapper — where it survives a resync by construction. Detecting
-   edits is answering "what if another repo is in a strange state"; with one consumer you
-   own, the answer is to resync and read the diff.
+   header saying so. There is no edit detection, and a deleted file returns on the next
+   run — `CATALOG_SPEC.md`'s Install section has the contract and the reasoning.
 
 `sync.js` prints the union of the manifests' `npmDependencies` as a single install
 line. It reports; it never installs.
