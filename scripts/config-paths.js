@@ -11,8 +11,8 @@
  * commit. That shipped twice, once reaching master. Git-ignoring the pipeline's input was
  * not enough; this covers its output.
  *
- * Why not just git-ignore spec/config/base/: `loadAllConfigs()` needs those five files
- * to exist, so ignoring them makes a fresh clone unbuildable until it runs
+ * Why not just git-ignore spec/config/base/: `loadAllConfigs()` needs that whole set to
+ * exist, so ignoring it makes a fresh clone unbuildable until it runs
  * `npm run configs`, which needs spec/answers.json — also ignored. Keeping a committed
  * default set and preferring a local one over it means a fresh clone builds Loom's look
  * with no answers file at all, and a brand generation never touches a tracked path.

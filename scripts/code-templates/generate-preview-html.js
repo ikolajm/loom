@@ -28,6 +28,7 @@ const sizing = load('base/sizing.json');
 const RAMP_FAMILIES = ['primary', 'secondary', 'accent', 'neutral', 'error', 'success', 'warning', 'info'];
 
 // Roles a consumer can check by eye: a fill with the on-color that belongs to it.
+/** @type {[string, [string, string][]][]} */
 const ROLE_GROUPS = [
   ['Primary', [['primary', 'on-primary'], ['primary-container', 'on-primary-container']]],
   ['Secondary', [['secondary', 'on-secondary'], ['secondary-container', 'on-secondary-container']]],

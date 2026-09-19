@@ -204,7 +204,7 @@
   "form-field": {
     "$catalog": {
     },
-    "$note": "A column with a gap, and nothing that ramps — so it declares only a $constant, which lifts to the base rule. It was the one component in APPEARANCE_ONLY with no schema at all, which is why the emitter reported it as having nothing to carry while the atom was carrying `flex flex-col gap-component-compact` in TSX. Spacing is {scale.1} like every other component here; the --component-compact-* tokens it used to read have no other consumer.",
+    "$note": "A column with a gap, and nothing that ramps — so it declares only a $constant, which lifts to the base rule. A component in APPEARANCE_ONLY with no schema at all emits nothing, and the atom ends up carrying the layout itself — which is what the $constant is here to prevent. Spacing is {scale.1} like every other component here.",
     "sizes": { "$constant": { "gap": "{scale.1}" } }
   },
   "label": {
@@ -234,7 +234,7 @@
       "font-weight": 400,
       "text-transform": "none"
     },
-    "$note": "Subordinate to the label by colour alone. It was one size tier down until label and action were matched to a single size ramp; both now read 12/14/16 at weight 500, so the only separation left is on-surface-variant against on-surface. The font-weight 400 below does not change that — nothing reads a component's typography block except text-transform, so font-family and font-weight there are inert. The exception this note replaced claimed 11px against a 12px floor and was wrong twice: the size was 10px, and no such floor existed.",
+    "$note": "Subordinate to the label by colour alone. label and action read one size ramp at one weight, so the only separation left is on-surface-variant against on-surface. The font-weight below does not change that — nothing reads a component's typography block except text-transform, so font-family and font-weight there are inert.",
     "sizes": {
       "sm": { "line-height": "16px" },
       "md": { "line-height": "16px" },

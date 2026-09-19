@@ -156,8 +156,8 @@ shape of what is coming, and it does both without moving, so there is nothing to
 
 ## The target floor moves between a laptop and a phone, and your CSS does not say so
 
-**Symptom.** A `data-size="sm"` button measures 32px on your laptop and 44px on your
-phone. Same build, same stylesheet, no breakpoint you wrote. A dense table of small
+**Symptom.** A `data-size="sm"` button renders at its declared height on your laptop and
+at the target floor on your phone. Same build, same stylesheet, no breakpoint you wrote. A dense table of small
 controls looks right in review and loosens up on the device.
 
 Loom authors it once, in the class layer:
@@ -171,24 +171,24 @@ Loom authors it once, in the class layer:
 }
 ```
 
-`--touch-min` is 44px — WCAG 2.2 SC 2.5.5 Target Size (Enhanced), the AAA figure, which
-is also what Apple's HIG asks. `height` still ramps underneath; this only clamps.
+`--touch-min` carries WCAG 2.2 SC 2.5.5 Target Size (Enhanced), the AAA figure, which is
+also what Apple's HIG asks. `height` still ramps underneath; this only clamps.
 
 **Why it is conditioned rather than always on.** The three `controlHeight` ladders already
-encode the split. Every tier of every role in `compact` sits at or above 28px and in
-`standard` at or above 32px, so both clear SC 2.5.8 Target Size (Minimum) — the AA figure,
-24px — on their own. Only `touch` reaches 44. Clamping unconditionally imposed AAA on two
-ladders built to AA, and overrode the `controlHeight` answer, which is the mechanism a
-product has for stating its own input context.
+encode the split. `compact` and `standard` clear SC 2.5.8 Target Size (Minimum) — the AA
+figure — at their smallest tier without help, and only `touch` is built to the AAA figure.
+Clamping unconditionally imposed AAA on two ladders built to AA, and overrode the
+`controlHeight` answer, which is the mechanism a product has for stating its own input
+context.
 
 **The hole, which is deliberate and not an oversight.** `pointer` reports the *primary*
 pointer. A touchscreen laptop is `pointer: fine` with `any-pointer: coarse`, so a finger
-on that screen gets the fine ladder and a 28px target. `any-pointer: coarse` would catch
-it — and would also resolve nearly every current laptop to 44, which takes the dense case
-away from the hardware most likely to want it. No media query separates *can be touched*
+on that screen gets the fine ladder and its smallest target. `any-pointer: coarse` would
+catch it — and would also resolve nearly every current laptop to the floor, which takes
+the dense case away from the hardware most likely to want it. No media query separates *can be touched*
 from *is being touched*.
 
-If you need the 44px guarantee on every pointer, that is what answering `controlHeight:
+If you need the floor guaranteed on every pointer, that is what answering `controlHeight:
 touch` is for. It is a product decision, not a device test.
 
 **Taking it back.** The block is layered, so any unlayered rule of yours outranks it

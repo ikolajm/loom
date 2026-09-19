@@ -1058,7 +1058,7 @@ function buildSection17_SurfacesTableLink() {
   // class bundling them would be wrong two times in three. Same orthogonality as tone and
   // treatment — one class says which plane, the other says how far off it.
   // `.surface` is the base plane and had no class while 1, 2 and 3 did — an incomplete
-  // ladder that every consumer closed by hand (paperboy reaches for bg-surface 24 times).
+  // ladder every consumer was closing by hand.
   const surfaces = ['.surface {\n  background-color: var(--surface);\n}\n']
     .concat([1, 2, 3].map((n) => `.surface-${n} {\n  background-color: var(--surface-${n});\n}\n`))
     .join('\n');
@@ -1218,9 +1218,9 @@ function buildSection15_Tones() {
     // --tone-border reads its own role too, resolved at 3:1 rather than 4.5:1 —
     // WCAG 1.4.11 puts a non-text boundary there. It used to read the base role, on the
     // reasoning that the brand line is most of what an outline treatment is for. That
-    // reasoning survives the change: resolving at 3:1 leaves ten of twelve family/mode
-    // pairs on exactly the shade they already had, and moves the other two by one ramp
-    // step — and those two were the ones failing. Measured, not assumed.
+    // reasoning survives the change: resolving at 3:1 leaves most family/mode pairs on
+    // exactly the shade they already had, and moves only the ones that were failing, by a
+    // single ramp step. Measured rather than assumed; `border-contrast` is what holds it.
     const edge = f === 'neutral'
       ? ['  --tone-text: var(--on-surface);', '  --tone-border: var(--outline);']
       : [`  --tone-text: var(--${f}-text);`, `  --tone-border: var(--${f}-border);`];
@@ -1522,17 +1522,19 @@ function generateLayer() {
  * README's claim true — appearance in the class layer, behavior in the atom.
  */
 /**
- * The target floor: if it is interactive and the pointer is coarse, it is 44px.
+ * The target floor: if it is interactive and the pointer is coarse, it clamps to
+ * `--touch-min`.
  *
- * `--touch-min` is what standards.json declares, and it is the WCAG 2.2 AAA figure
- * (2.5.5) rather than the AA one — AA asks 24x24 (2.5.8). Apple's HIG says the same 44.
+ * That token is what standards.json declares as `sizing.touch-target.min`, set to the
+ * WCAG 2.2 AAA figure (2.5.5) rather than the AA one — AA asks 24x24 (2.5.8).
  *
  * Conditioned on `pointer: coarse`, which is a reversal — this shipped unconditional, on
  * the argument that a media query lets the same build be compliant on a phone and not on
  * a laptop. What that argument missed is that the three ladders already encode the split.
- * Every tier of every role in `compact` is at or above 28px and in `standard` at or above
- * 32px, so both clear the AA minimum on their own; only `touch` reaches 44. An
- * unconditional clamp therefore imposed AAA on two ladders built to AA and overrode the
+ * Both `compact` and `standard` clear the AA minimum at their smallest tier on their own —
+ * the `touch-target` gate is what holds that true — and only `touch` is built to the AAA
+ * figure. An unconditional clamp therefore imposed AAA on two ladders built to AA and
+ * overrode the
  * `controlHeight` answer, which is the mechanism a product has for stating its own input
  * context.
  *
@@ -1542,10 +1544,11 @@ function generateLayer() {
  * would also resolve nearly every current laptop to 44, which takes the dense case away
  * from the hardware most likely to want it. No media query separates "can be touched"
  * from "is being touched"; a product that needs that guarantee answers `controlHeight:
- * touch` and gets 44 on every pointer.
+ * touch` and gets the floor on every pointer.
  *
- * `height` still ramps; this clamps it. Under a coarse pointer compact's control ladder
- * renders 44/44/44 and standard's 44/44/48.
+ * `height` still ramps; this clamps it. Under a coarse pointer a ladder flattens at its
+ * small end — every tier declared below the floor renders at the floor, and only the
+ * tiers already above it keep their own value.
  *
  * Layered rather than unlayered, unlike the print and reduced-motion blocks: those are
  * environmental overrides a consumer should not casually beat, while a target size is a
@@ -1796,7 +1799,7 @@ function generate() {
  * (TREATMENT_CLASSES, ICON_SLOT_CLASS), and hand-written CSS inside a template literal
  * (`.interactive`, `.control`, `.surface-N`, the dialog parts). Only the first enumerates
  * for free, and no rearrangement of componentPlan(), BASE_RULES or APPEARANCE_ONLY reaches
- * the other two — componentPlan() covers about twenty of the eighty-eight.
+ * the other two — componentPlan() accounts for well under half the manifest.
  *
  * So this is the same postcss scan atom-class-coverage was doing after the fact, moved to
  * before it. The technique is not the difference; the timing and the input are. It reads

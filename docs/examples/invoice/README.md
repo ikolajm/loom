@@ -21,9 +21,11 @@ of having been written twice — that was the bar for admitting one.
 - **`.surface`.** Levels 1, 2 and 3 had classes and the base plane did not — an
   incomplete ladder every consumer had been closing by hand.
 
-The measurement is the argument. The first render needed 15 lines of document-specific
-CSS, three of which were substrate gaps. With the gaps closed it needs 12, and all of
-them are `@page` setup and this document's own layout.
+The measurement is the argument. The first render needed document-specific CSS for three
+things the substrate should have carried. With those closed, everything left in
+`invoice.css` is `@page` setup and this document's own layout — no colour, no weight, no
+type role. That is the signal: if a change to the layer puts one of those back, the layer
+gave something up.
 
 ## Render it
 

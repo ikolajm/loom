@@ -52,8 +52,8 @@ Two files are never generated and have no local counterpart in practice:
   scale primitives, the radius/border-width/icon-size/component-height primitives,
   the color *role templates*, opacity, transitions, easing, focus ring. Generators
   read it for structure and fill it with your values. It is the reason
-  `generate-spacing.js` is 25 lines: the scale already exists, and density only
-  picks which scale steps each category points at.
+  `generate-spacing.js` is the smallest generator here: the scale already exists, and
+  density only picks which scale steps each category points at.
 - **`spec/config/components/*.json`** — the seven component schemas. Hand-authored,
   not derived from answers.
 
@@ -89,7 +89,7 @@ memory from `answers.example.json`. Those two paths must resolve identically or 
 check fails on a leak that isn't there.
 
 `productType` is refused with an error rather than ignored: it supplied `controlHeight`,
-so ignoring it moves a touch product down to a 40px tap target with no message anywhere.
+so ignoring it drops a touch product off the touch ladder with no message anywhere.
 
 ### Five generators, five files
 
@@ -202,7 +202,7 @@ The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
 `base-config-provenance`, `config-parity`, `dead-exports`, `tone-fallbacks`,
 `tone-matrix`, `theme-init-parity`, `focus-ring`, `touch-target`, `contrast`,
 `tone-contrast`, `border-contrast`, `figma-assembly`, `figma-code-syntax`,
-`typecheck`. Any failure exits
+`typecheck`, `typecheck-scripts`. Any failure exits
 non-zero, so a full `npm run generate` cannot report success over broken output.
 
 That list is itself gated. It is prose, and prose drifts: it named fourteen of the

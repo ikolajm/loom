@@ -129,11 +129,11 @@ and they do not always agree — Figma sees system fonts, its own set and your o
 The Figma typography paste checks at paste time and **substitutes Inter** for any family
 this Figma cannot render, logging which; the build completes rather than throwing.
 
-## The five look-and-feel answers, in plain terms
+## The look-and-feel answers, in plain terms
 
 These are the ones that need taste. Each is a word, not a number — Loom turns it into the
-actual scale. **You can skip four of the five** and let `styleDirection` supply them
-(next section). `controlHeight` is not one of them — see below.
+actual scale. **You can skip all but `controlHeight`** and let `styleDirection` supply
+them (next section) — see below for why that one is different.
 
 - **`edges`** — how rounded corners are. `none` is square, `sharp` is a slight round,
   `soft` is generous. Applies to buttons, cards, inputs, everything.
@@ -147,10 +147,11 @@ actual scale. **You can skip four of the five** and let `styleDirection` supply 
   editorial ramp.
 - **`controlHeight`** — how tall the things you click are: buttons, inputs, list rows, menu
   items, nav bars. `compact` is for dense pointer-driven screens, `standard` is the desktop
-  norm, and `touch` holds every one of them at or above the 44px minimum a finger needs.
+  norm, and `touch` holds every one of them at or above the target floor a finger needs.
   **If the product ships to a phone, answer `touch`.** Nothing infers this. Height is
   ergonomics, not style, so `styleDirection` does not supply it and no default will
-  discover it for you — omit the key and you get `standard`, which is a 40px tap target.
+  discover it for you — omit the key and you get `standard`, which is built to the AA
+  minimum rather than to the touch floor.
 
 ## Intent field — `styleDirection`
 

@@ -52,7 +52,7 @@
     "$note": "Tier 2 — the height ladder atoms resolve against. Six roles, grouped by what a control IS rather than by the numbers it happens to carry today; an atom picks its role once and inherits every ladder. Not supplied by style-direction: height is ergonomics, not style, and a brutalist dashboard and a brutalist phone app owe different tap targets. Roles are consumed as `height/<role>-<tier>` in config/components/*.json and emitted as --height-<role>-<tier>. Non-controls (avatar portraits) stay on ch-* primitives and are deliberately absent here.",
 
     "compact": {
-      "$note": "Information-dense surfaces read by a pointer. Below the 44px touch minimum by design — do not resolve this for a product that ships to a phone.",
+      "$note": "Information-dense surfaces read by a pointer. Below sizing.touch-target.min by design — do not resolve this for a product that ships to a phone.",
       "semantic-height": {
         "control": { "sm": "ch-2", "md": "ch-3", "lg": "ch-5" },
         "row": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
@@ -76,7 +76,7 @@
     },
 
     "touch": {
-      "$note": "Every tier of every role sits at or above sizing.touch-target.min (44px / ch-6), enforced by the touch-target check in scripts/code-templates/verify.js. This compresses the sm/md/lg spread — sm and md differ by one step, not two — because a `sm` control on a touch surface is still a finger target. That compression is the constraint doing its job, not a ladder that needs widening.",
+      "$note": "Every tier of every role sits at or above sizing.touch-target.min, enforced by the touch-target check in scripts/code-templates/verify.js. This compresses the sm/md/lg spread — sm and md differ by one step, not two — because a `sm` control on a touch surface is still a finger target. That compression is the constraint doing its job, not a ladder that needs widening.",
       "semantic-height": {
         "control": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
         "row": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" },
@@ -202,7 +202,7 @@
         "lg": { "size": "16px", "line-height": "24px" }
       },
       "label": {
-    "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider (0.02em vs 0.01em) and leads tighter (1.17/1.14/1.25 against 1.33/1.43/1.5), which is what a chip, a kbd key or a nav label wants and what a button does not. Weight is 500 in both. sm was 10px until the ramp was floored at 12. It was the only size the system emitted below 12, and it reached badge sm, kbd sm, bottom-nav sm and helper-text sm. WCAG sets no minimum font size, but iOS HIG floors at 11pt and Material at 11sp, so it cleared no platform guidance.",
+    "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider and leads tighter than action at every tier, which is what a chip, a kbd key or a nav label wants and what a button does not. Weight matches. The ramp is floored so that no tier emits below the smallest size platform guidance supports: WCAG sets no minimum font size, but iOS HIG and Material both floor around 11, and the tier that sat under that reached badge, kbd, bottom-nav and helper-text at their smallest size.",
         "font": "body", "weight": 500, "letter-spacing": "0.02em",
         "sm": { "size": "12px", "line-height": "14px" },
         "md": { "size": "14px", "line-height": "16px" },

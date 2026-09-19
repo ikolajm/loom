@@ -61,9 +61,9 @@ function lookup(block, value, field) {
  * key filled, and a parallel map of where each value came from (for the run log).
  */
 // `productType` is refused rather than ignored. Ignoring it is the dangerous failure:
-// the archetype used to supply controlHeight, so a file saying `consumer-mobile` would
-// keep generating and quietly drop from the touch ladder to `standard` — a 40px tap
-// target with no message anywhere. An unknown key that changes nothing is a typo; this
+// the archetype supplied controlHeight, so a file saying `consumer-mobile` would keep
+// generating and quietly drop from the touch ladder to `standard`, giving up the target
+// floor with no message anywhere. An unknown key that changes nothing is a typo; this
 // one changed something.
 function rejectRemovedKeys(answers) {
   if (answers.productType == null) return;

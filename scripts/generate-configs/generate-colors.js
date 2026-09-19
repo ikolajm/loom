@@ -180,8 +180,8 @@ function generate(answers, standards) {
   // worst background it can sit on or the guarantee is not one. Resolving against
   // `surface` instead keeps the colour nearer the brand and leaves every raised tier
   // failing, which is the debt this pass exists to clear. Measured cost of the strict
-  // choice: on both brands tested every family clears all four tiers, six of twelve
-  // family/mode pairs do not move at all, and the largest move is two ramp steps.
+  // choice: on both brands tested every family clears all four tiers, half the
+  // family/mode pairs do not move at all, and no move is larger than two ramp steps.
   //
   // Nearest-passing on the family ramp, and deliberately not an off-ramp colour computed
   // by lightness. The Figma pipeline aliases semantic colours to primitive variables by

@@ -123,7 +123,7 @@ function generatePalette(hex) {
 
 /**
  * Generate MD3-style neutral palette using tone numbers.
- * Takes primary hue for subtle tinting, uses very low saturation (7%).
+ * Takes primary hue for subtle tinting at the low saturation set below.
  */
 const NEUTRAL_TONES = [5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 85, 90, 95];
 

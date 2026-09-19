@@ -15,7 +15,7 @@
  *                       and docs/pipeline.md's check list matches this file's registry
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
- *   touch-target      — the `touch` height ladder honours standards.json's 44px minimum
+ *   touch-target      — every height ladder honours standards.json's touch-target.min
  *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
  *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
@@ -169,12 +169,12 @@ function checkDocCounts(atoms, checkNames) {
       continue;
     }
     fs.readFileSync(abs, 'utf8').split('\n').forEach((line, i) => {
-      for (const [kind, re] of [
+      for (const [kind, re] of /** @type {[string, RegExp][]} */ ([
         ['components', /(\d+)\s+(?:React\s+)?components\b/g],
         ['atoms', /(\d+)\s+atoms\b/g],
         ['patterns', /(\d+)\s+patterns\b/g],
         ['groups', /(\d+)\s+groups\b/g],
-      ]) {
+      ])) {
         for (const m of line.matchAll(re)) {
           claims++;
           const found = Number(m[1]);
@@ -506,6 +506,7 @@ function checkBaseConfigProvenance() {
   // a brand leak.
   const example = resolveIntent(readJson('spec/answers.example.json'), mappings).answers;
 
+  /** @type {[string, (a: object, s: object, m: object) => object][]} */
   const generators = [
     ['colors.json', require('../generate-configs/generate-colors').generate],
     ['spacing.json', require('../generate-configs/generate-spacing').generate],
@@ -630,7 +631,7 @@ function checkConfigParity() {
 // twice the leftovers were found by a hand sweep, which is not a mechanism.
 //
 // Deliberately narrow. An export used only inside its own module is over-exported, not
-// dead, and there are twenty-one of those — flagging them would be style noise in a check
+// dead, and there are enough of those that flagging them would be style noise in a check
 // that has to stay worth reading. An export nothing mentions anywhere is unambiguous.
 //
 // Not covered: a function that IS called but whose output is dead — a real limitation of
@@ -847,18 +848,18 @@ function checkFocusRing() {
 }
 
 // --- touch-target ----------------------------------------------------------
-// `standards.json` has declared touch-target.min: 44px since v2 and nothing consumed it:
-// it reached tokens.css as a value no atom read,
-// while the default button shipped at 40px. The semantic height ladder is what makes it
+// `standards.json` declared touch-target.min and nothing consumed it: the value reached
+// tokens.css unread while the default button shipped under it. The semantic height ladder
+// is what makes it
 // reachable, and this is what makes it binding — every tier of every role in the `touch`
 // ladder must sit at or above the minimum, checked against direction-mappings rather than
 // against the one resolved config, so a ladder edit cannot quietly drop below it.
 //
 // Every ladder is checked, each against the level it is built for. `touch` answers the
-// AAA figure (2.5.5, 44px) because that is what it exists to promise. `compact` and
-// `standard` answer the AA minimum (2.5.8, 24px), which they clear on their own — 28px
-// and 32px are their smallest tiers — and which nothing asserted while the unconditional
-// clamp was hiding them at 44. Now that the floor is conditioned on `pointer: coarse`,
+// AAA figure (2.5.5) because that is what it exists to promise. `compact` and `standard`
+// answer the AA minimum (2.5.8), which their smallest tiers clear without help, and which
+// nothing asserted while the unconditional clamp was hiding them at the floor. Now that
+// the floor is conditioned on `pointer: coarse`,
 // those two render at their declared heights on a fine pointer, so the AA floor is the
 // thing standing between a ladder edit and an undersized target.
 function checkTouchTarget() {
@@ -938,7 +939,7 @@ function contrastRatio(a, b) {
 
 function checkContrast() {
   // Read through config-paths, so this validates whichever brand is active. That is
-  // the exact opposite of base-config-provenance two checks up, which reads the
+  // the exact opposite of `base-config-provenance`, which reads the
   // committed set by explicit path — a provenance check that read a local brand would
   // check nothing, and a contrast check that read the committed one would pass a
   // consumer straight through with their own failing palette.
@@ -1345,6 +1346,34 @@ function checkFigmaCodeSyntax() {
     failures,
     note: `${captured.length} code syntaxes across ${collections.length} collections, resolved against the emitted CSS`,
   };
+}
+
+// --- typecheck-scripts --------------------------------------------------------
+// The other half of typecheck: that one compiles the catalog Loom emits, this one checks
+// the modules that do the emitting, from their JSDoc.
+//
+// It exists because a correct @param did not stop the defect it described. The Figma
+// helper documented `codeSyntax` as a CSS custom property string, with a worked example,
+// one function above the call that passed it a utility class - and that shipped. A tag
+// nothing reads is prose wearing a sigil, and it carries the false confidence of looking
+// like a type. This is what makes the tags in this repo load-bearing; it found a call
+// passing an argument to a function that takes none on its first run.
+//
+// scripts/figma-* is excluded, and the reason is in tsconfig.scripts.json: those files
+// are template fragments, not modules. figma-assembly compiles them in their assembled
+// form, which is the only form they have a meaning in.
+//
+// Skipped without an install, like typecheck, and for the same reason: generating Loom
+// needs no dependencies, so losing this on a fresh clone beats failing a generate that is
+// otherwise fine.
+function checkTypecheckScripts() {
+  const tsc = path.join(ROOT, 'node_modules/typescript/bin/tsc');
+  if (!fs.existsSync(tsc)) return { failures: [], note: 'root deps not installed - skipped' };
+  const { spawnSync } = require('child_process');
+  const run = spawnSync(process.execPath, [tsc, '--noEmit', '-p', 'tsconfig.scripts.json'], { cwd: ROOT, encoding: 'utf-8' });
+  if (run.status === 0) return { failures: [], note: 'checkJs over scripts/, figma templates excluded' };
+  const lines = String(run.stdout || run.stderr || '').split(String.fromCharCode(10)).filter(Boolean).slice(0, 10);
+  return { failures: lines, note: 'checkJs over scripts/, figma templates excluded' };
 }
 
 // --- typecheck ---------------------------------------------------------------
@@ -1778,6 +1807,7 @@ function verify() {
     ['figma-assembly', () => checkFigmaAssembly()],
     ['figma-code-syntax', () => checkFigmaCodeSyntax()],
     ['typecheck', () => checkTypecheck()],
+    ['typecheck-scripts', () => checkTypecheckScripts()],
   ];
 
   let failed = 0;

@@ -1,0 +1,31 @@
+{
+  "$comment": [
+    "The generator's own compile gate. tsconfig.json checks the catalog it emits; this",
+    "checks the modules that do the emitting, from their JSDoc, so a @param is a claim",
+    "something reads rather than prose in a comment delimiter.",
+    "scripts/figma-* is excluded on purpose. Those files are not modules: the assembler",
+    "slices them at a marker and wraps them in an IIFE, so they use top-level return,",
+    "reach for a `figma` global that exists only in a plugin console, and redeclare each",
+    "other's helper names. figma-assembly compiles them in their assembled form, which is",
+    "the only form that has a meaning."
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.js"],
+  "exclude": [
+    "scripts/figma-primitives/**",
+    "scripts/figma-semantics/**",
+    "scripts/figma-styles/**",
+    "scripts/figma-layout/**"
+  ]
+}

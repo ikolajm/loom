@@ -224,7 +224,7 @@ function generate(registry, outputDir, configs) {
   }
 
   // cn — utility atom (catalog-resident, foundation dependency)
-  const cnSrc = buildCnUtility(configs);
+  const cnSrc = buildCnUtility();
   writeSource('cn.ts', cnSrc);
   fs.writeFileSync(path.join(CATALOG_DIR, 'cn.manifest.json'), JSON.stringify({
     name: 'cn',
