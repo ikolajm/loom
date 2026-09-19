@@ -201,7 +201,8 @@ The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
 `atom-class-coverage`, `class-box-model`, `phantom-parts`, `variant-keys`,
 `base-config-provenance`, `config-parity`, `dead-exports`, `tone-fallbacks`,
 `tone-matrix`, `theme-init-parity`, `focus-ring`, `touch-target`, `contrast`,
-`tone-contrast`, `border-contrast`, `figma-assembly`, `typecheck`. Any failure exits
+`tone-contrast`, `border-contrast`, `figma-assembly`, `figma-code-syntax`,
+`typecheck`. Any failure exits
 non-zero, so a full `npm run generate` cannot report success over broken output.
 
 That list is itself gated. It is prose, and prose drifts: it named fourteen of the

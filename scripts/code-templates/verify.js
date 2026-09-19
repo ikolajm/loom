@@ -1212,6 +1212,141 @@ function checkFigmaAssembly() {
   return { failures, note: `${scripts} scripts, ${bytes} chars, compiled and swept for unresolved role templates` };
 }
 
+// --- figma-code-syntax --------------------------------------------------------
+// A Figma variable's code syntax is the string a developer copies out of the design file.
+// Nothing downstream resolves it, so a wrong one is not a broken build anywhere - it is a
+// designer handing over a token that does not exist.
+//
+// Two shipped that way. The spacing primitives published `var(--spacing-4)` for a scale
+// emitted as `--space-4`, so every spacing variable in Figma carried a name no stylesheet
+// declares. The semantic spacing roles published `px-4`, `gap-2` and `max-w-[1280px]`,
+// utilities from a framework this repo no longer has under it. figma-assembly saw neither:
+// it compiles the scripts and sweeps for unresolved role templates, and both of these
+// compile and carry no template.
+//
+// The scripts are RUN, against a stub of the Figma API, so what is checked is the string
+// each variable actually receives rather than the shape of the literal that builds it.
+// `var(--height-${role}-${tier})` interpolates to 30 different names and a prefix match
+// would clear all of them on the strength of one.
+//
+// Two shapes are legitimate, because they are the two ways Loom's output can be
+// referenced: `var(--token)` against a custom property some sheet declares, and `.class`
+// (or `.prefix-*`) against classManifest(). Anything else fails on shape alone - that is
+// what catches a utility from somewhere else, without keeping a list of framework
+// prefixes to go stale.
+function checkFigmaCodeSyntax() {
+  if (!sheets()) return { failures: [], note: 'postcss not installed - skipped' };
+  if (!parseComplete()) return NOT_PARSED;
+
+  const vm = require('vm');
+  const captured = [];
+  const collections = [];
+  const byId = new Map();
+  let seq = 0;
+
+  const makeVar = (name, collection) => {
+    const v = {
+      id: `v${seq++}`, name, scopes: [],
+      setValueForMode() {},
+      setVariableCodeSyntax(platform, value) { captured.push({ name, value }); },
+    };
+    byId.set(v.id, v);
+    if (collection) collection.variableIds.push(v.id);
+    return v;
+  };
+  const figma = {
+    variables: {
+      createVariableCollection(name) {
+        const c = {
+          id: `c${seq++}`, name, variableIds: [], modes: [{ modeId: 'm0', name: 'default' }],
+          renameMode() {},
+          addMode(n) { const id = `m${seq++}`; c.modes.push({ modeId: id, name: n }); return id; },
+        };
+        collections.push(c);
+        return c;
+      },
+      createVariable: (name, collection) => makeVar(name, collection),
+      getLocalVariableCollections: () => collections,
+      getVariableById: (id) => byId.get(id),
+      createVariableAlias: (v) => ({ type: 'VARIABLE_ALIAS', id: v.id }),
+    },
+    createTextStyle: () => ({ setBoundVariable() {} }),
+    createEffectStyle: () => ({ effects: [], setBoundVariable() {} }),
+    loadFontAsync: () => Promise.resolve(),
+    listAvailableFontsAsync: () => Promise.resolve([]),
+  };
+
+  let built;
+  try {
+    const { buildSharedUtils, buildAllSteps } = require('../assemble-figma');
+    built = [{ name: '00_shared-utils', script: buildSharedUtils() }, ...buildAllSteps()];
+  } catch (err) {
+    return { failures: [`the assembler threw before emitting anything - ${err.message}`], note: 'not run' };
+  }
+
+  const failures = [];
+  const ctx = vm.createContext({ figma, console: { log() {}, warn() {}, error() {} } });
+  for (const { name, script } of built) {
+    // A step that awaits would defer the rest of its body past this check, and the code
+    // syntax set after the await would go unseen - a silent under-count, which is the one
+    // failure mode a gate must not have. Only the shared-utils module may await: its
+    // awaits sit inside helper bodies that the steps call, not at its top level.
+    if (name !== '00_shared-utils' && /\bawait\b/.test(script) && /createVar(iable)?\s*\(|createAlias\s*\(|createDirect\s*\(/.test(script)) {
+      failures.push(`${name}.js both awaits and creates variables - this check cannot see past the await, so teach it or drop the await`);
+      continue;
+    }
+    try {
+      const done = new vm.Script(script, { filename: `${name}.js` }).runInContext(ctx);
+      if (done && typeof done.then === 'function') done.catch(() => {});
+    } catch (err) {
+      // figma-assembly owns "does it compile"; a throw here is the stub coming up short.
+      failures.push(`${name}.js threw against the API stub - ${err.message}`);
+    }
+  }
+
+  if (!captured.length) {
+    return { failures: failures.concat('no code syntax was set by any script - the stub is not seeing the pipeline'), note: 'not run' };
+  }
+
+  const declared = new Set();
+  for (const { root } of sheets()) {
+    root.walkDecls((d) => { if (d.prop.startsWith('--')) declared.add(d.prop); });
+  }
+  const { classManifest } = require('./generate-tokens-css');
+  const classes = classManifest();
+
+  for (const { name, value } of captured) {
+    const asVar = /^var\((--[a-z0-9-]+)\)$/.exec(value);
+    if (asVar) {
+      if (!declared.has(asVar[1])) {
+        failures.push(`${name}: code syntax \`${value}\` names a custom property no stylesheet declares`);
+      }
+      continue;
+    }
+    if (value.startsWith('.')) {
+      const bare = value.slice(1);
+      if (bare.endsWith('-*')) {
+        const prefix = bare.slice(0, -1);
+        if (![...classes].some((c) => c.startsWith(prefix))) {
+          failures.push(`${name}: code syntax \`${value}\` matches no emitted class`);
+        }
+      } else if (!classes.has(bare)) {
+        failures.push(`${name}: code syntax \`${value}\` names a class no stylesheet emits`);
+      }
+      continue;
+    }
+    failures.push(
+      `${name}: code syntax \`${value}\` is neither a var() nor a class - ` +
+      'Loom publishes nothing a consumer could write that way'
+    );
+  }
+
+  return {
+    failures,
+    note: `${captured.length} code syntaxes across ${collections.length} collections, resolved against the emitted CSS`,
+  };
+}
+
 // --- typecheck ---------------------------------------------------------------
 // The atoms are TypeScript, and nothing else in this repo compiles them. `tsc --noEmit`
 // over `catalog/` against the root tsconfig.
@@ -1641,6 +1776,7 @@ function verify() {
     ['tone-contrast', () => checkToneContrast()],
     ['border-contrast', () => checkBorderContrast()],
     ['figma-assembly', () => checkFigmaAssembly()],
+    ['figma-code-syntax', () => checkFigmaCodeSyntax()],
     ['typecheck', () => checkTypecheck()],
   ];
 
