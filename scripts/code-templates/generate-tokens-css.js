@@ -1139,7 +1139,7 @@ function buildSectionTable() {
 /* The column modifier. .numeric gives tabular figures anywhere; a table also right-aligns
    them, because that is where a column of money has to line up on its last digit. Written
    by hand twice before it was a class — in jmi-finance's call sites and again in the first
-   invoice built on the substrate. */
+   document built on the substrate. */
 .table :is(th, td).numeric {
   text-align: right;
 }
@@ -1337,7 +1337,7 @@ function buildSection14_Animations() {
 
 // --- Assembly ---
 // Three files, all plain CSS, running wherever CSS runs — a Vite app, a Django template,
-// headless Chrome printing an invoice. Nothing here is framework-bound.
+// headless Chrome printing a document. Nothing here is framework-bound.
 //
 // Everything Loom emits sits in a Loom-owned cascade layer, so a consumer's own CSS wins
 // by default: unlayered rules outrank every layer regardless of specificity, and that is
@@ -1371,7 +1371,7 @@ function header(name, note) {
  * Print forces the light roles, whatever the app is showing.
  *
  * A document is a document. `defaultMode` decides what the screen opens in; it should not
- * decide that an invoice arrives as a full-bleed dark page — and `print-color-adjust:
+ * decide that a printed page arrives full-bleed dark — and `print-color-adjust:
  * exact` would make that worse, insisting the browser actually render the dark ground
  * instead of dropping it as it would by default.
  *

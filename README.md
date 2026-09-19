@@ -7,8 +7,7 @@ states as named decisions instead of per-project choices.
 The coherence is the product. Tokens name the values; the class layer names the
 combinations, which is the part a values-only system cannot carry and the reason
 everything built on Loom looks like one hand made it — a Next app, a Vite app and a
-[printed invoice](docs/examples/invoice/) included, the last with no framework under
-it at all.
+server-rendered template alike, the last with no framework under it at all.
 
 Two things ride along. **Figma** takes the same substrate as variables, text
 styles and effect styles, so the design surface and the code surface read from
@@ -16,13 +15,12 @@ one source. A small set of **React components** covers what CSS cannot express �
 focus traps, portals, keyboard navigation, positioning — copied into your project
 rather than installed from it (the shadcn model: own the files, no upstream sync).
 
-**Where it runs.** Anything with a CSS engine takes the layer directly and themes
-live — Vite, Django, Next, static sites, and whatever renders your PDFs. That last
-one is not a browser in disguise: the worked example goes through WeasyPrint, which
-has its own layout implementation, and [`docs/gotchas.md`](docs/gotchas.md) records
-where that shows. Email is the one target no stylesheet reaches — Outlook's Word
-engine drops custom properties, so `var()` buys you nothing there. `tokens.css` is
-still the source: it holds the resolved values as literal hex, to be copied in.
+**Where it runs.** Anything with a CSS engine takes the layer directly and themes live —
+Vite, Django, Next, static sites. What an engine implements is the engine's business, so
+[`docs/gotchas.md`](docs/gotchas.md) states only what the substrate needs from one. Email
+is the one target no stylesheet reaches — Outlook's Word engine drops custom properties,
+so `var()` buys you nothing there. `tokens.css` is still the source: it holds the resolved
+values as literal hex, to be copied in.
 
 Loom started as a personal engine for spinning up consistent projects. It is open
 source for the model.
@@ -66,7 +64,7 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 That is a measured position, not a taste. Across every project consuming Loom, the atoms actually installed were `badge`, `table`, `empty-state`, `top-bar` and `cn`; not one consumer imported a composite, and the two heaviest token consumers held no atoms at all. Forty components covered a surface nobody reached for.
 
-**Appearance is not here at all.** A card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why the [printed invoice](docs/examples/invoice/) renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
+**Appearance is not here at all.** A card, a badge's shape, an input's padding and a table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped in it, which is why a page renders with no framework under it, and why a server-rendered template needs nothing from this directory either.
 
 What is here earns a file one of two ways. Most **carry behavior neither CSS nor HTML can express** — and HTML is in the frame, because a native `<dialog>` supplies a focus trap, a top-layer portal and Escape-to-close for free. Measured against that bar, `theme-provider` passes cleanly, `form-field` passes on its error context, `button` and `badge` pass on the composition contract rather than on behaviour, and `dialog` and `select` pass only **conditionally** — see [Native first](CATALOG_SPEC.md#native-first) before reaching for either. `badge` is the exception and is deliberate: it carries no behavior at all, and exists because its class contract has enough independent axes — treatment, tone, size — that composing them from memory at every call site is the failure mode. A typed prop is the cheaper contract. `card`, `table` and `skeleton` get no file because they have neither: one class, no axes, nothing to forget.
 
@@ -214,12 +212,10 @@ chain. The semantic names (`--primary`, `--on-surface-variant`, `--space-6`, `--
 are the interface worth designing against; the numbered palette underneath them moves
 when a brand changes.
 
-**A PDF renderer is not this case.** WeasyPrint implements enough CSS to take the
-substrate directly, cascade layers and custom properties included — link `main.css` and
-use the classes. [`docs/examples/invoice/`](docs/examples/invoice/) is a worked example,
-and [`docs/gotchas.md`](docs/gotchas.md) has the engine differences that bite. Reach for
-raw values only where nothing can consume a stylesheet at all, which in practice means
-email: Outlook's Word engine ignores custom properties, so values have to arrive already
+**An engine with a CSS implementation is not this case**, whatever it renders to — link
+`main.css` and use the classes. [`docs/gotchas.md`](docs/gotchas.md) states what the
+substrate needs from one. Reach for raw values only where nothing can consume a stylesheet
+at all, which in practice means email: Outlook's Word engine ignores custom properties, so values have to arrive already
 resolved and inlined.
 
 **Values you copy do not track brand changes.** This is the whole cost of the approach
@@ -287,7 +283,7 @@ docs/                  Design-system engineering docs (see below)
 
 [`docs/pipeline.md`](docs/pipeline.md) traces the derivation chain end to end — the three commands, how a config file is resolved, what each generator transforms rather than copies, and where a symptom points. Start there to extend the generator or to debug an output that doesn't match the answers.
 
-The full catalog model — surfaces, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, cascade-layer and reset ordering, font loading and parity, reduced-motion semantics, WeasyPrint's differences from a browser — are in [`docs/gotchas.md`](docs/gotchas.md).
+The full catalog model — surfaces, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, cascade-layer and reset ordering, font loading and parity, reduced-motion semantics, what the substrate needs from a non-browser engine — are in [`docs/gotchas.md`](docs/gotchas.md).
 
 A note on generated code: when an atom's Radix primitive has no template wired, the generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`. That marker is a deliberate fallback signal, not unfinished work. No atom in the current catalog carries one.
 

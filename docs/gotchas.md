@@ -386,15 +386,7 @@ inherits from the root element, so a running header or a page counter reads
 workaround.
 
 Past that, engine differences are yours to check rather than Loom's to catalogue — which
-CSS an engine implements is the engine's business and moves with its version. Two shapes
-worth knowing about, because the substrate leans on both: effect tokens (`.elevate-*`, via
-`box-shadow`) go inert wherever the property is unsupported, so a layout separating blocks
-by elevation alone renders as one undifferentiated block; and an engine may paint
-backgrounds regardless of `print-color-adjust`, so a correct-looking PDF is not proof the
-property works.
-
-[`docs/examples/invoice/`](examples/invoice/) is a worked example, rendered with
-WeasyPrint. Its own README carries the setup.
+CSS an engine implements is the engine's business and moves with its version.
 
 ## `hidden` does not hide anything Loom gives a `display` to
 

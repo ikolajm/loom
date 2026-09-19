@@ -303,4 +303,4 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 
 ## Cross-references
 
-- [`docs/gotchas.md`](docs/gotchas.md) — hard-won traps (Figma API, fonts, reduced motion, the target floor, cascade layers, WeasyPrint)
+- [`docs/gotchas.md`](docs/gotchas.md) — hard-won traps (Figma API, fonts, reduced motion, the target floor, cascade layers)
