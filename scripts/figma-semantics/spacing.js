@@ -41,27 +41,26 @@ collection.renameMode(modeId, "default");
 
 let count = 0;
 
-// These roles have no CSS counterpart and will not get one: layout spacing is written
-// as Tailwind utilities in the atoms, never as --spacing-{category}-{variant} variables.
-// The utility is therefore the only writable reference. An unmapped property gets no
-// code syntax rather than a fabricated one.
-const UTILITY = { "x-padding": "px", "y-padding": "py", "gap": "gap", "max-width": "max-w" };
+// These roles have no CSS counterpart and will not get one: layout spacing is written at
+// the call site, never as --spacing-{category}-{variant} variables. So they carry no code
+// syntax. A variable with no writable reference gets none rather than a fabricated one —
+// a code syntax naming something the stylesheets do not emit is worse than a blank field,
+// because it reads as an instruction.
 
 for (const [category, variants] of Object.entries(CONFIG)) {
   for (const [variant, properties] of Object.entries(variants)) {
     for (const [prop, value] of Object.entries(properties)) {
       const varName = `spacing/${category}/${variant}/${prop}`;
-      const utility = UTILITY[prop] || null;
 
       if (typeof value === 'string' && value.startsWith('{scale.')) {
         // Alias: {scale.N} → primitives.spacing spacing/N
         const step = value.match(/\{scale\.(\d+)\}/)[1];
         const primVar = primitives[`spacing/${step}`];
         if (!primVar) throw new Error(`Primitive spacing/${step} not found for ${varName}`);
-        createAlias(collection, varName, "FLOAT", modeId, primVar, SCOPES, utility ? `${utility}-${step}` : null);
+        createAlias(collection, varName, "FLOAT", modeId, primVar, SCOPES, null);
       } else {
-        // Direct value (e.g., max-width: "1280px") — no scale step, so an arbitrary-value utility
-        createDirect(collection, varName, "FLOAT", pxToNumber(value), modeId, SCOPES, utility ? `${utility}-[${value}]` : null);
+        // Direct value (e.g., max-width: "1280px") — no scale step
+        createDirect(collection, varName, "FLOAT", pxToNumber(value), modeId, SCOPES, null);
       }
       count++;
     }

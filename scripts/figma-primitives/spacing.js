@@ -27,7 +27,7 @@ collection.renameMode(modeId, "default");
 
 let count = 0;
 for (const [step, px] of Object.entries(CONFIG)) {
-  createVar(collection, `spacing/${step}`, "FLOAT", pxToNumber(px), modeId, SCOPES, `var(--spacing-${step})`);
+  createVar(collection, `spacing/${step}`, "FLOAT", pxToNumber(px), modeId, SCOPES, `var(--space-${step})`);
   count++;
 }
 
