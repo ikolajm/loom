@@ -130,23 +130,6 @@ function loadAnswers(args) {
   };
 }
 
-// Soft, heuristic parity check (early placement). The authoritative font-availability
-// check runs in Figma at paste time (figma.listAvailableFontsAsync); this just flags a
-// font that's off the recommended Figma-parity shortlist so it isn't a surprise later.
-function warnOffParitySafeFonts(answers) {
-  let safe;
-  try {
-    safe = JSON.parse(fs.readFileSync(path.join(__dirname, '../../spec/parity-safe-fonts.json'), 'utf-8')).families;
-  } catch { return; } // list optional — skip silently if absent
-  const set = new Set(safe);
-  for (const role of ['heading', 'body']) {
-    const fam = answers[role] || 'Inter';
-    if (!set.has(fam)) {
-      console.warn(`  ⚠ ${role} font "${fam}" is off the parity-safe shortlist. Code loads it via Google Fonts <link>; the Figma build will substitute Inter if this Figma can't render it (the typography paste reports which). Pick from spec/parity-safe-fonts.json for guaranteed parity.`);
-    }
-  }
-}
-
 // --- Main ---
 function main() {
   const args = parseArgs(process.argv);
@@ -173,7 +156,6 @@ function main() {
   console.log(`Secondary: ${answers.secondary || '(auto-derive)'}`);
   console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
   console.log(`Fonts: ${answers.heading || 'Inter'} / ${answers.body || 'Inter'}`);
-  warnOffParitySafeFonts(answers);
   // Each Tier 2 value with the layer that supplied it — an intent-derived value and a
   // hand-written one are indistinguishable in the output, so the run log says which.
   for (const key of Object.keys(TIER2_KEYS)) {

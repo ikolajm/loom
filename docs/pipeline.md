@@ -178,8 +178,7 @@ redirects.
 | Target | Emits |
 |---|---|
 | `tokens` | `tokens.css`, `loom.css`, `loom.components.css`, `main.css` |
-| `icons` | `components/icons.ts` |
-| `components` | `components/*.tsx` + `cn.ts` |
+| `components` | `catalog/*.tsx` + `*.manifest.json` + `cn.ts` + `atoms.json` — written to `catalog/`, not the output dir |
 | `preview-html` | `docs/preview.html` — written to the repo, not the output dir |
 | `handoff` | `HANDOFF.md` |
 | `verify` | nothing — runs the invariant checks and fails the run |
@@ -335,10 +334,10 @@ line. It reports; it never installs.
 | Output doesn't match a config you edited | `sourceOf()` / a stale `spec/config/local/`; resolution is per file |
 | A fill color isn't the shade you named | The AA fill resolver moved it; `$fillShades` says where it landed |
 | Figma colors differ from code colors | `$fillShades` missing or stale — regenerate configs |
-| A font renders as Inter in Figma | Off the parity-safe shortlist; step `14` reports per family |
+| A font renders as Inter in Figma | This Figma cannot render the family; step `14` reports per family |
 | `npm run generate` fails at the end | `verify` — the check name and its failures print inline |
 | Committed configs suddenly fail the build | `base-config-provenance`; repair with `--default-set` |
-| A consumer's atom didn't update | It has local edits and was skipped; the summary names it |
+| A consumer's atom didn't update | Delivered files are overwritten unconditionally — check you synced the right path |
 
 ## Cross-references
 

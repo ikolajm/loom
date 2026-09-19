@@ -1,11 +1,8 @@
-const { buildVariantStyles, buildSizeStyles, cls } = require('../shared');
-const { filterSizes, resolveConfig, buildSizeStylesWithText } = require('./helpers');
+const { cls } = require('../shared');
+const { resolveConfig } = require('./helpers');
 
 function generateRadixSelect(name, config, meta) {
   const resolved = resolveConfig(meta.source, meta.key, meta.baseKey);
-  const sizes = filterSizes(resolved.sizes);
-  const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
-  const stateStyles = resolved.state ? buildVariantStyles(resolved.state) : {};
 
   return `'use client';
 

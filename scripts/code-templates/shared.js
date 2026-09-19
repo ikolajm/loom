@@ -1,5 +1,5 @@
 /**
- * Shared config loading, Tailwind class mappers, and component registry.
+ * Shared config loading and the component registry.
  * Used by all code-template generators.
  */
 const fs = require('fs');
@@ -66,101 +66,7 @@ function loadAllConfigs() {
 // icon ladder existed twice: once in the generated CSS and once in a JS lookup table.
 const ICON_SLOT_CLASS = 'icon-slot';
 
-// --- Tailwind class mappers ---
-
-function colorToClass(colorPath, prefix = 'bg') {
-  if (!colorPath) return null;
-  if (colorPath === 'transparent') return `${prefix}-transparent`;
-  if (colorPath === 'currentColor') return `${prefix}-current`;
-  const parts = colorPath.split('/');
-  const role = parts[parts.length - 1];
-  return `${prefix}-${role}`;
-}
-
-function scaleToValue(val) {
-  if (!val || typeof val !== 'string') return null;
-  const m = val.match(/^\{scale\.(\d+)\}$/);
-  return m ? m[1] : null;
-}
-
-/** Resolve a padding/spacing value to a Tailwind class suffix. Handles both {scale.N} and raw values like "2px". */
-function spacingToClass(val, prefix) {
-  if (!val) return null;
-  const scale = scaleToValue(val);
-  if (scale) return `${prefix}-${scale}`;
-  // Raw value (e.g. "2px") → arbitrary value
-  if (typeof val === 'string' && val.match(/^\d/)) return `${prefix}-[${val}]`;
-  return null;
-}
-
-function heightToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  if (val.startsWith('height/')) return val.replace('height/', '');
-  // Scale reference: {scale.N} → N (maps to Tailwind h-N)
-  const scale = scaleToValue(val);
-  if (scale) return scale;
-  // Raw value (e.g. "72px") → arbitrary value (caller emits h-[72px])
-  if (val.match(/^\d/)) return `[${val}]`;
-  return null;
-}
-
-function radiusToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  if (val.startsWith('radius/')) return val.replace('radius/', '');
-  return null;
-}
-
-function shadowToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  const m = val.match(/effects\/shadow-(\d)/);
-  if (!m) return null;
-  const level = parseInt(m[1]);
-  if (level === 0) return null;
-  return `shadow-[var(--shadow-${level})]`;
-}
-
-function borderWidthToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  const m = val.match(/border-width\/bw-(\d)/);
-  if (!m) return null;
-  const w = parseInt(m[1]);
-  return w === 1 ? 'border' : `border-${w}`;
-}
-
-function maxWidthToClass(val) {
-  if (!val || typeof val !== 'string') return null;
-  if (val === '100%') return 'max-w-full';
-  return `max-w-[${val}]`;
-}
-
 // --- Variant/size style builders ---
-
-function buildVariantStyles(variants) {
-  const styles = {};
-  for (const [name, colors] of Object.entries(variants)) {
-    const classes = [];
-    const bg = colorToClass(colors.bg, 'bg');
-    const fg = colorToClass(colors.fg, 'text');
-    const border = colors.border && colors.border !== 'none' ? colorToClass(colors.border, 'border') : null;
-    const shadow = shadowToClass(colors.shadow);
-    if (bg) classes.push(bg);
-    if (fg) classes.push(fg);
-    if (border) classes.push(border, 'border');
-    if (colors.border === 'none') classes.push('border-0');
-    // Directional borders
-    const borderBottom = colors['border-bottom'] && colors['border-bottom'] !== 'none' ? colorToClass(colors['border-bottom'], 'border') : null;
-    if (borderBottom) classes.push(borderBottom, 'border-b');
-    const borderTop = colors['border-top'] && colors['border-top'] !== 'none' ? colorToClass(colors['border-top'], 'border') : null;
-    if (borderTop) classes.push(borderTop, 'border-t');
-    const borderRight = colors['border-right'] && colors['border-right'] !== 'none' ? colorToClass(colors['border-right'], 'border') : null;
-    if (borderRight) classes.push(borderRight, 'border-r');
-    const borderLeft = colors['border-left'] && colors['border-left'] !== 'none' ? colorToClass(colors['border-left'], 'border') : null;
-    if (borderLeft) classes.push(borderLeft, 'border-l');
-    if (shadow) classes.push(shadow);
-    styles[name] = classes.join(' ');
-  }
-  return styles;
-}
 
 /**
  * Catalog-wide treatment vocabulary for orthogonal atoms. A treatment is a fixed consumer
@@ -260,54 +166,6 @@ function buildColorVars(colorsCfg) {
     }
   }
   return { colorNames, toneClass, toneFamily };
-}
-
-function buildSizeStyles(sizes) {
-  const styles = {};
-  for (const [name, sz] of Object.entries(sizes)) {
-    if (name.startsWith('$')) continue; // skip $exception notes
-    const classes = [];
-    // Icon-sized components (spinner etc.) — size: "icon/icon-N"
-    if (sz.size && typeof sz.size === 'string' && sz.size.startsWith('icon/')) {
-      classes.push(`size-${sz.size.replace('icon/', '')}`);
-    }
-    // Square size via height token (e.g. icon-button)
-    if (sz.size && typeof sz.size === 'string' && sz.size.startsWith('height/')) {
-      classes.push(`size-${sz.size.replace('height/', '')}`);
-    }
-    // Height — height/ch-N
-    const h = heightToClass(sz.height);
-    if (h) classes.push(`h-${h}`);
-    // Min-height (e.g. textarea)
-    if (sz['min-height']) classes.push(`min-h-[${sz['min-height']}]`);
-    // Min-width (e.g. kbd) — for atoms whose content can be a single narrow
-    // character, where x-padding alone leaves the box narrower than it is tall.
-    if (sz['min-width']) classes.push(`min-w-[${sz['min-width']}]`);
-    // Padding — handles both {scale.N} and raw values
-    const px = spacingToClass(sz['x-padding'], 'px');
-    if (px) classes.push(px);
-    const py = spacingToClass(sz['y-padding'], 'py');
-    if (py) classes.push(py);
-    // Gap
-    const gap = spacingToClass(sz.gap, 'gap');
-    if (gap) classes.push(gap);
-    // Border radius
-    const rad = radiusToClass(sz.radius);
-    if (rad) classes.push(`rounded-${rad}`);
-    // Shadow per size (e.g. FAB)
-    const shadow = shadowToClass(sz.shadow);
-    if (shadow) classes.push(shadow);
-    // Border-width
-    const bw = borderWidthToClass(sz['border-width']);
-    if (bw) classes.push(bw);
-    // Max-width (Dialog, Sheet, etc.)
-    const mw = maxWidthToClass(sz['max-width']);
-    if (mw) classes.push(mw);
-    // Width (Sidebar, ColorPicker, etc.)
-    if (sz.width && !sz.size) classes.push(`w-[${sz.width}]`);
-    styles[name] = classes.join(' ');
-  }
-  return styles;
 }
 
 // --- $base inheritance resolver ---
@@ -506,21 +364,11 @@ function buildToneLookup(varName, colorNames, toneFamily, toneClass) {
 module.exports = {
   expandSizeConstants,
   loadAllConfigs,
-  colorToClass,
-  scaleToValue,
-  spacingToClass,
-  heightToClass,
-  radiusToClass,
-  shadowToClass,
-  borderWidthToClass,
-  maxWidthToClass,
-  buildVariantStyles,
   cls,
   TREATMENT_CLASSES,
   ICON_SLOT_CLASS,
   buildColorVars,
   buildToneLookup,
-  buildSizeStyles,
   buildTypographyClasses,
   resolveBase,
   getComponentRegistry,

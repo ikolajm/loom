@@ -641,9 +641,13 @@ function checkConfigParity() {
 // dead, and there are twenty-one of those — flagging them would be style noise in a check
 // that has to stay worth reading. An export nothing mentions anywhere is unambiguous.
 //
-// Not covered: a function that IS called but whose output is dead. `maxWidthToClass` and
-// friends still emit Tailwind class names into paths no surviving atom takes.
-// `atom-class-coverage` is what catches that, and only once an atom applies one.
+// Not covered: a function that IS called but whose output is dead. That was the state of
+// the Tailwind class mappers — `maxWidthToClass` and friends emitted class names into
+// paths no surviving atom took, and this check stayed green because they were exported
+// and imported. They are deleted now, so the gap has no live example; it remains a real
+// limitation of checking the import graph rather than the interpolation.
+// `atom-class-coverage` is what catches an emitted-but-unrenderable class, and only once
+// an atom applies one.
 // Exempt by name and by reason, never by pattern. An allowlist that grows silently is how
 // the thing being checked stops being checked.
 const UNCALLED_EXPORTS = {

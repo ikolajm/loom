@@ -89,15 +89,45 @@ looking exactly as intentional as the primary. Supply your own the moment you ha
 
 ## Fonts — `heading` / `body`
 
-**Use Google Fonts family names.** The generated `layout.tsx` loads fonts via a runtime
-Google Fonts `<link>` (not `next/font`), so an unrecognized name **falls back silently to
-system sans** rather than failing the build. To self-host or use a non-Google font, edit the
-generated `layout.tsx` — it's project-owned.
+Two families, and Loom recommends neither — a typeface is identity, and identity is yours.
+What Loom supplies is the ramp underneath it.
 
-**Design↔code parity.** Google Fonts and Figma's font set are not 1:1. For guaranteed parity,
-pick from [`parity-safe-fonts.json`](parity-safe-fonts.json). Off-list fonts are allowed:
-`npm run configs` flags them, and the Figma typography paste reports availability and
-**substitutes Inter** for any font this Figma can't render (the build completes, logged once).
+**The answer names a family; it does not load one.** `tokens.css` emits
+`--font-heading` / `--font-body` as `'Your Family', system-ui, sans-serif`, and loading the
+webfont is your project's job — a `<link>`, a self-hosted `@font-face`, `next/font`, an
+`@fontsource` package, whichever suits your framework. Nothing fails if you skip it: the
+page renders in the fallback silently, and it looks correct to anyone who has the family
+installed locally, which usually includes whoever picked it.
+
+**Spell the family exactly as your provider does.** That string is matched literally — by
+CSS font matching on the page, and by Figma's font picker at paste time. A near-miss
+resolves to the fallback on one surface and substitutes Inter on the other.
+
+**Which role draws which family.** Six type roles, two families:
+
+| Role | Family | What it is for |
+|---|---|---|
+| `display` | `heading` | The largest type on a page — a hero line, a number meant to be read across a room |
+| `title` | `heading` | Section and card headings, dialog titles |
+| `body` | `body` | Running prose, the default for anything unclassified |
+| `label` | `body` | Form labels, badges, table headers, metadata |
+| `action` | `body` | Button and link text |
+| `input` | `body` | Text the user typed, inside controls |
+
+Each has `sm` / `md` / `lg` tiers, and the size, weight and line-height of every one is
+derived from `typeScale`. The split is deliberate: display and title carry the voice, and
+everything a user reads at length or types into stays on one predictable face.
+
+**The ramp asks for four weights: 400, 500, 600 and 700.** If your family ships fewer, CSS
+font matching resolves to the nearest available rather than failing — a family with only
+400 and 700 renders 500 as 400 and 600 as 700, so a four-step hierarchy arrives as two
+steps. Nothing reports this. Check what your family ships before assuming the ramp is
+doing what it says.
+
+**Design↔code parity.** A font on the page and a font in Figma are separate availabilities
+and they do not always agree — Figma sees system fonts, its own set and your org's uploads.
+The Figma typography paste checks at paste time and **substitutes Inter** for any family
+this Figma cannot render, logging which; the build completes rather than throwing.
 
 ## The five look-and-feel answers, in plain terms
 
@@ -137,13 +167,9 @@ A value you write is **never** overridden. Omit `edges` / `density` / `shadowDep
 nothing else does. `npm run configs` prints each resolved value with the layer that
 supplied it.
 
-There was a second intent field, `productType`, supplying the same four values plus
-`controlHeight` and a starter pick-list. Two suppliers for one value meant the resolved
-scale could not be stated without running the generator and reading which layer won — and
-the blocks genuinely conflicted, `dashboard` saying `type-scale: compact` against its own
-suggested `clean` saying `standard`. It was cut. An answers file that still names it fails
-with a message saying what to set instead; it is refused rather than ignored, because
-ignoring it would silently drop a phone product from the touch ladder.
+**`productType` is not a key.** An answers file naming it is **refused** with a message
+saying what to set instead, rather than ignored — ignoring it would silently drop a phone
+product from the touch ladder.
 
 `projectName` remains metadata only: it travels with the config for provenance and changes
 no token.
@@ -156,6 +182,7 @@ no token.
 
 ---
 
-All 6 components are available in the catalog; projects pick the subset they need
-(see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md)). The full pick list is generated to
-[`catalog/atoms.json`](../catalog/atoms.json).
+All 6 components are installed by every sync, along with `cn` and `theme-init` — there is
+no subset mechanism, and a deleted atom returns on the next run (see [`CATALOG_SPEC.md`](../CATALOG_SPEC.md); an
+unimported atom is tree-shaken, so carrying one costs a file rather than bytes). The
+generated index is [`catalog/atoms.json`](../catalog/atoms.json).

@@ -1,11 +1,9 @@
 /**
  * theme-provider.tsx — the theme mechanism, as a catalog file.
  *
- * It was in `scaffold/`, reachable only through a Next-only `init.sh`, which made the one
- * piece of the scaffold that carries real behavior the hardest piece to get. It belongs
- * here by the catalog's own bar: it persists a choice, resolves `prefers-color-scheme`,
- * and writes the `data-theme` attribute the alternate-mode block keys off. None of that
- * is expressible in CSS.
+ * It belongs in the catalog by the catalog's own bar: it persists a choice, resolves
+ * `prefers-color-scheme`, and writes the `data-theme` attribute the alternate-mode block
+ * keys off. None of that is expressible in CSS.
  *
  * Config-driven, which is why it is generated rather than a static asset: the default
  * mode and the server-side fallback both come from `colors['default-mode']`.

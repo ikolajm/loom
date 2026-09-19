@@ -5,12 +5,9 @@
  * Produces the complete generated/ bundle:
  *   tokens.css, components/, HANDOFF.md
  *
- * No scaffold target. It wrote a Next app shell — a layout.tsx importing from `next`, an
- * App Router route, a `@/providers/` alias — plus an init.sh that hard-required src/app/.
- * The substrate was always portable; the only thing wiring it up was not. Its two parts
- * worth keeping moved: ThemeProvider is a catalog component, and the selection and
- * scrollbar rules are in loom.base. sync.js took the `--tokens` tier and the loom:sync
- * script.
+ * No app-shell target: the substrate is portable and wiring it into a framework is the
+ * consumer's business. ThemeProvider is a catalog component, the selection and scrollbar
+ * rules are in loom.base, and sync.js owns the `--tokens` tier and the loom:sync script.
  *
  * Each generator is a separate module with a generate(config, outputDir) function.
  *
@@ -41,15 +38,8 @@ const GENERATORS = {
       }
     },
   },
-  'icons': {
-    description: 'components/icons.ts (icon map + size classes)',
-    run: (outputDir) => {
-      const { generate } = require('./generate-icons');
-      return generate(configs, outputDir);
-    },
-  },
   'components': {
-    description: 'components/*.tsx + cn.ts',
+    description: 'catalog/*.tsx + *.manifest.json + cn.ts + atoms.json (ignores --output; always catalog/)',
     run: (outputDir) => {
       const { generate } = require('./generate-components');
       return generate(registry, outputDir, configs);

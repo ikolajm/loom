@@ -2,13 +2,13 @@
 
 **Architectural reference for the v2 catalog model.** For each component's concrete contract — kind, dependencies, variants, tokens — see its `catalog/[name].manifest.json`.
 
-The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider`. It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/loom/`, every run. Deleting one does not stick — a removed file is indistinguishable from a never-installed one, so the next sync restores it. Unimported atoms are tree-shaken and cost nothing shipped, so the cost of carrying one you do not use is a file in your tree, not bytes in your build. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
+The model in one paragraph: Loom ships 6 components — 5 atoms and `ThemeProvider` — plus `cn` and `theme-init`, which are delivered but are not components (see Kind). It is a **first-party component catalog copied into a project wholesale**. `npm run sync` writes every atom into `src/components/loom/`, every run. Deleting one does not stick — a removed file is indistinguishable from a never-installed one, so the next sync restores it. Unimported atoms are tree-shaken and cost nothing shipped, so the cost of carrying one you do not use is a file in your tree, not bytes in your build. Atoms are project-owned after install — edit freely, no upstream auto-flow. They land alongside any project-authored atoms; diffing them against `catalog/` is what surfaces changes worth porting back upstream. Tokens still ship as a single substrate bundle, unchanged.
 
 A consuming project ships atom files and nothing else — no stories, no harness. Marketing characterization is handled by omission rather than a variant flag — see [Marketing characterization is project-owned](#marketing-characterization-is-project-owned).
 
 ## Kind: atoms and patterns
 
-Every manifest carries a `kind` — **5 atoms**, **0 patterns**, and `cn` as `utility`.
+Every manifest carries a `kind` — **5 atoms**, **0 patterns**, and one each of `utility` (`cn`), `snippet` (`theme-init`) and `provider` (`theme-provider`).
 
 **The distinction is currently vestigial and the count says so.** It was introduced to make "does this earn its place?" answerable across a 44-component catalog, where an atom justified itself by being unavoidable and a pattern by saving composition. A worked-example set of five does not need a vocabulary for triage. The field stays because manifests carry it and nothing branches on it; if patterns stays at zero, delete the kind rather than keep a word that classifies one thing.
 
@@ -150,20 +150,14 @@ cva variants, which `react-refresh/only-export-components` objects to — and th
 available was an override naming each file, which the next atom arrives outside of.
 `src/components/loom/` is one glob, now and after the catalog grows.
 
-There was a picker: a `loom-picks.json` in the consuming project listing atom names, and
-a resolver that walked each name's manifest `dependencies` transitively. It went when the
-catalog reached five. The entire dependency graph is that every atom needs `cn`, which the
-sync copies unconditionally and outside the resolved set, so the walk returned what it had
-been handed. Deleting a file you did not want is cheaper than maintaining a list of the
-ones you did.
-
-The manifests stay, because they answer a question picking never asked: `npmDependencies`
+The manifests answer what the file tree cannot: `npmDependencies`
 is how a consumer learns `button` needs `@radix-ui/react-slot` and
 `class-variance-authority` without reverse-engineering it from imports, and the sync prints
 the union of them as a single `npm install` line.
 
-A local edit is still never overwritten — see [Override mechanism](#override-mechanism-shadcn-pure-copy). That guard is
-independent of how files are chosen and is the more valuable half of the sync.
+**A local edit in a delivered file is overwritten on the next sync** — there is no
+detection and nothing to force. Keep a change at the call site instead, where it survives
+by construction; see [Override mechanism](#override-mechanism-shadcn-pure-copy).
 ## Manifests
 
 Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON). There is no `version` field: it recorded a content hash that only the overwrite guard read, and both were cut.
@@ -173,30 +167,37 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 ```json
 {
   "name": "badge",
+  "kind": "atom",
   "category": "button",
-  "description": "Label with optional icon and severity. Never interactive — a chip you can click or dismiss is a Button.",
-  "version": "a1b2c3d4e5f6",
+  "file": "badge.tsx",
   "dependencies": ["cn"],
+  "npmDependencies": ["@radix-ui/react-slot", "class-variance-authority"],
   "tokens": ["color", "typography", "spacing", "sizing"],
   "composition": "slot",
   "sizes": ["sm", "md", "lg"]
 }
 ```
 
-**Required:** `name`, `category`, `dependencies`, `tokens`, `composition`
-**Optional:** `description`, `version`, `variants`, `sizes` (when applicable)
+**Required:** `name`, `kind`, `category`, `file`, `dependencies`, `npmDependencies`, `tokens`, `composition`
+**Optional:** `variants`, `sizes` (when applicable)
 
 | Field | Purpose |
 |---|---|
-| `name` | The atom's file stem in `catalog/` |
+| `name` | The atom's exported component name |
+| `kind` | `atom` / `pattern` / `utility` — vocabulary, not behaviour; all kinds install identically |
 | `category` | Catalog browse grouping (button / form / layout / feedback / data-display / navigation / composite) |
-| `description` | Playground UI label, browse summary |
-| `version` | Content hash of the atom's generated source — changes only when the atom changes |
+| `file` | The delivered filename in `catalog/`, so nothing downstream infers it from the name |
 | `dependencies` | Other catalog atoms this one imports |
+| `npmDependencies` | Packages this atom imports; the sync prints their union as one `npm install` line |
 | `tokens` | Which token sets the atom reads (informational — the substrate ships all-or-nothing) |
 | `composition` | Slot pattern — how an atom hands its root or its children to a caller. Enum: `none` / `slot` / `slottable` / `children-as-function` |
 | `variants` | Primary variant axis |
 | `sizes` | Size axis |
+
+**There is no `description`.** It existed as a playground UI label and a browse summary;
+the playground is gone and the browse view is `catalog/atoms.json`, which lists names by
+group. What an atom is for belongs in this document and in `docs/preview.html`, where it
+is written once rather than restated per manifest and left to drift.
 
 ### `composition` enum
 
@@ -281,20 +282,10 @@ radius) and the class layer (tones, treatments, surfaces, control states, every 
 class), plus a **Known gaps** section where a defect that is spec'd but not fixed renders
 as itself.
 
-There was a Next application here, `catalog-playground/`, doing two jobs. The compile gate
-is now `tsc --noEmit` over `catalog/`, which asks the same question of a tenth of the files
-and needs nine packages rather than thirty. The gallery is the page above.
-
-It was cut on a specific ground, not on weight. The playground kept `tailwindcss` as a
-devDependency after the bridge was removed, so stock utilities still resolved inside it
-and a consumer's did not — it was the only rendering surface in the repo, and it flattered
-the layer it existed to check. A static page standing on the three stylesheets cannot.
-
-What went with it and has no replacement: `story-coverage`, which asserted every atom was
-rendered somewhere. A static page cannot render TSX. After appearance moved into the class
-layer the page does show everything an atom *looks* like, and what remains in the TSX is
-behavior — focus traps, portals, keyboard nav — which a gallery never verified by being
-looked at either. The seam between them is closed at generation:
+The compile gate is `tsc --noEmit` over `catalog/`; the gallery is the page above. Nothing
+asserts that an atom is rendered somewhere — a static page cannot render TSX, and what
+lives in the TSX is behavior (focus traps, portals, keyboard nav) that looking at a gallery
+never verified either. The seam between appearance and behavior is closed at generation:
 `cls()` resolves every class an atom applies against `classManifest()`, the set the
 stylesheets actually emit, so a name the CSS does not define stops the build.
 `atom-class-coverage` re-checks the emitted catalog as a backstop.
@@ -307,9 +298,9 @@ Every atom is produced through the same pipeline. The mechanical pieces:
 
 1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
 2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/loom/`, overwriting unconditionally. Tokens ship as a substrate bundle.
-3. **No scaffold output.** There was a `scaffold/` tier — an `init.sh` writing a Next root layout, a `globals.css` and a provider mount into the consuming project, requiring `src/app/`. It was cut on the same ground as the playground: the substrate is plain CSS and the components plain React, so the only thing in the repo that assumed a framework was the script wiring them up, and the first consumer to take the reduced Loom is on Vite. `ThemeProvider` is a catalog component now, the `::selection` and scrollbar rules it used to write are in `loom.base`, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Mounting a provider and writing a root layout are the consuming framework's business.
+3. **No app shell.** Loom writes none and assumes no framework: the substrate is plain CSS and the components plain React. `ThemeProvider` is a catalog component, the `::selection` and scrollbar rules are in `loom.base`, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Mounting a provider and writing a root layout are the consuming framework's business.
 4. **Preview page.** `docs/preview.html` — the class layer rendered on the three stylesheets and nothing else.
-5. **No staleness stamp and no overwrite guard.** Both existed and were cut. The stamp hashed the schemas and templates into `catalog/atoms.json` so a sync could say "these atoms predate your edits"; the guard compared each installed file against the catalog and skipped the ones a consumer had touched, with a third verdict for a pair delivered split. Together with their test they were about 470 lines, and every one of them answered the same question — what if a repo you do not control is in a strange state. Delivered files now carry a generated header and are overwritten on every sync. A change worth keeping goes at the call site, where it survives by construction rather than by detection.
+5. **No staleness stamp and no overwrite guard.** Nothing compares an installed file against the catalog or reports that your atoms predate an edit. Delivered files carry a generated header saying so and are overwritten on every sync; a change worth keeping goes at the call site, where it survives by construction rather than by detection.
 
 ---
 

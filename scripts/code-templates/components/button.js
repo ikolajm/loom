@@ -1,5 +1,4 @@
-const { buildSizeStyles, buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes, buildSizeStylesWithText } = require('./helpers');
+const { buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 
 function generateButton(name, config, meta) {
   // Three axes: variant = treatment, color = family, intensity = solid or soft.
@@ -13,19 +12,8 @@ function generateButton(name, config, meta) {
   const intensities = config.intensities || ['solid', 'soft'];
   const { colorNames: colorKeys, toneClass, toneFamily } = buildColorVars(config.colors || {});
   const tones = buildToneLookup('button', colorKeys, toneFamily, toneClass);
-  const sizes = filterSizes(config.sizes);
-  const sizeStyles = buildSizeStylesWithText(sizes, meta.textFamily);
-  const iconSizesConfig = filterSizes(config['icon-sizes'] || {});
-  const iconSizeStyles = buildSizeStyles(iconSizesConfig);
   const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
-
-  // Merge regular sizes and icon-only sizes into one CVA dimension
-  // icon-sm, icon-md, icon-lg are the square icon-only sizes
-  const allSizeEntries = { ...sizeStyles };
-  for (const [k, v] of Object.entries(iconSizeStyles)) {
-    allSizeEntries[`icon-${k}`] = v;
-  }
 
   // `variant` carries a treatment class and is the only cva axis; the tone is computed
   // from color and intensity together. Both are plain classes from loom.css — the tone

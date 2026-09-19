@@ -1,5 +1,4 @@
-const { spacingToClass, radiusToClass, buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
-const { filterSizes } = require('./helpers');
+const { buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 
 function generateBadge(name, config, meta) {
   // Three orthogonal axes: variant = treatment, color = family, intensity = solid or soft.
@@ -21,42 +20,6 @@ function generateBadge(name, config, meta) {
   const { colorNames, toneFamily, toneClass } = buildColorVars(config.colors || {});
   // Shared with button, so the two cannot drift apart the way they did before.
   const tones = buildToneLookup('badge', colorNames, toneFamily, toneClass);
-
-  // Text-bearing sizes
-  const sizes = filterSizes(config.sizes || {});
-  const sizeClasses = {};
-  for (const [tier, sz] of Object.entries(sizes)) {
-    // Padding and gap are not emitted here. `.badge[data-size]` in the class layer
-    // already carries both from the same schema tier, so these were a second copy that
-    // resolved only through the bridge — and after it went out, the only copy that
-    // rendered was the one in CSS.
-    const classes = [];
-    // Type comes from the family ramp, not from literals in this config. Two reasons:
-    // the literals did not ramp (sm and md were both 10px/14px, so md differed from sm
-    // only in padding), and the Figma builder has always bound badge text to the
-    // label/{tier} text style — so Figma rendered md at 12px while code rendered 10px.
-    // Reading the same ramp both sides closes that drift and makes badge track a
-    // project's typeScale, which a hardcoded pixel value can never do.
-    const standardTier = ['sm', 'md', 'lg'].includes(tier);
-    if (meta.textFamily && standardTier) {
-      classes.push(`text-${meta.textFamily}-${tier}`);
-    } else {
-      if (sz['font-size']) classes.push(`text-[${sz['font-size']}]`);
-      if (sz['line-height']) classes.push(`leading-[${sz['line-height']}]`);
-    }
-    const rad = radiusToClass(sz.radius);
-    if (rad) classes.push(`rounded-${rad}`);
-    sizeClasses[tier] = classes.join(' ');
-  }
-
-  // Icon wrapper classes per text size
-  const iconClasses = {};
-  for (const [tier, sz] of Object.entries(sizes)) {
-    const iconToken = sz.icon || sz['icon-size'];
-    if (iconToken && typeof iconToken === 'string' && iconToken.startsWith('icon/')) {
-      iconClasses[tier] = `size-${iconToken.replace('icon/', '')}`;
-    }
-  }
 
   const typo = buildTypographyClasses(config);
   const dflt = config.default || {};

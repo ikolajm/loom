@@ -1006,11 +1006,10 @@ button,
 }
 
 /* === Selection and scrollbars === */
-/* Both were in the scaffold's globals.css, which is to say in a file a Next-only script
-   wrote into the consumer's app. They are token-driven appearance and nothing else in the
-   repo carried them, so cutting the scaffold would have lost them. The body rule that sat
-   beside them is not here: loom.base already sets the same three declarations, down to the
-   value, since --type-body-md-family resolves to var(--font-body).
+/* Token-driven appearance, so they belong in the substrate rather than in an app's own
+   stylesheet. No body rule beside them: loom.base already sets the same three
+   declarations, down to the value, since --type-body-md-family resolves to
+   var(--font-body).
 
    The standard properties are declared alongside the -webkit- ones rather than instead of
    them. ::-webkit-scrollbar is Chrome and Safari only, so on its own this was a substrate
@@ -1334,11 +1333,10 @@ function buildSection11_InteractiveStates() {
 
 function buildSection14_Animations() {
   return `/* === Animation Keyframes === */
-/* Consumed by .spinner. The Tailwind-era keyframes that sat here — accordion, fade,
-   scale and the four slide-ins — were reachable only through the \`--animate-*\`
-   registrations that went out with the bridge, so nothing could name them. Cut.
-   What a <dialog> does on open is an open question and is a \`::backdrop\` plus
-   \`transition-behavior: allow-discrete\` question, not a keyframe one. */
+/* One keyframe, consumed by .spinner. Everything else the class layer animates is a
+   transition rather than an animation — including a <dialog> on open, which is opacity
+   and scale on the panel plus a fading \`::backdrop\`, all on \`--transition\` so reduced
+   motion is handled for free. */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

@@ -13,23 +13,17 @@
  * which is the right default for a maintainer and the wrong one for a consumer. A project
  * that owns its answers file passes it and becomes reproducible from its own repo.
  *
- * `--tokens` and the loom:sync script below came from init.sh when scaffold/ was cut. Both
- * belong here: this is the only thing that knows both paths, because it is invoked with
- * one and lives in the other. What did NOT come across is the app shell — a Next root
- * layout, a globals.css, a provider mount — because that is a framework's business and
- * ThemeProvider is in the catalog now, delivered like any other component.
- *
- * Replaces setup.sh and scripts/refresh-test.sh. Those were 145 lines of shell whose only
- * work was argument parsing, copying, and printing. One language, and the helpers are
- * imported rather than shelled.
+ * `--tokens` and the loom:sync script below belong here because this is the only thing
+ * that knows both paths: it is invoked with the project directory and lives in Loom.
+ * Loom writes no app shell — no root layout, no globals.css, no provider mount — because
+ * that is a framework's business, and ThemeProvider is delivered like any other component.
  *
  * The catalog copies in whole, every run, with no edit detection. Delivered files carry a
  * generated header and sit in a directory of Loom's own: editing one is out of contract,
  * so there is nothing for a guard to protect. A change worth keeping goes at the call
- * site — className, a prop, a wrapper — where it survives a resync by construction. The
- * overwrite guard, its staleness stamp and their repair verdicts were ~470 lines
- * answering "what if another repo is in a strange state", and the answer with one
- * consumer you own is to resync and read the diff.
+ * site — className, a prop, a wrapper — where it survives a resync by construction.
+ * Nothing detects an edit, on purpose: that question is "what if another repo is in a
+ * strange state", and the answer with one consumer you own is to resync and read the diff.
  */
 const fs = require('fs');
 const os = require('os');
@@ -218,10 +212,9 @@ function main(argv) {
  * Add `loom:sync` to the project's package.json, so a refresh runs from the consumer's
  * own directory instead of from this repo.
  *
- * This is the one thing init.sh did that nothing else could: it knows the path between the
- * two repos. So does this script — it is invoked with the project directory and resolves
- * its own root — which is why the job moved here rather than being written by hand into a
- * README. An existing script is left alone; a project without a package.json says so and
+ * Only this script knows the path between the two repos — it is invoked with the project
+ * directory and resolves its own root — which is why it writes the line rather than a
+ * README documenting it. An existing script is left alone; a project without a package.json says so and
  * moves on, because the tokens tier does not assume node.
  *
  * Deliberately not wired into `predev`. A consumer's dev server that cannot start without

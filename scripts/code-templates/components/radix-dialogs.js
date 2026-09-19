@@ -1,5 +1,5 @@
-const { buildSizeStyles, cls } = require('../shared');
-const { filterSizes, buildSizeStylesWithText } = require('./helpers');
+const { cls } = require('../shared');
+const { filterSizes } = require('./helpers');
 
 /**
  * Built-in close affordance, shared by Dialog and Sheet (both wrap @radix-ui/react-dialog).

@@ -4,15 +4,22 @@ Traps the generated code embodies but can't explain. The code holds the *fix*; t
 
 ---
 
-## A custom class and a consumer's utility are a pure cascade question
+## A custom class of your own, shipped unlayered, outranks all of Loom
 
-**Symptom, historically.** Carousel arrows passed `className="absolute …"` through `Button` fell into normal document flow and stacked at the top instead of pinning to the viewport edges. It looked correct and compiled clean; it only showed up at visual-confirm.
+**The rule.** Unlayered author CSS beats layered author CSS regardless of source order and
+regardless of specificity. Every rule Loom ships is inside `@layer`, deliberately, so
+anything you write unlayered wins over it — that is the override mechanism working.
 
-**Root cause.** `.interactive` hard-sets `position: relative`. Pass `absolute` through `className` and tailwind-merge keeps both — it *cannot dedupe a custom utility class against a Tailwind position utility*, having no idea `.interactive` also sets `position`. Which one wins is then a pure cascade question, and at the time the class layer shipped **unlayered** while Tailwind v4 puts its utilities in `@layer utilities`. Unlayered styles beat layered ones regardless of source order, so `absolute` was present in the DOM and silently overridden.
+**The trap is your own classes.** Ship `.card-actions { position: relative }` unlayered and
+it silently outranks *everything* Loom layers for `position`, including on elements where
+you meant Loom's rule to hold. `.interactive` hard-sets `position: relative`, so an element
+carrying both gets yours and nothing reports it. No class-merging helper can catch this:
+it sees two class names from different vocabularies and has no idea both set the same
+property. Put your own classes in a layer too, and the cascade order is something you
+state rather than something you discover.
 
-**Resolution.** The class layer moved into a cascade layer — `loom.components` now — so anything you write unlayered wins over it. The wrap-in-a-positioning-div workaround this section used to prescribe is no longer needed.
-
-**The part that outlives the fix, and Tailwind.** No merge helper can dedupe a custom class against something setting the same property from another vocabulary; it has no idea `.interactive` also sets `position`. Layering is the only thing that makes that harmless, which is why every rule Loom ships is in a layer. Ship a custom class unlayered and it silently outranks everything layered for that property. The same mechanism bites from the other direction with consumer resets: see the last section of this file.
+The same mechanism bites from the other direction with a consumer reset, which is the last
+section of this file and the more common way an install looks broken.
 
 ## Radix `Slot` — `asChild` silently applies no classes when children are wrapped in a fragment
 
@@ -90,17 +97,30 @@ Fonts are the one token where the two surfaces have **different capabilities**, 
 
 | Surface | Loads via | Failure mode (raw) |
 |---|---|---|
-| **Code** | runtime Google Fonts `<link>` in `layout.tsx` | unknown name → **silent** fallback to system sans |
+| **Code** | nothing — **you load it** | not loaded → **silent** fallback to system sans |
 | **Figma** | `figma.loadFontAsync({ family, style })` | unavailable family → **throws**, crashes the paste |
 
-Google Fonts and Figma's font set are **not 1:1** (Figma = system fonts + a Google subset + org uploads), so a name can load in code yet be absent in Figma. The handling checks each surface against its *own* authoritative source rather than a maintained "GF ∩ Figma" list (which drifts and is environment-specific):
+A page's fonts and Figma's fonts are **separate availabilities** (Figma = system fonts + its own set + org uploads), so a name can load in code yet be absent in Figma. Each surface is checked against its *own* authoritative source. There is deliberately **no curated shortlist**: one was shipped and cut, because it drifts, it is environment-specific, and naming safe typefaces is Loom having an opinion about brand. It also promised more than it held — Space Mono was *on* it and still killed a paste on a missing weight.
 
-- **Code side** — the Google Fonts `<link>` *is* the proof. `layout.tsx` builds the URL from the family name. Self-host by editing the project-owned `layout.tsx`.
+- **Code side** — **Loom names the family and loads nothing.** `tokens.css` emits
+  `--font-heading` / `--font-body` as `'Your Family', system-ui, sans-serif`; putting the
+  bytes on the page is yours, by whatever route your framework prefers — a Google Fonts
+  `<link>`, a self-hosted `@font-face`, `next/font`. Until you do, the fallback renders
+  and nothing reports it. **This is the trap**: the token is correct, the build is green,
+  every gate passes, and the page is in system sans. It is invisible to anyone with the
+  family installed locally, which usually includes whoever picked it. Check by loading
+  the page on a machine that does not have it, or by reading the computed font family
+  rather than the custom property. Loom loads no webfont on purpose — nothing
+  framework-agnostic can, and guessing wrong costs a render-blocking request.
 - **Figma side** — `figma.listAvailableFontsAsync()` at paste time is authoritative; any missing family **substitutes Inter** (logged) so the build completes instead of throwing.
 
-Both placements: a soft config-time warning against [`spec/parity-safe-fonts.json`](../spec/parity-safe-fonts.json) (`npm run configs`), and the authoritative Figma preflight (`scripts/figma-styles/_shared.js`: `reportFontParity` / `resolveFamily` / `safeLoadFont`).
+One placement, and it is authoritative rather than heuristic: the Figma preflight
+(`scripts/figma-styles/_shared.js`: `reportFontParity` / `resolveFamily` / `safeLoadFont`).
+**Nothing warns on the code side, at any point** — that was the config-time check against
+the shortlist, and it went with it. The code-side failure is silent by construction, which
+is why it is written up above rather than gated.
 
-**A family being available says nothing about the weight you want.** `listAvailableFontsAsync()` answers with family *and* style; keeping only the family leaves `fontStyle()` guessing a style name and `loadFontAsync` throwing when the guess is absent. Space Mono ships Regular and Bold against a ramp asking 400/500/600/700 — `reportFontParity` reported the family present three lines before the paste died on the missing 600, because it checked the family and not the weights. `fontStyle()` now snaps to the nearest weight the family actually ships (ties heavier, italics excluded), which is what CSS font matching already does on the page; Figma was the only surface refusing to build rather than falling back. `FONT_WEIGHT_OVERRIDES` is still checked first, now as the way to pin a choice deliberately unlike the browser's rather than as the workaround for a crash.
+**A family being available says nothing about the weight you want.** `listAvailableFontsAsync()` answers with family *and* style; keeping only the family leaves `fontStyle()` guessing a style name and `loadFontAsync` throwing when the guess is absent. The ramp asks 400/500/600/700 and many families ship fewer; Space Mono ships Regular and Bold — `reportFontParity` reported the family present three lines before the paste died on the missing 600, because it checked the family and not the weights. `fontStyle()` now snaps to the nearest weight the family actually ships (ties heavier, italics excluded), which is what CSS font matching already does on the page; Figma was the only surface refusing to build rather than falling back. `FONT_WEIGHT_OVERRIDES` is still checked first, now as the way to pin a choice deliberately unlike the browser's rather than as the workaround for a crash.
 
 ---
 
@@ -348,10 +368,13 @@ the wrong fix — it would commit your brand to Loom's history.
 
 ## Documents — WeasyPrint is not a browser, and the differences are load-bearing
 
-The portable tier's only non-React consumer is a PDF renderer, and the engine that
-renders it has its own layout implementation rather than a browser's. Four differences
-matter, all found by rendering [`docs/examples/invoice/`](examples/invoice/) rather than
-by reading the CSS.
+The only non-React consumer that *links* the stylesheets is a PDF renderer — a surface
+with no CSS engine reads the values instead, which is a different path and has its own
+note in the README. The engine that renders here has its own layout implementation rather
+than a browser's. The differences
+below were found by rendering [`docs/examples/invoice/`](examples/invoice/) rather than by
+reading the CSS, with one exception called out where it appears — engine support read
+from the parser, which is a weaker claim than a render and is marked as such.
 
 **`print-color-adjust: exact` is ignored, and backgrounds print anyway.** The class
 layer sets it on `.treat-filled` so a badge reading OVERDUE prints as a
@@ -369,6 +392,16 @@ alone renders as one undifferentiated block on paper.
 inherits from the root element, so a running header or a page counter reads
 `var(--on-surface-variant)` like anything else. A hex in document CSS is a mistake, not
 a workaround — the first invoice carried one for exactly that reason.
+
+**Cascade layers resolve, so `main.css` links as-is.** Worth stating because the failure
+it would cause is total rather than partial: a parser without cascade-layer support does
+not ignore `@layer` and keep the contents — an unknown at-rule with a block is consumed
+and discarded, so the whole class layer would vanish rather than degrade. It does not.
+The multi-name statement, the named block form and dotted names all parse, and unlayered
+author CSS still outranks every layer, so a document stylesheet overrides Loom without
+declaring a layer of its own. Read from the engine's parser rather than from a render;
+the versions below the one this was checked against are unpinned, so a consumer on an
+older WeasyPrint should confirm before assuming.
 
 **`@keyframes` and `isolation` warn and are dropped.** Both are app concerns and the
 warnings are noise here, but they share the channel with real ones, so a document render

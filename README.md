@@ -60,7 +60,7 @@ Change a value in `spec/answers.json` → regenerate → every output moves toge
 
 ## What's in the catalog
 
-6 components across 3 groups — 5 atoms plus `ThemeProvider`, which is its own kind — each generated as a `.tsx` file + a `.manifest.json` (its dependency/variant contract). The canonical, always-current pick list is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view.
+6 components across 3 groups — 5 atoms plus `ThemeProvider`, which is its own kind — each generated as a source file + a `.manifest.json` (its dependency/variant contract). `cn` and `theme-init` are delivered alongside them and are not counted as components. The canonical, always-current index is generated to [`catalog/atoms.json`](catalog/atoms.json) — the table below is the readable view. It is an inventory, not a pick list: the sync copies every atom, and there is no mechanism for taking a subset.
 
 **The catalog is a worked example, not a component library.** Five references, one per distinct way of wiring something to the class layer: `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix form control. Anything else you need, build — Radix is already the primitive layer, and what Loom uniquely owns is tokens to classes.
 
@@ -84,7 +84,7 @@ A few architectural choices worth noting:
 
 - **Orthogonal tone × treatment.** Tone (`.tone-primary`, `.tone-error-soft`, …) re-points the `--tone-*` custom properties; treatment (`.treat-filled` / `-outline` / `-ghost`) consumes them, each through a fallback — so a treatment with no tone renders a neutral version of itself rather than nothing, and `badge tone-primary` with no treatment is filled, because `.badge` carries a tone default at zero specificity. Adding either is one line, not an N×M matrix, and every family carries a `-soft` container end so intensity is one axis rather than two vocabularies. **The label colour is resolved, not assumed.** `--tone-text` reads a per-family text role that the generator walks to the nearest ramp shade clearing AA against the most raised surface tier, per mode — so an outline or ghost badge is legible wherever it lands, not only on plain `surface`. It is a separate role from the fill, so your solid buttons keep the brand colour at full strength; only what `.treat-outline`, `.treat-ghost` and `.link` paint moves. `--tone-border` deliberately stays at the base role, because a border is a non-text boundary at 3:1 under WCAG 1.4.11 and the brand line is most of what an outline is for. A brand whose ramp cannot produce a legible label fails the build rather than shipping. Both are plain classes in `loom.css` — they were Tailwind-only arbitrary-property utilities until the class layer, which is what makes the portability claim above true. Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and `form-field` none.
 - **Atoms are project-owned.** You don't `npm install` Loom. You pick a subset, the files are copied into your project, and you edit them freely — the shadcn model. There's no upstream auto-sync; a manual port-back is the deliberate path when an edit generalizes.
-- **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A scaffolded Loom project looks plain because the personality is yours to add, not because the system is unfinished.
+- **The substrate is a foundation, not a finished look.** Loom ships coherent tokens + atoms — clean, consistent, deliberately plain. The eye-catching, on-brand layer (hero treatments, decorative accents, per-section design) is project-owned, built on top. A fresh Loom project looks plain because the personality is yours to add, not because the system is unfinished.
 
 ---
 
@@ -113,9 +113,7 @@ npm run generate
 
 **The install is only for that gate.** Generating Loom is pure Node with no
 dependencies, and `typecheck` skips itself when `node_modules` is absent rather than
-failing a generate that is otherwise fine. There used to be a whole Next application here
-to ask the same question; it carried thirty-odd packages and a Tailwind build, which meant
-the gate stood on something no consumer has.
+failing a generate that is otherwise fine.
 
 ### Configure and generate
 
@@ -137,9 +135,9 @@ npm run figma        # → Figma plugin scripts (paste into the Figma console)
 
 **Where your brand lands.** `npm run configs` writes to `spec/config/local/`, never to the committed set — so generating a brand never dirties the Loom repo. Every generator resolves each config file through `local/` first and falls back to `spec/config/base/`. Two things follow. Hand-edit `spec/config/local/`, not `spec/config/base/`: a local file of the same name overrides the committed one anyway, and editing the committed set fails the `base-config-provenance` check on the next `npm run generate`. And deleting `spec/config/local/` reverts you to Loom's default look.
 
-Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `icons`, `components`, `preview-html`, `handoff`, `verify`); `--only <target>` runs one.
+Re-run these any time you change a value in `spec/answers.json` or a component schema in `spec/config/components/`. `node scripts/code-templates/orchestrator.js --list` shows the individual code generators (`tokens`, `components`, `preview-html`, `handoff`, `verify`); `--only <target>` runs one.
 
-`generate` emits three stylesheets. All of them are plain CSS with no framework at-rules:
+`generate` emits four CSS files — three stylesheets and the index that imports them. All are plain CSS with no framework at-rules:
 
 | File | Holds | Layer |
 |---|---|---|
@@ -173,7 +171,7 @@ A project that owns its own components can skip `loom.components.css`. Before wi
 | **tokens** (`--tokens`) | the stylesheets, nothing else — no components, no dependencies | You have your own components and want Loom's design decisions as values |
 | **catalog** (default) | The tokens tier, plus the whole catalog and `ThemeProvider` | You want the components too |
 
-**There is no app shell, and no framework assumption.** Loom used to ship a `scaffold/` with an `init.sh` that wrote a Next root layout, a `globals.css` and a provider mount into your project, and hard-required `src/app/`. The stylesheets were always plain CSS and the components always plain React; the only thing that assumed a framework was the script wiring them up. It is gone. What it did that was worth keeping moved: `ThemeProvider` is a catalog component, the `::selection` and scrollbar rules are in the class layer, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Where a provider mounts and what your root layout looks like are your framework's business — Vite, Next, Remix, or a hand-rolled `index.html`.
+**There is no app shell, and no framework assumption.** The stylesheets are plain CSS and the components plain React; Loom writes nothing that presumes a router, a root layout or a `src/app/`. `ThemeProvider` is a catalog component, the `::selection` and scrollbar rules are in the class layer, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Where a provider mounts and what your root layout looks like are your framework's business — Vite, Next, Remix, or a hand-rolled `index.html`.
 
 To check that a brand landed, open [`docs/preview.html`](docs/preview.html) in this repo after generating. No dev server and no route in your project — a static file answers the question.
 
@@ -204,7 +202,32 @@ Then three things, once:
 
 A sync always regenerates the substrate, so your tokens are current by construction; only `catalog/*.tsx` can lag behind the schemas and templates it was built from. The sync **reports** that in one line rather than repairing it — rebuilding the atoms runs the whole pipeline, including a typecheck, so refreshing a brand in your project could fail on a surface it has never heard of. Pass `--refresh` when you do want them rebuilt.
 
-Fonts come from the questionnaire (`heading` / `body`) and load via a runtime Google Fonts `<link>` in the generated `layout.tsx` — use Google Fonts family names; an unrecognized name falls back to system sans rather than breaking the build (edit `layout.tsx` to self-host). Google Fonts and Figma's font set aren't 1:1, so the Figma typography paste reports availability and substitutes Inter for any font it can't render; pick from [`spec/parity-safe-fonts.json`](spec/parity-safe-fonts.json) for guaranteed design↔code parity.
+**Fonts are named here and loaded by you.** The questionnaire takes one family per role (`heading` / `body`) and `tokens.css` emits them as `'Your Family', system-ui, sans-serif`. **Loom recommends no typeface** — that is identity, and identity is yours; what Loom supplies is the ramp under it, six roles across two families ([the table](spec/questionnaire.md#fonts--heading--body)). It also loads nothing: add a `<link>`, an `@font-face`, `next/font` or an `@fontsource` package yourself. **Skip it and nothing breaks or warns** — the page renders in the fallback, and it looks right to anyone with the family installed locally ([why that is the trap](docs/gotchas.md)). Spell the family exactly as your provider does; the string is matched literally on both surfaces. The ramp asks for weights 400/500/600/700, so check your family ships four. The Figma typography paste substitutes Inter for any family that Figma cannot render, logged.
+
+### Read the values somewhere Loom cannot reach
+
+A surface with no CSS engine — an email, a templating language, a report builder — can
+still use Loom's decisions by reading `tokens.css` as a table of values rather than
+linking it as a stylesheet. It is already in that shape: nearly every declaration is a
+resolved literal on the line, and the aliases that are not resolve in one hop, never a
+chain. The semantic names (`--primary`, `--on-surface-variant`, `--space-6`, `--br-md`)
+are the interface worth designing against; the numbered palette underneath them moves
+when a brand changes.
+
+**A PDF renderer is not this case.** WeasyPrint implements enough CSS to take the
+substrate directly, cascade layers and custom properties included — link `main.css` and
+use the classes. [`docs/examples/invoice/`](docs/examples/invoice/) is a worked example,
+and [`docs/gotchas.md`](docs/gotchas.md) has the engine differences that bite. Reach for
+raw values only where nothing can consume a stylesheet at all, which in practice means
+email: Outlook's Word engine ignores custom properties, so values have to arrive already
+resolved and inlined.
+
+**Values you copy do not track brand changes.** This is the whole cost of the approach
+and there is no mechanism against it: regenerate with a different brand and the hexes
+move, while your template keeps the old ones and nothing in either repo knows it exists.
+Loom ships no generator, no JSON tier and no recommended templating approach for this —
+it is a use case the substrate supports, not a tier it delivers, and keeping the copy
+honest is the downstream author's problem to solve however suits them.
 
 ### Apply the Figma scripts
 
@@ -264,7 +287,7 @@ docs/                  Design-system engineering docs (see below)
 
 [`docs/pipeline.md`](docs/pipeline.md) traces the derivation chain end to end — the three commands, how a config file is resolved, what each generator transforms rather than copies, and where a symptom points. Start there to extend the generator or to debug an output that doesn't match the answers.
 
-The full catalog model — surfaces, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, Tailwind v4 footguns, font parity, reduced-motion semantics — are in [`docs/gotchas.md`](docs/gotchas.md).
+The full catalog model — surfaces, manifests, override mechanism — is specified in [`CATALOG_SPEC.md`](CATALOG_SPEC.md); each atom's contract (dependencies, variants, tokens) lives in its `.manifest.json`. The hard-won traps behind the generator — Figma Plugin API, cascade-layer and reset ordering, font loading and parity, reduced-motion semantics, WeasyPrint's differences from a browser — are in [`docs/gotchas.md`](docs/gotchas.md).
 
 A note on generated code: when an atom's Radix primitive has no template wired, the generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`. That marker is a deliberate fallback signal, not unfinished work. No atom in the current catalog carries one.
 

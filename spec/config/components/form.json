@@ -31,7 +31,6 @@
 
   "select": {
     "$catalog": {
-      "description": "Listbox built on Radix, with form-field error context wired in. **Read this before reaching for it.** A plain <select class=\"input control\" data-size=\"sm\"> is styled by the same class layer and does four things this cannot. A <label for> labels it (a label cannot label the Radix trigger, which is a <button>) — that one has no workaround. <option value=\"\"> is an ordinary option, where Radix reserves the empty string for \"nothing selected\", so an \"All\" sentinel needs translating both ways. A native select works inside a native <dialog> and a Radix one does not, because showModal() makes the portal target inert — which cascades, forcing the dialog to convert too. And the UA draws the arrow, which follows the theme through color-scheme, because loom.base takes appearance off buttons only. Reach for THIS component when you need rich rows, grouping or search — things <option> cannot hold, since it renders text and nothing else. WEIGHT: 39 transitive packages, and 29.31 kB gzip with Dialog on a consumer's entry chunk against 1.98 kB for Button and Badge. See CATALOG_SPEC.md, Native first."
     },
     "$base": "text-field",
     "state": {
@@ -204,7 +203,6 @@
 
   "form-field": {
     "$catalog": {
-      "description": "A label, its control and its helper text as one column. The class carries the gap and nothing else — everything visible composes from the class layer, and the markup is a plain <div class=\"form-field\"> around a <label class=\"label\">, an <input class=\"input control\"> and a <span class=\"helper-text\">. What earns it a file is not the column: it is the error context. FormField publishes an `error` flag that useFieldError() reads, so a control inside it goes invalid without the call site threading a prop through every layer, and a control used outside one still honours an explicit prop. That is React context, which is the one thing on the bar that neither CSS nor HTML can express — a <fieldset> groups, but nothing in HTML propagates validity downward to an arbitrary descendant. Exports FormField, useFormField and useFieldError. WEIGHT: no runtime dependency beyond React and cn."
     },
     "$note": "A column with a gap, and nothing that ramps — so it declares only a $constant, which lifts to the base rule. It was the one component in APPEARANCE_ONLY with no schema at all, which is why the emitter reported it as having nothing to carry while the atom was carrying `flex flex-col gap-component-compact` in TSX. Spacing is {scale.1} like every other component here; the --component-compact-* tokens it used to read have no other consumer.",
     "sizes": { "$constant": { "gap": "{scale.1}" } }
@@ -285,7 +283,6 @@
   "time-picker": {
     "$catalog": {
       "category": "form",
-      "description": "Time picker — composes three Select atoms (hour / minute / period). 12h or 24h, configurable minute step.",
       "dependencies": ["cn", "select"],
       "tokens": ["color", "typography", "spacing", "sizing"],
       "composition": "none"

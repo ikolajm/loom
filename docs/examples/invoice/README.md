@@ -1,7 +1,8 @@
 # Invoice — the portable tier with nothing else
 
-A printed document built on `tokens.css` and `loom.css` alone. No React, no build step,
-no Tailwind. It exists because the portable tier is the one with the fewest eyes on it:
+A printed document built on the substrate alone — it links `generated/main.css`, so all
+three sheets, and `.badge` and `.label` come from the component sheet. No React, no build
+step, no framework. It exists because the portable tier is the one with the fewest eyes on it:
 the catalog and both ported apps ran through a Tailwind build, so a
 gap in the tokens or class tier can hide behind preflight and utilities. This file has
 neither to hide behind.
@@ -29,11 +30,17 @@ them are `@page` setup and this document's own layout.
 
 The stylesheets are linked from `generated/`, which is not committed, so generate first:
 
-```
+```bash
 npm run generate
-python -m venv .venv && .venv/bin/pip install weasyprint
+python -m venv .venv && .venv/bin/pip install weasyprint   # Scripts/ not bin/ on Windows
 .venv/bin/weasyprint docs/examples/invoice/invoice.html invoice.pdf
 ```
+
+**WeasyPrint needs Pango, and `pip install` does not bring it.** On Linux it is usually
+already there; on macOS it is `brew install pango`. On Windows the import fails with
+`cannot load library 'libgobject-2.0-0'` until a GTK runtime is installed, so the
+practical routes are the GTK3 runtime installer, MSYS2, or WSL. This is why a render is
+a different kind of task from a build here, and why nothing runs it automatically.
 
 It renders against whatever the generator just emitted, not against a copied snapshot.
 Nothing runs it automatically. **The signal is `invoice.css`**: it holds `@page` setup
