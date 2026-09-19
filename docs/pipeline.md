@@ -88,9 +88,8 @@ sees the answers. Two callers do this: the `configs` entry point, and
 memory from `answers.example.json`. Those two paths must resolve identically or the
 check fails on a leak that isn't there.
 
-`productType` is refused with an error rather than ignored. It used to supply
-`controlHeight`, so silently dropping it moved a touch product down to a 40px tap
-target with no message anywhere.
+`productType` is refused with an error rather than ignored: it supplied `controlHeight`,
+so ignoring it moves a touch product down to a 40px tap target with no message anywhere.
 
 ### Five generators, five files
 
@@ -192,9 +191,8 @@ components, and hoisting it means the tier blocks hold only what actually ramps.
 
 `answers.json` is copied into the output as a receipt, but **only on a full run**. A
 partial run is how a private brand file reaches somewhere it shouldn't:
-`--only tokens --output <consumer>/src` is a real invocation — `sync.js` uses it —
-and it was dropping an answers file into
-consumer source trees with nothing ignoring it.
+`--only tokens --output <consumer>/src` is a real invocation — `sync.js` uses it — and it
+would otherwise drop an answers file into consumer source trees with nothing ignoring it.
 
 ### `verify` is the gate, and it runs last
 
@@ -231,10 +229,10 @@ check that needs `npm install`, and skips itself without it.
 
 `atom-class-coverage` asks the question neither a compiler nor a CSS read can: every
 class an atom *applies* must exist in the emitted CSS, and every `--type-*` an emitted
-rule reads must be declared. `dialog` shipped visually broken across five commits with
-everything green, because its appearance was Tailwind utilities that resolved through a
-bridge that had been removed — present in the TSX, absent from the CSS, and invisible to
-tsc, which does not read CSS at all.
+rule reads must be declared. `dialog` once shipped visually broken across five commits
+with everything green, because its appearance was class names no stylesheet defined —
+present in the TSX, absent from the CSS, and invisible to tsc, which does not read CSS at
+all.
 
 **The first half of that is enforced a stage earlier now, and this check is the backstop.**
 `generate-tokens-css.js` exports `classManifest()` — every class name the stylesheets
@@ -245,8 +243,8 @@ same way, which reaches the interpolated names (`'tone-' + badgeTone[color] + ..
 scan of the emitted source can see.
 
 What the gate still covers is a template that writes a class literal into the JSX without
-going through `cls()`. It is strict for that reason: it used to fail only on a
-Tailwind-*shaped* unknown, so a phantom spelled like a Loom class passed every check.
+going through `cls()`. It is strict for that reason — it does not guess whether an unknown
+name looks like a Loom class, because that is how a misspelling passes every check.
 
 `base-config-provenance` is the one that guards the committed set. It regenerates
 `spec/config/base/` in memory from `answers.example.json` and fails if the tracked
@@ -310,15 +308,14 @@ of one combination rather than the rule that generates it.
 
 1. `--refresh` regenerates the catalog first.
 2. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
-   pick list: at five atoms the dependency graph is one edge — everything needs `cn`,
-   which copies unconditionally anyway — so resolving a subset walked a graph to return
-   what it was handed. The consumer deletes what they do not want.
+   pick list: the dependency graph is one edge — everything needs `cn`, which copies
+   unconditionally anyway — so resolving a subset would walk a graph to return what it
+   was handed. The consumer deletes what they do not want.
 3. Every delivered file is **overwritten unconditionally**, and carries a generated
    header saying so. There is no edit detection: the files live in a directory of Loom's
    own, editing one is out of contract, and a change worth keeping goes at the call site —
-   className, a prop, a wrapper — where it survives a resync by construction. The
-   overwrite guard this replaces, with its staleness stamp and repair verdicts, was about
-   470 lines answering "what if another repo is in a strange state"; with one consumer you
+   className, a prop, a wrapper — where it survives a resync by construction. Detecting
+   edits is answering "what if another repo is in a strange state"; with one consumer you
    own, the answer is to resync and read the diff.
 
 `sync.js` prints the union of the manifests' `npmDependencies` as a single install

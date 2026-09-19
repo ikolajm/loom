@@ -51,8 +51,7 @@ Diffing a project's atoms against `catalog/` is the upstream-pitch surface. If t
 ## Native first
 
 `dialog` and `select` wrap elements the browser already ships. They are the right call
-when native cannot do the job and the wrong one by default, and this document used to
-present them the other way round.
+when native cannot do the job, and the wrong one by default.
 
 **Reach for the native recipe first.** Reach for the component when one of the named cases
 below applies. Both recipes use the same class layer the components do, so moving between
@@ -160,7 +159,7 @@ detection and nothing to force. Keep a change at the call site instead, where it
 by construction; see [Override mechanism](#override-mechanism-shadcn-pure-copy).
 ## Manifests
 
-Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON). There is no `version` field: it recorded a content hash that only the overwrite guard read, and both were cut.
+Every catalog atom ships with a sibling manifest declaring its contract. Manifest content is sourced from a `$catalog` block inside the per-component JSON (`spec/config/components/*.json`) — the orchestrator merges the `$catalog` metadata with derived fields (`variants` + `sizes` from the design-token half of the JSON).
 
 `catalog/[component].manifest.json`:
 
@@ -194,10 +193,8 @@ Every catalog atom ships with a sibling manifest declaring its contract. Manifes
 | `variants` | Primary variant axis |
 | `sizes` | Size axis |
 
-**There is no `description`.** It existed as a playground UI label and a browse summary;
-the playground is gone and the browse view is `catalog/atoms.json`, which lists names by
-group. What an atom is for belongs in this document and in `docs/preview.html`, where it
-is written once rather than restated per manifest and left to drift.
+What an atom is *for* is not a manifest field. It belongs in this document and in
+`docs/preview.html`, written once rather than restated per manifest and left to drift.
 
 ### `composition` enum
 
@@ -296,11 +293,11 @@ stylesheets actually emit, so a name the CSS does not define stops the build.
 
 Every atom is produced through the same pipeline. The mechanical pieces:
 
-1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/` instead of producing a full `generated/components/` bundle.
+1. **Catalog generation.** `orchestrator.js` writes per-atom files (`.tsx` + `.manifest.json`) into `catalog/`.
 2. **Install-flow rewrite.** Copies the catalog into the consuming project's `src/components/loom/`, overwriting unconditionally. Tokens ship as a substrate bundle.
 3. **No app shell.** Loom writes none and assumes no framework: the substrate is plain CSS and the components plain React. `ThemeProvider` is a catalog component, the `::selection` and scrollbar rules are in `loom.base`, and `sync.js` owns the `--tokens` tier and the `loom:sync` script. Mounting a provider and writing a root layout are the consuming framework's business.
 4. **Preview page.** `docs/preview.html` — the class layer rendered on the three stylesheets and nothing else.
-5. **No staleness stamp and no overwrite guard.** Nothing compares an installed file against the catalog or reports that your atoms predate an edit. Delivered files carry a generated header saying so and are overwritten on every sync; a change worth keeping goes at the call site, where it survives by construction rather than by detection.
+5. **Unconditional overwrite.** Delivered files carry a generated header saying so and are replaced on every sync — nothing compares an installed file against the catalog. A change worth keeping goes at the call site, where it survives by construction rather than by detection.
 
 ---
 

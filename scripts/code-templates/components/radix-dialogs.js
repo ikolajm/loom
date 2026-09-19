@@ -26,9 +26,7 @@ function closeButton(alias, pad) {
 
 /**
  * Appearance is the class layer's; this carries behavior. `size` and the variant travel
- * as data attributes rather than a cva of utility strings — those strings resolved only
- * through the `@theme` bridge, so after it went out the panel, overlay, header and
- * sizing all rendered as nothing while the typecheck stayed green.
+ * as data attributes rather than a cva of utility strings.
  *
  * `.dialog-fixed` is applied here because a Radix `Content` is a plain div in a portal
  * and has to be placed. A native `<dialog>` takes `.dialog` alone and is placed by the UA.

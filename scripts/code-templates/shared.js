@@ -7,7 +7,6 @@ const path = require('path');
 
 // --- Config loading ---
 // Prefers spec/config/local/ (your brand, git-ignored) over the committed default set.
-// See scripts/config-paths.js for why the generator no longer writes a tracked path.
 const { loadConfig: load } = require('../config-paths');
 
 /**
@@ -74,10 +73,7 @@ const ICON_SLOT_CLASS = 'icon-slot';
  * --tone-border for the line and label). The tone sets those properties; the treatment
  * reads them — so treatment and tone stay independent axes with no N×M matrix.
  *
- * Both halves are now plain classes emitted into loom.css by generate-tokens-css.js. They
- * used to be Tailwind arbitrary-property strings built here (`[--v-bg:var(--primary)]`
- * consumed by `bg-[color:var(--v-bg)]`), which meant the orthogonal model — the one idea
- * in this catalog not available off the shelf — only worked inside a Tailwind build.
+ * Both halves are plain classes emitted into loom.css by generate-tokens-css.js.
  */
 const TREATMENT_CLASSES = {
   filled: 'treat-filled',
@@ -90,14 +86,9 @@ const TREATMENT_CLASSES = {
  * no rule defines.
  *
  * This is the one gate that runs at the moment a name is minted rather than after the
- * artifact is on disk, and it exists because the after-the-fact ones do not close the
- * seam. `atom-class-coverage` only fails on a name shaped like a Tailwind utility — its
- * BARE set and PREFIX regex — so renaming `.dialog-fixed` to `.dialog-fixd` in the
- * template passed the entire gate list at exit 0, while renaming it to `.rounded-xl`
- * failed. Both names are equally absent from the CSS; only their shape differed.
- * `preview-coverage` filters its set to already-emitted names before comparing, so a
- * phantom does not fail it either — it silently leaves the population, and the count in
- * the note drops with nothing going red.
+ * artifact is on disk. It exists because a misspelled class name is absent from the CSS
+ * without being malformed, so a check that runs over the finished artifact has to guess
+ * whether an unknown name is a defect; here there is nothing to guess.
  *
  * Required lazily. generate-tokens-css.js does not import this module, so there is no
  * cycle, but a top-level import would force a full CSS generation at load time for every

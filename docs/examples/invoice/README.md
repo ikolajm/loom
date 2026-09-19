@@ -2,21 +2,20 @@
 
 A printed document built on the substrate alone — it links `generated/main.css`, so all
 three sheets, and `.badge` and `.label` come from the component sheet. No React, no build
-step, no framework. It exists because the portable tier is the one with the fewest eyes on it:
-the catalog and both ported apps ran through a Tailwind build, so a
-gap in the tokens or class tier can hide behind preflight and utilities. This file has
-neither to hide behind.
+step, no framework. It exists because the portable tier is the one with the fewest eyes on
+it: anywhere a framework's own reset and utilities are in play, a gap in the tokens or
+class tier hides behind them. This file has nothing to hide behind.
 
 Four things in the layer were found by building this file, each with independent evidence
 of having been written twice — that was the bar for admitting one.
 
 - **A document base.** The portable tier styled no bare element at all. Invisible in an
-  app, because Tailwind's preflight does it; take the tokens tier into a Django template
-  or a PDF and you get a white page, black text and a pile of unused custom properties.
+  app whose framework resets for you; take the tokens tier into a Django template or a PDF
+  and you get a white page, black text and a pile of unused custom properties.
   `border-box` and the body defaults — not a reset library.
 - **`.text-on-surface` / `.text-on-surface-variant`.** The class layer set a colour on no
-  text anywhere. Named after the tokens rather than shortened to `.text-muted`, so the
-  class a Tailwind consumer already types keeps working when they drop the bridge.
+  text anywhere. Named after the tokens they read rather than shortened to `.text-muted`,
+  so the class name states which role it paints.
 - **`.numeric`.** Tabular figures anywhere; right-alignment only inside `.table`, because
   outside one the layout decides. Hand-written twice before it was a class.
 - **`.surface`.** Levels 1, 2 and 3 had classes and the base plane did not — an
@@ -49,8 +48,7 @@ file need a color, a weight or a rule back, the layer gave something up.
 
 ## WeasyPrint
 
-It is not a browser, and the differences bite — `box-shadow` does nothing, so
-`.elevate-*` is inert on paper; `print-color-adjust` is ignored but backgrounds print
-regardless. Both are written up in [`../../gotchas.md`](../../gotchas.md), which is where
-engine traps live. A render here is not a clean-log check: real warnings share the
-channel with `@keyframes` and `isolation` being dropped.
+It is not a browser. What the substrate needs from any non-browser engine, and the shapes
+of difference worth expecting, are in [`../../gotchas.md`](../../gotchas.md). A render here
+is not a clean-log check — real warnings share the channel with app-only properties the
+engine drops.

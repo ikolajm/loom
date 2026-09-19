@@ -4,10 +4,8 @@
  * Architecture: Config → CVA (variant management) → Radix/lib primitives (behavior) → tokens (styling)
  *
  * Every registry entry in shared.js names its own generator module, as
- * `<module>#<export>`, and there is no generic fallback. There used to be a `template`
- * field selecting between `cva-only`, `radix` and `lib`; `lib` was never implemented,
- * `radix` only warned, and `cva-only` was unreachable because every entry also carried a
- * generator. The field is gone and dispatch throws on an entry without one.
+ * `<module>#<export>`, and there is no generic fallback — dispatch throws on an entry
+ * without one.
  *
  * Output (per atom):
  *   catalog/[name].tsx          — component code
@@ -77,15 +75,8 @@ function resolveGenerator(name, spec) {
 /**
  * Every registry entry names its own generator, and there is no fallback.
  *
- * There used to be a `template` switch behind this, falling through to `cva-only` — a
- * generic "styled element plus CVA variants" builder. It was unreachable: `meta.generator`
- * is set on all five entries, so the switch never ran, which was proven by making
- * `generateCvaOnly` throw on entry and watching a full generate complete. It also emitted
- * `size-icon-N`, a Tailwind class nothing has defined since the bridge went out, so the
- * thing it would have produced had it ever run was partly broken.
- *
- * Throwing is the better failure. A component added without a generator now stops the
- * build and says so, instead of silently receiving something utility-shaped.
+ * Throwing is the better failure. A component added without a generator stops the build
+ * and says so, instead of silently receiving something utility-shaped.
  */
 function dispatch(name, config, meta) {
   if (!meta.generator) {

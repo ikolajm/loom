@@ -163,10 +163,8 @@ function main() {
   }
   console.log('');
 
-  // defaultMode used to be propagated into standards.json here. It now rides in
-  // generate-colors.js's output instead: standards.json is locked across projects and
-  // this is a per-project answer, so writing it there made the file's own header false
-  // and put a second generator write on a tracked path. One write target now, below.
+  // defaultMode rides in generate-colors.js's output, not standards.json: standards.json
+  // is locked across projects and this is a per-project answer. One write target, below.
 
   // Ensure output directory exists
   const OUTPUT_DIR = outputDir(args);

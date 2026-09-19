@@ -8,11 +8,8 @@
  *
  *   styleDirection  <  hand-written answer
  *
- * There was a second supplier, `product-type`, filling the same fields. Two suppliers
- * for one value meant the resolved scale could not be stated without running the
- * generator and reading which layer won — the blocks genuinely conflicted, `dashboard`
- * saying `type-scale: compact` against its own first style-suggestion `clean` saying
- * `standard`. It was cut for that reason, not for size.
+ * One supplier per value, on purpose: a second one filling the same fields meant the
+ * resolved scale could not be stated without running the generator to see which won.
  *
  * Callers must resolve BEFORE handing answers to a generator. Two do: the `npm run
  * configs` entry point, and `verify.js`'s base-config-provenance check, which

@@ -242,8 +242,7 @@ Three declarations were doing the work in `button.tsx`:
 `.button` was emitted with `gap: var(--space-2)` and computed `display: block`. Gap is
 inert on a block container, so the gap did nothing and the label wrapped underneath the
 icon. `.input` was emitted with padding, height and a radius but no border, background or
-text colour — Tailwind's preflight sets `border: 0 solid` and `background-color:
-transparent` on form controls, so a text field rendered as bare text on the page.
+text colour, so a text field rendered as bare text on the page.
 
 The worst of it was one missing line on the icon slot:
 
@@ -271,10 +270,9 @@ asks the second question, stated as the failure rather than as a list of names: 
 that sets `width`, `height` or `gap` anywhere in its ladder must declare a `display`
 somewhere in that same ladder, or name itself in `NO_BOX` with a reason.
 
-**The same gap had a second half, found much later.** Preflight was doing more than
-the class layer recovered: it also cleared the UA's own chrome from form elements. When
-the Tailwind bridge went out, nothing replaced that, so every `<button>` wore the UA
-border no matter its treatment — `.button` sets none, and neither do `.treat-filled` or
+**The same gap had a second half, found much later.** Nothing in the class layer cleared
+the UA's own chrome from form elements, so every `<button>` wore the UA border no matter
+its treatment — `.button` sets none, and neither do `.treat-filled` or
 `.treat-ghost`. `.treat-outline` looked correct only because it happens to set a border
 itself, which is exactly how the defect stayed invisible: the one treatment defined by
 having no frame was the one that showed a frame, and the fix was mistaken for a question
@@ -366,46 +364,37 @@ the wrong fix — it would commit your brand to Loom's history.
 
 ---
 
-## Documents — WeasyPrint is not a browser, and the differences are load-bearing
+## Documents — what the substrate needs from a non-browser engine
 
-The only non-React consumer that *links* the stylesheets is a PDF renderer — a surface
-with no CSS engine reads the values instead, which is a different path and has its own
-note in the README. The engine that renders here has its own layout implementation rather
-than a browser's. The differences
-below were found by rendering [`docs/examples/invoice/`](examples/invoice/) rather than by
-reading the CSS, with one exception called out where it appears — engine support read
-from the parser, which is a weaker claim than a render and is marked as such.
+The only non-React consumer that *links* the stylesheets is a document renderer. A surface
+with no CSS engine reads the resolved values instead, which is a different path and has
+its own note in the README.
 
-**`print-color-adjust: exact` is ignored, and backgrounds print anyway.** The class
-layer sets it on `.treat-filled` so a badge reading OVERDUE prints as a
-fill rather than as bare text. WeasyPrint logs it as an unknown property — it has no
-"economy" mode to opt out of, so it always paints backgrounds. The declaration stays
-because it is the browser print path that needs it; the document path gets the same
-result for a different reason. Do not read a correct-looking PDF as proof that the
+Loom's emitted CSS makes two demands on whatever renders it. Both are worth checking
+before you commit to an engine, because the first fails silently and totally.
+
+**Cascade layers must resolve.** Every component rule sits inside `@layer loom.components`,
+so an engine without layer support does not degrade — it renders the page unstyled. An
+unknown at-rule with a block is consumed and discarded, contents and all. Loom emits the
+multi-name statement, the named block form and dotted names, and relies on unlayered author
+CSS outranking every layer so a document stylesheet can override Loom without declaring a
+layer of its own.
+
+**Custom properties must resolve, including inside `@page` margin boxes.** The page context
+inherits from the root element, so a running header or a page counter reads
+`var(--on-surface-variant)` like anything else. A hex in document CSS is a mistake, not a
+workaround.
+
+Past that, engine differences are yours to check rather than Loom's to catalogue — which
+CSS an engine implements is the engine's business and moves with its version. Two shapes
+worth knowing about, because the substrate leans on both: effect tokens (`.elevate-*`, via
+`box-shadow`) go inert wherever the property is unsupported, so a layout separating blocks
+by elevation alone renders as one undifferentiated block; and an engine may paint
+backgrounds regardless of `print-color-adjust`, so a correct-looking PDF is not proof the
 property works.
 
-**`box-shadow` is unsupported**, so `.elevate-*` is inert in a document. Depth has to be
-carried by rules and surface levels. A layout that separates two blocks with elevation
-alone renders as one undifferentiated block on paper.
-
-**Custom properties resolve, including inside `@page` margin boxes.** The page context
-inherits from the root element, so a running header or a page counter reads
-`var(--on-surface-variant)` like anything else. A hex in document CSS is a mistake, not
-a workaround — the first invoice carried one for exactly that reason.
-
-**Cascade layers resolve, so `main.css` links as-is.** Worth stating because the failure
-it would cause is total rather than partial: a parser without cascade-layer support does
-not ignore `@layer` and keep the contents — an unknown at-rule with a block is consumed
-and discarded, so the whole class layer would vanish rather than degrade. It does not.
-The multi-name statement, the named block form and dotted names all parse, and unlayered
-author CSS still outranks every layer, so a document stylesheet overrides Loom without
-declaring a layer of its own. Read from the engine's parser rather than from a render;
-the versions below the one this was checked against are unpinned, so a consumer on an
-older WeasyPrint should confirm before assuming.
-
-**`@keyframes` and `isolation` warn and are dropped.** Both are app concerns and the
-warnings are noise here, but they share the channel with real ones, so a document render
-is not a clean-log check.
+[`docs/examples/invoice/`](examples/invoice/) is a worked example, rendered with
+WeasyPrint. Its own README carries the setup.
 
 ## `hidden` does not hide anything Loom gives a `display` to
 
@@ -481,10 +470,7 @@ and is imported before `tokens.css` cannot be minified into the wrong order.
 Found in pb2 (Paperboy v2). The buttons had correct tone and treatment classes and were
 diagnosed twice as a markup problem before anyone looked at the layer.
 
-**The symptom now tells you which defect it is.** It used to be shared: a treatment with
-no tone class produced the same reading — tone properties unset, `background-color`
-transparent — and the two were indistinguishable without checking the markup. Treatments
-carry tone fallbacks now, so a treatment used alone renders a neutral fill or the outline
-role. If `background-color` computes to transparent on an element whose `--tone-*`
+**The symptom tells you which defect it is**, because treatments carry tone fallbacks: a
+treatment used alone renders a neutral fill or the outline role rather than nothing. If `background-color` computes to transparent on an element whose `--tone-*`
 properties are resolving, a class is not missing; something unlayered is outranking the
 layer.

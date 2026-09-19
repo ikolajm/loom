@@ -489,15 +489,11 @@ function checkManifestDeps(atoms) {
 
 // --- base-config-provenance -----------------------------------------------
 // spec/config/base/ is a generated artifact that is COMMITTED — it is Loom's own look
-// and the fallback a fresh clone builds from. It used to be the generator's write
-// target too, so `npm run configs` with a local brand rewrote it and the diff rode
-// along in the next commit. That happened twice: an Availo brand-gen diff left dirty
-// on master (2026-07-16, caught) and a dashboard's orange swept into e935de3
-// (2026-08-04, shipped to master and live for a day).
-//
-// The 07-16 fix git-ignored the input, the 08-05 fix redirected the output to the
-// ignored spec/config/local/, and this is the check that neither has quietly come
-// undone: the committed base configs must be exactly what the committed
+// and the fallback a fresh clone builds from. A brand generated locally once rewrote it
+// and rode along in the next commit, twice, once reaching master. The input is git-ignored
+// and the output redirected to the ignored spec/config/local/; this is the check that
+// neither has quietly come undone: the committed base configs must be exactly what the
+// committed
 // answers.example.json generates. It reads spec/config/base/ by explicit path rather
 // than through config-paths.js — a provenance check that reads whatever is local
 // checks nothing. The generators are pure (answers, standards, mappings) → object, so
@@ -630,22 +626,16 @@ function checkConfigParity() {
 // --- dead-exports ------------------------------------------------------------
 // A name on module.exports that nothing references, in any file including its own.
 //
-// Two cut-flows went past these. `tailwind-out` removed the bridge and left behind the
-// converters that only spoke to it — `iconSizeToClass` emitting `size-icon-2`,
-// `fontWeightToClass` emitting `font-semibold`, `letterSpacingToClass` emitting
-// `tracking-[…]` — plus `prefixClasses`, a utility-variant prefixer whose own example was
-// `data-[state=off]:bg-transparent`. `drop-the-playground` went past them again. They were
-// found by a hand sweep, which is not a mechanism.
+// It exists because a removal that leaves its helpers behind is invisible otherwise —
+// twice the leftovers were found by a hand sweep, which is not a mechanism.
 //
 // Deliberately narrow. An export used only inside its own module is over-exported, not
 // dead, and there are twenty-one of those — flagging them would be style noise in a check
 // that has to stay worth reading. An export nothing mentions anywhere is unambiguous.
 //
-// Not covered: a function that IS called but whose output is dead. That was the state of
-// the Tailwind class mappers — `maxWidthToClass` and friends emitted class names into
-// paths no surviving atom took, and this check stayed green because they were exported
-// and imported. They are deleted now, so the gap has no live example; it remains a real
-// limitation of checking the import graph rather than the interpolation.
+// Not covered: a function that IS called but whose output is dead — a real limitation of
+// checking the import graph rather than the interpolation. It has gone green over exactly
+// that before, on helpers whose returned strings reached no template.
 // `atom-class-coverage` is what catches an emitted-but-unrenderable class, and only once
 // an atom applies one.
 // Exempt by name and by reason, never by pattern. An allowlist that grows silently is how
@@ -924,10 +914,8 @@ function checkTouchTarget() {
 // are derived from the answers file, so a consumer generates their own pass or fail —
 // six pairs failed on Loom's own default and nothing surfaced it until a human
 // measured. Same shape as touch-target: a value declared and never made binding.
-// The two WCAG ratios, together and at module scope. AA_NON_TEXT used to be declared
-// inside composited-contrast, which border-contrast also read — so deleting that gate
-// took a constant its sibling depended on and broke the build. A threshold the spec
-// fixes belongs to the file, not to whichever check happened to need it first.
+// The two WCAG ratios, together and at module scope. A threshold the spec fixes belongs
+// to the file, not to whichever check happened to need it first.
 const AA_TEXT = 4.5; // SC 1.4.3 Contrast (Minimum)
 const AA_NON_TEXT = 3.0; // SC 1.4.11 Non-text Contrast
 
@@ -1006,11 +994,10 @@ const TONE_SURFACES = ['surface', 'surface-1', 'surface-2', 'surface-3'];
 // .treat-ghost and .link, which paint no fill at all. Until this existed, the pairing
 // that decides whether an outline badge can be read was measured by nothing.
 //
-// It reads {family}-text, not {family}. --tone-text used to be the base role at full
-// strength, which left 15 of 48 pairs below AA on Loom’s own default and 16 on the
-// first consumer’s brand. Those were parked by hex pair while the fix was a flow;
-// the park is deleted, because every pair now passes on both brands by construction
-// — generate-colors.js resolves the role against the most raised tier.
+// It reads {family}-text, not {family} — a per-family text role that generate-colors.js
+// resolves against the most raised surface tier, so every pair passes by construction
+// rather than by exemption. Reading the base role at full strength put a third of the
+// pairs below AA, which is what the separate role is for.
 //
 // A brand whose ramp cannot produce a legible label still fails here, loudly, which
 // is the outcome worth having: the alternative is shipping an unreadable label.
@@ -1226,9 +1213,8 @@ function checkFigmaAssembly() {
 }
 
 // --- typecheck ---------------------------------------------------------------
-// The atoms are TypeScript, and nothing else in this repo compiles them. It used to be
-// a `tsc --noEmit` over a whole Next app; it is now tsc over `catalog/`
-// against the root tsconfig, which is the same question asked of a tenth of the files.
+// The atoms are TypeScript, and nothing else in this repo compiles them. `tsc --noEmit`
+// over `catalog/` against the root tsconfig.
 //
 // Skipped when the root has no node_modules. Generating Loom needs no install — this is
 // the only
@@ -1245,14 +1231,11 @@ function checkTypecheck() {
 }
 
 // --- atom-class-coverage ---------------------------------------------------
-// The gate that was missing for the whole of the Tailwind removal.
-//
-// `dialog` shipped visually broken across five commits with every check green. Its
-// appearance lived in the TSX as `bg-surface-1 rounded-modal px-6`, utilities that
-// resolved only through the `@theme` bridge; once the bridge went, they resolved to
-// nothing. No check could see it: the static checks read the emitted CSS or the schemas,
-// and `tsc` does not read CSS at all. A class that exists and a class that is *applied to
-// something* are two questions, and only the first was being asked.
+// `dialog` once shipped visually broken across five commits with every check green: its
+// appearance lived in the TSX as class names no stylesheet defined. No check could see
+// it — the static checks read the emitted CSS or the schemas, and `tsc` does not read CSS
+// at all. A class that exists and a class that is *applied to something* are two
+// questions, and only the first was being asked.
 //
 // So: every class an atom puts in a className must exist in the emitted CSS, and every
 // custom property an emitted rule reads must be defined in tokens.css. The second half is
@@ -1269,20 +1252,16 @@ const CLASS_GAPS = {};
 // re-check is tautological for every site that went through it. What it still catches is
 // the site that did not: a template author writing a literal into the JSX directly.
 //
-// It is strict now, and that is the whole point of the change. It used to fail only on a
-// TAILWIND-SHAPED unknown — a BARE set and a PREFIX regex of utility prefixes — so an
-// unknown name shaped like a Loom class passed. Renaming `.dialog-fixed` to
-// `.dialog-fixd` in the catalog passed all twenty-three gates at exit 0; renaming it to
-// `.rounded-xl` failed. Same absence from the CSS, different spelling. With the manifest
-// to check against there is no reason to guess at shape: a token in a className is a
-// class, and a class the stylesheets do not emit is a defect whatever it looks like.
+// It is strict: with the manifest to check against there is no reason to guess at shape.
+// A token in a className is a class, and a class the stylesheets do not emit is a defect
+// whatever it looks like. Guessing at shape is what let a misspelling of a Loom class
+// through while a misspelling shaped like a foreign utility failed — the same absence
+// from the CSS, caught or missed on spelling alone.
 //
-// The fifth pattern is the one preview-coverage already carried and this check did not,
-// which is why `treat-filled`, `treat-outline`, `treat-ghost` and `tone-inherit` were
-// invisible here — they sit as cva variant VALUES, and none of the other four patterns
-// reaches a value. Fully interpolated names (`'tone-' + badgeTone[color] + ...`) are still
-// out of reach of any scan; those are resolved at generation by buildToneLookup and
-// checked against the emitted CSS by tone-matrix.
+// The fifth pattern reaches cva variant VALUES, where `treat-*` and `tone-inherit` sit;
+// none of the other four does. Fully interpolated names (`'tone-' + badgeTone[color] +
+// ...`) are out of reach of any scan — those are resolved at generation by buildToneLookup
+// and checked against the emitted CSS by tone-matrix.
 function checkAtomClassCoverage() {
   if (!sheets()) return { failures: [], note: 'postcss not installed — skipped' };
   if (!parseComplete()) return NOT_PARSED;
@@ -1544,10 +1523,9 @@ function checkThemeInitParity() {
 // atom applies is rendered here" would have caught it, while "every class the emitters
 // produce" was a bigger net for the same fish.
 //
-// The classes it no longer covers are the named component classes with no atom and no
-// consumer: banner, breadcrumbs, empty-state, fab, pagination, sidebar, stepper, toolbar,
-// top-bar. class-coverage still asserts those are emitted. Nothing asserts they render,
-// and that gap is now stated rather than papered over with boxes nobody reads.
+// It does not cover the named component classes that no atom applies. class-coverage
+// asserts those are emitted; nothing asserts they render, and that gap is stated rather
+// than papered over with boxes nobody reads.
 //
 // Read as GENERATED HTML, not as the generator: every class on the page is in the static
 // markup, because the one script flips attributes and calls dialog methods and never

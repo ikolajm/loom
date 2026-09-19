@@ -8,11 +8,8 @@
  * much as markup, the shortest honest answer to "how do I use this without a
  * framework", and generating it would produce an exhaustive matrix nobody reads.
  *
- * What changed in the port is the substrate under it. The TSX page rendered the token
- * half through Tailwind utilities — `bg-primary`, `text-on-primary` — which existed only
- * through the `@theme` bridge. With the bridge gone those resolve to nothing, so the
- * swatches read the custom properties directly. That is also the more honest test: the
- * custom properties are what ships.
+ * The swatches read the custom properties directly rather than through any class, which
+ * is the more honest test: the custom properties are what ships.
  *
  * Page-local layout is a <style> block under the `pv-` prefix, kept deliberately apart
  * from anything Loom emits so the page cannot flatter the layer by styling it. If a Loom

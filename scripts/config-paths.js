@@ -6,14 +6,10 @@
  *   spec/config/local/  — your brand, written by `npm run configs`. GIT-IGNORED.
  *   spec/config/        — Loom's own look, committed. The fallback.
  *
- * The problem this solves: `spec/config/base/*.json` used to be both a tracked file
- * and the generator's write target, so generating a brand rewrote Loom's committed
- * look and the diff rode along in the next commit. That shipped twice — an abandoned
- * Availo brand left dirty on master (2026-07-16) and a dashboard's orange that reached
- * master and stayed live for a day (2026-08-04). `.gitignore` already claimed this was
- * handled: its comment on spec/answers.json reads "Keeping it out of the repo means
- * generating your brand never dirties the Loom working tree." That covered the
- * pipeline's input and missed its output. This covers the output.
+ * The problem this solves: when the committed set was also the generator's write target,
+ * generating a brand rewrote Loom's committed look and the diff rode along in the next
+ * commit. That shipped twice, once reaching master. Git-ignoring the pipeline's input was
+ * not enough; this covers its output.
  *
  * Why not just git-ignore spec/config/base/: `loadAllConfigs()` needs those five files
  * to exist, so ignoring them makes a fresh clone unbuildable until it runs

@@ -172,9 +172,6 @@ function buildSection6_Effects() {
   lines.push(`--focus-ring-width: ${standards.effects['focus-ring'].width};`);
   lines.push(`--focus-ring-offset: ${standards.effects['focus-ring'].offset};`);
   lines.push(`--focus-ring-color: var(--${standards.effects['focus-ring'].color});`);
-  // No `--ring` alias. It existed for the bridge's `--color-ring`, which is what Tailwind
-  // read to make `ring-ring` resolve; with the bridge gone it was a second spelling of
-  // --focus-ring-color that nothing read.
 
   // Consumed as `opacity: var(--opacity-disabled)`.
   lines.push('');
@@ -288,9 +285,7 @@ function buildSection10_TypographyPresets() {
  * Tone x treatment — the orthogonal color axis, as CSS.
  *
  * A tone declares four custom properties; a treatment consumes them. Adding a tone or a
- * treatment is one rule, not an N*M matrix — the same orthogonality the CVA version had,
- * with the Tailwind arbitrary-property syntax (`[--v-bg:var(--primary)]`) dropped, since
- * that spelling only works inside a Tailwind build.
+ * treatment is one rule, not an N*M matrix.
  *
  * The vocabulary comes from the color roles, not from what button and badge happened to
  * declare. Those two disagreed: button's colors read the base roles, badge's read the
@@ -919,19 +914,17 @@ function buildSectionPrintStructure() {
  * The document base, and the two colour roles that had no class.
  *
  * Everything else in this file is opt-in: you add a class and something happens. This
- * section is the exception, and it exists because the portable tier styled no bare element
- * at all. In an app that never showed, because Tailwind's preflight was doing it. Take the
- * tokens tier into a Django template, a static page or a PDF and you get a white page with
- * black text and 203 unused custom properties, and every consumer writes the same four
- * lines to fix it. Measured on the first real document built this way.
+ * section is the exception, because the portable tier styles no bare element at all.
+ * Without it, taking the tokens tier into a Django template, a static page or a PDF gives
+ * a white page with black text and a pile of unused custom properties, and every consumer
+ * writes the same four lines to fix it.
  *
  * Minimal on purpose. This is not a reset library: border-box because it is the one line
  * everyone writes, and the body defaults because the substrate is useless without them.
  * Layered like the rest, so a consumer's own body rule wins without a specificity fight.
  *
- * The two text roles are named after the tokens rather than shortened to something like
- * `.text-muted`, so that the class a Tailwind consumer already types keeps working when
- * they drop the bridge. paperboy types `text-on-surface-variant` 146 times.
+ * The two text roles are named after the tokens they read rather than shortened to
+ * something like `.text-muted`, so the class name states which role it paints.
  */
 function buildSectionDocumentBase() {
   return `/* === Document Base === */
@@ -951,11 +944,10 @@ body {
 }
 
 /* === Form Controls === */
-/* Tailwind's preflight did this until the bridge went out, and nothing replaced it. A
-   <button> keeps the UA's border and its own font family, so .button.treat-filled renders
-   framed and .treat-ghost renders as an outline, which is the opposite of ghost. Nothing
-   in the class layer sets a border on a button: .treat-outline does, which is the only
-   reason that one looked right.
+/* A <button> keeps the UA's border and its own font family unless something clears them,
+   so .button.treat-filled renders framed and .treat-ghost renders as an outline, which is
+   the opposite of ghost. Nothing in the class layer sets a border on a button:
+   .treat-outline does, which is the only reason that one looks right.
 
    In loom.base on purpose, so a treatment in loom.components that does want a border
    still wins. Buttons only — this is a normalization of the chrome that was showing
