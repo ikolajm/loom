@@ -531,8 +531,12 @@ function buildComponentClass(name, cfg, textFamily) {
     // Icon size travels as a property rather than a descendant rule: the class must not
     // assume what element holds the icon. The atom's icon slot reads it, and so can a
     // consumer marking up by hand.
+    // A raw length is allowed here for the same reason height and width allow one: the
+    // icon scale is a standards primitive, so a tier whose type role falls between two of
+    // its steps can reach neither. Without CSS_SPACE a literal resolved to `var(--14px)`,
+    // a property nothing declares, and the slot fell back to the svg's intrinsic size.
     const icon = src['icon-size'] || src.icon;
-    if (icon) d.push(`--icon-size: ${CSS_TOKEN(icon, '')};`);
+    if (icon) d.push(`--icon-size: ${CSS_SPACE(icon) || CSS_TOKEN(icon, '')};`);
     return d;
   };
 

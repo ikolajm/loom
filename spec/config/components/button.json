@@ -225,7 +225,7 @@
       }
     },
     "sizes": {
-      "$note": "Type is not declared here — it comes from the label/{tier} ramp, which both the Figma builder and the code bind to, so a tier never restates a font-size or a line-height. Icons hold at the smallest step for the two lower tiers and take the next step only at lg, so every tier's icon sits at or under its own font size and inside its line box — which is what stops a tier pairing an icon with leading it cannot fit.",
+      "$note": "Type is not declared here — it comes from the label/{tier} ramp, which both the Figma builder and the code bind to, so a tier never restates a font-size or a line-height. Every tier's icon matches its own font size. md reaches that with a raw length because the icon scale is a standards primitive with no step between icon-0 and icon-1; see its $exception. The earlier rule held icons at or under the font size to keep them inside the line box, which was never the constraint: .badge is inline-flex and the icon is a flex sibling of the text, not inline content, so the tier's height is max(leading, icon) and an icon at the leading adds nothing.",
       "$constant": {
         "gap": "{scale.1}",
         "radius": "radius/component"
@@ -239,7 +239,8 @@
       "md": {
         "x-padding": "{scale.2}",
         "y-padding": "{scale.1}",
-        "icon": "icon/icon-0"
+        "$exception": "14px icon — off the icon scale, which steps 12 to 16 with nothing between. label/md is 14px and every badge tier matches its own font size; icon-0 left md the only tier in the catalog with an icon under its text. Costs no height: the tier is max(16px leading, icon).",
+        "icon": "14px"
       },
       "lg": {
         "x-padding": "{scale.3}",
