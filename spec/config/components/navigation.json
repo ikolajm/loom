@@ -49,29 +49,6 @@
     "default": { "variant": "default", "size": "md" }
   },
 
-  "tabs": {
-    "$note": "Horizontal tab strip. Active tab indicated by bottom border. One tab active at a time. Full keyboard navigation (arrow keys between tabs). Content panel linked via aria-controls.",
-    "variants": {
-      "default": {
-        "bg": "transparent",
-        "active-fg": "color/primary/primary",
-        "inactive-fg": "color/surface/on-surface-variant",
-        "indicator": "color/primary/primary",
-        "indicator-width": "border-width/bw-2"
-      }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "text-transform": "none"
-    },
-    "sizes": {
-      "sm": { "height": "height/nav-item-sm", "x-padding": "{scale.3}", "gap": "{scale.1}", "text": "action/sm", "icon-size": "icon/icon-1" },
-      "md": { "height": "height/nav-item-md", "x-padding": "{scale.4}", "gap": "{scale.2}", "text": "action/md", "icon-size": "icon/icon-2" },
-      "lg": { "height": "height/nav-item-lg", "x-padding": "{scale.6}", "gap": "{scale.2}", "text": "action/lg", "icon-size": "icon/icon-2" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
   "bottom-nav": {
     "$note": "Mobile bottom navigation bar. 3-5 destinations only. Always includes labels — never icon-only. Active item uses primary color.",
@@ -147,78 +124,7 @@
       "lg": { "item-size": "height/control-lg", "gap": "{scale.2}", "icon-size": "icon/icon-2" }
     },
     "default": { "variant": "default", "size": "md" }
-  },
-
-  "navigation-menu": {
-    "$note": "Horizontal menu bar with optional dropdown/mega-menu panels. For site-level navigation (marketing, content sites). Distinct from sidebar (app navigation) and dropdown-menu (contextual actions).",
-    "variants": {
-      "default": {
-        "bg": "transparent",
-        "fg": "color/surface/on-surface",
-        "active-fg": "color/primary/primary",
-        "hover-bg": "color/surface/surface-1"
-      }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "panel": {
-      "bg": "color/surface/surface-1",
-      "fg": "color/surface/on-surface",
-      "shadow": "effects/shadow-2",
-      "radius": "radius/card"
-    },
-    "sizes": {
-      "sm": { "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "gap": "{scale.1}" },
-      "md": { "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "gap": "{scale.2}" },
-      "lg": { "item-height": "height/nav-item-lg", "item-x-padding": "{scale.6}", "gap": "{scale.3}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
-
-  "command-palette": {
-    "$note": "Keyboard-first search + action overlay (Cmd+K). Combines search input with filterable item list. Common in dashboards for quick navigation across views, records, and actions. Fuzzy matching, recent items, grouped results. Escape to close. Shares modal overlay model.",
-    "variants": {
-      "default": {
-        "bg": "color/surface/surface-1",
-        "fg": "color/surface/on-surface",
-        "overlay": "color/surface/scrim",
-        "shadow": "effects/shadow-3",
-        "border": "color/outline/outline"
-      }
-    },
-    "input": {
-      "$note": "Search input at top of palette. No border, larger font, integrated into the palette header.",
-      "bg": "transparent",
-      "fg": "color/surface/on-surface",
-      "placeholder-fg": "color/surface/on-surface-variant"
-    },
-    "item": {
-      "state": {
-        "default": { "bg": "transparent", "fg": "color/surface/on-surface" },
-        "active":  { "bg": "color/surface/surface-2", "fg": "color/surface/on-surface" }
-      },
-      "typography": {
-        "font-family": "body",
-        "font-weight": 400,
-        "letter-spacing": "0",
-        "text-transform": "none"
-      }
-    },
-    "group-label": {
-      "fg": "color/surface/on-surface-variant",
-      "font-weight": 500,
-      "text-transform": "uppercase"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/modal" },
-      "sm": { "max-width": "480px", "input-text": "input/md", "input-x-padding": "{scale.3}", "input-height": "height/bar-sm", "item-height": "height/nav-item-sm", "item-x-padding": "{scale.3}", "item-gap": "{scale.2}", "item-text": "action/md", "group-text": "label/sm", "icon-size": "icon/icon-1" },
-      "md": { "max-width": "560px", "input-text": "input/lg", "input-x-padding": "{scale.4}", "input-height": "height/bar-md", "item-height": "height/nav-item-md", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/md", "group-text": "label/md", "icon-size": "icon/icon-2" },
-      "lg": { "max-width": "640px", "input-text": "title/md", "input-x-padding": "{scale.6}", "input-height": "height/bar-lg", "item-height": "height/nav-item-lg", "item-x-padding": "{scale.4}", "item-gap": "{scale.3}", "item-text": "action/lg", "group-text": "label/md", "icon-size": "icon/icon-2" }
-    },
-    "default": { "variant": "default", "size": "md" }
   }
+
+
 }

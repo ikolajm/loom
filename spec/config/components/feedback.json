@@ -1,88 +1,8 @@
 {
-  "toast": {
-    "variants": {
-      "default": { "bg": "color/surface/surface-inverse", "fg": "color/surface/on-surface-inverse" },
-      "error":   { "bg": "color/error/error-container", "fg": "color/error/on-error-container" },
-      "success": { "bg": "color/success/success-container", "fg": "color/success/on-success-container" },
-      "warning": { "bg": "color/warning/warning-container", "fg": "color/warning/on-warning-container" },
-      "info":    { "bg": "color/info/info-container", "fg": "color/info/on-info-container" }
-    },
-    "icon-slots": {
-      "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
-      "trailing": { "default-visible": false, "default-icon": "icon/x" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/component", "shadow": "effects/shadow-3" },
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.3}", "icon-size": "icon/icon-3" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
 
-  "tooltip": {
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "shadow": "effects/shadow-1" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm": { "x-padding": "{scale.1}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
-      "md": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
-      "lg": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
-  "popover": {
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "shadow": "effects/shadow-2" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/card" },
-      "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
-      "md": { "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}" },
-      "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
-  "dropdown-menu": {
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "hover-bg": "color/surface/surface-2", "shadow": "effects/shadow-2" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm": { "item-height": "height/menu-item-sm", "text": "body/sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
-      "md": { "item-height": "height/menu-item-md", "text": "body/md", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
-      "lg": { "item-height": "height/menu-item-lg", "text": "body/lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
   "skeleton": {
     "$note": "Loading placeholder component. Shimmer animation is code-only — not a Figma variable.",
@@ -98,21 +18,6 @@
     "default": { "variant": "default" }
   },
 
-  "progress-bar": {
-    "variants": {
-      "default": { "track-bg": "color/surface/surface-1", "fill-bg": "color/primary/primary" },
-      "success": { "track-bg": "color/surface/surface-1", "fill-bg": "color/success/success" },
-      "warning": { "track-bg": "color/surface/surface-1", "fill-bg": "color/warning/warning" },
-      "error":   { "track-bg": "color/surface/surface-1", "fill-bg": "color/error/error" }
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/pill" },
-      "sm": { "height": "{scale.1}" },
-      "md": { "height": "{scale.2}" },
-      "lg": { "height": "{scale.3}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
   "empty-state": {
     "$note": "Placeholder shown when a view has no content — zero results, first-time use, empty list. Icon/illustration + heading + description + optional action button. Always provide a next action when possible. Distinct from skeleton (loading placeholder) — empty state appears after loading completes with no data.",
@@ -138,45 +43,7 @@
     "default": { "variant": "default", "size": "md" }
   },
 
-  "context-menu": {
-    "$note": "Right-click triggered menu. Shares visual styling with dropdown-menu but uses a different trigger mechanism (contextmenu event instead of click). Supports items, separators, sub-menus, and checkable items.",
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "hover-bg": "color/surface/surface-2", "shadow": "effects/shadow-2" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/component" },
-      "sm": { "item-height": "height/menu-item-sm", "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
-      "md": { "item-height": "height/menu-item-md", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-2" },
-      "lg": { "item-height": "height/menu-item-lg", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
-  "hover-card": {
-    "$note": "Hover-triggered preview card. Richer than tooltip (supports structured content — images, links, metadata). Different from popover (hover trigger vs click trigger). Delay before show (~300ms), dismiss on mouse leave. Anchor positioning.",
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline", "shadow": "effects/shadow-2" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "$constant": { "radius": "radius/card" },
-      "sm": { "max-width": "240px", "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
-      "md": { "max-width": "320px", "x-padding": "{scale.4}", "y-padding": "{scale.3}", "gap": "{scale.3}" },
-      "lg": { "max-width": "400px", "x-padding": "{scale.6}", "y-padding": "{scale.4}", "gap": "{scale.4}" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
 
   "spinner": {
     "$note": "Indeterminate loading indicator. Distinct from Skeleton (content placeholder) and ProgressBar (determinate progress). CSS animation — not a Figma variable. Use aria-label for accessibility. Can be inlined in buttons (loading state) or standalone.",

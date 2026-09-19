@@ -3,7 +3,7 @@
  * Code Templates Orchestrator
  *
  * Produces the complete generated/ bundle:
- *   tokens.css, components/, HANDOFF.md
+ *   tokens.css, components/
  *
  * No app-shell target: the substrate is portable and wiring it into a framework is the
  * consumer's business. ThemeProvider is a catalog component, the selection and scrollbar
@@ -56,13 +56,6 @@ const GENERATORS = {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, 'preview.html'), generate());
       console.log('  docs/preview.html');
-    },
-  },
-  'handoff': {
-    description: 'HANDOFF.md',
-    run: (outputDir) => {
-      const { generate } = require('./generate-handoff');
-      generate(configs, registry, outputDir);
     },
   },
   // Not a generator — writes nothing. Runs last so a full `npm run generate` cannot
