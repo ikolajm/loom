@@ -22,6 +22,7 @@
     "figma": "node scripts/assemble-figma.js",
     "generate": "node scripts/code-templates/orchestrator.js",
     "sync": "node scripts/sync.js",
+    "test:provenance": "node scripts/provenance.test.js",
     "typecheck": "tsc --noEmit",
     "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json"
   },

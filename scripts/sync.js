@@ -39,6 +39,45 @@ function die(lines) {
   process.exit(1);
 }
 
+/**
+ * Describe the Loom producing this sync, as `<version> (<short hash>)`.
+ *
+ * Read at delivery, not baked in at generation. The catalog is committed, so a
+ * hash stamped when a file was generated would change the moment that file was
+ * committed, and every regenerate would diff against itself. What a consumer
+ * needs is which Loom handed them the file, and that is decided here.
+ *
+ * A dirty producing tree is marked. A hash that silently means "3.0.0 plus
+ * whatever I had open" is worse than no hash, because it reads as precise.
+ *
+ * git missing, or `root` not a repository, yields `unknown-commit` rather than
+ * `undefined` — a header that says nothing while looking like it says something
+ * is the failure this function exists to prevent.
+ *
+ * @param {string} [root] repository to describe; defaults to Loom's own.
+ * @returns {string}
+ */
+function provenance(root = LOOM_ROOT) {
+  let version = 'unknown-version';
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    if (pkg.version) version = pkg.version;
+  } catch { /* the named unknown above stands */ }
+
+  const git = (...args) => execFileSync('git', ['-C', root, ...args], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  }).trim();
+
+  let commit = 'unknown-commit';
+  try {
+    commit = git('rev-parse', '--short', 'HEAD');
+    if (git('status', '--porcelain')) commit += '-dirty';
+  } catch { /* the named unknown above stands */ }
+
+  return `${version} (${commit})`;
+}
+
 function main(argv) {
   const flags = new Set(argv.filter((a) => a.startsWith('--')));
   // --answers takes a value, so its argument is not a project directory.
@@ -256,4 +295,4 @@ function addLoomSyncScript(project, answers) {
 
 if (require.main === module) main(process.argv.slice(2));
 
-module.exports = { main };
+module.exports = { main, provenance };
