@@ -1619,8 +1619,8 @@ function generateLayer() {
  *
  * The parts carry type roles rather than inheriting: `.dialog-title` read `text-title-md`
  * in the atom and `.dialog-description` read `text-body-sm text-on-surface-variant`, both
- * bridge utilities that resolve to nothing now. Naming them here is what makes the
- * README's claim true — appearance in the class layer, behavior in the atom.
+ * bridge utilities that resolve to nothing now. Naming them here is what makes
+ * docs/catalog.md's claim true — appearance in the class layer, behavior in the atom.
  */
 /**
  * The target floor: if it is interactive and the pointer is coarse, it clamps to

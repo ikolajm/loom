@@ -120,7 +120,7 @@ function checkCssParse() {
 
 // Files carrying hand-written counts. A doc not listed here is not checked — add it
 // when it starts making a claim, or the claim drifts unobserved.
-const COUNTED_DOCS = ['README.md', 'CATALOG_SPEC.md', 'spec/questionnaire.md'];
+const COUNTED_DOCS = ['README.md', 'docs/catalog.md', 'spec/questionnaire.md'];
 // Not in COUNTED_DOCS: it carries no N-of-kind claims, only the check list below.
 const CHECKLIST_DOC = 'docs/pipeline.md';
 

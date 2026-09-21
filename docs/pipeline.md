@@ -2,14 +2,14 @@
 
 Where a value you typed ends up, and what decided it on the way.
 
-`README.md` says what goes in and what comes out. [`spec/questionnaire.md`](../spec/questionnaire.md)
+`../README.md` says what goes in and what comes out. [`spec/questionnaire.md`](../spec/questionnaire.md)
 documents every answer key. This traces the middle: the three pipelines that turn
 one answers file into stylesheets, a React catalog and a Figma paste set, and the
 handful of places where a value is transformed rather than copied.
 
 Read this to extend the generator or to debug an output that doesn't match what you
-answered. Consuming Loom in a project needs none of it — the README Quickstart is
-the whole surface.
+answered. Consuming Loom in a project needs none of it — [`quickstart.md`](quickstart.md)
+is the whole surface.
 
 ---
 
@@ -281,7 +281,8 @@ Assembly is mechanical: read the template, slice everything before its
 ```
 
 Order is a dependency chain: primitives create the variables that semantics alias, so
-a semantics paste before its primitive has nothing to point at. Opacity leads the
+a semantics paste before its primitive has nothing to point at. [`figma.md`](figma.md) is
+the pasting end of this. Opacity leads the
 semantics because it is the only one that aliases nothing.
 
 Step `09` is where `$fillShades` is consumed. Each `{fill.*}` template in
@@ -307,7 +308,8 @@ failing in the plugin console names neither.
    was handed.
 3. Every delivered file is **overwritten unconditionally**, and carries a generated
    header saying so. There is no edit detection, and a deleted file returns on the next
-   run — `CATALOG_SPEC.md`'s Install section has the contract and the reasoning.
+   run — [`catalog.md`'s Install section](catalog.md#install) has the contract and the
+   reasoning.
 
 `sync.js` prints the union of the manifests' `npmDependencies` as a single install
 line. It reports; it never installs.
@@ -330,5 +332,7 @@ line. It reports; it never installs.
 ## Cross-references
 
 - [`../spec/questionnaire.md`](../spec/questionnaire.md) — every answer key
-- [`../CATALOG_SPEC.md`](../CATALOG_SPEC.md) — manifests, the install flow, the override mechanism
-- [`gotchas.md`](gotchas.md) — the traps, including config resolution and Figma Plugin API
+- [`catalog.md`](catalog.md) — manifests, the install flow, the override mechanism
+- [`class-layer.md`](class-layer.md) — what a component schema can and cannot express
+- [`figma.md`](figma.md) — pasting the emitted scripts, and the console's failure modes
+- [`gotchas.md`](gotchas.md) — the traps, including config resolution and the cascade

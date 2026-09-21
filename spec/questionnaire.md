@@ -184,5 +184,5 @@ no token.
 ---
 
 Every sync installs the whole catalog — there is no subset mechanism; see
-[`CATALOG_SPEC.md`](../CATALOG_SPEC.md) for why. The generated index is
+[`docs/catalog.md`](../docs/catalog.md) for why. The generated index is
 [`catalog/atoms.json`](../catalog/atoms.json).

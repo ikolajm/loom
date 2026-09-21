@@ -2,6 +2,10 @@
 
 Traps the generated code embodies but can't explain. The code holds the *fix*; these hold the *why* — the landmines that produced the workarounds, kept so the next person (or future-you) doesn't re-pay the hours. The "how it works" is in the code; this is the part that isn't.
 
+Two surfaces have their own files, because their traps are a workflow rather than a
+scattering: schema authoring is [`class-layer.md`](class-layer.md), and the Figma console
+is [`figma.md`](figma.md).
+
 ---
 
 ## Radix `Slot` — `asChild` silently applies no classes when children are wrapped in a fragment
@@ -23,34 +27,6 @@ No story exercised it, which is why it went unseen. Any generated component wiri
 consumer's element nests inside it. The fix is not mechanical — the span exists to read
 `--icon-size`, so removing it means deciding how an icon is sized without one. A design
 call on component internals, parked visibly rather than guessed at.
-
----
-
-## Figma — the paste is a console session, not a build
-
-Everything the Figma half does happens in a plugin console that keeps scope between
-pastes, which is where its failure modes come from. What the API itself requires is
-embodied in `scripts/figma-*/` and commented at the call site; what follows is only what
-reading those files does not tell you.
-
-**Plugin code has a 50,000-character maximum.** That limit is the whole reason for the
-shared-utils architecture — paste `00_shared-utils.js` once, then run small step scripts
-against the globals it defines — rather than emitting one self-contained script per step.
-
-**A Figma deliverable only changes on re-paste.** Regenerating updates
-`generated/figma-scripts/`, not any file you already built: an existing Figma file keeps
-its old variables and styles until you run the paste again. "The generator is fixed" and
-"the file is fixed" are separate claims, and only the second is checkable by looking.
-
-**Re-pasting `00` into a console that has already run it silently halts.** Top-level
-`const`/`let` cannot be redeclared, so the second paste dies at the first collision and
-every helper below it never reloads — including the fix you just made. `assemble-figma.js`
-emits the bundle with top-level declarations rewritten to `var` so re-pastes redefine
-cleanly; the one case left is the first hop out of a `const`-era session, which needs a
-console reload.
-
-**Variable IDs are session-specific.** A step resolves the references it needs in its own
-run. An ID carried across runs points at nothing, and does so without complaining.
 
 ---
 
@@ -184,150 +160,11 @@ npm run configs                                        # your local brand
 
 ---
 
-## The class layer — a schema describes a ladder, not a box
-
-When the appearance-only atoms became classes, the emitter read the sizing schema and
-nothing else. So each component's ladder survived the move and the cva base string it
-ramped did not — and a cva base is where the box model lived.
-
-Three declarations were doing the work in `button.tsx`:
-
-```
-- 'inline-flex items-center justify-center interactive control'
-+ 'button interactive control'
-```
-
-`.button` was emitted with `gap: var(--space-2)` and computed `display: block`. Gap is
-inert on a block container, so the gap did nothing and the label wrapped underneath the
-icon. `.input` was emitted with padding, height and a radius but no border, background or
-text colour, so a text field rendered as bare text on the page.
-
-The worst of it was one missing line on the icon slot:
-
-```css
-.icon-slot {
-  width: var(--icon-size);   /* ignored */
-  height: var(--icon-size);  /* ignored */
-}
-```
-
-A `<span>` is inline, and **width and height do not apply to an inline box**. The slot
-had worked inside the atoms only because their flex parent blockified it — and the
-parents lost their `display` in the same commit. So `--icon-size` resolved correctly to
-16px, went unread, and the svg fell back to its intrinsic size: a 16px icon rendering at
-55px and overflowing every button and badge that had one.
-
-**None of it failed anything.** Every class existed and was emitted, which is all
-`class-coverage` could see. A class being present and a class being *usable* are two
-questions, and only the first was being asked.
-
-**The fix** — `BASE_RULES` in `generate-tokens-css.js` holds the declarations no schema
-can express, each line recovered from the atom the class replaced rather than redesigned,
-so a faithful restore cannot break what already rendered. `class-box-model` in `verify.js`
-asks the second question, stated as the failure rather than as a list of names: any class
-that sets `width`, `height` or `gap` anywhere in its ladder must declare a `display`
-somewhere in that same ladder, or name itself in `NO_BOX` with a reason.
-
-**The same gap had a second half, found much later.** Nothing in the class layer cleared
-the UA's own chrome from form elements, so every `<button>` wore the UA border no matter
-its treatment — `.button` sets none, and neither do `.treat-filled` or
-`.treat-ghost`. `.treat-outline` looked correct only because it happens to set a border
-itself, which is exactly how the defect stayed invisible: the one treatment defined by
-having no frame was the one that showed a frame, and the fix was mistaken for a question
-about whether ghost should exist. There is now a Form Controls block in `loom.base` —
-low enough in the cascade that a treatment wanting a border still wins.
-
-The lesson generalises past this file: a reset you delete is not gone, it is inherited
-from the UA, and the UA's defaults are not neutral.
-
-Write that check against the emitted CSS, not against the emitter's plan. The two worst
-instances — `.icon-slot` and the `<name>-icon` sub-parts — are written by the emitter
-directly and never appear in the plan at all. A first version of the check enumerated the
-plan, passed, and left the 55px icon exactly where it was.
-
-### And key it on the element the rule styles, not the first class in the selector
-
-The second version of that check keyed on the first class it found in a selector. So
-`.sidebar[data-size="sm"] .sidebar-item { height; padding; gap }` was credited to
-`.sidebar`, which has a `display`. Eleven classes were hiding behind that, `.sidebar-item`
-among them — it sets `gap` and had no `display` of its own.
-
-The atoms hid it too, and for a related reason: every sub-part lived inside a flex parent,
-which blockifies its children, so `height` applied and `gap` quietly did not. It only
-surfaced when the gallery shell stopped importing the `Sidebar` atom and hand-marked-up
-`.sidebar-item` the way a consumer would — outside that flex parent, where an inline box
-ignores every dimension you give it.
-
-`SUB_PART_RULES` carries the recovered displays. Declaring one changes nothing inside the
-old flex parents, since a flex item is blockified anyway; it makes the class stand up
-outside them.
-
-### A schema key that is itself a property is not a part
-
-`line-height` ends in `height`. `min-width` and `border-width` end in `width`. The part
-splitter matched the longest known prop suffix and read them as parts `line`, `min` and
-`border`, emitting five classes for elements that do not exist:
-
-```css
-.helper-text[data-size="sm"] .helper-text-line { height: var(--height-16px); }  /* nothing is .helper-text-line */
-.kbd[data-size="sm"] .kbd-min                  { width: 20px; }                 /* nothing is .kbd-min */
-```
-
-Nothing rendered wrong, because `decls()` also puts the real declaration on the element —
-which is exactly why no check and no page could have caught it. `SELF_PROPS` is the guard:
-a key `decls()` consumes is never split.
-
-`class-box-model` does fail on a phantom, but it says "give it a display" — advice that
-would entrench the class instead of deleting it. `phantom-parts` exists to name the actual
-cause, because a check that catches the right failure with the wrong diagnosis sends you
-to fix the wrong thing.
-
-### A variant can rule one edge, and only `border` was being read
-
-`top-bar` declares `"border-bottom": "color/outline/outline"`. `sidebar` declares
-`border-right`, `bottom-nav` declares `border-top`. The variant emitter read `v.border` and
-nothing else, so all five declarations were dropped — and the fallback is not silence, it
-is `border: 0`, which actively removes the rule. The app header lost its bottom border and
-the sidebar its right one, in the same rewrite whose premise was that appearance had moved
-somewhere safe.
-
-It was found by hand-porting a consumer off the `top-bar` atom, comparing what it drew
-against what the class draws. Nothing else would have: the schema was right, the class was
-present, `class-coverage` passed, and a missing 1px rule is not what anyone notices on a
-gallery page.
-
-**A declared key disappearing is now a three-time pattern** — `item-x-padding` split wrong,
-`rail-width` was read as a part, `border-bottom` was never read. `variant-keys` in
-verify.js is the guard: every key a variant declares is either consumed or parked by name
-in `UNCONSUMED_VARIANT_KEYS` with a reason, and the gate's own line reports how many are
-parked. A key the emitter cannot
-express yet is fine; a key that vanishes without anyone noticing is not.
-
-### The deliverable is gitignored, so review it with `npm run diff-emit`
-
-`generated/` holds literal hex from whichever brand is active — the same reason
-`spec/answers.json` is ignored — so `git diff` reports **nothing** for the four stylesheets
-the class layer actually ships. A change to the emitter is otherwise reviewed by reading
-the emitter and trusting it, which is how five classes for nonexistent elements survived:
-no check failed, no page rendered wrong, and no diff mentioned them.
-
-```
-npm run diff-emit                 # working tree vs HEAD
-npm run diff-emit -- HEAD~3       # vs an older ref
-npm run diff-emit -- --stat       # summary only
-```
-
-It builds a temp worktree at the ref, copies the active brand in so the two sides differ
-only where the *generator* does, emits both, and diffs. Un-ignoring `generated/` would be
-the wrong fix — it would commit your brand to Loom's history.
-
----
-
 ## Documents — what the substrate needs from a non-browser engine
 
 The only non-React consumer that *links* the stylesheets is a document renderer. A surface
 with no CSS engine reads the resolved values instead, which is a different path and has
-its own note in the README.
+its own note in [`substrate.md`](substrate.md#read-the-values-somewhere-with-no-css-engine).
 
 Loom's emitted CSS makes two demands on whatever renders it. Both are worth checking
 before you commit to an engine, because the first fails silently and totally.
@@ -346,6 +183,8 @@ workaround.
 
 Past that, engine differences are yours to check rather than Loom's to catalogue — which
 CSS an engine implements is the engine's business and moves with its version.
+
+---
 
 ## `hidden` does not hide anything Loom gives a `display` to
 
@@ -380,6 +219,8 @@ since the day it was written. It was toggled with `hidden` specifically to avoid
 page-local CSS that might flatter the classes under test; the reasoning was right and the
 mechanism does not work. `preview-coverage` did not catch it either: the class was
 rendered, which is all that check asserts — it was just never hidden.
+
+---
 
 ## Loom ships in cascade layers, so anything unlayered outranks all of it
 
