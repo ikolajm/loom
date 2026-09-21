@@ -118,10 +118,32 @@ function checkCssParse() {
   return { failures, note: `${EMITTED.length} stylesheets, ${rules} rules` };
 }
 
-// Files carrying hand-written counts. A doc not listed here is not checked — add it
-// when it starts making a claim, or the claim drifts unobserved.
-const COUNTED_DOCS = ['README.md', 'docs/catalog.md', 'spec/questionnaire.md'];
-// Not in COUNTED_DOCS: it carries no N-of-kind claims, only the check list below.
+// Every markdown file in the repo is checked for hand-written counts. This used to be
+// a hand-written allowlist, which is the failure this gate exists to catch, one level
+// up: a list of paths is a second copy of something the tree already knows, it went
+// stale the first time a doc was renamed, and its policy — add a doc when it starts
+// making a claim — could only be followed by someone who remembered it. Deriving the
+// set covers a doc the day it is written rather than the day someone notices.
+// `APPEARANCE_ONLY` is the same shape and hid 32 unread schemas: an enumeration a gate
+// reads cannot see past itself.
+//
+// Walked rather than read from `git ls-files`, so this does not need a git tree.
+const DOC_SKIP_DIRS = new Set(['node_modules', '.git', 'generated']);
+
+function countedDocs(dir, out) {
+  dir = dir || ROOT;
+  out = out || [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      if (!DOC_SKIP_DIRS.has(entry.name)) countedDocs(path.join(dir, entry.name), out);
+    } else if (entry.name.endsWith('.md')) {
+      out.push(path.relative(ROOT, path.join(dir, entry.name)).split(path.sep).join('/'));
+    }
+  }
+  return out.sort();
+}
+
+// Read separately: it carries no N-of-kind claims, only the check list below.
 const CHECKLIST_DOC = 'docs/pipeline.md';
 
 function atomNames() {
@@ -162,12 +184,9 @@ function checkDocCounts(atoms, checkNames) {
   const failures = [];
   let claims = 0;
 
-  for (const rel of COUNTED_DOCS) {
+  const docs = countedDocs();
+  for (const rel of docs) {
     const abs = path.join(ROOT, rel);
-    if (!fs.existsSync(abs)) {
-      failures.push(`${rel} — listed in COUNTED_DOCS but missing`);
-      continue;
-    }
     fs.readFileSync(abs, 'utf8').split('\n').forEach((line, i) => {
       for (const [kind, re] of /** @type {[string, RegExp][]} */ ([
         ['components', /(\d+)\s+(?:React\s+)?components\b/g],
@@ -220,7 +239,7 @@ function checkDocCounts(atoms, checkNames) {
     : 'check list unreadable';
   return {
     failures,
-    note: `${claims} claims across ${COUNTED_DOCS.length} files, ${listNote}`,
+    note: `${claims} claims across ${docs.length} files, ${listNote}`,
   };
 }
 
