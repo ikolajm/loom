@@ -54,22 +54,5 @@
       "lg": { "x-padding": "{scale.6}", "y-padding": "{scale.3}", "text": "body/md" }
     },
     "default": { "variant": "default", "size": "md" }
-  },
-  "toolbar": {
-    "variants": {
-      "default": { "bg": "color/surface/surface-1", "fg": "color/surface/on-surface", "border": "color/outline/outline" }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "sm": { "x-padding": "{scale.2}", "y-padding": "{scale.1}", "gap": "{scale.1}" },
-      "md": { "x-padding": "{scale.3}", "y-padding": "{scale.2}", "gap": "{scale.2}" },
-      "lg": { "x-padding": "{scale.5}", "y-padding": "{scale.3}", "gap": "{scale.3}" }
-    },
-    "default": { "variant": "default", "size": "md" }
   }
 }

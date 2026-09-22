@@ -74,7 +74,7 @@
       }
     },
     "label": {
-      "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider and leads tighter than action at every tier, which is what a chip, a kbd key or a nav label wants and what a button does not. Weight matches. The ramp is floored so that no tier emits below the smallest size platform guidance supports: WCAG sets no minimum font size, but iOS HIG and Material both floor around 11, and the tier that sat under that reached badge, kbd, bottom-nav and helper-text at their smallest size.",
+      "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider and leads tighter than action at every tier, which is what a chip, a kbd key or a nav label wants and what a button does not. Weight matches. The ramp is floored so that no tier emits below the smallest size platform guidance supports: WCAG sets no minimum font size, but iOS HIG and Material both floor around 11, and the tier that sat under that reached badge, kbd and helper-text at their smallest size.",
       "font": "body",
       "weight": 500,
       "letter-spacing": "0.02em",

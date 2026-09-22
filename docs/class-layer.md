@@ -33,8 +33,8 @@ name itself in `NO_BOX` with a reason.
 
 ## Sub-parts need their own display
 
-A sub-part — `.sidebar-item` and `.pagination-item` are the two that need one today —
-gets a `display` of its own in `SUB_PART_RULES`. It does not inherit one from context.
+A sub-part that sets a dimension gets a `display` of its own in `SUB_PART_RULES`. It does
+not inherit one from context.
 
 Inside an atom a sub-part usually sits in a flex parent, which blockifies its children —
 so `height` applies, `gap` quietly does not, and the class looks correct. Hand-marked up
@@ -45,7 +45,7 @@ Declaring a `display` changes nothing inside the old flex parents. It makes the 
 stand up outside them.
 
 `class-box-model` keys on the element a rule styles, not the first class in the selector,
-so `.sidebar[data-size="sm"] .sidebar-item { gap }` is checked against `.sidebar-item`.
+so `.<name>[data-size="sm"] .<name>-<part> { gap }` is checked against the part.
 
 ---
 
@@ -81,13 +81,14 @@ the fallback writes the property's zero value, which actively removes the rule. 
 `border-bottom` that goes unread emits `border: 0`, and the element loses the border it
 had.
 
-Edge-specific borders are separate keys from `border`:
+Edge-specific borders are separate keys from `border`, one per side:
 
 ```json
-"top-bar":    { "border-bottom": "color/outline/outline" },
-"sidebar":    { "border-right":  "color/outline/outline" },
-"bottom-nav": { "border-top":    "color/outline/outline" }
+"<variant>": { "border-bottom": "color/outline/outline" }
 ```
+
+No schema declares one today, so that branch of the emitter runs at zero. It stays
+because the zero fallback it guards against has not gone anywhere.
 
 **The rule, enforced by `variant-keys`:** every key a variant declares is either consumed
 by the emitter or parked by name in `UNCONSUMED_VARIANT_KEYS` with a reason. A key the

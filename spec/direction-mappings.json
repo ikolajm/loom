@@ -55,11 +55,7 @@
       "$note": "Information-dense surfaces read by a pointer. Below sizing.touch-target.min by design — do not resolve this for a product that ships to a phone.",
       "semantic-height": {
         "control": { "sm": "ch-2", "md": "ch-3", "lg": "ch-5" },
-        "row": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
-        "nav-item": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
-        "menu-item": { "sm": "ch-2", "md": "ch-3", "lg": "ch-4" },
-        "bar": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
-        "bottom-bar": { "sm": "ch-7", "md": "ch-8" }
+        "row": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" }
       }
     },
 
@@ -67,11 +63,7 @@
       "$note": "The values every atom carried before this ladder existed, preserved exactly. This is the default, so converting the catalog to semantic names changes no emitted class.",
       "semantic-height": {
         "control": { "sm": "ch-3", "md": "ch-5", "lg": "ch-7" },
-        "row": { "sm": "ch-5", "md": "ch-7", "lg": "ch-9" },
-        "nav-item": { "sm": "ch-5", "md": "ch-7", "lg": "ch-8" },
-        "menu-item": { "sm": "ch-3", "md": "ch-4", "lg": "ch-5" },
-        "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
-        "bottom-bar": { "sm": "ch-8", "md": "ch-9" }
+        "row": { "sm": "ch-5", "md": "ch-7", "lg": "ch-9" }
       }
     },
 
@@ -79,11 +71,7 @@
       "$note": "Every tier of every role sits at or above sizing.touch-target.min, enforced by the touch-target check in scripts/code-templates/verify.js. This compresses the sm/md/lg spread — sm and md differ by one step, not two — because a `sm` control on a touch surface is still a finger target. That compression is the constraint doing its job, not a ladder that needs widening.",
       "semantic-height": {
         "control": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
-        "row": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" },
-        "nav-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
-        "menu-item": { "sm": "ch-6", "md": "ch-7", "lg": "ch-8" },
-        "bar": { "sm": "ch-7", "md": "ch-8", "lg": "ch-9" },
-        "bottom-bar": { "sm": "ch-8", "md": "ch-9" }
+        "row": { "sm": "ch-6", "md": "ch-8", "lg": "ch-9" }
       }
     }
   },
@@ -202,7 +190,7 @@
         "lg": { "size": "16px", "line-height": "24px" }
       },
       "label": {
-    "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider and leads tighter than action at every tier, which is what a chip, a kbd key or a nav label wants and what a button does not. Weight matches. The ramp is floored so that no tier emits below the smallest size platform guidance supports: WCAG sets no minimum font size, but iOS HIG and Material both floor around 11, and the tier that sat under that reached badge, kbd, bottom-nav and helper-text at their smallest size.",
+    "$note": "Same sizes as action, deliberately. label and action are not two scales, they are two settings of one scale: label tracks wider and leads tighter than action at every tier, which is what a chip, a kbd key or a nav label wants and what a button does not. Weight matches. The ramp is floored so that no tier emits below the smallest size platform guidance supports: WCAG sets no minimum font size, but iOS HIG and Material both floor around 11, and the tier that sat under that reached badge, kbd and helper-text at their smallest size.",
         "font": "body", "weight": 500, "letter-spacing": "0.02em",
         "sm": { "size": "12px", "line-height": "14px" },
         "md": { "size": "14px", "line-height": "16px" },

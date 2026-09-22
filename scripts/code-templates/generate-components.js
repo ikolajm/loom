@@ -95,7 +95,6 @@ const CATEGORY_MAP = {
   'Layout': 'layout',
   'Feedback': 'feedback',
   'Data Display': 'data-display',
-  'Navigation': 'navigation',
 };
 
 function extractAxisKeys(obj) {
@@ -287,7 +286,7 @@ function generate(registry, outputDir, configs) {
 
   // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.
-  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation'];
+  const GROUP_ORDER = ['button', 'form', 'layout', 'feedback', 'data-display'];
   const byGroup = {};
   for (const a of atoms) (byGroup[a.category] ||= []).push(a.name);
   const grouped = {};

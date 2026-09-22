@@ -417,11 +417,11 @@ const CSS_TOKEN = (v, prefix) => {
  * Sub-parts. A schema key of the form `<part>-<prop>` describes a child, not the element
  * the class is on — `heading-text` is the heading's type role, not the container's. Those
  * emit as `.<component>-<part>` so the part is nameable in markup without the class
- * guessing which element carries it (`.empty-state h3` would be wrong the moment someone
- * uses a div).
+ * guessing which element carries it — a descendant selector naming a heading tag would be
+ * wrong the moment a consumer reaches for a div instead.
  *
- * Generic on purpose: `stepper`, `pagination` and `sidebar` declare the same shape of key
- * and can use this when their internals get named, rather than each inventing a scheme.
+ * Generic on purpose: any component declaring the same shape of key uses this when its
+ * internals get named, rather than each inventing a scheme of its own.
  */
 const PART_PROPS = new Set(['text', 'fg', 'size', 'height', 'gap', 'x-padding', 'y-padding', 'radius', 'width']);
 
@@ -449,8 +449,8 @@ const SELF_PROPS = new Set([
  * Split `<part>-<prop>` by the longest known prop suffix rather than the last hyphen.
  *
  * `item-x-padding` is the case that matters: split at the last hyphen it becomes part
- * `item-x`, prop `padding`, which is not a known prop — so the key was dropped and the
- * sidebar's item padding silently never emitted. Props contain hyphens; parts may too.
+ * `item-x`, prop `padding`, which is not a known prop — so the key was dropped and that
+ * part's padding silently never emitted. Props contain hyphens; parts may too.
  */
 function splitParts(keys) {
   const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
@@ -468,10 +468,11 @@ function splitParts(keys) {
 
 /**
  * `<prop>-<variant>` is the mirror of `<part>-<prop>`: the same property, in one variant.
- * The distinction is not inferable from the shape — `rail-width` and `item-height` look
- * identical and mean opposite things — so the schema spells it prop-first, and a suffix
- * matching a declared variant name is what tells the two apart. Written the other way it
- * nearly produced a `.sidebar-rail` class for an element that does not exist.
+ * The distinction is not inferable from the shape — a `<variant>-width` and an
+ * `<part>-height` look identical and mean opposite things — so the schema spells it
+ * prop-first, and a suffix matching a declared variant name is what tells the two apart.
+ * Written the other way it emits a class named after a variant, for an element that does
+ * not exist.
  */
 function splitVariantDims(keys, variantNames) {
   const props = [...PART_PROPS].sort((a, b) => b.length - a.length);
@@ -514,7 +515,7 @@ function buildComponentClass(name, cfg, textFamily) {
     if (src.radius) d.push(`border-radius: ${CSS_TOKEN(src.radius, 'radius-')};`);
     if (src.height) d.push(`height: ${CSS_SPACE(src.height) || CSS_TOKEN(src.height, 'height-')};`);
     if (src['min-height']) d.push(`min-height: ${CSS_TOKEN(src['min-height'], 'height-')};`);
-    // A square: one token driving both axes (dot, spinner, the icon-only fab).
+    // A square: one token driving both axes (the spinner's ring, an icon-only button tier).
     if (src.size) {
       const sz = CSS_SPACE(src.size)
         || CSS_TOKEN(src.size, src.size.startsWith('icon/') ? '' : 'height-');
@@ -631,11 +632,12 @@ function buildComponentClass(name, cfg, textFamily) {
     const border = CSS_COLOR(v.border);
     if (bg) d.push(`background-color: ${bg};`);
     if (fg) d.push(`color: ${fg};`);
-    // A variant may rule one edge rather than all four: `border-bottom` on top-bar,
-    // `border-right` on sidebar, `border-top` on bottom-nav. Only `border` was read, so
-    // all five declarations were dropped — and the fallback is `border: 0`, which does not
-    // merely omit the rule, it removes it. The app header lost its bottom rule and the
-    // sidebar its right one, in the same move that was supposed to preserve appearance.
+    // A variant may rule one edge rather than all four. Only `border` was read, so every
+    // single-edge declaration was dropped, and the fallback is `border: 0`, which does not
+    // merely omit the rule, it removes it — an app header lost its bottom rule in the move
+    // that was supposed to preserve appearance. No schema declares a single edge today, so
+    // this branch runs at zero: it stays because the fallback it guards against is still
+    // there, and the next `border-<side>` written would hit it silently.
     // Found by hand-porting a consumer off the atom, which is what that exercise is for.
     const sides = ['top', 'right', 'bottom', 'left']
       .map((side) => [side, v[`border-${side}`]])
@@ -699,14 +701,11 @@ const CELL_SIZED = new Set(['table']);
  */
 const BASE_RULES = {
   badge: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-  'bottom-nav': ['display: flex;', 'align-items: center;', 'justify-content: space-around;', 'width: 100%;'],
-  breadcrumbs: ['display: flex;', 'align-items: center;'],
   button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
   card: ['display: flex;', 'flex-direction: column;'],
   // Appearance only. `.dialog-fixed` carries placement, so the class works on a native
   // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
   dialog: ['display: flex;', 'flex-direction: column;', 'width: 100%;'],
-  'empty-state': ['display: flex;', 'flex-direction: column;', 'align-items: center;', 'text-align: center;'],
   'form-field': ['display: flex;', 'flex-direction: column;'],
   'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
   // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
@@ -726,8 +725,6 @@ const BASE_RULES = {
   kbd: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
   label: ['display: flex;', 'align-items: center;', 'color: var(--on-surface);'],
   'list-item': ['display: flex;', 'align-items: center;'],
-  pagination: ['display: flex;', 'align-items: center;', 'justify-content: center;'],
-  sidebar: ['display: flex;', 'flex-direction: column;'],
   // Static by deliberate choice. A skeleton earns its place by reserving layout and
   // showing the shape of what is coming, and it does both without moving. The pulse it
   // used to carry was also the only thing a reduced-motion user had to be spared from,
@@ -780,8 +777,6 @@ const BASE_RULES = {
   textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
-  toolbar: ['display: flex;', 'align-items: center;'],
-  'top-bar': ['display: flex;', 'align-items: center;'],
 };
 
 // Emitted classes that need no `display`, and why. Anything else missing one is a bug —
@@ -798,21 +793,17 @@ const NO_BOX = {
  * The same recovery as BASE_RULES, for the sub-part classes.
  *
  * A sub-part rule only ever emits the tier dimensions — `height`, `gap`, `padding` — on a
- * selector like `.sidebar[data-size="sm"] .sidebar-item`. It never emitted a `display`,
- * and the atoms hid that: every one of these lived inside a flex parent, which blockifies
- * its children, so height applied and gap did not. Marked up by hand, outside that parent,
- * they are inline boxes and the dimensions are inert — which is what the gallery shell hit
- * the moment it stopped importing the Sidebar atom and used `.sidebar-item` directly.
+ * selector like `.<name>[data-size="sm"] .<name>-<part>`. It declares no `display`, and an
+ * atom hides that: a part rendered inside a flex parent is blockified by it, so height
+ * applies and gap does not. Marked up by hand, outside that parent, the part is an inline
+ * box and the dimensions are inert. Found by hand-marking a part up without its atom, not
+ * by a check.
  *
- * Recovered from the atom that rendered each part, at the commit before the catalog cut.
- * A flex item's display is blockified anyway, so declaring it changes nothing inside the
- * old parents and makes the class stand on its own outside them.
+ * Empty: no part left emits a dimension that would be inert on its own. It stays as the
+ * place a part declares a box when one does, and `class-box-model` in verify.js is what
+ * fails if a part arrives without.
  */
-const SUB_PART_RULES = {
-  'sidebar-item': ['display: flex;', 'align-items: center;', 'width: 100%;',
-                   'border-radius: var(--radius-component);'],
-  'pagination-item': ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-};
+const SUB_PART_RULES = {};
 
 // Sub-part vocabularies. A component declaring one describes its internals, and naming
 // those is a design decision per component rather than a loop — so it waits, visibly.
@@ -822,20 +813,20 @@ const SUB_PART_RULES = {
 const SUB_PART_KEYS = new Set([]);
 
 const APPEARANCE_ONLY = new Set([
-  'badge', 'bottom-nav', 'breadcrumbs', 'button', 'card', 'empty-state',
-  'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item', 'pagination',
-  'dialog', 'separator', 'sidebar', 'skeleton', 'spinner', 'table',
-  'textarea', 'toolbar', 'top-bar',
+  'badge', 'button', 'card',
+  'form-field', 'helper-text', 'input', 'kbd', 'label', 'list-item',
+  'dialog', 'separator', 'skeleton', 'spinner', 'table',
+  'textarea',
   'checkbox', 'radio', 'switch',
 ]);
 
 const TEXT_FAMILY = {
-  badge: 'label', 'bottom-nav': 'label', breadcrumbs: 'body',
-  button: 'action', card: 'body', dialog: 'body', 'empty-state': 'body',
+  badge: 'label',
+  button: 'action', card: 'body', dialog: 'body',
   'helper-text': 'label', input: 'input', kbd: 'label', label: 'action',
   'list-item': 'body', spinner: null, skeleton: 'body', table: 'body',
   checkbox: null, radio: null, switch: null,
-  textarea: 'input', toolbar: 'body', 'top-bar': 'title',
+  textarea: 'input',
 };
 
 // Schema key -> class name, where they differ. `input` is styled by the shared
@@ -843,7 +834,7 @@ const TEXT_FAMILY = {
 const SCHEMA_KEY = { input: 'text-field' };
 
 function componentPlan() {
-  const sources = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation']
+  const sources = ['button', 'form', 'layout', 'feedback', 'data-display']
     .map((g) => load(`components/${g}.json`));
   const raw = (key) => {
     const k = SCHEMA_KEY[key] || key;

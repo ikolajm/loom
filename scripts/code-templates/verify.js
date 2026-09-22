@@ -243,6 +243,57 @@ function checkDocCounts(atoms, checkNames) {
   };
 }
 
+// --- height-roles -------------------------------------------------------------
+// Every semantic height role sizing.json declares is picked by a component schema, or is
+// parked here by name with a reason.
+//
+// `component-height` groups heights by what a control IS, and a role exists to be picked:
+// a schema names `height/<role>-<tier>` once and inherits the ladder. A role nothing names
+// still emits `--height-<role>-<tier>` in three direction modes, still counts toward
+// `touch-target`'s denominator, and still materializes as a Figma variable — so it looks
+// exactly like a live one from every direction except the only one that matters.
+//
+// Earned by `menu-item`, which no schema had named for the whole of the reduction and which
+// survived it untouched, and then by `nav-item` and `bottom-bar`, orphaned in the commit
+// that cut the components naming them while the roles, their three direction-mode entries
+// and their Figma examples all stayed. It is the third time this seam has given way: the
+// `fab` role's removal left three dead `--height-fab-*` tokens emitting, which is the same
+// seam from the other side and is recorded against `config-parity`, the gate that caught
+// it. The class layer has `class-coverage` here; the token layer had nothing.
+const UNPICKED_HEIGHT_ROLES = {};
+
+function checkHeightRoles() {
+  const roles = Object.keys(loadConfig('base/sizing.json')['component-height'] || {})
+    .filter((r) => !r.startsWith('$'));
+
+  // Read as text, not as a parsed schema: a role reference is a string value that can sit
+  // under a size tier, a `$constant`, a variant dimension or a sub-part, and enumerating
+  // those shapes here would be a second copy of the emitter's own key vocabulary — the
+  // whitelist mistake, which is what let half of spec/config/components/ go unread.
+  const picked = new Set();
+  for (const f of fs.readdirSync(path.join(ROOT, 'spec/config/components'))) {
+    if (!f.endsWith('.json')) continue;
+    const src = fs.readFileSync(path.join(ROOT, 'spec/config/components', f), 'utf8');
+    for (const m of src.matchAll(/"height\/([a-z][a-z0-9-]*)-(?:sm|md|lg)"/g)) picked.add(m[1]);
+  }
+
+  const failures = [];
+  for (const r of roles) {
+    if (picked.has(r)) continue;
+    if (UNPICKED_HEIGHT_ROLES[r]) continue;
+    failures.push(`component-height.${r} — no component schema names height/${r}-<tier>, so the role emits tokens nothing reads. Cut it, or park it in UNPICKED_HEIGHT_ROLES with the reason`);
+  }
+  for (const r of Object.keys(UNPICKED_HEIGHT_ROLES)) {
+    if (!roles.includes(r)) {
+      failures.push(`UNPICKED_HEIGHT_ROLES names \`${r}\`, which sizing.json does not declare`);
+    }
+  }
+  return {
+    failures,
+    note: `${roles.length} height roles, ${Object.keys(UNPICKED_HEIGHT_ROLES).length} parked as unpicked`,
+  };
+}
+
 function checkInteractiveImpliesControl(atoms) {
   const failures = [];
   const cls = (src, name) => new RegExp(`(?:^|[\\s'"\`])${name}(?:[\\s'"\`]|$)`, 'm').test(src);
@@ -314,12 +365,11 @@ const CELL_SIZED_NAMES = new Set(['table']);
 // Every key a variant declares is either consumed by the emitter or parked here by name.
 //
 // A declared key vanishing has now happened three times: `item-x-padding` split wrong and
-// the sidebar's item padding never emitted; `rail-width` was read as a part and nearly
-// styled an element that does not exist; and `border-bottom` / `border-right` /
-// `border-top` were dropped by a variant emitter that only ever read `border` — so the
-// app header lost its bottom rule and the sidebar its right one, replaced by `border: 0`,
-// which removes rather than omits. That last one was found by hand-porting a consumer off
-// the atom, months after it shipped.
+// a part's padding never emitted; a `<variant>-width` key was read as a part and nearly
+// styled an element that does not exist; and single-edge `border-<side>` keys were dropped
+// by a variant emitter that only ever read `border` — so the app header lost its bottom
+// rule, replaced by `border: 0`, which removes rather than omits. That last one was found
+// by hand-porting a consumer off the atom, months after it shipped.
 //
 // The parked list is the point. A key the emitter cannot yet express is fine; a key that
 // disappears without anyone noticing is not. Adding a new key to a schema fails here until
@@ -341,7 +391,7 @@ const UNCONSUMED_VARIANT_KEYS = {
 };
 
 function checkVariantKeys() {
-  const configs = ['button', 'form', 'layout', 'feedback', 'data-display', 'navigation']
+  const configs = ['button', 'form', 'layout', 'feedback', 'data-display']
     .map((g) => {
       const f = path.join(ROOT, `spec/config/components/${g}.json`);
       return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
@@ -462,11 +512,11 @@ function checkClassBoxModel() {
   // that enumerated the plan passed while a 16px icon rendered at 55px.
   //
   // Keyed on the LAST class in the selector, because the first one is the ancestor.
-  // Written the other way this check passed while `.sidebar[data-size="sm"] .sidebar-item`
-  // set height and gap with no display of its own — the rule got credited to `.sidebar`,
+  // Written the other way this check passed while a `.<name>[data-size="sm"] .<name>-<part>`
+  // rule set height and gap with no display of its own — it got credited to the container,
   // which has one. Eleven classes were hiding behind that, and the hole was found by
-  // hand-marking-up `.sidebar-item` in the gallery shell, not by the check. Second time
-  // this check has been wrong in the direction of passing.
+  // hand-marking a part up outside its atom, not by the check. Second time this check has
+  // been wrong in the direction of passing.
   const byClass = new Map();
   for (const { selector, decls } of allRules()) {
     const classes = selector.match(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g);
@@ -1691,24 +1741,26 @@ function checkThemeInitParity() {
 }
 
 // --- preview-coverage ---------------------------------------------------------
-// Every class an ATOM applies is rendered in docs/preview.html, and no class on that page
-// is one the stylesheets do not emit.
+// Every class an ATOM applies and every emitted COMPONENT class is rendered in
+// docs/preview.html, and no class on that page is one the stylesheets do not emit.
 //
-// Scoped to atoms deliberately, and narrower than this started. The first version required
-// all 94 emitted classes to appear, which the page satisfied by growing a generated
-// inventory of labelled boxes. Jacob's read of that page: it should show itself off, not
-// explain itself, and an inventory of generic boxes is neither. He is right, and the
-// coverage requirement was mine rather than the defect's.
-//
-// What survives is the half with a defect behind it. `.dialog-fixed` shipped unable to do
+// The atom half is the one with a defect behind it. `.dialog-fixed` shipped unable to do
 // its only job - it weighs (0,1,0) against `.dialog:not(dialog)` at (0,1,1), same layer,
 // so it could not position anything - and it is applied by dialog.tsx. So "every class an
-// atom applies is rendered here" would have caught it, while "every class the emitters
-// produce" was a bigger net for the same fish.
+// atom applies is rendered here" would have caught it.
 //
-// It does not cover the named component classes that no atom applies. class-coverage
-// asserts those are emitted; nothing asserts they render, and that gap is stated rather
-// than papered over with boxes nobody reads.
+// The component half covers what that missed: a named component class no atom applies can
+// be emptied, renamed or outranked with every check green, because class-coverage asserts
+// only that it is emitted. Two classes sat in exactly that position while the one consumer
+// marked both up by hand, and the page was the last place that would have shown it.
+//
+// Scoped to those two sets, and deliberately not wider. The first version required all 94
+// emitted classes, which the page satisfied by growing a generated inventory of labelled
+// boxes. Jacob's read of that page: it should show itself off, not explain itself, and an
+// inventory of generic boxes is neither. The difference is what the extra names were - the
+// 94 are mostly `tone-*`, `text-*`, `treat-*` and `surface-*` utilities, which have no demo
+// except a labelled box. The component classes each have a real one, which is why this line
+// is drawable where that one was not. Do not widen it past componentPlan().
 //
 // Read as GENERATED HTML, not as the generator: every class on the page is in the static
 // markup, because the one script flips attributes and calls dialog methods and never
@@ -1746,6 +1798,10 @@ function checkPreviewCoverage() {
   // reads. Only names the stylesheets define count: the rest are utilities and prop
   // values, which that check already polices.
   const applied = new Set();
+  // Enumerated from the emitter's own plan rather than from a list here, so a component
+  // added to a schema is required on this page without anyone remembering to say so.
+  const { emit: componentClasses } = require('./generate-tokens-css').componentPlan();
+  for (const c of componentClasses) if (emitted.has(c.name)) applied.add(c.name);
   for (const file of fs.readdirSync(CATALOG).filter((f) => f.endsWith('.tsx'))) {
     const src = fs.readFileSync(path.join(CATALOG, file), 'utf8');
     const strings = [
@@ -1769,9 +1825,10 @@ function checkPreviewCoverage() {
   for (const c of [...applied].sort()) {
     if (rendered.has(c) || PREVIEW_SKIPS[c]) continue;
     failures.push(
-      `.${c} is applied by an atom but never rendered in docs/preview.html - it can be ` +
-      'emptied, renamed or outranked without this page changing, which is how .dialog-fixed ' +
-      'shipped unable to position anything. Render it, or add it to PREVIEW_SKIPS with a reason'
+      `.${c} is applied by an atom or emitted as a component class, but never rendered in ` +
+      'docs/preview.html - it can be emptied, renamed or outranked without this page ' +
+      'changing, which is how .dialog-fixed shipped unable to position anything. Render it, ' +
+      'or add it to PREVIEW_SKIPS with a reason'
     );
   }
 
@@ -1785,7 +1842,7 @@ function checkPreviewCoverage() {
 
   for (const c of Object.keys(PREVIEW_SKIPS)) {
     if (!applied.has(c)) {
-      failures.push(`.${c} is in PREVIEW_SKIPS but no atom applies it any more - drop the entry`);
+      failures.push(`.${c} is in PREVIEW_SKIPS but is neither atom-applied nor an emitted component class any more - drop the entry`);
     } else if (rendered.has(c)) {
       failures.push(`.${c} is in PREVIEW_SKIPS but the page renders it now - drop the entry`);
     }
@@ -1793,7 +1850,7 @@ function checkPreviewCoverage() {
 
   return {
     failures,
-    note: `${applied.size} atom-applied classes against docs/preview.html, ${Object.keys(PREVIEW_SKIPS).length} skipped`,
+    note: `${applied.size} atom-applied and component classes against docs/preview.html, ${Object.keys(PREVIEW_SKIPS).length} skipped`,
   };
 }
 function verify() {
@@ -1812,6 +1869,7 @@ function verify() {
     ['class-box-model', () => checkClassBoxModel()],
     ['phantom-parts', () => checkPhantomParts()],
     ['variant-keys', () => checkVariantKeys()],
+    ['height-roles', () => checkHeightRoles()],
     ['base-config-provenance', () => checkBaseConfigProvenance()],
     ['config-parity', () => checkConfigParity()],
     ['dead-exports', () => checkDeadExports()],

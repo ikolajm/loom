@@ -19,32 +19,6 @@
   },
 
 
-  "empty-state": {
-    "$note": "Placeholder shown when a view has no content — zero results, first-time use, empty list. Icon/illustration + heading + description + optional action button. Always provide a next action when possible. Distinct from skeleton (loading placeholder) — empty state appears after loading completes with no data.",
-    "variants": {
-      "default": { "icon-fg": "color/surface/on-surface-variant", "heading-fg": "color/surface/on-surface", "description-fg": "color/surface/on-surface-variant" }
-    },
-    "heading-typography": {
-      "font-family": "body",
-      "font-weight": 600,
-      "text-transform": "none"
-    },
-    "description-typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
-    "sizes": {
-      "sm": { "gap": "{scale.3}", "icon-size": "icon/icon-3", "heading-text": "title/sm", "description-text": "body/sm" },
-      "md": { "gap": "{scale.4}", "icon-size": "icon/icon-4", "heading-text": "title/md", "description-text": "body/md" },
-      "lg": { "gap": "{scale.6}", "icon-size": "icon/icon-4", "heading-text": "title/lg", "description-text": "body/lg" }
-    },
-    "default": { "variant": "default", "size": "md" }
-  },
-
-
-
   "spinner": {
     "$note": "Indeterminate loading indicator. Distinct from Skeleton (content placeholder) and ProgressBar (determinate progress). CSS animation — not a Figma variable. Use aria-label for accessibility. Can be inlined in buttons (loading state) or standalone.",
     "variants": {

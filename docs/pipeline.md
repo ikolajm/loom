@@ -196,7 +196,8 @@ would otherwise drop an answers file into consumer source trees with nothing ign
 The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
 `interactive-implies-control`, `class-coverage`, `preview-coverage`,
 `atom-class-coverage`, `class-box-model`, `phantom-parts`, `variant-keys`,
-`base-config-provenance`, `config-parity`, `dead-exports`, `tone-fallbacks`,
+`height-roles`, `base-config-provenance`, `config-parity`, `dead-exports`,
+`tone-fallbacks`,
 `tone-matrix`, `theme-init-parity`, `focus-ring`, `touch-target`, `contrast`,
 `tone-contrast`, `border-contrast`, `figma-assembly`, `figma-code-syntax`,
 `typecheck`, `typecheck-scripts`. Any failure exits

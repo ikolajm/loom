@@ -17,25 +17,6 @@
       "sm": "ch-5",
       "md": "ch-7",
       "lg": "ch-9"
-    },
-    "nav-item": {
-      "sm": "ch-5",
-      "md": "ch-7",
-      "lg": "ch-8"
-    },
-    "menu-item": {
-      "sm": "ch-3",
-      "md": "ch-4",
-      "lg": "ch-5"
-    },
-    "bar": {
-      "sm": "ch-7",
-      "md": "ch-8",
-      "lg": "ch-9"
-    },
-    "bottom-bar": {
-      "sm": "ch-8",
-      "md": "ch-9"
     }
   }
 }

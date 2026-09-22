@@ -53,7 +53,6 @@ function loadAllConfigs() {
     feedbackConfig: loadComponents('components/feedback.json'),
     dataDisplayConfig: loadComponents('components/data-display.json'),
     layoutConfig: loadComponents('components/layout.json'),
-    navigationConfig: loadComponents('components/navigation.json'),
   };
 }
 
@@ -198,7 +197,7 @@ function resolveBase(allComponents, configKey) {
 // --- Component registry ---
 
 function getComponentRegistry(configs) {
-  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig, navigationConfig } = configs;
+  const { buttonConfig, formConfig, feedbackConfig, dataDisplayConfig, layoutConfig } = configs;
   return {
     // === Actions ===
     'Button': { generator: 'button#generateButton', source: buttonConfig, key: 'button', element: 'button', htmlType: 'ButtonHTMLAttributes<HTMLButtonElement>', textFamily: 'action', category: 'Actions' },

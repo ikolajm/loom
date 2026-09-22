@@ -79,7 +79,7 @@ Reading inward:
 | `--screen-*` | the page against the viewport — the gutter outside everything | `x-padding`, `y-padding` |
 | `--content-*` | the column the page's reading matter sits in | `+ gap`, `+ max-width` |
 | `--section-*` | related groups under one heading — a card's contents, a form's fieldsets | `+ gap` |
-| `--group-*` | controls that read as one unit — a toolbar's buttons, a field and its label | `+ gap` |
+| `--group-*` | controls that read as one unit — a row of buttons, a field and its label | `+ gap` |
 | `--component-*` | the inside of one control — a button's padding, its icon-to-label gap | `+ gap` |
 
 The gaps descend as you move inward — `--content-gap` through `--component-gap` step down
@@ -97,7 +97,7 @@ tightened. Every var has a twin, so switching a context over never needs a list 
 exceptions.
 
 This is the density mechanism Loom ships that is *not* a build-time answer: point a rule
-at the compact value where the context is tight — a dense table, a sidebar, a narrow
+at the compact value where the context is tight — a dense table, a dialog footer, a narrow
 viewport — and the hierarchy holds at a smaller step instead of collapsing. Loom does not
 choose when that happens and ships no breakpoints to hang it on, because the width at
 which a layout gets tight is a property of your layout, not of the substrate. (Custom
@@ -134,6 +134,21 @@ produce a legible label fails the build.
 
 Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and
 `form-field` none.
+
+**Tone is a hue signal, so it cannot carry meaning by itself.** The semantic roles sit
+at matched luminance on purpose — that is what lets every `on-*` pairing resolve the
+same way and what keeps a filled error and a filled success reading at the same weight
+beside each other. The cost is that they separate by hue and very little else, so in
+greyscale, or to a viewer with red-green colour blindness, an error and a success
+render as the same swatch. The container ends are closer still than the fills.
+
+Which means a status that matters needs a second channel — an icon, a word, a
+treatment — and tone alone is decoration on top of it. Loom cannot check this for you:
+it emits the roles, and whether colour is the only thing carrying your meaning is a
+fact about your markup. **The states Loom does ship are already safe.** Hover and
+active are a `currentColor` overlay, disabled is opacity, focus is a ring and a link's
+hover thickens its underline — every one of them a change in lightness or shape rather
+than hue, so they survive the same conditions the tones do not.
 
 ---
 

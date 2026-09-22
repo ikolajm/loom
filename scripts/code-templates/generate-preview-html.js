@@ -314,7 +314,32 @@ const CLASS_STRIP = [
           </select>
           <span class="helper-text" data-size="md">A label can label this one.</span>
         </div>
+      </div>
+      <div class="pv-field">
+        <div class="form-field">
+          <label class="label" data-size="md" for="pv-textarea">Notes</label>
+          <textarea class="textarea control" data-size="md" id="pv-textarea" rows="3" placeholder="Anything the team should know"></textarea>
+          <span class="helper-text" data-size="md">Same field treatment, sized by rows.</span>
+        </div>
       </div>`),
+  ].join(NL)),
+
+  section('Keys and rules', [
+    lede(`Two classes that exist because composing them from memory is the failure mode.
+      <code>.kbd</code> is a key cap on the label ramp, not the body one, so it sits in a
+      sentence without changing its leading. <code>.separator</code> is a divider, and the
+      decision it carries is which boundary role to take &mdash; <code>--outline-subtle</code>,
+      what a page draws between two things, rather than <code>--outline</code>, what a
+      control draws around itself. Nothing but the class says which.`),
+    `    <p class="text-body-md">
+      Press <kbd class="kbd" data-size="md" data-variant="default">Ctrl</kbd> <kbd class="kbd" data-size="md" data-variant="default">K</kbd>
+      to search, or <kbd class="kbd" data-size="sm" data-variant="default">Esc</kbd> to close.
+    </p>`,
+    `    <hr class="separator">`,
+    `    <p class="text-body-sm text-on-surface-variant">
+      A rule between two blocks, drawn horizontally. A vertical one is two declarations at
+      the call site.
+    </p>`,
   ].join(NL)),
 
   section('Selection controls', [
