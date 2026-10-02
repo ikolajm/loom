@@ -163,6 +163,10 @@ function main(argv) {
   // the only fix available was an override naming each one — which a seventh atom then
   // arrives outside of. One glob covers every atom, now and later.
   const dest = path.join(src, 'components', 'loom');
+  // The stylesheets get the same, for a different reason: they are overwritten without a
+  // check, which is only safe in a directory nobody else writes to. Delivered into `src/`
+  // itself, a consumer's own `main.css` or `tokens.css` would be replaced without a word.
+  const styles = path.join(src, 'styles', 'loom');
 
   // The brand, built into a throwaway config root rather than into spec/config/local/.
   // That directory is a single slot, so generating a consumer brand there evicts whatever
@@ -261,16 +265,17 @@ function main(argv) {
       [path.join(LOOM_ROOT, 'scripts/code-templates/orchestrator.js'), '--only', 'tokens', '--output', tmp],
       { stdio: ['ignore', 'ignore', 'inherit'], env: childEnv }
     );
+    fs.mkdirSync(styles, { recursive: true });
     for (const f of SUBSTRATE) {
-      deliver(path.join(tmp, f), path.join(src, f), prov);
-      console.log(`  + src/${f}`);
+      deliver(path.join(tmp, f), path.join(styles, f), prov);
+      console.log(`  + src/styles/loom/${f}`);
     }
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
     if (cfgRoot) fs.rmSync(cfgRoot, { recursive: true, force: true });
   }
 
-  console.log(`Done → ${tokensOnly ? src : dest}`);
+  console.log(`Done → ${tokensOnly ? styles : `${dest} and ${styles}`}`);
 
   addLoomSyncScript(project, answers);
 
@@ -282,13 +287,13 @@ function main(argv) {
 
   console.log('');
   console.log('Wire the substrate into your global stylesheet with one line:');
-  console.log('  @import "./main.css";   /* path relative to that stylesheet */');
+  console.log('  @import "./styles/loom/main.css";   /* path relative to that stylesheet */');
   console.log('');
   console.log('main.css imports the three in the order the cascade needs. Import them directly');
   console.log('instead if you own your components and want to drop the third:');
-  console.log('  @import "./tokens.css";          /* values */');
-  console.log('  @import "./loom.css";            /* the class layer */');
-  console.log('  @import "./loom.components.css"; /* named components */');
+  console.log('  @import "./styles/loom/tokens.css";          /* values */');
+  console.log('  @import "./styles/loom/loom.css";            /* the class layer */');
+  console.log('  @import "./styles/loom/loom.components.css"; /* named components */');
   console.log('');
   console.log('Your own reset goes in @layer loom.reset, imported before tokens.css, or it');
   console.log('silently outranks the whole class layer. See docs/gotchas.md.');

@@ -62,7 +62,7 @@ your app is a separate project it builds into. The clean layout is siblings:
 ```bash
 # From the Loom repo, pointing at your project by path.
 
-# Tokens tier — four stylesheets into <project>/src/, nothing else:
+# Tokens tier — four stylesheets into <project>/src/styles/loom/, nothing else:
 npm run sync -- ../my-loom-app --tokens --answers ../my-loom-app/loom-answers.json
 
 # Catalog tier — the same, plus every component into <project>/src/components/loom/:
@@ -108,7 +108,7 @@ Three things, once. **There is no app shell and no framework assumption** — Lo
 nothing that presumes a router, a root layout or a `src/app/`. Where a provider mounts is
 your framework's business.
 
-1. **Wire the substrate in.** One `@import "./main.css"` in your global stylesheet —
+1. **Wire the substrate in.** One `@import "./styles/loom/main.css"` in your global stylesheet —
    plain CSS, no build step. If you own your components, import the three directly in
    order and drop the `loom.components.css` line.
    [The order is load-bearing](substrate.md#the-four-files-and-the-layer-order).

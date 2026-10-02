@@ -144,7 +144,7 @@ non-modal or arbitrarily positioned surface. That path is what `.dialog-fixed` a
 ## Install
 
 `npm run sync -- <project>` copies the whole catalog into the consuming project's
-`src/components/loom/`, plus `cn`, and writes the four stylesheets into `src/`. The
+`src/components/loom/`, plus `cn`, and writes the four stylesheets into `src/styles/loom/`. The
 operational contract is in [`quickstart.md`](quickstart.md#2-install-it-into-a-project);
 what follows is why it is shaped that way.
 
@@ -162,6 +162,10 @@ consumer's lint run produced 14 errors in files it had not written — every ato
 its cva variants, which `react-refresh/only-export-components` objects to — and the only
 fix available was an override naming each file, which the next atom arrives outside of.
 `src/components/loom/` is one glob, now and after the catalog grows.
+
+**The stylesheets get one too, `src/styles/loom/`.** The sync overwrites without checking,
+which is safe only where nothing else writes. Delivered into `src/` itself, the four files
+would replace a project's own `main.css` or `tokens.css` without a word.
 
 **There is no override config layer and no install-time customization.** The copy in
 your tree is the override mechanism, which is why the sync overwrites it unconditionally
