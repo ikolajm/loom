@@ -708,8 +708,14 @@ const BASE_RULES = {
   // Appearance only. `.dialog-fixed` carries placement, so the class works on a native
   // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
   dialog: ['display: flex;', 'flex-direction: column;', 'width: 100%;'],
-  'form-field': ['display: flex;', 'flex-direction: column;'],
-  'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
+  // `--tone-text` inherits, so without the reset a field inside a toned card or banner
+  // recoloured its helper text. `initial` makes the property invalid, so a reader takes its
+  // fallback; a tone class on the helper text itself sets it again below the reset.
+  'form-field': ['display: flex;', 'flex-direction: column;', '--tone-text: initial;'],
+  // The colour reads `--tone-text` so a tone class recolours it: `tone-error` for an error
+  // hint, at the text role resolved against every surface. A plain colour here outranked a
+  // tone in the same layer, so an error hint needed a consumer rule.
+  'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--tone-text, var(--on-surface-variant));'],
   // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
   // the error role and the field turns red without this rule knowing about validity.
   // Before, that re-point had no reader on an input — only `.treat-outline` consumes it,

@@ -104,8 +104,8 @@
   "form-field": {
     "$catalog": {
     },
-    "$note": "A column with a gap, and nothing that ramps — so it declares only a $constant, which lifts to the base rule. A component in APPEARANCE_ONLY with no schema at all emits nothing, and the atom ends up carrying the layout itself — which is what the $constant is here to prevent. Spacing is {scale.1} like every other component here.",
-    "sizes": { "$constant": { "gap": "{scale.1}" } }
+    "$note": "A column with a gap, and nothing that ramps — so it declares only a $constant, which lifts to the base rule. A component in APPEARANCE_ONLY with no schema at all emits nothing, and the atom ends up carrying the layout itself — which is what the $constant is here to prevent. The gap is {scale.2}, not the {scale.1} the other components here use, because it has to clear the focus ring: the ring reaches --focus-ring-offset plus --focus-ring-width past the control, which equals {scale.1}, so at that gap a focused field's ring touched its label and its helper text.",
+    "sizes": { "$constant": { "gap": "{scale.2}" } }
   },
   "label": {
     "state": {

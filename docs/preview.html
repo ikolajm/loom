@@ -664,7 +664,9 @@
     <h2 class="text-title-md text-on-surface-variant">Form field</h2>
     <p class="text-body-sm text-on-surface-variant">
       A label, a control and its helper text as one column. The gap is the only thing
-      the class carries &mdash; everything else composes. The second one is a plain
+      the class carries &mdash; everything else composes &mdash; and it clears the focus
+      ring, so tab into a field to check it. An error hint is the helper text with
+      <code>tone-error</code>, as in the last one. The second one is a plain
       <code>&lt;select&gt;</code>: the same two classes, no component, and the arrow is the
       UA's because <code>loom.base</code> takes <code>appearance</code> off buttons only.
       It follows the theme through <code>color-scheme</code>.
@@ -693,6 +695,13 @@
           <label class="label" data-size="md" for="pv-textarea">Notes</label>
           <textarea class="textarea control" data-size="md" id="pv-textarea" rows="3" placeholder="Anything the team should know"></textarea>
           <span class="helper-text" data-size="md">Same field treatment, sized by rows.</span>
+        </div>
+      </div>
+      <div class="pv-field">
+        <div class="form-field">
+          <label class="label" data-size="md" for="pv-invalid">Handle</label>
+          <input class="input control" data-size="md" id="pv-invalid" aria-invalid="true" aria-describedby="pv-invalid-hint" value="taken">
+          <span class="helper-text tone-error" data-size="md" id="pv-invalid-hint">That handle is taken.</span>
         </div>
       </div>
     </div>
