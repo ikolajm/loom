@@ -701,7 +701,9 @@ const CELL_SIZED = new Set(['table']);
  */
 const BASE_RULES = {
   badge: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-  button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  // Not a recovered line. `Button asChild` renders a navigation as an `<a>`, and the UA
+  // underline for `a[href]` showed through every button-styled link.
+  button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'text-decoration: none;'],
   card: ['display: flex;', 'flex-direction: column;'],
   // Appearance only. `.dialog-fixed` carries placement, so the class works on a native
   // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
