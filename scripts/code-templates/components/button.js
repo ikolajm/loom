@@ -1,4 +1,4 @@
-const { buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 
 function generateButton(name, config, meta) {
   // Three axes: variant = treatment, color = family, intensity = solid or soft.
@@ -12,7 +12,6 @@ function generateButton(name, config, meta) {
   const intensities = config.intensities || ['solid', 'soft'];
   const { colorNames: colorKeys, toneClass, toneFamily } = buildColorVars(config.colors || {});
   const tones = buildToneLookup('button', colorKeys, toneFamily, toneClass);
-  const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
 
   // `variant` carries a treatment class and is the only cva axis; the tone is computed

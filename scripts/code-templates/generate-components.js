@@ -137,11 +137,9 @@ function extractLocalDeps(src) {
 function buildManifest(def, config, src) {
   const cat = config?.$catalog || {};
 
-  // Primary axis: variants if present, else checked, else active, else step-state
+  // Primary axis: variants if present, else active
   const axisKey = config?.variants ? 'variants'
-    : config?.checked ? 'checked'
     : config?.active ? 'active'
-    : config?.['step-state'] ? 'step-state'
     : null;
   const variants = axisKey ? extractAxisKeys(config[axisKey]) : [];
   const sizes = extractAxisKeys(config?.sizes);

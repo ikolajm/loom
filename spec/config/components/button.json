@@ -69,11 +69,6 @@
         "border": "currentColor"
       }
     },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "text-transform": "none"
-    },
     "icon-slots": {
       "leading": {
         "default-visible": false,
@@ -208,11 +203,6 @@
         "text": "currentColor",
         "border": "currentColor"
       }
-    },
-    "typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "text-transform": "none"
     },
     "icon-slots": {
       "leading": {

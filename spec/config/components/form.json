@@ -1,12 +1,6 @@
 {
   "text-field": {
     "$note": "Shared visual foundation for all text-input-style components (input, select, textarea, date-picker). Components reference this base — changing it changes all text fields uniformly.",
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "letter-spacing": "0",
-      "text-transform": "none"
-    },
     "icon-slots": {
       "leading":  { "default-visible": false, "default-icon": "icon/placeholder" },
       "trailing": { "default-visible": false, "default-icon": "icon/placeholder" }
@@ -100,11 +94,6 @@
     "sizes": { "$constant": { "gap": "{scale.2}" } }
   },
   "label": {
-    "typography": {
-      "font-family": "body",
-      "font-weight": 500,
-      "text-transform": "none"
-    },
     "sizes": {
       "sm": { "line-height": "16px" },
       "md": { "line-height": "20px" },
@@ -114,12 +103,7 @@
   },
 
   "helper-text": {
-    "typography": {
-      "font-family": "body",
-      "font-weight": 400,
-      "text-transform": "none"
-    },
-    "$note": "Subordinate to the label by colour alone. label and action read one size ramp at one weight, so the only separation left is on-surface-variant against on-surface. The font-weight below does not change that — nothing reads a component's typography block except text-transform, so font-family and font-weight there are inert.",
+    "$note": "Subordinate to the label by colour alone. label and action read one size ramp at one weight, so the only separation left is on-surface-variant against on-surface.",
     "sizes": {
       "sm": { "line-height": "16px" },
       "md": { "line-height": "16px" },
