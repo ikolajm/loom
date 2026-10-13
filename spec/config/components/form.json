@@ -1,10 +1,6 @@
 {
   "text-field": {
     "$note": "Shared visual foundation for all text-input-style components (input, select, textarea, date-picker). Components reference this base — changing it changes all text fields uniformly.",
-    "state": {
-      "default": { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/outline/outline", "placeholder": "color/surface/on-surface-variant" },
-      "error":   { "bg": "color/surface/surface", "fg": "color/surface/on-surface", "border": "color/error/error", "placeholder": "color/surface/on-surface-variant" }
-    },
     "typography": {
       "font-family": "body",
       "font-weight": 400,
@@ -26,21 +22,17 @@
 
   "input": {
     "$base": "text-field",
-    "default": { "state": "default", "size": "md" }
+    "default": { "size": "md" }
   },
 
   "select": {
     "$catalog": {
     },
     "$base": "text-field",
-    "state": {
-      "default": { "indicator": "color/surface/on-surface-variant" },
-      "error":   { "indicator": "color/surface/on-surface-variant" }
-    },
     "icon-slots": {
       "trailing": { "default-visible": true, "default-icon": "icon/chevron-down", "persistent": true }
     },
-    "default": { "state": "default", "size": "md" }
+    "default": { "size": "md" }
   },
 
   "textarea": {
@@ -54,7 +46,7 @@
       "lg": { "min-height": "160px", "x-padding": "{scale.4}", "y-padding": "{scale.3}" }
     },
     "resize": "vertical",
-    "default": { "state": "default", "size": "md" }
+    "default": { "size": "md" }
   },
 
 
@@ -108,9 +100,6 @@
     "sizes": { "$constant": { "gap": "{scale.2}" } }
   },
   "label": {
-    "state": {
-      "default": { "fg": "color/surface/on-surface" }
-    },
     "typography": {
       "font-family": "body",
       "font-weight": 500,
@@ -121,14 +110,10 @@
       "md": { "line-height": "20px" },
       "lg": { "line-height": "24px" }
     },
-    "default": { "state": "default", "size": "md" }
+    "default": { "size": "md" }
   },
 
   "helper-text": {
-    "state": {
-      "default": { "fg": "color/surface/on-surface-variant" },
-      "error":   { "fg": "color/error/error" }
-    },
     "typography": {
       "font-family": "body",
       "font-weight": 400,
@@ -140,7 +125,7 @@
       "md": { "line-height": "16px" },
       "lg": { "line-height": "20px" }
     },
-    "default": { "state": "default", "size": "md" }
+    "default": { "size": "md" }
   }
 
 

@@ -205,7 +205,7 @@ function getComponentRegistry(configs) {
     'Badge': { generator: 'badge#generateBadge', source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions' },
 
     // === Inputs ===
-    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', variantKey: 'state' },
+    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs' },
     'Checkbox': { generator: 'toggles#generateCheckbox', source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
     'Radio': { generator: 'toggles#generateRadio', source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
     'Switch': { generator: 'toggles#generateSwitch', source: formConfig, key: 'switch', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
