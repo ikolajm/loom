@@ -223,9 +223,6 @@ const CLASS_STRIP = [
       <code>.dialog-fixed</code>, which is why the same class works on a native
       <code>&lt;dialog&gt;</code> the browser centres itself.`),
     `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
-      <div class="dialog-close">
-        <button class="button treat-ghost tone-inherit interactive control" data-size="icon-sm" aria-label="Close">${CLOSE_MARK}</button>
-      </div>
       <div class="dialog-header">
         <span class="dialog-title">Delete this project</span>
         <span class="dialog-description">This cannot be undone. Everything in it goes with it.</span>
@@ -233,6 +230,16 @@ const CLASS_STRIP = [
       <div class="dialog-footer">
         <button class="button treat-outline tone-neutral interactive control" data-size="md">Cancel</button>
         <button class="button treat-filled tone-error interactive control" data-size="md">Delete</button>
+      </div>
+    </div>`,
+    lede(`A dialog with no footer button carries a close button, and the button sits in
+      the header: a second column on the title's row. A title or description long enough
+      to reach it wraps first. A header without one stays a single column.`),
+    `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
+      <div class="dialog-header">
+        <span class="dialog-title">Everyone who can see this project, and what each of them can change</span>
+        <span class="dialog-description">Access is set per person. Anyone listed here keeps it until it is removed, including people who have left the team.</span>
+        <button class="dialog-close button treat-ghost tone-inherit interactive control" data-size="icon-sm" aria-label="Close">${CLOSE_MARK}</button>
       </div>
     </div>`,
     lede(`The same class on a real <code>&lt;dialog&gt;</code>, opened with

@@ -2,34 +2,18 @@ const { cls } = require('../shared');
 const { filterSizes } = require('./helpers');
 
 /**
- * Built-in close affordance, shared by Dialog and Sheet (both wrap @radix-ui/react-dialog).
- * `alias` is the imported primitive namespace (DialogPrimitive / SheetPrimitive); `pad` is the
- * leading indent for the block. Single source for the close-button markup + styling.
- */
-function closeButton(alias, pad) {
-  // Compose the iconOnly Button (house dismiss pattern, color="inherit" takes the surface
-  // foreground). The wrapper div carries the absolute position — Button's `.interactive`
-  // utility hard-sets position:relative, so positioning Button directly via className loses
-  // the cascade (same footgun as the carousel arrows).
-  return [
-    `${pad}{showClose && (`,
-    `${pad}  <div className="${cls('dialog-close', 'dialog')}">`,
-    `${pad}    <${alias}.Close asChild>`,
-    `${pad}      <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">`,
-    `${pad}        <X />`,
-    `${pad}      </Button>`,
-    `${pad}    </${alias}.Close>`,
-    `${pad}  </div>`,
-    `${pad})}`,
-  ].join('\n');
-}
-
-/**
  * Appearance is the class layer's; this carries behavior. `size` and the variant travel
  * as data attributes rather than a cva of utility strings.
  *
  * `.dialog-fixed` is applied here because a Radix `Content` is a plain div in a portal
  * and has to be placed. A native `<dialog>` takes `.dialog` alone and is placed by the UA.
+ *
+ * The close button belongs to the header, off unless asked for. It was absolute in the
+ * panel's corner, reserved no space, and a long title or description ran under it; both
+ * consumers turned it off and one rebuilt it beside its title by hand. In the header it
+ * takes a grid column, so nothing can reach under it. Off by default because a dialog with
+ * a Cancel in its footer would carry two controls for one intent; a dialog with no footer
+ * button asks for it, since it is then the only visible way out.
  */
 function generateRadixDialog(name, config, meta) {
   const sizes = filterSizes(config.sizes);
@@ -59,8 +43,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: ${sizeUnion}; showClose?: boolean }
->(({ size = '${defaultSize}', showClose = true, className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: ${sizeUnion} }
+>(({ size = '${defaultSize}', className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -71,15 +55,23 @@ const DialogContent = forwardRef<
       {...props}
     >
       {children}
-${closeButton('DialogPrimitive', '      ')}
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('${cls('dialog-header', 'dialog')}', className)} {...props} />
+const DialogHeader = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'> & { showClose?: boolean }>(
+  ({ showClose = false, className, children, ...props }, ref) => (
+    <div ref={ref} className={cn('${cls('dialog-header', 'dialog')}', className)} {...props}>
+      {children}
+      {showClose && (
+        <DialogPrimitive.Close asChild>
+          <Button className="${cls('dialog-close', 'dialog')}" iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">
+            <X />
+          </Button>
+        </DialogPrimitive.Close>
+      )}
+    </div>
   )
 );
 DialogHeader.displayName = 'DialogHeader';

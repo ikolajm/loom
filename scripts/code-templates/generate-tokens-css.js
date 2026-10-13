@@ -1967,6 +1967,20 @@ dialog.dialog::backdrop {
   gap: var(--space-1);
 }
 
+/* A header holding the close button becomes two columns: the title and description in the
+   first, the button in the second on the title's row. The button takes a track, so a long
+   title or description wraps before it rather than running under it. Keyed off the
+   button's presence so a header without one stays a plain column with no empty track. */
+.dialog-header:has(> .dialog-close) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+}
+
+.dialog-header > :not(.dialog-close) {
+  grid-column: 1;
+}
+
 .dialog-title {
   font-family: var(--type-title-md-family);
   font-size: var(--type-title-md-size);
@@ -1992,9 +2006,9 @@ dialog.dialog::backdrop {
 }
 
 .dialog-close {
-  position: absolute;
-  right: var(--space-4);
-  top: var(--space-4);
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
 }`;
 }
 
