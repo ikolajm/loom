@@ -90,9 +90,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }}
       >
         {iconOnly ? (
-          <span className={'icon-slot'}>
-            {loading ? spinner : children}
-          </span>
+          // The render form of Slottable, so under asChild the icon slot lands inside the
+          // consumer's element. A bare span here was the only child Slot could find, so it
+          // took the button's classes and an <a> rendered with none of them. Needs
+          // @radix-ui/react-slot 1.2.5 or later; earlier versions have no child prop.
+          <Slottable child={children}>
+            {(content) => (
+              <span className={'icon-slot'}>
+                {loading ? spinner : content}
+              </span>
+            )}
+          </Slottable>
         ) : (
           // An array, not a fragment. Slot finds Slottable with React.Children.toArray,
           // which flattens arrays but not fragments — wrapped in one, Slot saw a single
