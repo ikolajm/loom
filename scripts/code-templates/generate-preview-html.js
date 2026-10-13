@@ -342,6 +342,21 @@ const CLASS_STRIP = [
     </p>`,
   ].join(NL)),
 
+  section('Links', [
+    lede(`<code>.link</code> is a standalone link: the tone's text role and the action
+      weight at rest, an underline on hover. <code>.link-prose</code> beside it is a link
+      inside reading text: underlined at rest, the underline doubled on hover. Neither
+      changes colour. Hover these in both themes.`),
+    `    <p class="text-body-md" id="pv-links">
+      Already have an account? <a class="link" href="#pv-links">Log in</a>
+    </p>`,
+    row(TONES.map((t) => `      <a class="link tone-${t}" href="#pv-links">${t}</a>`).join(NL)),
+    `    <p class="text-body-md">
+      Read the <a class="link link-prose" href="#pv-links">quickstart</a> before the
+      <a class="link link-prose" href="#pv-links">substrate reference</a>, which is the page you return to.
+    </p>`,
+  ].join(NL)),
+
   section('Selection controls', [
     lede(`The box, the tick and the circle are the browser's, pointed at the brand with
       <code>accent-color</code>; the ladder sets the size and nothing else. That is what

@@ -1165,14 +1165,42 @@ ${surfaces}
 /* === Elevation === */
 ${elevations}
 /* === Link === */
+/* Two kinds. .link alone is a standalone link, one action such as "Log in" after a
+   question: tone and weight mark it at rest, and hover underlines it. .link-prose beside
+   it is a link inside reading text, underlined at rest because that is the cue a reader
+   looks for in a paragraph, and hover doubles the underline. Both change shape on hover,
+   never colour, so the state reads the same in either mode and cannot drop below the
+   contrast floor --tone-text is resolved against. Markup cannot tell the two apart: a
+   standalone link often sits inside a <p>, so the prose kind is opted into.
+
+   The underline is a pixel floor that scales with the font above it. The weight is held
+   at zero specificity so a type class on the same element sets its own: at equal
+   specificity .link comes later in the file and would win. */
+:where(.link) {
+  font-weight: var(--type-action-md-weight);
+}
+
 .link {
   color: var(--tone-text, var(--primary));
-  text-decoration: underline;
+  text-decoration-line: none;
+  text-decoration-thickness: max(var(--bw-1), 0.0625em);
   text-underline-offset: 0.15em;
 }
 
 .link:hover {
-  text-decoration-thickness: var(--bw-2);
+  text-decoration-line: underline;
+}
+
+:where(.link-prose) {
+  font-weight: inherit;
+}
+
+.link-prose {
+  text-decoration-line: underline;
+}
+
+.link-prose:hover {
+  text-decoration-thickness: max(var(--bw-2), 0.125em);
 }`;
 }
 

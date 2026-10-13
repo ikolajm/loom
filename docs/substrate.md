@@ -147,8 +147,9 @@ treatment — and tone alone is decoration on top of it. Loom cannot check this 
 it emits the roles, and whether colour is the only thing carrying your meaning is a
 fact about your markup. **The states Loom does ship are already safe.** Hover and
 active are a `currentColor` overlay, disabled is opacity, focus is a ring and a link's
-hover thickens its underline — every one of them a change in lightness or shape rather
-than hue, so they survive the same conditions the tones do not.
+hover underlines it, or thickens the underline a `.link-prose` already has — every one
+of them a change in lightness or shape rather than hue, so they survive the same
+conditions the tones do not.
 
 ---
 
