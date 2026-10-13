@@ -25,8 +25,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: 'sm' | 'md' | 'lg' | 'full'; showClose?: boolean }
->(({ size = 'md', showClose = true, className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: 'sm' | 'md' | 'lg' | 'full' }
+>(({ size = 'md', className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -37,23 +37,23 @@ const DialogContent = forwardRef<
       {...props}
     >
       {children}
-      {showClose && (
-        <div className="dialog-close">
-          <DialogPrimitive.Close asChild>
-            <Button iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">
-              <X />
-            </Button>
-          </DialogPrimitive.Close>
-        </div>
-      )}
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('dialog-header', className)} {...props} />
+const DialogHeader = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'> & { showClose?: boolean }>(
+  ({ showClose = false, className, children, ...props }, ref) => (
+    <div ref={ref} className={cn('dialog-header', className)} {...props}>
+      {children}
+      {showClose && (
+        <DialogPrimitive.Close asChild>
+          <Button className="dialog-close" iconOnly variant="ghost" color="inherit" size="sm" aria-label="Close">
+            <X />
+          </Button>
+        </DialogPrimitive.Close>
+      )}
+    </div>
   )
 );
 DialogHeader.displayName = 'DialogHeader';

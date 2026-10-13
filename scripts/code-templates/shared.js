@@ -205,7 +205,7 @@ function getComponentRegistry(configs) {
     'Badge': { generator: 'badge#generateBadge', source: buttonConfig, key: 'badge', element: 'span', htmlType: 'HTMLAttributes<HTMLElement>', textFamily: 'label', category: 'Actions' },
 
     // === Inputs ===
-    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs', variantKey: 'state' },
+    'Select': { generator: 'radix-form-controls#generateRadixSelect', source: formConfig, key: 'select', baseKey: 'text-field', element: 'select', htmlType: 'SelectHTMLAttributes<HTMLSelectElement>', noIconSlots: true, textFamily: 'input', category: 'Inputs' },
     'Checkbox': { generator: 'toggles#generateCheckbox', source: formConfig, key: 'checkbox', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
     'Radio': { generator: 'toggles#generateRadio', source: formConfig, key: 'radio', baseKey: 'toggle-base', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
     'Switch': { generator: 'toggles#generateSwitch', source: formConfig, key: 'switch', element: 'input', htmlType: 'InputHTMLAttributes<HTMLInputElement>', noIconSlots: true, noChildren: true, defaultSize: 'md', category: 'Inputs' },
@@ -222,31 +222,6 @@ function getComponentRegistry(configs) {
 
     // === Composite ===
   };
-}
-
-// --- Typography extraction ---
-
-/**
- * Base typography classes for an atom.
- *
- * `font-weight` and `letter-spacing` are deliberately NOT emitted. Every atom that
- * declares typography also lands a `text-{family}-{tier}` ramp class through its size
- * variant, and the ramp already carries both — so emitting them here put two sources on
- * one element. That was invisible while the ramp was unlayered and outranked the
- * utilities; in `@layer components` the utilities win, and a schema's font-weight would
- * quietly outrank the type ramp it sits on. If an atom needs a different weight, it needs
- * a different text role.
- *
- * `text-transform` stays: no ramp tier declares it, so there is nothing to conflict with.
- */
-function buildTypographyClasses(config) {
-  const typo = config.typography;
-  if (!typo) return '';
-  const classes = [];
-  if (typo['text-transform'] && typo['text-transform'] !== 'none') {
-    classes.push(typo['text-transform']);
-  }
-  return classes.join(' ');
 }
 
 /**
@@ -325,7 +300,6 @@ module.exports = {
   ICON_SLOT_CLASS,
   buildColorVars,
   buildToneLookup,
-  buildTypographyClasses,
   resolveBase,
   getComponentRegistry,
 };

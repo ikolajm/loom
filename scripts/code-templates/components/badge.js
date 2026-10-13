@@ -1,4 +1,4 @@
-const { buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 
 function generateBadge(name, config, meta) {
   // Three orthogonal axes: variant = treatment, color = family, intensity = solid or soft.
@@ -21,7 +21,6 @@ function generateBadge(name, config, meta) {
   // Shared with button, so the two cannot drift apart the way they did before.
   const tones = buildToneLookup('badge', colorNames, toneFamily, toneClass);
 
-  const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
 
   return `import { forwardRef } from 'react';

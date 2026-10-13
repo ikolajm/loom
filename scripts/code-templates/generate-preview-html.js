@@ -223,9 +223,6 @@ const CLASS_STRIP = [
       <code>.dialog-fixed</code>, which is why the same class works on a native
       <code>&lt;dialog&gt;</code> the browser centres itself.`),
     `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
-      <div class="dialog-close">
-        <button class="button treat-ghost tone-inherit interactive control" data-size="icon-sm" aria-label="Close">${CLOSE_MARK}</button>
-      </div>
       <div class="dialog-header">
         <span class="dialog-title">Delete this project</span>
         <span class="dialog-description">This cannot be undone. Everything in it goes with it.</span>
@@ -233,6 +230,16 @@ const CLASS_STRIP = [
       <div class="dialog-footer">
         <button class="button treat-outline tone-neutral interactive control" data-size="md">Cancel</button>
         <button class="button treat-filled tone-error interactive control" data-size="md">Delete</button>
+      </div>
+    </div>`,
+    lede(`A dialog with no footer button carries a close button, and the button sits in
+      the header: a second column on the title's row. A title or description long enough
+      to reach it wraps first. A header without one stays a single column.`),
+    `    <div class="dialog" data-size="md" data-variant="default" style="max-width: 100%">
+      <div class="dialog-header">
+        <span class="dialog-title">Everyone who can see this project, and what each of them can change</span>
+        <span class="dialog-description">Access is set per person. Anyone listed here keeps it until it is removed, including people who have left the team.</span>
+        <button class="dialog-close button treat-ghost tone-inherit interactive control" data-size="icon-sm" aria-label="Close">${CLOSE_MARK}</button>
       </div>
     </div>`,
     lede(`The same class on a real <code>&lt;dialog&gt;</code>, opened with
@@ -293,7 +300,9 @@ const CLASS_STRIP = [
 
   section('Form field', [
     lede(`A label, a control and its helper text as one column. The gap is the only thing
-      the class carries &mdash; everything else composes. The second one is a plain
+      the class carries &mdash; everything else composes &mdash; and it clears the focus
+      ring, so tab into a field to check it. An error hint is the helper text with
+      <code>tone-error</code>, as in the last one. The second one is a plain
       <code>&lt;select&gt;</code>: the same two classes, no component, and the arrow is the
       UA's because <code>loom.base</code> takes <code>appearance</code> off buttons only.
       It follows the theme through <code>color-scheme</code>.`),
@@ -321,6 +330,13 @@ const CLASS_STRIP = [
           <textarea class="textarea control" data-size="md" id="pv-textarea" rows="3" placeholder="Anything the team should know"></textarea>
           <span class="helper-text" data-size="md">Same field treatment, sized by rows.</span>
         </div>
+      </div>
+      <div class="pv-field">
+        <div class="form-field">
+          <label class="label" data-size="md" for="pv-invalid">Handle</label>
+          <input class="input control" data-size="md" id="pv-invalid" aria-invalid="true" aria-describedby="pv-invalid-hint" value="taken">
+          <span class="helper-text tone-error" data-size="md" id="pv-invalid-hint">That handle is taken.</span>
+        </div>
       </div>`),
   ].join(NL)),
 
@@ -339,6 +355,21 @@ const CLASS_STRIP = [
     `    <p class="text-body-sm text-on-surface-variant">
       A rule between two blocks, drawn horizontally. A vertical one is two declarations at
       the call site.
+    </p>`,
+  ].join(NL)),
+
+  section('Links', [
+    lede(`<code>.link</code> is a standalone link: the tone's text role and the action
+      weight at rest, an underline on hover. <code>.link-prose</code> beside it is a link
+      inside reading text: underlined at rest, the underline doubled on hover. Neither
+      changes colour. Hover these in both themes.`),
+    `    <p class="text-body-md" id="pv-links">
+      Already have an account? <a class="link" href="#pv-links">Log in</a>
+    </p>`,
+    row(TONES.map((t) => `      <a class="link tone-${t}" href="#pv-links">${t}</a>`).join(NL)),
+    `    <p class="text-body-md">
+      Read the <a class="link link-prose" href="#pv-links">quickstart</a> before the
+      <a class="link link-prose" href="#pv-links">substrate reference</a>, which is the page you return to.
     </p>`,
   ].join(NL)),
 

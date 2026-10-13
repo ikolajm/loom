@@ -701,13 +701,21 @@ const CELL_SIZED = new Set(['table']);
  */
 const BASE_RULES = {
   badge: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
-  button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;'],
+  // Not a recovered line. `Button asChild` renders a navigation as an `<a>`, and the UA
+  // underline for `a[href]` showed through every button-styled link.
+  button: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;', 'text-decoration: none;'],
   card: ['display: flex;', 'flex-direction: column;'],
   // Appearance only. `.dialog-fixed` carries placement, so the class works on a native
   // <dialog> the UA centres itself and on a hand-rolled portal that needs telling.
   dialog: ['display: flex;', 'flex-direction: column;', 'width: 100%;'],
-  'form-field': ['display: flex;', 'flex-direction: column;'],
-  'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--on-surface-variant);'],
+  // `--tone-text` inherits, so without the reset a field inside a toned card or banner
+  // recoloured its helper text. `initial` makes the property invalid, so a reader takes its
+  // fallback; a tone class on the helper text itself sets it again below the reset.
+  'form-field': ['display: flex;', 'flex-direction: column;', '--tone-text: initial;'],
+  // The colour reads `--tone-text` so a tone class recolours it: `tone-error` for an error
+  // hint, at the text role resolved against every surface. A plain colour here outranked a
+  // tone in the same layer, so an error hint needed a consumer rule.
+  'helper-text': ['display: flex;', 'align-items: center;', 'color: var(--tone-text, var(--on-surface-variant));'],
   // The border reads `--tone-border` so `.control[aria-invalid="true"]` re-points it to
   // the error role and the field turns red without this rule knowing about validity.
   // Before, that re-point had no reader on an input — only `.treat-outline` consumes it,
@@ -1163,14 +1171,42 @@ ${surfaces}
 /* === Elevation === */
 ${elevations}
 /* === Link === */
+/* Two kinds. .link alone is a standalone link, one action such as "Log in" after a
+   question: tone and weight mark it at rest, and hover underlines it. .link-prose beside
+   it is a link inside reading text, underlined at rest because that is the cue a reader
+   looks for in a paragraph, and hover doubles the underline. Both change shape on hover,
+   never colour, so the state reads the same in either mode and cannot drop below the
+   contrast floor --tone-text is resolved against. Markup cannot tell the two apart: a
+   standalone link often sits inside a <p>, so the prose kind is opted into.
+
+   The underline is a pixel floor that scales with the font above it. The weight is held
+   at zero specificity so a type class on the same element sets its own: at equal
+   specificity .link comes later in the file and would win. */
+:where(.link) {
+  font-weight: var(--type-action-md-weight);
+}
+
 .link {
   color: var(--tone-text, var(--primary));
-  text-decoration: underline;
+  text-decoration-line: none;
+  text-decoration-thickness: max(var(--bw-1), 0.0625em);
   text-underline-offset: 0.15em;
 }
 
 .link:hover {
-  text-decoration-thickness: var(--bw-2);
+  text-decoration-line: underline;
+}
+
+:where(.link-prose) {
+  font-weight: inherit;
+}
+
+.link-prose {
+  text-decoration-line: underline;
+}
+
+.link-prose:hover {
+  text-decoration-thickness: max(var(--bw-2), 0.125em);
 }`;
 }
 
@@ -1931,6 +1967,20 @@ dialog.dialog::backdrop {
   gap: var(--space-1);
 }
 
+/* A header holding the close button becomes two columns: the title and description in the
+   first, the button in the second on the title's row. The button takes a track, so a long
+   title or description wraps before it rather than running under it. Keyed off the
+   button's presence so a header without one stays a plain column with no empty track. */
+.dialog-header:has(> .dialog-close) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+}
+
+.dialog-header > :not(.dialog-close) {
+  grid-column: 1;
+}
+
 .dialog-title {
   font-family: var(--type-title-md-family);
   font-size: var(--type-title-md-size);
@@ -1956,9 +2006,9 @@ dialog.dialog::backdrop {
 }
 
 .dialog-close {
-  position: absolute;
-  right: var(--space-4);
-  top: var(--space-4);
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
 }`;
 }
 

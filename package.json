@@ -1,6 +1,6 @@
 {
   "name": "loom-design-system",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Token-driven design system generator — produces a first-party React component catalog, a CSS token substrate, and a Figma variable/style/component pipeline from a single config source.",
   "license": "MIT",
   "author": "Jacob Ikola",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@radix-ui/react-dialog": "^1.1.16",
     "@radix-ui/react-select": "^2.3.0",
-    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-slot": "^1.2.5",
     "@types/node": "^26.6.2",
     "@types/react": "^19.0.0",
     "class-variance-authority": "^0.7.1",

@@ -35,18 +35,8 @@
       "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline" }
     },
     "typography": {
-      "header": {
-        "font-family": "body",
-        "font-weight": 500,
-        "letter-spacing": "0",
-        "text-transform": "none"
-      },
-      "cell": {
-        "font-family": "body",
-        "font-weight": 400,
-        "letter-spacing": "0",
-        "text-transform": "none"
-      }
+      "header": { "font-weight": 500 },
+      "cell": { "font-weight": 400 }
     },
     "sizes": {
       "sm": { "x-padding": "{scale.3}", "y-padding": "{scale.1}", "text": "body/sm" },

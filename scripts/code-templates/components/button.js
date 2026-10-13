@@ -1,4 +1,4 @@
-const { buildTypographyClasses, buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
+const { buildColorVars, buildToneLookup, cls, TREATMENT_CLASSES, ICON_SLOT_CLASS } = require('../shared');
 
 function generateButton(name, config, meta) {
   // Three axes: variant = treatment, color = family, intensity = solid or soft.
@@ -12,7 +12,6 @@ function generateButton(name, config, meta) {
   const intensities = config.intensities || ['solid', 'soft'];
   const { colorNames: colorKeys, toneClass, toneFamily } = buildColorVars(config.colors || {});
   const tones = buildToneLookup('button', colorKeys, toneFamily, toneClass);
-  const typo = buildTypographyClasses(config);
   const dflt = config.default || {};
 
   // `variant` carries a treatment class and is the only cva axis; the tone is computed
@@ -87,9 +86,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }}
       >
         {iconOnly ? (
-          <span className={'${cls(ICON_SLOT_CLASS, 'button')}'}>
-            {loading ? spinner : children}
-          </span>
+          // The render form of Slottable, so under asChild the icon slot lands inside the
+          // consumer's element. A bare span here was the only child Slot could find, so it
+          // took the button's classes and an <a> rendered with none of them. Needs
+          // @radix-ui/react-slot 1.2.5 or later; earlier versions have no child prop.
+          <Slottable child={children}>
+            {(content) => (
+              <span className={'${cls(ICON_SLOT_CLASS, 'button')}'}>
+                {loading ? spinner : content}
+              </span>
+            )}
+          </Slottable>
         ) : (
           // An array, not a fragment. Slot finds Slottable with React.Children.toArray,
           // which flattens arrays but not fragments — wrapped in one, Slot saw a single

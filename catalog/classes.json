@@ -26,6 +26,7 @@
     "kbd",
     "label",
     "link",
+    "link-prose",
     "list-item",
     "numeric",
     "radio",
