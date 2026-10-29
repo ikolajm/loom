@@ -712,20 +712,25 @@ const BASE_RULES = {
   // showing the shape of what is coming, and it does both without moving. The pulse it
   // used to carry was also the only thing a reduced-motion user had to be spared from,
   // and what they would have been served instead is exactly this block.
-  // The UA draws the box, the mark and the checked fill; accent-color points all three at
-  // the brand. That is the whole styling contract, and it is deliberately smaller than the
-  // schema once was: a custom box needs a mark, a mark needs a pseudo-element on a replaced
-  // element, and that is a cross-engine bet this repo will not make. What is given up is a
-  // custom radius and an unchecked fill. What is kept is native indeterminate, native focus
-  // and a control that works with no framework and no markup contract.
+  // The UA draws the box, the tick and the checked fill; accent-color points them at the
+  // brand, and the browser picks the tick's colour from the fill's lightness.
   checkbox: ['accent-color: var(--primary);', 'display: inline-block;', 'flex-shrink: 0;',
              'margin: 0;', 'cursor: pointer;'],
-  radio: ['accent-color: var(--primary);', 'display: inline-block;', 'flex-shrink: 0;',
-          'margin: 0;', 'cursor: pointer;'],
+  // Drawn, so the dot is on-primary on primary in every browser rather than whichever of
+  // white or black the browser picks for accent-color. The dot is a radial gradient that
+  // grows from nothing, for the switch's reason below; its colours are in the radio
+  // section, read from the schema's `active` states.
+  radio: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
+          'cursor: pointer;', 'border-radius: 50%;', 'border: var(--bw-1) solid;',
+          'background-repeat: no-repeat;', 'background-position: center;', 'background-size: 0 0;',
+          'background-image: radial-gradient(circle closest-side, currentColor 100%, transparent 100%);',
+          'transition: background-color var(--transition) var(--easing),'
+            + ' border-color var(--transition) var(--easing),'
+            + ' background-size var(--transition) var(--easing);'],
   // No native switch exists to point accent-color at, so this one is drawn. The thumb is a
-  // radial gradient rather than a pseudo-element for the same reason as above — an <input>
-  // is replaced — and it takes `currentColor`, so the two states differ by `color` alone and
-  // the thumb crossfades with the track instead of being redeclared.
+  // radial gradient rather than a pseudo-element because an <input> is a replaced element
+  // — and it takes `currentColor`, so the two states differ by `color` alone and the thumb
+  // crossfades with the track instead of being redeclared.
   switch: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
            'cursor: pointer;', 'background-repeat: no-repeat;',
            'background-image: radial-gradient(circle closest-side, currentColor 100%, transparent 100%);',
@@ -1786,6 +1791,94 @@ function buildSectionSwitchThumb() {
   return out.join('\n');
 }
 
+/**
+ * The radio's two states, from the schema's `active` block, and the dot's size.
+ *
+ * The dot is a share of the box rather than a per-tier number, so it scales with the
+ * ladder on its own. DOT_SHARE is chosen, like THUMB_SHARE: large enough to read as
+ * selected at the small tier, small enough to leave a ring of fill around it.
+ */
+const DOT_SHARE = '50%';
+
+function buildSectionRadio() {
+  const { emit } = componentPlan();
+  const radio = emit.find((e) => e.name === 'radio');
+  if (!radio) return '';
+  const states = radio.cfg.active || {};
+  const out = ['/* === Radio === */', ''];
+  for (const [key, sel] of [['false', '.radio'], ['true', '.radio:checked']]) {
+    const v = states[key] || {};
+    const d = [];
+    const bg = CSS_COLOR(v['box-bg']);
+    const border = CSS_COLOR(v['box-border']);
+    const mark = CSS_COLOR(v['mark-bg']);
+    if (bg) d.push(`  background-color: ${bg};`);
+    if (border) d.push(`  border-color: ${border};`);
+    if (mark) d.push(`  color: ${mark};`, `  background-size: ${DOT_SHARE} ${DOT_SHARE};`);
+    if (d.length) out.push(`${sel} {`, ...d, '}', '');
+  }
+  return out.join('\n');
+}
+
+/**
+ * Forced colours for the drawn controls.
+ *
+ * Under a contrast theme the browser replaces background and border colours with system
+ * ones, so a drawn control's state — a fill and a gradient — can vanish. These opt the
+ * radio and switch out of that adjustment and paint them in system colours instead:
+ * Canvas and CanvasText at rest, Highlight and HighlightText when checked, GrayText when
+ * disabled. The switch has no border, so its edge is an inset box-shadow, which changes no
+ * size.
+ *
+ * Unlayered, beside print and reduced motion and for their reason: an environmental
+ * override should not sit in a layer a consumer's restyle of the control outranks.
+ */
+function buildSectionForcedColors() {
+  return `@media (forced-colors: active) {
+  .radio,
+  .switch {
+    forced-color-adjust: none;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  .radio {
+    border-color: CanvasText;
+  }
+
+  .switch {
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .radio:checked,
+  .switch:checked {
+    background-color: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+
+  .switch:checked {
+    box-shadow: none;
+  }
+
+  .radio:disabled,
+  .switch:disabled {
+    border-color: GrayText;
+    color: GrayText;
+  }
+
+  .switch:disabled {
+    box-shadow: inset 0 0 0 1px GrayText;
+  }
+
+  .radio:checked:disabled,
+  .switch:checked:disabled {
+    background-color: GrayText;
+    color: Canvas;
+  }
+}`;
+}
+
 function buildSectionDialogParts() {
   return `/* === Dialog parts === */
 
@@ -1979,6 +2072,8 @@ function generateComponents() {
     '',
     buildSectionSwitchThumb(),
     '',
+    buildSectionRadio(),
+    '',
     buildSectionTargetFloor(),
   ].join('\n');
 
@@ -1986,6 +2081,8 @@ function generateComponents() {
     header('loom.components.css', 'Named component classes in `@layer loom.components` — shape only; compose with the tones, treatments and control states in loom.css, which must load first.'),
     '',
     `@layer loom.components {\n${indent(layered.split('\n'))}\n}`,
+    '',
+    buildSectionForcedColors(),
     ''
   ].join('\n');
 }

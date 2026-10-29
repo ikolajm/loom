@@ -378,13 +378,11 @@ const CLASS_STRIP = [
   ].join(NL)),
 
   section('Selection controls', [
-    lede(`The box, the tick and the circle are the browser's, pointed at the brand with
-      <code>accent-color</code>; the ladder sets the size and nothing else. That is what
-      buys native indeterminate, native focus and a control that needs no markup contract
-      &mdash; and it is what costs a custom radius and a custom unchecked fill. The switch
-      has no native counterpart to borrow, so the class layer draws it: a track, and a thumb
-      that is a radial gradient taking <code>currentColor</code>, which is why it slides and
-      crossfades rather than snapping.
+    lede(`The checkbox's box and tick are the browser's, pointed at the brand with
+      <code>accent-color</code>. The radio and the switch are drawn by the class layer: a
+      circle with a dot, and a track with a thumb, each mark a radial gradient taking
+      <code>currentColor</code>, which is why the dot grows and the thumb slides rather than
+      snapping. Under a contrast theme both switch to system colours.
       <br><br>
       <strong>Every one of them is inside its label, and that is the target.</strong> An
       <code>&lt;input&gt;</code> is a replaced element and renders no
@@ -394,9 +392,11 @@ const CLASS_STRIP = [
       <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md"> Medium</label>
       <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="lg" checked> Large, checked</label>
       <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" disabled checked> Disabled</label>`),
-    row(`      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md" checked> First</label>
-      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md"> Second</label>
-      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md" disabled> Disabled</label>`),
+    row(`      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="sm" checked> Small</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md"> Medium</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="lg"> Large</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio-off" class="radio control" data-size="md" disabled checked> Disabled, checked</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio-off" class="radio control" data-size="md" disabled> Disabled</label>`),
     row(`      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="sm"> Small</label>
       <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="md" checked> Medium, on</label>
       <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="lg"> Large</label>
