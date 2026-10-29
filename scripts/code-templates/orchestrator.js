@@ -6,8 +6,8 @@
  *   tokens.css, components/
  *
  * No app-shell target: the substrate is portable and wiring it into a framework is the
- * consumer's business. ThemeProvider is a catalog component, the selection and scrollbar
- * rules are in loom.base, and sync.js owns the `--tokens` tier and the loom:sync script.
+ * consumer's business. The selection and scrollbar rules are in loom.base, and sync.js
+ * owns the `--tokens` tier and the loom:sync script.
  *
  * Each generator is a separate module with a generate(config, outputDir) function.
  *

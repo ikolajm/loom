@@ -56,6 +56,7 @@ not Loom's "look"):
 | Key | Required | Allowed values | Default if omitted | Drives |
 |-----|----------|----------------|--------------------|--------|
 | `primary` | **yes** | hex `#RRGGBB` | — | brand color ramp; neutral hue |
+| `defaultMode` | **yes** | `dark` · `light` | — | which surface set the brand ships; there is one mode |
 | `secondary` | no | hex `#RRGGBB` | analogous +30° from `primary`, marked derived | secondary ramp |
 | `accent` | no | hex `#RRGGBB` | analogous +60° from `primary`, marked derived | accent ramp (always generated) |
 | `heading` | no | Google Fonts family name | `Inter` | heading text styles |
@@ -65,7 +66,6 @@ not Loom's "look"):
 | `shadowDepth` | no | `flat` · `elevated` | `elevated` | shadow/elevation scale |
 | `typeScale` | no | `compact` · `standard` · `dramatic` | `standard` | type size range |
 | `controlHeight` | no | `compact` · `standard` · `touch` | `standard` | height of buttons, inputs, rows, bars |
-| `defaultMode` | no | `dark` · `light` | `dark` | which color mode loads first |
 | `projectName` | no | string | `null` | metadata only |
 | `styleDirection` | no | see list below | `null` | Tier 2 defaults |
 

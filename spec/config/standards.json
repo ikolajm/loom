@@ -87,7 +87,7 @@
   },
 
   "colors": {
-    "$note": "Both light and dark are equal mapping schemes. Which one loads first is a per-project answer and lives in the generated config/base/colors.json → default-mode, not here — this file is locked across projects and must not carry a value the questionnaire sets. Fixed variants reference the same palette stops in both modes — explicitly modeled in each.",
+    "$note": "Two role tables, light and dark. A brand ships one: the table its defaultMode answers, recorded in the generated config/base/colors.json → mode, not here — this file is locked across projects and must not carry a value the questionnaire sets. Print always uses the light table. Fixed variants reference the same palette stops in both tables — explicitly modeled in each.",
 
     "modes": {
       "light": {

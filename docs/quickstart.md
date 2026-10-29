@@ -57,7 +57,7 @@ your app is a separate project it builds into. The clean layout is siblings:
 | Tier | You get | Use when |
 |------|---------|----------|
 | **tokens** (`--tokens`) | the stylesheets, nothing else — no components, no dependencies | You have your own components and want Loom's design decisions as values |
-| **catalog** (default) | The tokens tier, plus the whole catalog and `ThemeProvider` | You want the components too |
+| **catalog** (default) | The tokens tier, plus the whole catalog | You want the components too |
 
 ```bash
 # From the Loom repo, pointing at your project by path.
@@ -130,17 +130,7 @@ your framework's business.
    has the order, [`gotchas.md`](gotchas.md#loom-ships-in-cascade-layers-so-anything-unlayered-outranks-all-of-it)
    has the symptom.
 
-3. **Wire theme switching, which is two artifacts.** Paste the body of
-   `components/loom/theme-init.js` into an inline `<script>` in `<head>`, before your
-   stylesheet — it reads the stored choice and sets `data-theme` and `color-scheme` on the
-   first frame. Then mount `ThemeProvider` at your app root; it persists changes and owns
-   everything after that frame. Skip the snippet and the theme still works one frame late,
-   so anyone on the non-default mode sees a flash of the default on every load. It cannot
-   be a component: React renders after the first paint, so nothing it owns can set an
-   attribute before that paint exists. Do not load it with `<script src>` — deferred it
-   runs after the paint it exists to precede, undeferred it costs a round trip before it.
-
-4. **Load your fonts.** Loom names them; you load the bytes. The questionnaire takes one
+3. **Load your fonts.** Loom names them; you load the bytes. The questionnaire takes one
    family per role (`heading` / `body`) and `tokens.css` emits them as
    `'Your Family', system-ui, sans-serif` — so a `<link>`, an `@font-face`, `next/font`,
    an `@fontsource` package, whatever your framework prefers.

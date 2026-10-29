@@ -305,7 +305,7 @@ const CLASS_STRIP = [
       <code>tone-error</code>, as in the last one. The second one is a plain
       <code>&lt;select&gt;</code>: the same two classes, no component, and the arrow is the
       UA's because <code>loom.base</code> takes <code>appearance</code> off buttons only.
-      It follows the theme through <code>color-scheme</code>.`),
+      It follows the brand's mode through <code>color-scheme</code>.`),
     row(`      <div class="pv-field">
         <div class="form-field">
           <label class="label" data-size="md" for="pv-input">Project name</label>
@@ -362,7 +362,7 @@ const CLASS_STRIP = [
     lede(`<code>.link</code> is a standalone link: the tone's text role and the action
       weight at rest, an underline on hover. <code>.link-prose</code> beside it is a link
       inside reading text: underlined at rest, the underline doubled on hover. Neither
-      changes colour. Hover these in both themes.`),
+      changes colour.`),
     `    <p class="text-body-md" id="pv-links">
       Already have an account? <a class="link" href="#pv-links">Log in</a>
     </p>`,
@@ -405,8 +405,7 @@ const CLASS_STRIP = [
 // Prefixed so it cannot be mistaken for something Loom ships, and kept to layout only.
 // If this block ever sets colour, type or state, the page has started flattering the
 // layer instead of testing it.
-const PAGE_CSS = `    :root { color-scheme: light dark; }
-    body { max-width: 64rem; margin: 0 auto; padding: var(--space-8) var(--space-5); }
+const PAGE_CSS = `    body { max-width: 64rem; margin: 0 auto; padding: var(--space-8) var(--space-5); }
     .pv-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-10); }
     .pv-section { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-10); }
     .pv-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
@@ -436,18 +435,8 @@ const PAGE_CSS = `    :root { color-scheme: light dark; }
     .pv-details { padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }
     .pv-scroll { height: 5rem; overflow-y: auto; padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }`;
 
-const THEME_SCRIPT = `    // The only script on the page, and it does one thing: flip the attribute the
-    // alternate-mode block keys off, so both modes can be checked without a rebuild.
+const PAGE_SCRIPT = `    // Opens and closes the dialog demos. Nothing else on the page is scripted.
     (function () {
-      var el = document.documentElement;
-      var btn = document.getElementById('pv-theme');
-      function label() { btn.textContent = 'Theme: ' + (el.dataset.theme || 'default'); }
-      btn.addEventListener('click', function () {
-        el.dataset.theme = el.dataset.theme === 'dark' ? 'light' : 'dark';
-        label();
-      });
-      label();
-
       var dlg = document.getElementById('pv-dialog');
       document.getElementById('pv-open').addEventListener('click', function () { dlg.showModal(); });
       document.getElementById('pv-close').addEventListener('click', function () { dlg.close(); });
@@ -515,13 +504,12 @@ ${PAGE_CSS}
       <h1 class="text-display-sm">Loom substrate</h1>
       <p class="text-body-sm text-on-surface-variant">Tokens above, the class layer below. This is the surface you override.</p>
     </div>
-    <button type="button" id="pv-theme" class="button treat-outline tone-neutral interactive control" data-size="md">Theme</button>
   </header>
 
 ${body}
 
   <script>
-${THEME_SCRIPT}
+${PAGE_SCRIPT}
   </script>
 </body>
 </html>

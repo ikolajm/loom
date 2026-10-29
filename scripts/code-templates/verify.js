@@ -16,7 +16,7 @@
  *   manifest-deps     — every relative import is declared (regression guard on aacc481)
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   touch-target      — every height ladder honours standards.json's touch-target.min
- *   contrast          — every on-X/X colour pair clears WCAG AA in both modes
+ *   contrast          — every on-X/X colour pair clears WCAG AA, on screen and in print
  *   typecheck         — the generated TSX actually compiles (tsc --noEmit)
  *
  * Each check reports its denominator. "0 of 66 under-declared" is auditable; "clean"
@@ -169,16 +169,12 @@ function checkDocCounts(atoms, checkNames) {
     const m = JSON.parse(fs.readFileSync(path.join(CATALOG, `${a}.manifest.json`), 'utf8'));
     return m.kind || 'atom';
   });
-  // `components` is by KIND, not "everything that is not cn". A snippet is delivered by
-  // the sync and is not a component: theme-init.js is text a consumer pastes into <head>,
-  // with nothing to import and no class contract. Counting it as one made three docs
-  // wrong the moment it existed.
-  const COMPONENT_KINDS = new Set(['atom', 'pattern', 'provider']);
+  // `components` is by KIND, not "everything that is not cn".
+  const COMPONENT_KINDS = new Set(['atom', 'pattern']);
   const expected = {
     components: kinds.filter((k) => COMPONENT_KINDS.has(k)).length,
     atoms: kinds.filter((k) => k === 'atom').length,
     patterns: kinds.filter((k) => k === 'pattern').length,
-    snippets: kinds.filter((k) => k === 'snippet').length,
     groups,
   };
   const failures = [];
@@ -593,14 +589,14 @@ function checkBaseConfigProvenance() {
     }
   }
 
-  // standards.json is no longer a generator write target — defaultMode rides in
+  // standards.json is not a generator write target — the brand's mode rides in
   // colors.json, which the loop above already compares. What is worth checking is that
   // it has not drifted back: a key the generator sets must not reappear in the file the
   // generator must never touch, or the two disagree silently and the locked-across-
   // projects header is false again.
-  if (standards.colors['default-mode'] !== undefined) {
+  if (standards.colors.mode !== undefined) {
     failures.push(
-      `spec/config/standards.json — carries a "default-mode" key; it is a per-project answer and belongs in the generated base/colors.json`
+      `spec/config/standards.json — carries a "mode" key; it is a per-project answer and belongs in the generated base/colors.json`
     );
   }
 
@@ -1006,6 +1002,12 @@ function contrastRatio(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+// The role tables tokens.css emits, labelled: the brand's mode on screen, and the light
+// table print uses. A dark brand's print table is a second set of pairs a reader sees.
+function roleTables(colors) {
+  return [[colors.mode, colors.roles], ['print', colors['print-roles']]];
+}
+
 function checkContrast() {
   // Read through config-paths, so this validates whichever brand is active. That is
   // the exact opposite of `base-config-provenance`, which reads the
@@ -1016,9 +1018,9 @@ function checkContrast() {
   const failures = [];
   let pairs = 0;
 
-  for (const mode of Object.keys(colors.roles || {})) {
+  for (const [mode, groups] of roleTables(colors)) {
     const flat = {};
-    for (const group of Object.values(colors.roles[mode])) {
+    for (const group of Object.values(groups)) {
       for (const [role, value] of Object.entries(group)) {
         if (typeof value === 'string' && value.startsWith('#')) flat[role] = value;
       }
@@ -1077,8 +1079,7 @@ function checkToneContrast() {
   const failures = [];
   let pairs = 0;
 
-  for (const mode of Object.keys(colors.roles || {})) {
-    const groups = colors.roles[mode];
+  for (const [mode, groups] of roleTables(colors)) {
     const flat = {};
     for (const group of Object.values(groups)) {
       for (const [role, value] of Object.entries(group)) {
@@ -1153,8 +1154,7 @@ function checkBorderContrast() {
   const hit = new Set();
   let pairs = 0;
 
-  for (const mode of Object.keys(colors.roles || {})) {
-    const groups = colors.roles[mode];
+  for (const [mode, groups] of roleTables(colors)) {
     const flat = {};
     for (const group of Object.values(groups)) {
       for (const [role, value] of Object.entries(group)) {
@@ -1628,96 +1628,6 @@ function checkToneMatrix() {
   return { failures, note: `${pairs} colour/intensity pairs across ${names.length} atoms` };
 }
 
-// --- theme-init-parity --------------------------------------------------------
-// The two halves of the theme mechanism must agree, and only one of them can be tested
-// by running it.
-//
-// theme-init.js sets data-theme before first paint; theme-provider.tsx owns every change
-// after. They are separate artifacts in separate languages, and they share three
-// constants: the storage key, the default mode, and what an unrecognised stored value
-// resolves to. If those drift, the page paints one theme and React switches it to
-// another - which is the flash the snippet exists to remove, arriving from the other
-// side and looking exactly the same to a consumer.
-//
-// Checked by reading the EMITTED files rather than the generators. Both are produced
-// from the same module, so comparing the generators would compare a value to itself.
-function checkThemeInitParity() {
-  const failures = [];
-  // Counted and reported so that REMOVING an assertion is visible. The 'went
-  // unchecked' failures below cover a regex that stops matching; nothing covered an
-  // edit that quietly drops a comparison, and the note is where that would show.
-  let asserted = 0;
-  const initPath = path.join(CATALOG, 'theme-init.js');
-  const provPath = path.join(CATALOG, 'theme-provider.tsx');
-
-  if (!fs.existsSync(initPath) || !fs.existsSync(provPath)) {
-    return {
-      failures: ['theme-init.js or theme-provider.tsx is missing from the catalog, so the two halves could not be compared'],
-      note: 'not run',
-    };
-  }
-
-  const init = fs.readFileSync(initPath, 'utf8');
-  const prov = fs.readFileSync(provPath, 'utf8');
-
-  // Storage key.
-  const initKey = init.match(/localStorage\.getItem\('([^']+)'\)/);
-  const provKey = prov.match(/const STORAGE_KEY = '([^']+)';/);
-  if (initKey && provKey) asserted++;
-  if (!initKey || !provKey) {
-    failures.push('could not read the storage key out of both files, so parity went unchecked');
-  } else if (initKey[1] !== provKey[1]) {
-    failures.push(
-      `storage key disagrees - theme-init.js reads '${initKey[1]}', theme-provider.tsx writes '${provKey[1]}'. ` +
-      'A visitor who picks a theme would have it saved under one key and read back under another, so the choice never sticks'
-    );
-  }
-
-  // Default mode. The snippet carries it twice: the fallback branch and the catch.
-  const provDefault = prov.match(/const DEFAULT_THEME: Theme = '([^']+)';/);
-  const initDefaults = [...init.matchAll(/: '(light|dark)';\n/g)].map((m) => m[1])
-    .concat([...init.matchAll(/setAttribute\('data-theme', '(light|dark)'\)/g)].map((m) => m[1]));
-  if (provDefault && initDefaults.length) asserted++;
-  if (!provDefault) {
-    failures.push('could not read DEFAULT_THEME out of theme-provider.tsx, so parity went unchecked');
-  } else {
-    // De-duplicated: the snippet carries the default twice, in the fallback branch and in
-    // the catch, and both disagreeing is one fact rather than two.
-    for (const d of new Set(initDefaults)) {
-      if (d !== provDefault[1]) {
-        failures.push(
-          `default mode disagrees - theme-init.js falls back to '${d}', theme-provider.tsx to '${provDefault[1]}'. ` +
-          'A first-time visitor would be painted one theme and handed another on hydration'
-        );
-      }
-    }
-  }
-
-  // The snippet must never be loadable as an external script: deferred it runs after the
-  // paint it exists to precede, and undeferred it costs a round trip before it.
-  asserted++;
-  if (!/paste/i.test(init)) {
-    failures.push('theme-init.js no longer says it must be pasted inline - a consumer who <script src>s it gets the flash back and no error');
-  }
-
-  // The provider must not stamp the attribute from an effect that runs on mount with a
-  // fixed theme. That is the defect this pair was built to fix: the effect wrote
-  // DEFAULT_THEME over the snippet's value before the stored choice had applied.
-  asserted++;
-  const sysEffect = prov.match(/useEffect\(\(\) => \{\s*if \(theme !== 'system'\) return;/);
-  if (!sysEffect) {
-    failures.push(
-      "theme-provider.tsx's [theme] effect no longer bails out for a fixed theme - if it applies on mount it " +
-      'will stamp DEFAULT_THEME over whatever theme-init.js painted, and the flash returns with the snippet installed'
-    );
-  }
-
-  return {
-    failures,
-    note: `${asserted} of 4 parity assertions ran — storage key, default mode, paste mode, system effect`,
-  };
-}
-
 // --- preview-coverage ---------------------------------------------------------
 // Every class an ATOM applies and every emitted COMPONENT class is rendered in
 // docs/preview.html, and no class on that page is one the stylesheets do not emit.
@@ -1853,7 +1763,6 @@ function verify() {
     ['dead-exports', () => checkDeadExports()],
     ['tone-fallbacks', () => checkToneFallbacks()],
     ['tone-matrix', () => checkToneMatrix()],
-    ['theme-init-parity', () => checkThemeInitParity()],
     ['focus-ring', () => checkFocusRing()],
     ['touch-target', () => checkTouchTarget()],
     ['contrast', () => checkContrast()],

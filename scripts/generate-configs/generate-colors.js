@@ -55,15 +55,13 @@ function generate(answers, standards) {
   // Any other brace template, or a reference to a shade the palette lacks, throws.
   // An unresolved template once travelled as a literal string all the way into the
   // Figma plugin console before anything complained; failing here names the role.
-  const roles = {};
-
-  for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
-    roles[mode] = {};
-    for (const [group, groupRoles] of Object.entries(modeRoles)) {
-      roles[mode][group] = {};
+  function resolveTable(mode) {
+    const table = {};
+    for (const [group, groupRoles] of Object.entries(standards.colors.modes[mode])) {
+      table[group] = {};
       for (const [role, template] of Object.entries(groupRoles)) {
         if (typeof template !== 'string' || !template.startsWith('{')) {
-          roles[mode][group][role] = template;
+          table[group][role] = template;
           continue;
         }
         const match = template.match(/^\{palette\.(\w+)\.(\w+)\}$/);
@@ -71,9 +69,17 @@ function generate(answers, standards) {
         if (!hex) {
           throw new Error(`standards.json colors.modes.${mode}.${group}.${role}: ${template} is not a {palette.family.shade} the palette has`);
         }
-        roles[mode][group][role] = hex;
+        table[group][role] = hex;
       }
     }
+    return table;
+  }
+
+  // One mode: the brand answers light or dark once and ships that table. standards.json
+  // keeps both, so the other stays a choice a brand can make rather than a derivation.
+  const mode = answers.defaultMode;
+  if (!standards.colors.modes[mode]) {
+    throw new Error(`defaultMode must be one of ${Object.keys(standards.colors.modes).join(', ')}; got ${JSON.stringify(mode)}`);
   }
 
   return {
@@ -83,14 +89,16 @@ function generate(answers, standards) {
     // invented hue looks most like a decision someone made.
     $derived: { secondary: !secondaryChosen, accent: !accentChosen },
 
-    // Which mode loads first. Lives here, with the generated colors, because it is a
-    // per-project answer: standards.json declares itself "values locked across all
-    // projects, do not override per-project" and `npm run configs` used to write this
-    // one key into it anyway, which is both a false header and the second of the two
-    // tracked-path writes that dirtied the working tree.
-    'default-mode': answers.defaultMode || 'dark',
+    // The brand's one mode. Lives here, with the generated colors, because it is a
+    // per-project answer: standards.json declares itself locked across projects.
+    mode,
     palette,
-    roles
+    roles: resolveTable(mode),
+    // Print always uses the light table. Browsers drop backgrounds when printing but
+    // keep text colors, so a dark brand would print pale text on white paper. Carried
+    // for every brand so the config's shape does not depend on the answer; tokens.css
+    // emits it only when it differs from `roles`.
+    'print-roles': resolveTable('light')
   };
 }
 
