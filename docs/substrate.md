@@ -123,14 +123,13 @@ specificity. Every family carries a `-soft` container end, so intensity is one a
 rather than two vocabularies. Adding a tone or a treatment is one line, not an N x M
 matrix.
 
-**The label colour is resolved, not assumed.** `--tone-text` reads a per-family text
-role that the generator walks to the nearest ramp shade clearing AA against the most
-raised surface tier, per mode — so an outline or ghost badge is legible wherever it
-lands, not only on plain `surface`. It is a separate role from the fill, so solid
-buttons keep the brand colour at full strength; only what `.treat-outline`,
-`.treat-ghost` and `.link` paint moves. `--tone-border` stays at the base role, since a
-border is a non-text boundary at 3:1 under WCAG 1.4.11. A brand whose ramp cannot
-produce a legible label fails the build.
+**The label colour is measured, not assumed.** `--tone-text` reads a per-family text
+role on a shade that clears AA against the most raised surface tier — so an outline or
+ghost badge is legible wherever it lands, not only on plain `surface`. It is a separate
+role from the fill, so solid buttons keep the brand colour at full strength; only what
+`.treat-outline`, `.treat-ghost` and `.link` paint moves. `--tone-border` reads its own
+role too, held to 3:1 because a border is a non-text boundary under WCAG 1.4.11. Every
+shade is placed by luminance, so these hold for any brand, and the build checks them.
 
 Tone is opt-in per atom: `button` and `badge` carry the full axis, `dialog` and
 `form-field` none.

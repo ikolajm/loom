@@ -1064,10 +1064,10 @@ const TONE_SURFACES = ['surface', 'surface-1', 'surface-2', 'surface-3'];
 // .treat-ghost and .link, which paint no fill at all. Until this existed, the pairing
 // that decides whether an outline badge can be read was measured by nothing.
 //
-// It reads {family}-text, not {family} — a per-family text role that generate-colors.js
-// resolves against the most raised surface tier, so every pair passes by construction
-// rather than by exemption. Reading the base role at full strength put a third of the
-// pairs below AA, which is what the separate role is for.
+// It reads {family}-text, not {family} — a per-family text role whose shade in
+// standards.json clears AA against the most raised surface tier, so every pair passes
+// by construction rather than by exemption. Reading the base role at full strength put
+// a third of the pairs below AA, which is what the separate role is for.
 //
 // A brand whose ramp cannot produce a legible label still fails here, loudly, which
 // is the outcome worth having: the alternative is shipping an unreadable label.
@@ -1140,9 +1140,7 @@ function checkToneContrast() {
 // worst-case argument as tone-contrast — --tone-border is one value and nothing tells a
 // badge which tier it landed on, so surface-3 is in scope or the guarantee is not one.
 //
-// It reads {family}-border, the role .tone-{family} assigns. That role is resolved by the
-// same nearest-passing-shade pass as {family}-text, at 3:1 instead of 4.5:1 — the pass
-// runs both kinds in one loop so they cannot drift. Its absence is itself a failure: a
+// It reads {family}-border, the role .tone-{family} assigns. Its absence is itself a failure: a
 // family that qualifies for a tone but declares no border role emits
 // `--tone-border: var(--{family}-border)` pointing at nothing, and an invalid custom
 // property reference drops the whole declaration, so the border falls back to --outline
@@ -1227,22 +1225,10 @@ function checkBorderContrast() {
 // same shape as base-config-provenance. It does NOT paste them into Figma; a plugin
 // console is the half a check cannot reach, and that stays a human pass.
 //
-// Two things, and they are the two that fail silently:
-//
-//   Every script must COMPILE. They are assembled by slicing templates at a marker and
-//   prepending a JSON config line, so a template edit that unbalances a brace produces a
-//   file that is written happily and throws only when a designer pastes it.
-//
-//   No role template may survive unresolved. `{fill.*}`, `{readable.*}` and `{boundary.*}`
-//   are resolved by the assembler against $fillShades / $textShades / $borderShades so
-//   Figma aliases the primitive the CODE shipped, not the one the template asked for. Miss
-//   a branch and the literal string travels into the plugin console — which the resolver's
-//   own comment records having happened once already, and which nearly happened again when
-//   {boundary.*} was added and needed a third branch.
-//
-// `{palette.*}` is deliberately NOT a failure. It is the alias path Figma needs, and it is
-// what a resolved role looks like on the other side.
-const FIGMA_RAW_TEMPLATE = /\{(fill|readable|boundary)\.[A-Za-z0-9._-]+\}/g;
+// Every script must COMPILE. They are assembled by slicing templates at a marker and
+// prepending a JSON config line, so a template edit that unbalances a brace produces a
+// file that is written happily and throws only when a designer pastes it. A role
+// template Figma cannot alias is refused earlier, by generate-colors.js.
 
 function checkFigmaAssembly() {
   const vm = require('vm');
@@ -1269,17 +1255,9 @@ function checkFigmaAssembly() {
     } catch (err) {
       failures.push(`${name}.js does not parse — ${err.message}`);
     }
-    const raw = [...new Set(script.match(FIGMA_RAW_TEMPLATE) || [])];
-    if (raw.length) {
-      failures.push(
-        `${name}.js carries ${raw.length} unresolved role template(s) — ${raw.slice(0, 3).join(', ')}`
-        + (raw.length > 3 ? `, +${raw.length - 3} more` : '')
-        + ' — the assembler needs a resolver branch for that kind, or the literal reaches the plugin console'
-      );
-    }
   }
 
-  return { failures, note: `${scripts} scripts, ${bytes} chars, compiled and swept for unresolved role templates` };
+  return { failures, note: `${scripts} scripts, ${bytes} chars, compiled` };
 }
 
 // --- figma-code-syntax --------------------------------------------------------

@@ -151,51 +151,11 @@ function buildAllSteps() {
   // Opacity leads the semantics because it is the only one that aliases nothing —
   // it has no primitive layer to be pasted after.
   semStep(9, 'opacity', omitNotes(standards.effects.opacity), 'opacity.js');
-  // Substitute each {fill.family.shade} with the shade the generator actually landed on
-  // (colors.$fillShades). The Figma step aliases roles to primitive colour variables by
-  // name, so it cannot resolve {fill.*} itself — and must not guess the intent shade,
-  // because the resolver moves it whenever AA demands.
-  //
-  // A missing entry throws here rather than emitting the raw template. It happened once:
-  // a stale spec/config/local/ predating $fillShades took precedence over a freshly
-  // regenerated committed set, and the unresolved template travelled all the way into
-  // the Figma console before anything complained. Failing in Node names the cause and
-  // the fix; failing in the plugin console names neither.
-  const resolvedModes = {};
-  for (const [mode, groups] of Object.entries(standards.colors.modes)) {
-    resolvedModes[mode] = {};
-    for (const [group, roles] of Object.entries(groups)) {
-      resolvedModes[mode][group] = {};
-      for (const [role, template] of Object.entries(roles)) {
-        // Both resolved kinds behave identically here: the generator moved the shade, so
-        // Figma has to be handed where it landed rather than where the template pointed.
-        // {readable.*} is the label colour resolved against the most raised surface tier;
-        // it travels through the same door as {fill.*} and for the same reason.
-        const resolved = template && typeof template === 'string'
-          ? (template.startsWith('{fill.') ? ['$fillShades', colors.$fillShades]
-            : template.startsWith('{boundary.') ? ['$borderShades', colors.$borderShades]
-            : template.startsWith('{readable.') ? ['$textShades', colors.$textShades]
-            : null)
-          : null;
-        if (resolved) {
-          const [key, table] = resolved;
-          const landed = table && table[mode] && table[mode][role];
-          if (!landed) {
-            throw new Error(
-              `No ${key} entry for ${mode}.${role} (template ${template}).\n` +
-                `  The active colors.json predates that resolver — regenerate it:\n` +
-                `    npm run configs                 (your brand, spec/config/local/)\n` +
-                `    npm run configs -- --input spec/answers.example.json --default-set   (maintainers)`
-            );
-          }
-          resolvedModes[mode][group][role] = `{palette.${landed}}`;
-        } else {
-          resolvedModes[mode][group][role] = template;
-        }
-      }
-    }
-  }
-  semStep(10, 'color', { defaultMode: colors['default-mode'], modes: resolvedModes }, 'color.js');
+  // Every role template is a {palette.family.shade} reference or a literal, which is
+  // the alias path Figma needs as it stands: the shade a role names is the shade the
+  // code ships, because ramps are placed by luminance and nothing moves a role.
+  // generate-colors.js refuses any other template before this runs.
+  semStep(10, 'color', { defaultMode: colors['default-mode'], modes: standards.colors.modes }, 'color.js');
   semStep(11, 'spacing', spacing.categories, 'spacing.js');
   semStep(12, 'radius', sizing['border-radius'], 'radius.js');
   semStep(13, 'component-height', sizing['component-height'], 'component-height.js');

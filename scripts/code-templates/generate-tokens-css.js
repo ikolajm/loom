@@ -1336,19 +1336,11 @@ function buildSection15_Tones() {
 
   const lines = ['/* === Tones === */'];
   for (const f of families) {
-    // Both stay at base intensity across solid and soft: an outline treatment draws the
-    // same brand line and reads the same label whether its fill is solid or soft. That
-    // was the whole justification for --tone-text too, and it was a statement about
-    // intensity rather than about legibility — which is what the property actually
-    // decides. The label now reads the family's text role, resolved per mode against the
-    // most raised surface tier; see the third pass in generate-colors.js.
-    //
-    // --tone-border reads its own role too, resolved at 3:1 rather than 4.5:1 —
-    // WCAG 1.4.11 puts a non-text boundary there. It used to read the base role, on the
-    // reasoning that the brand line is most of what an outline treatment is for. That
-    // reasoning survives the change: resolving at 3:1 leaves most family/mode pairs on
-    // exactly the shade they already had, and moves only the ones that were failing, by a
-    // single ramp step. Measured rather than assumed; `border-contrast` is what holds it.
+    // Both stay the same across solid and soft: an outline treatment draws the same
+    // brand line and reads the same label whether its fill is solid or soft. The label
+    // reads the family's text role, on a shade that clears AA against the most raised
+    // surface tier; the border reads its own role, held to 3:1 because WCAG 1.4.11 puts
+    // a non-text boundary there. `tone-contrast` and `border-contrast` hold both.
     const edge = f === 'neutral'
       ? ['  --tone-text: var(--on-surface);', '  --tone-border: var(--outline);']
       : [`  --tone-text: var(--${f}-text);`, `  --tone-border: var(--${f}-border);`];

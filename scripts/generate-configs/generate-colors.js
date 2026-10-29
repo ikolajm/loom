@@ -6,40 +6,12 @@
  *
  * Source of truth for role mappings: standards.json → colors.modes
  */
-const path = require('path');
 const {
   generatePalette,
   generateNeutralPalette,
   generateStatusPalette,
-  deriveAnalogous,
-  hexToHsl
+  deriveAnalogous
 } = require('./utils/color');
-
-// WCAG 2.1 AA for text. Mirrored by the `contrast` check in code-templates/verify.js,
-// which is what actually fails the build — this constant only steers the pick.
-const AA_TEXT = 4.5;
-// WCAG 1.4.11: a border is a non-text boundary, so it answers 3:1 rather than 4.5:1.
-const AA_NON_TEXT = 3.0;
-// Which surface tier a {readable.*} role must clear. The most raised one Loom ships:
-// one value has to survive every background it can land on. Loosening this to
-// 'surface' re-creates the debt on every raised tier.
-const READABLE_AGAINST = 'surface-3';
-
-function srgbToLinear(channel) {
-  const s = channel / 255;
-  return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-}
-
-function contrastRatio(a, b) {
-  const lum = (hex) => {
-    const raw = hex.replace('#', '');
-    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
-    const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
-    return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
-  };
-  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 const STATUS_HUES = {
   error: 0,
@@ -60,14 +32,16 @@ function generate(answers, standards) {
   const accentChosen = Boolean(answers.accent);
   const secondary = answers.secondary || deriveAnalogous(primary, SECONDARY_ROTATION);
   const accent = answers.accent || deriveAnalogous(primary, ACCENT_ROTATION);
-  const primaryHsl = hexToHsl(primary);
 
   // --- Generate palettes ---
+  // Every ramp places its shades by luminance (see utils/color.js), so a shade has
+  // the same contrast whatever the brand. That is what lets each role in
+  // standards.json name its shade outright instead of searching for one.
   const palette = {
     primary: generatePalette(primary),
     secondary: generatePalette(secondary),
     accent: generatePalette(accent),
-    neutral: generateNeutralPalette(primaryHsl.h),
+    neutral: generateNeutralPalette(primary),
     error: generateStatusPalette(STATUS_HUES.error),
     success: generateStatusPalette(STATUS_HUES.success),
     warning: generateStatusPalette(STATUS_HUES.warning),
@@ -75,183 +49,39 @@ function generate(answers, standards) {
   };
 
   // --- Resolve role mappings ---
-  // standards.json defines role templates with {palette.family.shade} references
-  // We resolve those to actual hex values from our generated palette
+  // standards.json defines role templates as {palette.family.shade} references or
+  // literal values. References resolve to hex from the generated palette.
+  //
+  // Any other brace template, or a reference to a shade the palette lacks, throws.
+  // An unresolved template once travelled as a literal string all the way into the
+  // Figma plugin console before anything complained; failing here names the role.
   const roles = {};
 
-  // Two passes. Labels and every plain reference resolve first; {fill.*} resolves
-  // second, because a fill has to read the label it will carry.
   for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
     roles[mode] = {};
     for (const [group, groupRoles] of Object.entries(modeRoles)) {
       roles[mode][group] = {};
       for (const [role, template] of Object.entries(groupRoles)) {
-        if (typeof template === 'string'
-            && (template.startsWith('{fill.') || template.startsWith('{readable.')
-              || template.startsWith('{boundary.'))) {
-          // Reserve the key so a later pass overwrites in place. Creating it there
-          // instead would append it after every first-pass role and reorder the emitted
-          // JSON — a 70-line diff for a handful of changed values.
-          roles[mode][group][role] = null;
-          continue;
-        }
-        if (typeof template === 'string' && template.startsWith('{palette.')) {
-          // Resolve {palette.family.shade} → hex value
-          const match = template.match(/\{palette\.(\w+)\.(\w+)\}/);
-          if (match) {
-            const [, family, shade] = match;
-            roles[mode][group][role] = palette[family]?.[shade] || template;
-          } else {
-            roles[mode][group][role] = template;
-          }
-        } else {
-          // Direct value (e.g., "#FFFFFF", "rgba(...)")
+        if (typeof template !== 'string' || !template.startsWith('{')) {
           roles[mode][group][role] = template;
-        }
-      }
-    }
-  }
-
-  // Second pass: {fill.family.shade} → the nearest shade to `shade` whose contrast
-  // against the role's already-resolved label clears AA.
-  //
-  // The discarded alternative was letting the label chase the fill per role, which
-  // optimises each pair and produces a patchwork: on the default brand every light-mode
-  // button
-  // took a white label but dark-mode `error` alone took white while its six siblings
-  // took dark, and on a teal brand light-mode `primary` flipped to dark while its
-  // siblings stayed white. A row of filled buttons with one odd label out reads as a
-  // bug, not as a system. Label polarity is now fixed per mode by declaration — white
-  // in light, the family's dark tone in dark — and the fill moves to meet it.
-  //
-  // Nearest-passing rather than a fixed direction: standard ramps darken as the number
-  // rises (600 → 700) while the neutral ramp lightens (60 → 70), so a hardcoded
-  // direction would be wrong for one of them. If no shade clears AA the start shade is
-  // kept and the `contrast` check in code-templates/verify.js fails the build loudly,
-  // which is the right outcome — silently shipping an unreadable button is not.
-  // Which shade each {fill.*} role actually landed on, per mode. The Figma pipeline
-  // aliases semantic colours to primitive variables by name, so it needs the *resolved*
-  // shade — handing it the intent shade would alias `primary/600` in Figma while code
-  // shipped `primary/700`, which is the design↔code divergence this whole model exists
-  // to prevent. Emitted as $fillShades and consumed by assemble-figma.js.
-  const fillShades = {};
-
-  for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
-    for (const [group, groupRoles] of Object.entries(modeRoles)) {
-      for (const [role, template] of Object.entries(groupRoles)) {
-        if (typeof template !== 'string' || !template.startsWith('{fill.')) continue;
-        const m = template.match(/\{fill\.(\w+)\.(\w+)\}/);
-        const label = roles[mode][group][`on-${role}`];
-        if (!m || !palette[m[1]] || !label || !String(label).startsWith('#')) {
-          roles[mode][group][role] = m ? palette[m[1]]?.[m[2]] || template : template;
-          if (m) (fillShades[mode] = fillShades[mode] || {})[role] = `${m[1]}.${m[2]}`;
           continue;
         }
-        const [, family, startShade] = m;
-        const shades = Object.keys(palette[family]);
-        const startIdx = shades.indexOf(startShade);
-        const passing = shades
-          .map((s, i) => ({ s, i, hex: palette[family][s] }))
-          .filter((c) => contrastRatio(c.hex, label) >= AA_TEXT)
-          .sort((a, b) => Math.abs(a.i - startIdx) - Math.abs(b.i - startIdx));
-        const landed = passing.length ? passing[0].s : startShade;
-        roles[mode][group][role] = palette[family][landed] || template;
-        (fillShades[mode] = fillShades[mode] || {})[role] = `${family}.${landed}`;
-      }
-    }
-  }
-
-
-  // Third pass: {readable.family.shade} → the nearest shade to `shade` whose contrast
-  // against READABLE_AGAINST clears AA.
-  //
-  // This is the label colour a treatment paints WITH, as opposed to the fill it paints
-  // ON. --tone-text was the base role at full strength, chosen with the reasoning that
-  // "text/border stay at base intensity in both" — a statement about intensity, not
-  // about legibility, and legibility is what the property decides. On the committed
-  // default that left 15 of 48 tone/surface pairs below AA and on the first consumer's
-  // brand 16, including `light secondary` at 4.27 on plain `surface`.
-  //
-  // It is a NEW role rather than a shift of the existing one. Moving --primary would move
-  // every fill with it; this moves only what .treat-outline, .treat-ghost and .link paint.
-  //
-  // Resolved against the MOST RAISED tier, not the base surface. --tone-text is one value
-  // and nothing tells a badge which tier it landed on, so the value has to satisfy the
-  // worst background it can sit on or the guarantee is not one. Resolving against
-  // `surface` instead keeps the colour nearer the brand and leaves every raised tier
-  // failing, which is the debt this pass exists to clear. Measured cost of the strict
-  // choice: on both brands tested every family clears all four tiers, half the
-  // family/mode pairs do not move at all, and no move is larger than two ramp steps.
-  //
-  // Nearest-passing on the family ramp, and deliberately not an off-ramp colour computed
-  // by lightness. The Figma pipeline aliases semantic colours to primitive variables by
-  // name, so a colour that is not a ramp stop has nothing to alias to — the same
-  // constraint that produced $fillShades.
-  const textShades = {};
-  const borderShades = {};
-
-  // Two kinds through one pass. They differ only in the threshold and where the
-  // resolved shade is recorded: a label is text and answers WCAG 1.4.3 at 4.5:1, a
-  // border is a non-text boundary and answers 1.4.11 at 3:1. Running them as one loop
-  // is deliberate — a second copy is how the two would drift, and the shape that
-  // matters (nearest passing shade on the family ramp, resolved against the most
-  // raised tier) is identical.
-  const NEAREST_PASSING = [
-    { prefix: '{readable.', re: /\{readable\.(\w+)\.(\w+)\}/, min: AA_TEXT, into: textShades },
-    { prefix: '{boundary.', re: /\{boundary\.(\w+)\.(\w+)\}/, min: AA_NON_TEXT, into: borderShades },
-  ];
-
-  for (const [mode, modeRoles] of Object.entries(standards.colors.modes)) {
-    const backdrop = roles[mode]?.surface?.[READABLE_AGAINST];
-    for (const [group, groupRoles] of Object.entries(modeRoles)) {
-      for (const [role, template] of Object.entries(groupRoles)) {
-        if (typeof template !== 'string') continue;
-        const kind = NEAREST_PASSING.find((k) => template.startsWith(k.prefix));
-        if (!kind) continue;
-        const m = template.match(kind.re);
-        if (!m || !palette[m[1]] || !backdrop || !String(backdrop).startsWith('#')) {
-          roles[mode][group][role] = m ? palette[m[1]]?.[m[2]] || template : template;
-          if (m) (kind.into[mode] = kind.into[mode] || {})[role] = `${m[1]}.${m[2]}`;
-          continue;
+        const match = template.match(/^\{palette\.(\w+)\.(\w+)\}$/);
+        const hex = match && palette[match[1]]?.[match[2]];
+        if (!hex) {
+          throw new Error(`standards.json colors.modes.${mode}.${group}.${role}: ${template} is not a {palette.family.shade} the palette has`);
         }
-        const [, family, startShade] = m;
-        const shades = Object.keys(palette[family]);
-        const startIdx = shades.indexOf(startShade);
-        const passing = shades
-          .map((sh, i) => ({ sh, i, hex: palette[family][sh] }))
-          .filter((c) => contrastRatio(c.hex, backdrop) >= kind.min)
-          .sort((a, b) => Math.abs(a.i - startIdx) - Math.abs(b.i - startIdx));
-        // No passing shade keeps the start, and the tone-contrast / border-contrast
-        // checks fail the build loudly. A brand whose ramp cannot produce a legible
-        // label is a brand problem, and shipping it quietly is the failure this replaces.
-        const landed = passing.length ? passing[0].sh : startShade;
-        roles[mode][group][role] = palette[family][landed] || template;
-        (kind.into[mode] = kind.into[mode] || {})[role] = `${family}.${landed}`;
+        roles[mode][group][role] = hex;
       }
     }
   }
 
   return {
-    $note: `Generated from primary: ${primary} (chosen). secondary: ${secondary} (${secondaryChosen ? 'chosen' : `DERIVED — analogous +${SECONDARY_ROTATION}° from primary, nobody picked it; set "secondary" in your answers file to choose one`}). accent: ${accent} (${accentChosen ? 'chosen' : `DERIVED — analogous +${ACCENT_ROTATION}° from primary, nobody picked it; set "accent" in your answers file to choose one`}). Neutral tinted from primary hue (${Math.round(primaryHsl.h)}°). A derived family generates a full ramp and role set identical in structure to a chosen one, so this note is the only thing recording which is which. Questionnaire is the override mechanism — change inputs and regenerate.`,
+    $note: `Generated from primary: ${primary} (chosen). secondary: ${secondary} (${secondaryChosen ? 'chosen' : `DERIVED — analogous +${SECONDARY_ROTATION}° from primary, nobody picked it; set "secondary" in your answers file to choose one`}). accent: ${accent} (${accentChosen ? 'chosen' : `DERIVED — analogous +${ACCENT_ROTATION}° from primary, nobody picked it; set "accent" in your answers file to choose one`}). Neutral tinted toward the primary's hue. A derived family generates a full ramp and role set identical in structure to a chosen one, so this note is the only thing recording which is which. Questionnaire is the override mechanism — change inputs and regenerate.`,
     // Machine-readable half of the note above. The Figma pipeline reads this to put
     // a description on every derived variable, because the Figma ramp is where an
     // invented hue looks most like a decision someone made.
     $derived: { secondary: !secondaryChosen, accent: !accentChosen },
-
-    // Resolved shade per {fill.*} role, per mode — see the second pass above. The Figma
-    // pipeline reads this instead of the raw templates, so its aliases point at the same
-    // primitive the code shipped.
-    $fillShades: fillShades,
-
-    // Resolved shade per {readable.*} role, per mode — see the third pass. Same job as
-    // $fillShades and for the same reason: Figma must alias the primitive the code
-    // shipped, not the one the template asked for.
-    $textShades: textShades,
-
-    // Resolved shade per {boundary.*} role, per mode. Same job as $textShades at the
-    // non-text threshold — without it a {boundary.*} template travels raw into the
-    // Figma plugin console, which is what $fillShades' own comment records happening.
-    $borderShades: borderShades,
 
     // Which mode loads first. Lives here, with the generated colors, because it is a
     // per-project answer: standards.json declares itself "values locked across all
