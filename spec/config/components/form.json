@@ -45,7 +45,7 @@
 
 
   "toggle-base": {
-    "$note": "Shared size ladder for the binary toggles. The box, the mark and the checked fill belong to the UA — accent-color points them at the brand — so the size of the indicator is the only decision left here.",
+    "$note": "Shared size ladder for the binary toggles: the size of the indicator. What draws inside it is each toggle's own.",
     "$exception": "Toggle indicator sizes are hardcoded — proportional to the control's visual weight, not derived from icon or component-height primitives.",
     "sizes": {
       "sm": { "size": "16px" },
@@ -63,8 +63,12 @@
   "radio": {
     "$base": "toggle-base",
     "$catalog": { "dependencies": ["cn", "form-field"], "tokens": ["color", "sizing"], "composition": "none" },
-    "$note": "The same control as checkbox with the UA drawing a circle instead of a box, and exclusive within a name group. No radius of its own: the shape is the input type, not a token.",
-    "default": { "size": "md" }
+    "$note": "Drawn by the class layer, as switch is: a circle with a border, and a dot that is a radial gradient taking currentColor. Native accent-color let the browser pick the dot's colour from the fill's lightness, which put a white dot on a light dark-mode primary; drawn, the dot is on-primary on primary in every browser. Exclusive within a name group. No radius token: the shape is a circle.",
+    "active": {
+      "false": { "box-bg": "color/surface/surface", "box-border": "color/outline/outline" },
+      "true":  { "box-bg": "color/primary/primary", "box-border": "color/primary/primary", "mark-bg": "color/primary/on-primary" }
+    },
+    "default": { "active": "false", "size": "md" }
   },
 
   "switch": {
