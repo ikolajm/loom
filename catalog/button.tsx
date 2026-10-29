@@ -25,7 +25,6 @@ const buttonVariants = cva('button interactive control', {
 // whichever one its `bg` token happened to name.
 const buttonTone: Record<string, string> = {
   primary: 'primary',
-  secondary: 'secondary',
   destructive: 'error',
   success: 'success',
   warning: 'warning',
@@ -41,7 +40,7 @@ const buttonToneFixed: Record<string, string> = {
 
 type ButtonSize = 'sm' | 'md' | 'lg';
 type ButtonVariant = 'filled' | 'outline' | 'ghost';
-type ButtonColor = 'primary' | 'secondary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
+type ButtonColor = 'primary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
 type ButtonIntensity = 'solid' | 'soft';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>

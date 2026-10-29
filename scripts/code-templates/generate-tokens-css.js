@@ -8,7 +8,7 @@
  *
  * Handles:
  *   - mode (dark/light) — :root gets the brand's one role table; print gets the light one
- *   - Optional accent group — skipped when not in config
+ *   - Optional families (secondary, accent) — absent from the config when unanswered
  *   - {palette.X.N} → hex resolution
  *   - {scale.N} → var(--space-N) resolution
  *

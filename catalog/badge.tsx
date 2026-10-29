@@ -25,7 +25,6 @@ const badgeVariants = cva('badge', {
 // whichever one its `bg` token happened to name.
 const badgeTone: Record<string, string> = {
   primary: 'primary',
-  secondary: 'secondary',
   destructive: 'error',
   success: 'success',
   warning: 'warning',
@@ -41,7 +40,7 @@ const badgeToneFixed: Record<string, string> = {
 
 type BadgeSize = 'sm' | 'md' | 'lg';
 type BadgeVariant = 'filled' | 'outline' | 'ghost';
-type BadgeColor = 'primary' | 'secondary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
+type BadgeColor = 'primary' | 'destructive' | 'success' | 'warning' | 'neutral' | 'info' | 'inherit';
 type BadgeIntensity = 'solid' | 'soft';
 
 type BadgeProps = React.HTMLAttributes<HTMLElement>

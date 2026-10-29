@@ -37,7 +37,11 @@ const ROLE_GROUPS = [
   ['Semantic', [['error', 'on-error'], ['success', 'on-success'], ['warning', 'on-warning'], ['info', 'on-info']]],
 ];
 
-const TONES = ['primary', 'secondary', 'neutral', 'error', 'success', 'warning', 'info'];
+// Secondary and accent exist only where the brand answered them, so the page shows the
+// families this brand has rather than naming roles its stylesheet never declared.
+const hasRole = (name) => Object.values(colors.roles).some((group) => name in group);
+const TONES = ['primary', 'secondary', 'neutral', 'error', 'success', 'warning', 'info']
+  .filter((t) => colors.roles[t]);
 const SIZES = ['sm', 'md', 'lg'];
 
 // The page carries no icon library on purpose — taking one would be exactly the
@@ -100,7 +104,7 @@ ${swatches}
 }
 
 function roleGroups() {
-  return ROLE_GROUPS.map(([label, pairs]) => {
+  return ROLE_GROUPS.filter(([, pairs]) => pairs.every(([bg]) => hasRole(bg))).map(([label, pairs]) => {
     const cards = pairs.map(([bg, fg]) =>
       `        <div class="pv-role" style="background: var(--${bg}); color: var(--${fg})"><span class="text-label-sm">${bg}</span></div>`
     ).join(NL);

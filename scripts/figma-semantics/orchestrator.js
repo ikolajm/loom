@@ -16,6 +16,7 @@ const path = require('path');
 const CONFIG_ROOT = path.resolve(__dirname, '../../spec/config');
 // Prefers spec/config/local/ over the committed set — see scripts/config-paths.js.
 const { loadConfig } = require('../config-paths');
+const { roleTemplates } = require('../generate-configs/generate-colors');
 const STANDARDS = loadConfig('standards.json');
 const COLORS = loadConfig('base/colors.json');
 const SPACING = loadConfig('base/spacing.json');
@@ -30,7 +31,7 @@ const COLLECTIONS = {
   'color': {
     config: {
       mode: COLORS.mode,
-      roles: STANDARDS.colors.modes[COLORS.mode]
+      roles: roleTemplates(STANDARDS, COLORS)
     },
     template: 'color.js'
   },

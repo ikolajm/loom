@@ -57,8 +57,8 @@ not Loom's "look"):
 |-----|----------|----------------|--------------------|--------|
 | `primary` | **yes** | hex `#RRGGBB` | — | brand color ramp; neutral hue |
 | `defaultMode` | **yes** | `dark` · `light` | — | which surface set the brand ships; there is one mode |
-| `secondary` | no | hex `#RRGGBB` | analogous +30° from `primary`, marked derived | secondary ramp |
-| `accent` | no | hex `#RRGGBB` | analogous +60° from `primary`, marked derived | accent ramp (always generated) |
+| `secondary` | no | hex `#RRGGBB` | no secondary family | secondary ramp, roles and tone classes |
+| `accent` | no | hex `#RRGGBB` | no accent family | accent ramp |
 | `heading` | no | Google Fonts family name | `Inter` | heading text styles |
 | `body` | no | Google Fonts family name | `Inter` | body/UI text styles |
 | `edges` | no | `none` · `sharp` · `soft` | `sharp` | border-radius scale |
@@ -75,17 +75,15 @@ A value outside the allowed set fails loudly (e.g. `Unknown edges: "round". Vali
 
 ## Colors
 
-`primary` is the only required color; `secondary` and `accent` are **always generated** —
-derived from `primary` by a small hue rotation (analogous, +30° and +60°) when you don't
-supply them. Supply a hex to override the derivation. All three produce a full semantic ramp.
+`primary` is the only required color. `secondary` and `accent` exist only if you answer
+them; nothing is derived for you. An unanswered family has no ramp and no roles, so
+`tokens.css` declares none of its custom properties and the class layer emits no
+`tone-secondary`. Answer one later and regenerate to add it.
 
-**A derived color is a placeholder, not a decision.** The generated ramp is structurally
-identical to a chosen one, so nothing downstream can tell them apart by looking — which is
-why the pipeline records which is which, and says so on the face of every derived Figma
-variable. The rotation is deliberately
-small: complementary and triadic derivations are correct color theory and the wrong default,
-because a teal primary produced a fire-engine red secondary that shipped into the tokens
-looking exactly as intentional as the primary. Supply your own the moment you have one.
+`secondary` gets the full role set and its tone classes. The `Button` and `Badge` atoms do
+not offer it as a `color`, because the catalog is shared by every brand and not every
+brand has one: apply `tone-secondary` in your markup instead. `accent` is a ramp only —
+`--color-accent-*` and its Figma primitives — with no roles.
 
 ## Fonts — `heading` / `body`
 
