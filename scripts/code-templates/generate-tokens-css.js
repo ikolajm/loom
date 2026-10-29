@@ -712,25 +712,34 @@ const BASE_RULES = {
   // showing the shape of what is coming, and it does both without moving. The pulse it
   // used to carry was also the only thing a reduced-motion user had to be spared from,
   // and what they would have been served instead is exactly this block.
-  // The UA draws the box, the tick and the checked fill; accent-color points them at the
-  // brand, and the browser picks the tick's colour from the fill's lightness.
-  checkbox: ['accent-color: var(--primary);', 'display: inline-block;', 'flex-shrink: 0;',
-             'margin: 0;', 'cursor: pointer;'],
-  // Drawn, so the dot is on-primary on primary in every browser rather than whichever of
-  // white or black the browser picks for accent-color. The dot is a radial gradient that
-  // grows from nothing, for the switch's reason below; its colours are in the radio
-  // section, read from the schema's `active` states.
+  // Drawn, so the tick is on-primary on primary in every browser rather than whichever of
+  // white or black the browser picks for accent-color. The tick is the ::before, which an
+  // input renders once `appearance: none` takes the native box away; its shape, colours
+  // and states are in the drawn-toggles section. The radius follows the brand's, capped
+  // at a fifth of the box so `edges: soft` never turns a 16px box into a circle.
+  //
+  // State changes instantly, here and on the radio, as native toggles do. At rest neither
+  // sets `color`, so the mark inherits the label's text colour, and `.control`'s colour
+  // transition faded a fresh mark in from that — a white tick or dot flashing on a dark
+  // page. So these narrow `.control`'s transition to the focus ring and the disabled fade.
+  // Both rules are one class in loom.components, and this file loads after loom.css, so
+  // this wins on source order.
+  checkbox: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
+             'cursor: pointer;', 'position: relative;',
+             'border-radius: min(var(--radius-component), 20%);', 'border: var(--bw-1) solid;',
+             'transition-property: outline-color, opacity;'],
+  // Drawn for the checkbox's reason. The dot is a radial gradient taking currentColor,
+  // sized to nothing at rest; its colours are in the drawn-toggles section, read from the
+  // schema's `active` states.
   radio: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
           'cursor: pointer;', 'border-radius: 50%;', 'border: var(--bw-1) solid;',
           'background-repeat: no-repeat;', 'background-position: center;', 'background-size: 0 0;',
           'background-image: radial-gradient(circle closest-side, currentColor 100%, transparent 100%);',
-          'transition: background-color var(--transition) var(--easing),'
-            + ' border-color var(--transition) var(--easing),'
-            + ' background-size var(--transition) var(--easing);'],
+          'transition-property: outline-color, opacity;'],
   // No native switch exists to point accent-color at, so this one is drawn. The thumb is a
-  // radial gradient rather than a pseudo-element because an <input> is a replaced element
-  // — and it takes `currentColor`, so the two states differ by `color` alone and the thumb
-  // crossfades with the track instead of being redeclared.
+  // radial gradient taking `currentColor`, so the two states differ by `color` alone and
+  // the thumb crossfades with the track instead of being redeclared. Its slide keeps a
+  // transition because the thumb has its own colour in both states.
   switch: ['appearance: none;', 'display: inline-block;', 'flex-shrink: 0;', 'margin: 0;',
            'cursor: pointer;', 'background-repeat: no-repeat;',
            'background-image: radial-gradient(circle closest-side, currentColor 100%, transparent 100%);',
@@ -1652,15 +1661,15 @@ const NOT_A_TARGET = {
 
 // Fixed-size classes that take the clamp exemption but not the hit area, and why.
 //
-// An <input> is a replaced element and renders no ::before, so the overlay below is simply
-// not available to one — it is not a support question to hedge on, it is what the element
-// is. A toggle gets its target from the label that names it, which is markup no stylesheet
-// can supply. The clamp exemption still applies: without it a 20px checkbox stretches to a
-// 44px-tall rectangle under a coarse pointer, which is the distortion, not the fix.
+// A toggle gets its target from the label that names it, which is markup no stylesheet can
+// supply, so the overlay below is not used on one. The checkbox's ::before is its tick, so
+// the overlay could not live there anyway. The clamp exemption still applies: without it a
+// 20px checkbox stretches to a 44px-tall rectangle under a coarse pointer, which is the
+// distortion, not the fix.
 const TARGET_FROM_LABEL = {
-  checkbox: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
-  radio: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
-  switch: 'an <input>, so no ::before; pair it with a <label> and pad that instead',
+  checkbox: 'its ::before is the tick; pair it with a <label> and pad that instead',
+  radio: 'a toggle; pair it with a <label> and pad that instead',
+  switch: 'a toggle; pair it with a <label> and pad that instead',
 };
 
 /**
@@ -1722,9 +1731,9 @@ function buildSectionTargetFloor() {
      square lit up outside a 40px icon button on every press.
 
      A fixed-size ladder that is not a target says so in NOT_A_TARGET — .spinner ramps one and
-     nothing clicks it. One that is a target but cannot carry the overlay says so in
-     TARGET_FROM_LABEL — an <input> renders no ::before, so a checkbox takes the exemption
-     above and gets its target from the label beside it. The tier selector already outranks
+     nothing clicks it. One that is a target but takes it from elsewhere says so in
+     TARGET_FROM_LABEL — a toggle takes the exemption above and gets its target from the
+     label beside it. The tier selector already outranks
      the clamp on specificity, so this holds wherever it lands in the block. */
 ${squares.map((sel) => `  ${sel},`).join('\n').replace(/,$/, ' {')}
     min-height: 0;
@@ -1792,30 +1801,70 @@ function buildSectionSwitchThumb() {
 }
 
 /**
- * The radio's two states, from the schema's `active` block, and the dot's size.
+ * The drawn checkbox and radio: their two states from the schema's `active` block, and
+ * the mark each one draws.
  *
- * The dot is a share of the box rather than a per-tier number, so it scales with the
- * ladder on its own. DOT_SHARE is chosen, like THUMB_SHARE: large enough to read as
- * selected at the small tier, small enough to leave a ring of fill around it.
+ * The resting edge reads `--tone-border` first, as `.input` does, so `aria-invalid`
+ * turns it to the error colour through the `.control` rule rather than a rule of its own.
+ * The checked state also covers the checkbox's indeterminate one, which takes the same
+ * fill and swaps the tick for a dash.
+ *
+ * Both marks are a share of the box rather than a per-tier number, so they scale with
+ * the ladder on their own. DOT_SHARE and TICK_INSET are chosen, like THUMB_SHARE: large
+ * enough to read at the small tier, small enough to leave fill around the mark.
  */
 const DOT_SHARE = '50%';
+const TICK_INSET = '15%';
 
-function buildSectionRadio() {
+function buildSectionDrawnToggles() {
   const { emit } = componentPlan();
-  const radio = emit.find((e) => e.name === 'radio');
-  if (!radio) return '';
-  const states = radio.cfg.active || {};
-  const out = ['/* === Radio === */', ''];
-  for (const [key, sel] of [['false', '.radio'], ['true', '.radio:checked']]) {
-    const v = states[key] || {};
-    const d = [];
-    const bg = CSS_COLOR(v['box-bg']);
-    const border = CSS_COLOR(v['box-border']);
-    const mark = CSS_COLOR(v['mark-bg']);
-    if (bg) d.push(`  background-color: ${bg};`);
-    if (border) d.push(`  border-color: ${border};`);
-    if (mark) d.push(`  color: ${mark};`, `  background-size: ${DOT_SHARE} ${DOT_SHARE};`);
-    if (d.length) out.push(`${sel} {`, ...d, '}', '');
+  const out = ['/* === Drawn toggles === */', ''];
+  const shapes = {
+    radio: {
+      checked: ['.radio:checked'],
+      mark: [`  background-size: ${DOT_SHARE} ${DOT_SHARE};`],
+      extra: [],
+    },
+    checkbox: {
+      checked: ['.checkbox:checked', '.checkbox:indeterminate'],
+      mark: [],
+      // The tick exists only while checked or indeterminate, so nothing is left at rest
+      // to take the label's colour.
+      extra: [
+        '.checkbox:checked::before,',
+        '.checkbox:indeterminate::before {',
+        '  content: "";',
+        '  position: absolute;',
+        `  inset: ${TICK_INSET};`,
+        '  background-color: currentColor;',
+        '  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);',
+        '}',
+        '',
+        '.checkbox:indeterminate::before {',
+        '  clip-path: inset(40% 0);',
+        '}',
+        '',
+      ],
+    },
+  };
+  for (const [name, shape] of Object.entries(shapes)) {
+    const toggle = emit.find((e) => e.name === name);
+    if (!toggle) continue;
+    const states = toggle.cfg.active || {};
+    /** @type {[string, string[]][]} */
+    const pairs = [['false', [`.${name}`]], ['true', shape.checked]];
+    for (const [key, sels] of pairs) {
+      const v = states[key] || {};
+      const d = [];
+      const bg = CSS_COLOR(v['box-bg']);
+      const border = CSS_COLOR(v['box-border']);
+      const mark = CSS_COLOR(v['mark-bg']);
+      if (bg) d.push(`  background-color: ${bg};`);
+      if (border) d.push(`  border-color: ${key === 'false' ? `var(--tone-border, ${border})` : border};`);
+      if (mark) d.push(`  color: ${mark};`, ...shape.mark);
+      if (d.length) out.push(`${sels.join(',\n')} {`, ...d, '}', '');
+    }
+    out.push(...shape.extra);
   }
   return out.join('\n');
 }
@@ -1824,8 +1873,9 @@ function buildSectionRadio() {
  * Forced colours for the drawn controls.
  *
  * Under a contrast theme the browser replaces background and border colours with system
- * ones, so a drawn control's state — a fill and a gradient — can vanish. These opt the
- * radio and switch out of that adjustment and paint them in system colours instead:
+ * ones, so a drawn control's state — a fill, a gradient, a clipped mark — can vanish.
+ * These opt the checkbox, radio and switch out of that adjustment and paint them in
+ * system colours instead:
  * Canvas and CanvasText at rest, Highlight and HighlightText when checked, GrayText when
  * disabled. The switch has no border, so its edge is an inset box-shadow, which changes no
  * size.
@@ -1835,6 +1885,7 @@ function buildSectionRadio() {
  */
 function buildSectionForcedColors() {
   return `@media (forced-colors: active) {
+  .checkbox,
   .radio,
   .switch {
     forced-color-adjust: none;
@@ -1842,6 +1893,7 @@ function buildSectionForcedColors() {
     color: CanvasText;
   }
 
+  .checkbox,
   .radio {
     border-color: CanvasText;
   }
@@ -1850,6 +1902,8 @@ function buildSectionForcedColors() {
     box-shadow: inset 0 0 0 1px CanvasText;
   }
 
+  .checkbox:checked,
+  .checkbox:indeterminate,
   .radio:checked,
   .switch:checked {
     background-color: Highlight;
@@ -1861,6 +1915,7 @@ function buildSectionForcedColors() {
     box-shadow: none;
   }
 
+  .checkbox:disabled,
   .radio:disabled,
   .switch:disabled {
     border-color: GrayText;
@@ -1871,6 +1926,8 @@ function buildSectionForcedColors() {
     box-shadow: inset 0 0 0 1px GrayText;
   }
 
+  .checkbox:checked:disabled,
+  .checkbox:indeterminate:disabled,
   .radio:checked:disabled,
   .switch:checked:disabled {
     background-color: GrayText;
@@ -2072,7 +2129,7 @@ function generateComponents() {
     '',
     buildSectionSwitchThumb(),
     '',
-    buildSectionRadio(),
+    buildSectionDrawnToggles(),
     '',
     buildSectionTargetFloor(),
   ].join('\n');

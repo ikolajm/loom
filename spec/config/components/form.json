@@ -57,7 +57,12 @@
   "checkbox": {
     "$base": "toggle-base",
     "$catalog": { "dependencies": ["cn", "form-field"], "tokens": ["color", "sizing"], "composition": "none" },
-    "default": { "size": "md" }
+    "$note": "Drawn by the class layer, as radio is: a box with a border, and a tick or an indeterminate dash on its ::before, a currentColor fill cut to shape with clip-path. With appearance: none the input renders the pseudo-element; native accent-color let the browser pick the tick's colour, which put a white tick on a light dark-mode primary. The indeterminate state takes the checked fill. The box radius follows the brand's component radius, capped so a small box never becomes a circle.",
+    "active": {
+      "false": { "box-bg": "color/surface/surface", "box-border": "color/outline/outline" },
+      "true":  { "box-bg": "color/primary/primary", "box-border": "color/primary/primary", "mark-bg": "color/primary/on-primary" }
+    },
+    "default": { "active": "false", "size": "md" }
   },
 
   "radio": {
