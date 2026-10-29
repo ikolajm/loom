@@ -92,43 +92,43 @@
     "modes": {
       "light": {
         "primary": {
-          "primary": "{fill.primary.600}",
+          "primary": "{palette.primary.600}",
           "on-primary": "#FFFFFF",
-          "primary-text": "{readable.primary.600}",
-        "primary-border": "{boundary.primary.600}",
-          "primary-container": "{fill.primary.100}",
+          "primary-text": "{palette.primary.700}",
+          "primary-border": "{palette.primary.600}",
+          "primary-container": "{palette.primary.100}",
           "on-primary-container": "{palette.primary.900}",
-          "primary-fixed": "{fill.primary.200}",
+          "primary-fixed": "{palette.primary.200}",
           "primary-fixed-dim": "{palette.primary.300}",
           "on-primary-fixed": "{palette.primary.900}",
           "on-primary-fixed-variant": "{palette.primary.700}"
         },
         "secondary": {
-          "secondary": "{fill.secondary.600}",
+          "secondary": "{palette.secondary.600}",
           "on-secondary": "#FFFFFF",
-          "secondary-text": "{readable.secondary.600}",
-        "secondary-border": "{boundary.secondary.600}",
-          "secondary-container": "{fill.secondary.100}",
+          "secondary-text": "{palette.secondary.700}",
+          "secondary-border": "{palette.secondary.600}",
+          "secondary-container": "{palette.secondary.100}",
           "on-secondary-container": "{palette.secondary.900}",
-          "secondary-fixed": "{fill.secondary.200}",
+          "secondary-fixed": "{palette.secondary.200}",
           "secondary-fixed-dim": "{palette.secondary.300}",
           "on-secondary-fixed": "{palette.secondary.900}",
           "on-secondary-fixed-variant": "{palette.secondary.700}"
         },
         "neutral": {
-          "neutral": "{fill.neutral.60}",
+          "neutral": "{palette.neutral.40}",
           "on-neutral": "#FFFFFF",
-          "neutral-container": "{fill.neutral.90}",
+          "neutral-container": "{palette.neutral.90}",
           "on-neutral-container": "{palette.neutral.10}"
         },
         "surface": {
-          "surface": "{fill.neutral.95}",
+          "surface": "{palette.neutral.95}",
           "surface-1": "{palette.neutral.90}",
           "surface-2": "{palette.neutral.85}",
           "surface-3": "{palette.neutral.80}",
           "on-surface": "{palette.neutral.10}",
           "on-surface-variant": "{palette.neutral.30}",
-          "surface-inverse": "{fill.primary.800}",
+          "surface-inverse": "{palette.primary.800}",
           "on-surface-inverse": "{palette.neutral.95}",
           "inverse-primary": "{palette.primary.300}",
           "scrim": "rgba(0, 0, 0, 0.3)"
@@ -138,35 +138,35 @@
           "outline-subtle": "{palette.neutral.80}"
         },
         "error": {
-          "error": "{fill.error.600}",
+          "error": "{palette.error.600}",
           "on-error": "#FFFFFF",
-          "error-text": "{readable.error.600}",
-        "error-border": "{boundary.error.600}",
-          "error-container": "{fill.error.100}",
+          "error-text": "{palette.error.700}",
+          "error-border": "{palette.error.600}",
+          "error-container": "{palette.error.100}",
           "on-error-container": "{palette.error.900}"
         },
         "success": {
-          "success": "{fill.success.600}",
+          "success": "{palette.success.600}",
           "on-success": "#FFFFFF",
-          "success-text": "{readable.success.600}",
-        "success-border": "{boundary.success.600}",
-          "success-container": "{fill.success.100}",
+          "success-text": "{palette.success.700}",
+          "success-border": "{palette.success.600}",
+          "success-container": "{palette.success.100}",
           "on-success-container": "{palette.success.900}"
         },
         "warning": {
-          "warning": "{fill.warning.600}",
+          "warning": "{palette.warning.600}",
           "on-warning": "#FFFFFF",
-          "warning-text": "{readable.warning.600}",
-        "warning-border": "{boundary.warning.600}",
-          "warning-container": "{fill.warning.100}",
+          "warning-text": "{palette.warning.700}",
+          "warning-border": "{palette.warning.600}",
+          "warning-container": "{palette.warning.100}",
           "on-warning-container": "{palette.warning.900}"
         },
         "info": {
-          "info": "{fill.info.600}",
+          "info": "{palette.info.600}",
           "on-info": "#FFFFFF",
-          "info-text": "{readable.info.600}",
-        "info-border": "{boundary.info.600}",
-          "info-container": "{fill.info.100}",
+          "info-text": "{palette.info.700}",
+          "info-border": "{palette.info.600}",
+          "info-container": "{palette.info.100}",
           "on-info-container": "{palette.info.900}"
         },
         "common": {
@@ -176,43 +176,43 @@
 
       "dark": {
         "primary": {
-          "primary": "{fill.primary.300}",
+          "primary": "{palette.primary.300}",
           "on-primary": "{palette.primary.900}",
-          "primary-text": "{readable.primary.300}",
-        "primary-border": "{boundary.primary.300}",
-          "primary-container": "{fill.primary.800}",
+          "primary-text": "{palette.primary.200}",
+          "primary-border": "{palette.primary.300}",
+          "primary-container": "{palette.primary.800}",
           "on-primary-container": "{palette.primary.100}",
-          "primary-fixed": "{fill.primary.200}",
+          "primary-fixed": "{palette.primary.200}",
           "primary-fixed-dim": "{palette.primary.300}",
           "on-primary-fixed": "{palette.primary.900}",
           "on-primary-fixed-variant": "{palette.primary.700}"
         },
         "secondary": {
-          "secondary": "{fill.secondary.300}",
+          "secondary": "{palette.secondary.300}",
           "on-secondary": "{palette.secondary.900}",
-          "secondary-text": "{readable.secondary.300}",
-        "secondary-border": "{boundary.secondary.300}",
-          "secondary-container": "{fill.secondary.800}",
+          "secondary-text": "{palette.secondary.200}",
+          "secondary-border": "{palette.secondary.300}",
+          "secondary-container": "{palette.secondary.800}",
           "on-secondary-container": "{palette.secondary.100}",
-          "secondary-fixed": "{fill.secondary.200}",
+          "secondary-fixed": "{palette.secondary.200}",
           "secondary-fixed-dim": "{palette.secondary.300}",
           "on-secondary-fixed": "{palette.secondary.900}",
           "on-secondary-fixed-variant": "{palette.secondary.700}"
         },
         "neutral": {
-          "neutral": "{fill.neutral.80}",
+          "neutral": "{palette.neutral.80}",
           "on-neutral": "{palette.neutral.10}",
-          "neutral-container": "{fill.neutral.25}",
+          "neutral-container": "{palette.neutral.25}",
           "on-neutral-container": "{palette.neutral.90}"
         },
         "surface": {
-          "surface": "{fill.neutral.10}",
+          "surface": "{palette.neutral.10}",
           "surface-1": "{palette.neutral.15}",
           "surface-2": "{palette.neutral.25}",
           "surface-3": "{palette.neutral.30}",
           "on-surface": "{palette.neutral.90}",
           "on-surface-variant": "{palette.neutral.80}",
-          "surface-inverse": "{fill.primary.100}",
+          "surface-inverse": "{palette.primary.100}",
           "on-surface-inverse": "{palette.neutral.20}",
           "inverse-primary": "{palette.primary.600}",
           "scrim": "rgba(0, 0, 0, 0.5)"
@@ -222,35 +222,35 @@
           "outline-subtle": "{palette.neutral.30}"
         },
         "error": {
-          "error": "{fill.error.400}",
+          "error": "{palette.error.300}",
           "on-error": "{palette.error.900}",
-          "error-text": "{readable.error.400}",
-        "error-border": "{boundary.error.400}",
-          "error-container": "{fill.error.800}",
+          "error-text": "{palette.error.200}",
+          "error-border": "{palette.error.300}",
+          "error-container": "{palette.error.800}",
           "on-error-container": "{palette.error.100}"
         },
         "success": {
-          "success": "{fill.success.400}",
+          "success": "{palette.success.300}",
           "on-success": "{palette.success.900}",
-          "success-text": "{readable.success.400}",
-        "success-border": "{boundary.success.400}",
-          "success-container": "{fill.success.800}",
+          "success-text": "{palette.success.200}",
+          "success-border": "{palette.success.300}",
+          "success-container": "{palette.success.800}",
           "on-success-container": "{palette.success.100}"
         },
         "warning": {
-          "warning": "{fill.warning.400}",
+          "warning": "{palette.warning.300}",
           "on-warning": "{palette.warning.900}",
-          "warning-text": "{readable.warning.400}",
-        "warning-border": "{boundary.warning.400}",
-          "warning-container": "{fill.warning.800}",
+          "warning-text": "{palette.warning.200}",
+          "warning-border": "{palette.warning.300}",
+          "warning-container": "{palette.warning.800}",
           "on-warning-container": "{palette.warning.100}"
         },
         "info": {
-          "info": "{fill.info.400}",
+          "info": "{palette.info.300}",
           "on-info": "{palette.info.900}",
-          "info-text": "{readable.info.400}",
-        "info-border": "{boundary.info.400}",
-          "info-container": "{fill.info.800}",
+          "info-text": "{palette.info.200}",
+          "info-border": "{palette.info.300}",
+          "info-container": "{palette.info.800}",
           "on-info-container": "{palette.info.100}"
         },
         "common": {

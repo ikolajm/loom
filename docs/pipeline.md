@@ -125,9 +125,16 @@ Under `flat` every shadow is `none`, so `shadow-properties` comes out empty.
 
 **Palettes.** `primary` generates a ramp. `secondary` and `accent` are yours if you
 gave them and otherwise derived as analogous rotations — `+30°` and `+60°`, small and
-on the same side of the wheel. `neutral` is tinted from the primary's hue, so the
+on the same side of the wheel. `neutral` is tinted toward the primary's hue, so the
 greys belong to the brand. The four status families are generated from fixed hues
 (`error 0`, `success 145`, `warning 40`, `info 210`) and do not move with your brand.
+
+**Every shade is placed by luminance.** Shade N of any family takes the WCAG relative
+luminance of a fixed grey, keeping the input's OKLCH hue and as much of its chroma as
+sRGB can show at that luminance. So a shade's contrast against anything is the same
+whatever the hue, and a role can name its shade outright. The cost is chroma where
+sRGB runs out: the light stops of blues and violets go toward grey, and the dark stops
+of yellows and greens go toward olive. Your exact hex is not a stop on its own ramp.
 
 A derived family produces a ramp and role set structurally identical to a chosen one.
 Nothing downstream can tell them apart, which is why two records exist: the prose
@@ -135,30 +142,17 @@ Nothing downstream can tell them apart, which is why two records exist: the pros
 read by the Figma pipeline so every invented hue gets a description on its variable.
 The Figma ramp is where an invented hue looks most like a decision someone made.
 
-**Roles, in two passes.** `standards.colors.modes` holds role templates.
-`{palette.family.shade}` resolves directly to hex. `{fill.family.shade}` cannot — a
-fill has to read the label it will carry — so pass one reserves the key as `null` and
-pass two fills it. (Reserving rather than appending keeps emitted JSON key order
-stable; creating the key in pass two turned a handful of changed values into a
-70-line diff.)
+**Roles.** `standards.colors.modes` holds role templates: a `{palette.family.shade}`
+reference, which resolves to hex, or a literal. Each role's shade is chosen once, so
+that every fill clears AA against its label, every `*-text` role against the most
+raised surface tier, and every `*-border` role 1.4.11's 3:1 against the same tier.
+Label polarity is fixed per mode: white in light, the family's dark tone in dark. The
+`contrast`, `tone-contrast` and `border-contrast` checks in `verify.js` measure the
+result for your brand, so the table is checked rather than trusted. Any other brace
+template, or a shade the palette lacks, stops the run naming the role.
 
-**The fill resolver.** Pass two walks outward from the intent shade to the *nearest*
-shade whose contrast against the already-resolved `on-<role>` label clears AA (4.5).
-Nearest rather than a fixed direction, because standard ramps darken as the number
-rises while the neutral ramp lightens — a hardcoded direction is wrong for one of
-them. If nothing clears AA the intent shade is kept and the `contrast` check in
-`verify.js` fails the build.
-
-The discarded alternative was letting the label chase the fill per role. It optimizes
-each pair and produces a patchwork — a row of filled buttons with one odd label out
-reads as a bug, not a system. Label polarity is now fixed per mode by declaration:
-white in light, the family's dark tone in dark. The fill moves to meet it.
-
-**`$fillShades`** records which shade each fill role actually landed on, per mode.
-This exists for Figma. The Figma steps alias semantic colors to primitive variables
-*by name*, so they need the resolved shade — handing them the intent shade would alias
-`primary/600` in Figma while code shipped `primary/700`, which is precisely the
-design↔code divergence the whole model exists to prevent.
+Because the shade a role names is the shade the code ships, the Figma steps alias
+each role to that primitive variable by name and the two cannot diverge.
 
 `default-mode` also lands here rather than in `standards.json`, because it is a
 per-project answer and `standards.json` declares itself locked across projects.
@@ -286,15 +280,6 @@ a semantics paste before its primitive has nothing to point at. [`figma.md`](fig
 the pasting end of this. Opacity leads the
 semantics because it is the only one that aliases nothing.
 
-Step `09` is where `$fillShades` is consumed. Each `{fill.*}` template in
-`standards.colors.modes` is substituted with `{palette.<landed shade>}` before the
-config is inlined. The Figma step aliases by name and cannot resolve `{fill.*}`
-itself — and must not guess the intent shade, because the resolver moves it whenever
-AA demands. A missing `$fillShades` entry throws in Node rather than emitting the raw
-template: that failure shipped once, a stale `spec/config/local/` predating the fill
-resolver outranking a fresh committed set, and the unresolved template reached the
-Figma console before anything complained. Failing in Node names the cause and the fix;
-failing in the plugin console names neither.
 
 ---
 
@@ -323,8 +308,7 @@ line. It reports; it never installs.
 |---|---|
 | A value you answered didn't take | The `configs` run log — it names the source layer per Tier 2 key |
 | Output doesn't match a config you edited | `sourceOf()` / a stale `spec/config/local/`; resolution is per file |
-| A fill color isn't the shade you named | The AA fill resolver moved it; `$fillShades` says where it landed |
-| Figma colors differ from code colors | `$fillShades` missing or stale — regenerate configs |
+| A brand color looks duller than your hex | sRGB cannot hold that chroma at the shade's luminance; see "Every shade is placed by luminance" |
 | A font renders as Inter in Figma | This Figma cannot render the family; step `14` reports per family |
 | `npm run generate` fails at the end | `verify` — the check name and its failures print inline |
 | Committed configs suddenly fail the build | `base-config-provenance`; repair with `--default-set` |
