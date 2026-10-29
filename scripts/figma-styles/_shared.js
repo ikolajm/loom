@@ -86,7 +86,9 @@ async function reportFontParity(families, textStyles) {
   for (const [fam, weight] of [...wanted.values()].sort((a, b) => a[0].localeCompare(b[0]) || a[1] - b[1])) {
     const ideal = __idealStyle(weight);
     const chosen = fontStyle(weight, fam);
-    console.log(chosen === ideal
+    // Normalised: Inter spells it "Semi Bold" where the ladder says "SemiBold", and an
+    // exact comparison reported a correct choice as a missing weight.
+    console.log(__normStyle(chosen) === __normStyle(ideal)
       ? `  ✓ ${fam} ${weight} → ${chosen}`
       : `  ⚠ ${fam} ${weight} → "${chosen}" (no ${ideal} in this Figma; the browser resolves it the same way)`);
   }
@@ -146,6 +148,9 @@ function fontStyle(weight, familyName) {
   const available = familyName && __figmaStyles && __figmaStyles.get(familyName);
   if (!available) return ideal;           // no index yet (or family absent) — ladder as before
   if (available.has(ideal)) return ideal;
+  // The same weight under the family's own spelling ("Semi Bold") is not a snap.
+  const spelled = [...available].find((s) => __normStyle(s) === __normStyle(ideal));
+  if (spelled) return spelled;
 
   // Italics excluded: a ramp asking for 600 wants a heavier upright, never a slanted one.
   // Ties go heavier, matching CSS font matching for weights at or above 400.
