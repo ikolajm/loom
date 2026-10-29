@@ -1,12 +1,11 @@
 // =============================================================================
-// semantic.color — Semantic color roles with light/dark modes
-// Source: config/standards.json → colors.modes
+// semantic.color — Semantic color roles, in the brand's one mode
+// Source: config/standards.json → colors.modes[mode]
 // Architecture: config/figma/variable-collections.json → semantic.color
 //
 // CONFIG injected by orchestrator:
-//   { defaultMode: "dark",
-//     modes: { light: { primary: { primary: "{palette.primary.600}", ... }, ... },
-//              dark:  { primary: { primary: "{palette.primary.400}", ... }, ... } } }
+//   { mode: "dark",
+//     roles: { primary: { primary: "{palette.primary.300}", ... }, ... } }
 //
 // Values are either:
 //   - "{palette.family.shade}" → alias to primitives.color color/family/shade
@@ -63,65 +62,24 @@ const SCOPES = ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL", "STROKE_COLOR"];
 
 const collection = figma.variables.createVariableCollection("semantic.color");
 
-// Set up light/dark modes
-const firstModeId = collection.modes[0].modeId;
-const defaultMode = CONFIG.defaultMode || "light";
-
-let lightModeId, darkModeId;
-if (defaultMode === "dark") {
-  collection.renameMode(firstModeId, "dark");
-  darkModeId = firstModeId;
-  lightModeId = collection.addMode("light");
-} else {
-  collection.renameMode(firstModeId, "light");
-  lightModeId = firstModeId;
-  darkModeId = collection.addMode("dark");
-}
-
-// Collect all unique variable names across both modes
-// (both modes should have the same roles, but we iterate to be safe)
-const allRoles = new Map(); // "group/role" → true
-for (const [modeName, groups] of Object.entries(CONFIG.modes)) {
-  for (const [group, roles] of Object.entries(groups)) {
-    for (const role of Object.keys(roles)) {
-      allRoles.set(`${group}/${role}`, true);
-    }
-  }
-}
+// One mode, named for the brand's answer.
+const modeId = collection.modes[0].modeId;
+collection.renameMode(modeId, CONFIG.mode);
 
 let count = 0;
-for (const varPath of allRoles.keys()) {
-  const [group, role] = varPath.split('/');
-  const figmaName = `color/${group}/${role}`;
-  const codeSyntax = `var(--${role})`;
-
-  const v = figma.variables.createVariable(figmaName, collection, "COLOR");
-  v.scopes = SCOPES;
-  v.setVariableCodeSyntax("WEB", codeSyntax);
-
-  // Set light mode value
-  const lightValue = CONFIG.modes.light?.[group]?.[role];
-  if (lightValue) {
-    const resolved = resolveValue(lightValue, primitives);
+for (const [group, roles] of Object.entries(CONFIG.roles)) {
+  for (const [role, value] of Object.entries(roles)) {
+    const v = figma.variables.createVariable(`color/${group}/${role}`, collection, "COLOR");
+    v.scopes = SCOPES;
+    v.setVariableCodeSyntax("WEB", `var(--${role})`);
+    const resolved = resolveValue(value, primitives);
     if (resolved.alias) {
-      v.setValueForMode(lightModeId, { type: "VARIABLE_ALIAS", id: resolved.alias.id });
+      v.setValueForMode(modeId, { type: "VARIABLE_ALIAS", id: resolved.alias.id });
     } else {
-      v.setValueForMode(lightModeId, resolved.direct);
+      v.setValueForMode(modeId, resolved.direct);
     }
+    count++;
   }
-
-  // Set dark mode value
-  const darkValue = CONFIG.modes.dark?.[group]?.[role];
-  if (darkValue) {
-    const resolved = resolveValue(darkValue, primitives);
-    if (resolved.alias) {
-      v.setValueForMode(darkModeId, { type: "VARIABLE_ALIAS", id: resolved.alias.id });
-    } else {
-      v.setValueForMode(darkModeId, resolved.direct);
-    }
-  }
-
-  count++;
 }
 
-return `semantic.color: ${count} variables created (light + dark modes, default: ${defaultMode})`;
+return `semantic.color: ${count} variables created (${CONFIG.mode} mode)`;

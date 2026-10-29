@@ -4,7 +4,7 @@
     "secondary": false,
     "accent": false
   },
-  "default-mode": "dark",
+  "mode": "dark",
   "palette": {
     "primary": {
       "50": "#f3f0ff",
@@ -108,171 +108,169 @@
     }
   },
   "roles": {
-    "light": {
-      "primary": {
-        "primary": "#7521db",
-        "on-primary": "#FFFFFF",
-        "primary-text": "#6200be",
-        "primary-border": "#7521db",
-        "primary-container": "#e9e2ff",
-        "on-primary-container": "#36006f",
-        "primary-fixed": "#d2c4ff",
-        "primary-fixed-dim": "#b394ff",
-        "on-primary-fixed": "#36006f",
-        "on-primary-fixed-variant": "#6200be"
-      },
-      "secondary": {
-        "secondary": "#006462",
-        "on-secondary": "#FFFFFF",
-        "secondary-text": "#00504e",
-        "secondary-border": "#006462",
-        "secondary-container": "#c3efec",
-        "on-secondary-container": "#002c2b",
-        "secondary-fixed": "#99d7d5",
-        "secondary-fixed-dim": "#55b5b2",
-        "on-secondary-fixed": "#002c2b",
-        "on-secondary-fixed-variant": "#00504e"
-      },
-      "neutral": {
-        "neutral": "#67656d",
-        "on-neutral": "#FFFFFF",
-        "neutral-container": "#e7e5ee",
-        "on-neutral-container": "#1b191f"
-      },
-      "surface": {
-        "surface": "#f3f1fa",
-        "surface-1": "#e7e5ee",
-        "surface-2": "#dad8e1",
-        "surface-3": "#cdcbd4",
-        "on-surface": "#1b191f",
-        "on-surface-variant": "#4e4c53",
-        "surface-inverse": "#4e009a",
-        "on-surface-inverse": "#f3f1fa",
-        "inverse-primary": "#b394ff",
-        "scrim": "rgba(0, 0, 0, 0.3)"
-      },
-      "outline": {
-        "outline": "#817f87",
-        "outline-subtle": "#cdcbd4"
-      },
-      "error": {
-        "error": "#b40d13",
-        "on-error": "#FFFFFF",
-        "error-text": "#940009",
-        "error-border": "#b40d13",
-        "error-container": "#ffdfda",
-        "on-error-container": "#550003"
-      },
-      "success": {
-        "success": "#00672f",
-        "on-success": "#FFFFFF",
-        "success-text": "#005324",
-        "success-border": "#00672f",
-        "success-container": "#b7f5c4",
-        "on-success-container": "#002d11"
-      },
-      "warning": {
-        "warning": "#775200",
-        "on-warning": "#FFFFFF",
-        "warning-text": "#604100",
-        "warning-border": "#775200",
-        "warning-container": "#fee2b7",
-        "on-warning-container": "#352300"
-      },
-      "info": {
-        "info": "#0059a6",
-        "on-info": "#FFFFFF",
-        "info-text": "#004787",
-        "info-border": "#0059a6",
-        "info-container": "#d5e8ff",
-        "on-info-container": "#00264d"
-      },
-      "common": {
-        "on-color": "#FFFFFF"
-      }
+    "primary": {
+      "primary": "#b394ff",
+      "on-primary": "#36006f",
+      "primary-text": "#d2c4ff",
+      "primary-border": "#b394ff",
+      "primary-container": "#4e009a",
+      "on-primary-container": "#e9e2ff",
+      "primary-fixed": "#d2c4ff",
+      "primary-fixed-dim": "#b394ff",
+      "on-primary-fixed": "#36006f",
+      "on-primary-fixed-variant": "#6200be"
     },
-    "dark": {
-      "primary": {
-        "primary": "#b394ff",
-        "on-primary": "#36006f",
-        "primary-text": "#d2c4ff",
-        "primary-border": "#b394ff",
-        "primary-container": "#4e009a",
-        "on-primary-container": "#e9e2ff",
-        "primary-fixed": "#d2c4ff",
-        "primary-fixed-dim": "#b394ff",
-        "on-primary-fixed": "#36006f",
-        "on-primary-fixed-variant": "#6200be"
-      },
-      "secondary": {
-        "secondary": "#55b5b2",
-        "on-secondary": "#002c2b",
-        "secondary-text": "#99d7d5",
-        "secondary-border": "#55b5b2",
-        "secondary-container": "#003f3e",
-        "on-secondary-container": "#c3efec",
-        "secondary-fixed": "#99d7d5",
-        "secondary-fixed-dim": "#55b5b2",
-        "on-secondary-fixed": "#002c2b",
-        "on-secondary-fixed-variant": "#00504e"
-      },
-      "neutral": {
-        "neutral": "#cdcbd4",
-        "on-neutral": "#1b191f",
-        "neutral-container": "#413f46",
-        "on-neutral-container": "#e7e5ee"
-      },
-      "surface": {
-        "surface": "#1b191f",
-        "surface-1": "#27252c",
-        "surface-2": "#413f46",
-        "surface-3": "#4e4c53",
-        "on-surface": "#e7e5ee",
-        "on-surface-variant": "#cdcbd4",
-        "surface-inverse": "#e9e2ff",
-        "on-surface-inverse": "#343239",
-        "inverse-primary": "#7521db",
-        "scrim": "rgba(0, 0, 0, 0.5)"
-      },
-      "outline": {
-        "outline": "#9a98a0",
-        "outline-subtle": "#4e4c53"
-      },
-      "error": {
-        "error": "#ff8173",
-        "on-error": "#550003",
-        "error-text": "#ffbcb3",
-        "error-border": "#ff8173",
-        "error-container": "#770005",
-        "on-error-container": "#ffdfda"
-      },
-      "success": {
-        "success": "#22be61",
-        "on-success": "#002d11",
-        "success-text": "#87df9d",
-        "success-border": "#22be61",
-        "success-container": "#00421c",
-        "on-success-container": "#b7f5c4"
-      },
-      "warning": {
-        "warning": "#d39d3a",
-        "on-warning": "#352300",
-        "warning-text": "#edc689",
-        "warning-border": "#d39d3a",
-        "warning-container": "#4c3300",
-        "on-warning-container": "#fee2b7"
-      },
-      "info": {
-        "info": "#5ea9ff",
-        "on-info": "#00264d",
-        "info-text": "#a7d0ff",
-        "info-border": "#5ea9ff",
-        "info-container": "#00386d",
-        "on-info-container": "#d5e8ff"
-      },
-      "common": {
-        "on-color": "#FFFFFF"
-      }
+    "secondary": {
+      "secondary": "#55b5b2",
+      "on-secondary": "#002c2b",
+      "secondary-text": "#99d7d5",
+      "secondary-border": "#55b5b2",
+      "secondary-container": "#003f3e",
+      "on-secondary-container": "#c3efec",
+      "secondary-fixed": "#99d7d5",
+      "secondary-fixed-dim": "#55b5b2",
+      "on-secondary-fixed": "#002c2b",
+      "on-secondary-fixed-variant": "#00504e"
+    },
+    "neutral": {
+      "neutral": "#cdcbd4",
+      "on-neutral": "#1b191f",
+      "neutral-container": "#413f46",
+      "on-neutral-container": "#e7e5ee"
+    },
+    "surface": {
+      "surface": "#1b191f",
+      "surface-1": "#27252c",
+      "surface-2": "#413f46",
+      "surface-3": "#4e4c53",
+      "on-surface": "#e7e5ee",
+      "on-surface-variant": "#cdcbd4",
+      "surface-inverse": "#e9e2ff",
+      "on-surface-inverse": "#343239",
+      "inverse-primary": "#7521db",
+      "scrim": "rgba(0, 0, 0, 0.5)"
+    },
+    "outline": {
+      "outline": "#9a98a0",
+      "outline-subtle": "#4e4c53"
+    },
+    "error": {
+      "error": "#ff8173",
+      "on-error": "#550003",
+      "error-text": "#ffbcb3",
+      "error-border": "#ff8173",
+      "error-container": "#770005",
+      "on-error-container": "#ffdfda"
+    },
+    "success": {
+      "success": "#22be61",
+      "on-success": "#002d11",
+      "success-text": "#87df9d",
+      "success-border": "#22be61",
+      "success-container": "#00421c",
+      "on-success-container": "#b7f5c4"
+    },
+    "warning": {
+      "warning": "#d39d3a",
+      "on-warning": "#352300",
+      "warning-text": "#edc689",
+      "warning-border": "#d39d3a",
+      "warning-container": "#4c3300",
+      "on-warning-container": "#fee2b7"
+    },
+    "info": {
+      "info": "#5ea9ff",
+      "on-info": "#00264d",
+      "info-text": "#a7d0ff",
+      "info-border": "#5ea9ff",
+      "info-container": "#00386d",
+      "on-info-container": "#d5e8ff"
+    },
+    "common": {
+      "on-color": "#FFFFFF"
+    }
+  },
+  "print-roles": {
+    "primary": {
+      "primary": "#7521db",
+      "on-primary": "#FFFFFF",
+      "primary-text": "#6200be",
+      "primary-border": "#7521db",
+      "primary-container": "#e9e2ff",
+      "on-primary-container": "#36006f",
+      "primary-fixed": "#d2c4ff",
+      "primary-fixed-dim": "#b394ff",
+      "on-primary-fixed": "#36006f",
+      "on-primary-fixed-variant": "#6200be"
+    },
+    "secondary": {
+      "secondary": "#006462",
+      "on-secondary": "#FFFFFF",
+      "secondary-text": "#00504e",
+      "secondary-border": "#006462",
+      "secondary-container": "#c3efec",
+      "on-secondary-container": "#002c2b",
+      "secondary-fixed": "#99d7d5",
+      "secondary-fixed-dim": "#55b5b2",
+      "on-secondary-fixed": "#002c2b",
+      "on-secondary-fixed-variant": "#00504e"
+    },
+    "neutral": {
+      "neutral": "#67656d",
+      "on-neutral": "#FFFFFF",
+      "neutral-container": "#e7e5ee",
+      "on-neutral-container": "#1b191f"
+    },
+    "surface": {
+      "surface": "#f3f1fa",
+      "surface-1": "#e7e5ee",
+      "surface-2": "#dad8e1",
+      "surface-3": "#cdcbd4",
+      "on-surface": "#1b191f",
+      "on-surface-variant": "#4e4c53",
+      "surface-inverse": "#4e009a",
+      "on-surface-inverse": "#f3f1fa",
+      "inverse-primary": "#b394ff",
+      "scrim": "rgba(0, 0, 0, 0.3)"
+    },
+    "outline": {
+      "outline": "#817f87",
+      "outline-subtle": "#cdcbd4"
+    },
+    "error": {
+      "error": "#b40d13",
+      "on-error": "#FFFFFF",
+      "error-text": "#940009",
+      "error-border": "#b40d13",
+      "error-container": "#ffdfda",
+      "on-error-container": "#550003"
+    },
+    "success": {
+      "success": "#00672f",
+      "on-success": "#FFFFFF",
+      "success-text": "#005324",
+      "success-border": "#00672f",
+      "success-container": "#b7f5c4",
+      "on-success-container": "#002d11"
+    },
+    "warning": {
+      "warning": "#775200",
+      "on-warning": "#FFFFFF",
+      "warning-text": "#604100",
+      "warning-border": "#775200",
+      "warning-container": "#fee2b7",
+      "on-warning-container": "#352300"
+    },
+    "info": {
+      "info": "#0059a6",
+      "on-info": "#FFFFFF",
+      "info-text": "#004787",
+      "info-border": "#0059a6",
+      "info-container": "#d5e8ff",
+      "on-info-container": "#00264d"
+    },
+    "common": {
+      "on-color": "#FFFFFF"
     }
   }
 }

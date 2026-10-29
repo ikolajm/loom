@@ -7,7 +7,7 @@
  * Writes: loom/tokens.css (or stdout with --stdout)
  *
  * Handles:
- *   - default-mode (dark/light) — :root gets default mode, [data-theme] gets alternate
+ *   - mode (dark/light) — :root gets the brand's one role table; print gets the light one
  *   - Optional accent group — skipped when not in config
  *   - {palette.X.N} → hex resolution
  *   - {scale.N} → var(--space-N) resolution
@@ -66,10 +66,10 @@ function buildSection1_ColorPalette() {
   return lines;
 }
 
-function buildSection2_ColorRoles(modeName) {
-  const roles = colors.roles[modeName];
-  if (!roles) return [];
-  const lines = [`/* === Color Roles (${modeName === 'light' ? 'Light' : 'Dark'}) === */`];
+// `color-scheme` tells the browser which way to paint what Loom does not draw: native
+// form controls, scrollbars and the canvas behind the page.
+function buildSection2_ColorRoles(roles, scheme) {
+  const lines = [`/* === Color Roles (${scheme}) === */`, `color-scheme: ${scheme};`];
   for (const [group, roleMap] of Object.entries(roles)) {
     for (const [role, value] of Object.entries(roleMap)) {
       lines.push(`--${role}: ${value};`);
@@ -207,31 +207,6 @@ function buildSection8_ZIndex() {
     '--z-popover: 1300;',
     '--z-tooltip: 1400;'
   ];
-}
-
-function buildSection9_AltMode(modeName) {
-  const roles = colors.roles[modeName];
-  if (!roles) return '';
-  const lines = [`/* === Color Roles (${modeName === 'light' ? 'Light' : 'Dark'}) === */`];
-
-  // Collect fixed keys to skip (they don't change between modes)
-  const fixedKeys = new Set();
-  for (const [group, roleMap] of Object.entries(roles)) {
-    for (const role of Object.keys(roleMap)) {
-      if (role.includes('-fixed') || role.startsWith('on-') && role.includes('-fixed')) {
-        fixedKeys.add(role);
-      }
-    }
-  }
-
-  for (const [group, roleMap] of Object.entries(roles)) {
-    for (const [role, value] of Object.entries(roleMap)) {
-      if (fixedKeys.has(role)) continue;
-      lines.push(`--${role}: ${value};`);
-    }
-  }
-
-  return `[data-theme="${modeName}"] {\n${indent(lines)}\n}`;
 }
 
 /**
@@ -1325,8 +1300,7 @@ function buildSection16_ControlStates() {
 }
 
 function buildSection15_Tones() {
-  const defaultMode = colors['default-mode'] || 'light';
-  const groups = colors.roles[defaultMode] || {};
+  const groups = colors.roles;
   // A family qualifies when it carries the full four-role set. That is the contract a
   // tone needs; anything short of it would emit a rule with holes in it.
   const families = Object.keys(groups).filter((g) => {
@@ -1486,24 +1460,22 @@ function header(name, note) {
  */`;
 }
 
-/** Custom properties only: :root and the alternate-mode block. Portable. */
 /**
- * Print forces the light roles, whatever the app is showing.
+ * Print uses the light roles, whatever the brand's mode.
  *
- * A document is a document. `defaultMode` decides what the screen opens in; it should not
- * decide that a printed page arrives full-bleed dark — and `print-color-adjust:
- * exact` would make that worse, insisting the browser actually render the dark ground
- * instead of dropping it as it would by default.
+ * Browsers drop background colors when printing and keep text colors, so a dark brand
+ * would print pale text on white paper. `print-color-adjust: exact` would print the dark
+ * ground instead — a page of ink inside white paper margins, overriding the reader's own
+ * background-graphics choice. So every role switches to the light table together.
  *
- * Both `:root` and `[data-theme="dark"]` are overridden, so this holds whichever mode is
- * the default and whether or not the viewer has toggled. It redefines the same custom
- * properties the light block already emits, so nothing downstream — tones, treatments,
- * surfaces — needs a print-aware branch: they read the roles, and the roles changed.
+ * It redefines the same custom properties `:root` declares, so nothing downstream —
+ * tones, treatments, surfaces — needs a print-aware branch: they read the roles, and the
+ * roles changed. A light brand's roles already are the light table, so it emits nothing.
  */
 function buildSectionPrintRoles() {
-  const lines = buildSection2_ColorRoles('light');
-  if (!lines.length) return '';
-  return `@media print {\n  :root,\n  [data-theme="dark"] {\n${indent(lines, 2)}\n  }\n}`;
+  if (colors.mode === 'light') return '';
+  const lines = buildSection2_ColorRoles(colors['print-roles'], 'light');
+  return `@media print {\n  :root {\n${indent(lines, 2)}\n  }\n}`;
 }
 
 /**
@@ -1532,13 +1504,10 @@ function buildSectionReducedMotion() {
 }
 
 function generateTokens() {
-  const defaultMode = colors['default-mode'] || 'light';
-  const altMode = defaultMode === 'dark' ? 'light' : 'dark';
-
   const rootSections = [
     buildSection1_ColorPalette(),
     [],
-    buildSection2_ColorRoles(defaultMode),
+    buildSection2_ColorRoles(colors.roles, colors.mode),
     [],
     buildSection3_SpacingScale(),
     [],
@@ -1556,15 +1525,11 @@ function generateTokens() {
   ];
 
   return [
-    header('tokens.css', `Design token values in \`@layer loom.tokens\`. Default mode: ${defaultMode}; \`[data-theme="${altMode}"]\` overrides the color roles. Declares the layer order for every Loom file, so import this one first. Plain CSS.`),
+    header('tokens.css', `Design token values in \`@layer loom.tokens\`. Mode: ${colors.mode}; print uses the light roles. Declares the layer order for every Loom file, so import this one first. Plain CSS.`),
     '',
     LAYER_ORDER,
     '',
-    `@layer loom.tokens {\n${indent([
-      `:root {\n${indent(rootSections.flat())}\n}`,
-      '',
-      buildSection9_AltMode(altMode),
-    ].join('\n').split('\n'))}\n}`,
+    `@layer loom.tokens {\n${indent(`:root {\n${indent(rootSections.flat())}\n}`.split('\n'))}\n}`,
     '',
     buildSectionPrintRoles(),
     '',

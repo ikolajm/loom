@@ -92,11 +92,7 @@ function loadAnswers(args) {
       );
       process.exit(1);
     }
-    const answers = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
-    // defaultMode lands in the generated colors.json; default it here so an omitted key
-    // doesn't emit `undefined`. Matches the CLI-flag path.
-    answers.defaultMode = answers.defaultMode || 'dark';
-    return answers;
+    return JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
   }
 
   // Otherwise, build from CLI flags
@@ -109,7 +105,7 @@ function loadAnswers(args) {
     // Tier 1 — intent; resolveIntent() turns these into Tier 2 values below
     projectName: args.projectName || null,
     styleDirection: args.styleDirection || null,
-    defaultMode: args.defaultMode || 'dark',
+    defaultMode: args.defaultMode,
     // Tier 2 — implementation (drives config generation)
     primary: args.primary,
     secondary: args.secondary || null,
@@ -148,10 +144,17 @@ function main() {
     process.exit(1);
   }
 
+  // Required, like primary: it picks which role table the brand ships, so without it
+  // there is no way to know which surface variations to use.
+  if (answers.defaultMode !== 'light' && answers.defaultMode !== 'dark') {
+    console.error(`Error: defaultMode is required — "light" or "dark", got ${JSON.stringify(answers.defaultMode)}`);
+    process.exit(1);
+  }
+
   console.log('=== Design System Config Generator ===');
   if (answers.projectName) console.log(`Project: ${answers.projectName}`);
   if (answers.styleDirection) console.log(`Style Direction: ${answers.styleDirection}`);
-  console.log(`Default Mode: ${answers.defaultMode || 'dark'}`);
+  console.log(`Mode: ${answers.defaultMode}`);
   console.log(`Primary: ${answers.primary}`);
   console.log(`Secondary: ${answers.secondary || '(auto-derive)'}`);
   console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
@@ -162,9 +165,6 @@ function main() {
     console.log(`${key}: ${answers[key]}  (from ${sources[key]})`);
   }
   console.log('');
-
-  // defaultMode rides in generate-colors.js's output, not standards.json: standards.json
-  // is locked across projects and this is a per-project answer. One write target, below.
 
   // Ensure output directory exists
   const OUTPUT_DIR = outputDir(args);

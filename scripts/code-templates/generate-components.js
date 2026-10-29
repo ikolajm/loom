@@ -20,8 +20,6 @@ const path = require('path');
 // --- Module imports ---
 const { resolveConfig } = require('./components/helpers');
 const { buildCnUtility } = require('./components/cn');
-const { buildThemeProvider } = require('./components/theme-provider');
-const { buildThemeInit } = require('./components/theme-init');
 
 // Every other template module is reached through the registry's `generator` field
 // ('module#export', resolved below) rather than a hand-written import here. Adding an
@@ -162,9 +160,7 @@ function buildManifest(def, config, src) {
     // `doc-counts` reads it; the classifier does not, because it classified nothing.
     kind: 'atom',
     category: cat.category || CATEGORY_MAP[def.category] || 'misc',
-    // The delivered filename, so nothing downstream has to know which atoms are not
-    // .tsx. sync.js used to carry `atom === 'cn' ? 'cn.ts' : ...`, which was one special
-    // case until theme-init.js made it two.
+    // The delivered filename, so nothing downstream has to know which entries are not .tsx.
     file: `${def.key}.tsx`,
     dependencies: [...new Set([...imported, ...declared])].sort(),
     npmDependencies: extractNpmDeps(src || ''),
@@ -238,48 +234,6 @@ function generate(registry, outputDir, configs) {
     composition: 'none',
   }, null, 2) + '\n');
   console.log(`  cn.ts + manifest (utility)`);
-
-  // theme-provider — the theme mechanism, catalog-resident.
-  //
-  // Its own kind, for the reason cn has one: a consumer filtering by kind should not have
-  // to special-case it. It is not an atom — it renders no shape and has no class contract
-  // — but it is not a utility either, because it carries the behavior the alternate-mode
-  // block depends on: persisting a choice, resolving prefers-color-scheme, and writing
-  // data-theme.
-  const tpSrc = buildThemeProvider(configs);
-  writeSource('theme-provider.tsx', tpSrc);
-  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-provider.manifest.json'), JSON.stringify({
-    name: 'ThemeProvider',
-    kind: 'provider',
-    category: 'utility',
-    file: 'theme-provider.tsx',
-    dependencies: [],
-    npmDependencies: extractNpmDeps(tpSrc),
-    tokens: [],
-    composition: 'wrapper',
-  }, null, 2) + '\n');
-  console.log(`  theme-provider.tsx + manifest (provider)`);
-
-  // theme-init.js — the blocking half of the theme mechanism.
-  //
-  // Its own kind, and not a component, because it is not code a consumer imports: it is
-  // text they paste into an inline <script> in <head>. A module cannot do this job. React
-  // renders after first paint, so nothing React owns can set an attribute before the
-  // first frame, which is the entire defect. It ships beside ThemeProvider so the two
-  // halves arrive together and agree on the storage key and the default by construction.
-  const tiSrc = buildThemeInit(configs);
-  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-init.js'), tiSrc);
-  fs.writeFileSync(path.join(CATALOG_DIR, 'theme-init.manifest.json'), JSON.stringify({
-    name: 'theme-init',
-    kind: 'snippet',
-    category: 'utility',
-    file: 'theme-init.js',
-    dependencies: [],
-    npmDependencies: [],
-    tokens: [],
-    composition: 'none',
-  }, null, 2) + '\n');
-  console.log(`  theme-init.js + manifest (snippet)`);
 
   // Atoms grouped by catalog group — the readable view of what the sync copies.
   // Generated from the catalog so it can't drift from what's actually built.

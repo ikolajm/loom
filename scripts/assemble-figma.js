@@ -155,7 +155,7 @@ function buildAllSteps() {
   // the alias path Figma needs as it stands: the shade a role names is the shade the
   // code ships, because ramps are placed by luminance and nothing moves a role.
   // generate-colors.js refuses any other template before this runs.
-  semStep(10, 'color', { defaultMode: colors['default-mode'], modes: standards.colors.modes }, 'color.js');
+  semStep(10, 'color', { mode: colors.mode, roles: standards.colors.modes[colors.mode] }, 'color.js');
   semStep(11, 'spacing', spacing.categories, 'spacing.js');
   semStep(12, 'radius', sizing['border-radius'], 'radius.js');
   semStep(13, 'component-height', sizing['component-height'], 'component-height.js');

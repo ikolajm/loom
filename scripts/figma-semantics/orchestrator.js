@@ -29,8 +29,8 @@ function omitNotes(o) {
 const COLLECTIONS = {
   'color': {
     config: {
-      defaultMode: COLORS['default-mode'],
-      modes: STANDARDS.colors.modes
+      mode: COLORS.mode,
+      roles: STANDARDS.colors.modes[COLORS.mode]
     },
     template: 'color.js'
   },

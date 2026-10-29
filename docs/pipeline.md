@@ -146,7 +146,7 @@ The Figma ramp is where an invented hue looks most like a decision someone made.
 reference, which resolves to hex, or a literal. Each role's shade is chosen once, so
 that every fill clears AA against its label, every `*-text` role against the most
 raised surface tier, and every `*-border` role 1.4.11's 3:1 against the same tier.
-Label polarity is fixed per mode: white in light, the family's dark tone in dark. The
+Label polarity is fixed per table: white in light, the family's dark tone in dark. The
 `contrast`, `tone-contrast` and `border-contrast` checks in `verify.js` measure the
 result for your brand, so the table is checked rather than trusted. Any other brace
 template, or a shade the palette lacks, stops the run naming the role.
@@ -154,8 +154,13 @@ template, or a shade the palette lacks, stops the run naming the role.
 Because the shade a role names is the shade the code ships, the Figma steps alias
 each role to that primitive variable by name and the two cannot diverge.
 
-`default-mode` also lands here rather than in `standards.json`, because it is a
-per-project answer and `standards.json` declares itself locked across projects.
+**One mode.** `standards.colors.modes` holds a light table and a dark one, and a brand
+ships one: `defaultMode` is required and picks it. The answer lands in `colors.json` as
+`mode` rather than in `standards.json`, because it is a per-project answer and
+`standards.json` declares itself locked across projects. `colors.json` also carries the
+light table as `print-roles`, which `tokens.css` emits inside `@media print` for a dark
+brand: browsers drop backgrounds when printing and keep text colours, so dark roles would
+print pale text on white paper.
 
 ---
 
@@ -192,7 +197,7 @@ The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
 `atom-class-coverage`, `class-box-model`, `phantom-parts`, `variant-keys`,
 `height-roles`, `base-config-provenance`, `config-parity`, `dead-exports`,
 `tone-fallbacks`,
-`tone-matrix`, `theme-init-parity`, `focus-ring`, `touch-target`, `contrast`,
+`tone-matrix`, `focus-ring`, `touch-target`, `contrast`,
 `tone-contrast`, `border-contrast`, `figma-assembly`, `figma-code-syntax`,
 `typecheck`, `typecheck-scripts`. Any failure exits
 non-zero, so a full `npm run generate` cannot report success over broken output.

@@ -5,8 +5,8 @@ For each component's concrete contract — kind, dependencies, variants, tokens 
 `catalog/[name].manifest.json`.
 
 The model in one paragraph: Loom ships the components in
-[`../catalog/atoms.json`](../catalog/atoms.json) — atoms, plus `ThemeProvider` — and
-delivers `cn` and `theme-init` alongside them, which are not components. `npm run sync`
+[`../catalog/atoms.json`](../catalog/atoms.json) and delivers `cn` alongside them, which
+is not a component. `npm run sync`
 writes every atom into `src/components/loom/`, every run. Atoms are project-owned after
 install: edit freely, no upstream auto-flow. A consuming project ships atom files and
 nothing else — no stories, no harness.
@@ -129,8 +129,8 @@ non-modal or arbitrarily positioned surface. That path is what `.dialog-fixed` a
   "nothing selected", so an "All" sentinel needs translating to a different value going
   in and back again coming out.
 - **The UA keeps drawing the arrow**, because `loom.base` sets `appearance: none` on
-  buttons only. That is the affordance, not a leak — and it follows the theme, because
-  `theme-init.js` sets `color-scheme` on the root.
+  buttons only. That is the affordance, not a leak — and it follows the brand's mode,
+  because `tokens.css` sets `color-scheme` on the root.
 - **A native `<select>` works inside a native `<dialog>`. A Radix one does not**, because
   `showModal()` makes everything outside the dialog inert, including the portal target.
   **This is the one that cascades**: it is what forced a consumer to convert their dialog

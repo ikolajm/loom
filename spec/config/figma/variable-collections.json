@@ -164,14 +164,12 @@
   },
   "semantic-collections": {
     "semantic.color": {
-      "description": "Semantic color roles. Aliases primitive colors. Light and dark modes swap which primitives are referenced.",
+      "description": "Semantic color roles in the brand's one mode. Aliases primitive colors.",
       "type": "COLOR",
-      "source": "config/standards.json → colors.modes",
+      "source": "config/standards.json → colors.modes[mode], mode from config/base/colors.json",
       "modes": [
-        "light",
-        "dark"
+        "light or dark, named for the brand's answer"
       ],
-      "default-mode": "config/standards.json → colors.default-mode",
       "naming": "color/{group}/{role}",
       "scopes": [
         "FRAME_FILL",
@@ -180,7 +178,7 @@
         "STROKE_COLOR"
       ],
       "code-syntax": "var(--{role})",
-      "alias-pattern": "Each variable aliases a primitives.color variable. Mode determines which primitive: light.primary → primitives.color/primary/600, dark.primary → primitives.color/primary/400.",
+      "alias-pattern": "Each variable aliases a primitives.color variable. The brand's mode determines which primitive: light primary → primitives.color/primary/600, dark primary → primitives.color/primary/300.",
       "examples": [
         "color/primary/primary",
         "color/primary/on-primary",
