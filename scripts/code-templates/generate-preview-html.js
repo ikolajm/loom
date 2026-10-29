@@ -378,25 +378,31 @@ const CLASS_STRIP = [
   ].join(NL)),
 
   section('Selection controls', [
-    lede(`The checkbox's box and tick are the browser's, pointed at the brand with
-      <code>accent-color</code>. The radio and the switch are drawn by the class layer: a
-      circle with a dot, and a track with a thumb, each mark a radial gradient taking
-      <code>currentColor</code>, which is why the dot grows and the thumb slides rather than
-      snapping. Under a contrast theme both switch to system colours.
+    lede(`All three are drawn by the class layer, so each mark is <code>on-primary</code> on
+      <code>primary</code> in every browser. The checkbox's tick and indeterminate dash are
+      its <code>::before</code>, cut to shape with <code>clip-path</code>; the radio's dot
+      and the switch's thumb are radial gradients taking <code>currentColor</code>. The
+      checkbox and radio change state instantly, as native ones do; the switch's thumb
+      slides. An invalid control's edge
+      turns to the error colour, and under a contrast theme all three switch to system
+      colours.
       <br><br>
-      <strong>Every one of them is inside its label, and that is the target.</strong> An
-      <code>&lt;input&gt;</code> is a replaced element and renders no
-      <code>::before</code>, so the hit area an icon-only button gets is not available here.
-      The label is what a finger lands on, which is markup no stylesheet can supply for you.`),
+      <strong>Every one of them is inside its label, and that is the target.</strong> The
+      hit area an icon-only button gets is not used on a toggle: the label is what a finger
+      lands on, which is markup no stylesheet can supply for you.`),
     row(`      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="sm" checked> Small, checked</label>
       <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md"> Medium</label>
       <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="lg" checked> Large, checked</label>
-      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" disabled checked> Disabled</label>`),
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" id="pv-indeterminate"> Indeterminate</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" aria-invalid="true"> Invalid</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" disabled checked> Disabled, checked</label>
+      <label class="pv-toggle"><input type="checkbox" class="checkbox control" data-size="md" disabled> Disabled</label>`),
     row(`      <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="sm" checked> Small</label>
       <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="md"> Medium</label>
       <label class="pv-toggle"><input type="radio" name="pv-radio" class="radio control" data-size="lg"> Large</label>
       <label class="pv-toggle"><input type="radio" name="pv-radio-off" class="radio control" data-size="md" disabled checked> Disabled, checked</label>
-      <label class="pv-toggle"><input type="radio" name="pv-radio-off" class="radio control" data-size="md" disabled> Disabled</label>`),
+      <label class="pv-toggle"><input type="radio" name="pv-radio-off" class="radio control" data-size="md" disabled> Disabled</label>
+      <label class="pv-toggle"><input type="radio" name="pv-radio-bad" class="radio control" data-size="md" aria-invalid="true"> Invalid</label>`),
     row(`      <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="sm"> Small</label>
       <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="md" checked> Medium, on</label>
       <label class="pv-toggle"><input type="checkbox" role="switch" class="switch control" data-size="lg"> Large</label>
@@ -439,8 +445,11 @@ const PAGE_CSS = `    body { max-width: 64rem; margin: 0 auto; padding: var(--sp
     .pv-details { padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }
     .pv-scroll { height: 5rem; overflow-y: auto; padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }`;
 
-const PAGE_SCRIPT = `    // Opens and closes the dialog demos. Nothing else on the page is scripted.
+const PAGE_SCRIPT = `    // Sets the indeterminate checkbox, which is a DOM property with no attribute, and opens
+    // and closes the dialog demos. Nothing else on the page is scripted.
     (function () {
+      document.getElementById('pv-indeterminate').indeterminate = true;
+
       var dlg = document.getElementById('pv-dialog');
       document.getElementById('pv-open').addEventListener('click', function () { dlg.showModal(); });
       document.getElementById('pv-close').addEventListener('click', function () { dlg.close(); });
