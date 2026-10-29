@@ -156,8 +156,8 @@ function main() {
   if (answers.styleDirection) console.log(`Style Direction: ${answers.styleDirection}`);
   console.log(`Mode: ${answers.defaultMode}`);
   console.log(`Primary: ${answers.primary}`);
-  console.log(`Secondary: ${answers.secondary || '(auto-derive)'}`);
-  console.log(`Accent: ${answers.accent || '(auto-derive)'}`);
+  console.log(`Secondary: ${answers.secondary || '(none)'}`);
+  console.log(`Accent: ${answers.accent || '(none)'}`);
   console.log(`Fonts: ${answers.heading || 'Inter'} / ${answers.body || 'Inter'}`);
   // Each Tier 2 value with the layer that supplied it — an intent-derived value and a
   // hand-written one are indistinguishable in the output, so the run log says which.

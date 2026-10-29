@@ -123,9 +123,9 @@ Under `flat` every shadow is `none`, so `shadow-properties` comes out empty.
 
 `generate-colors.js` is where a single hex becomes the whole system.
 
-**Palettes.** `primary` generates a ramp. `secondary` and `accent` are yours if you
-gave them and otherwise derived as analogous rotations — `+30°` and `+60°`, small and
-on the same side of the wheel. `neutral` is tinted toward the primary's hue, so the
+**Palettes.** `primary` generates a ramp. `secondary` and `accent` exist only if you
+answered them: an unanswered family has no ramp and no roles, and nothing is derived in
+its place. `neutral` is tinted toward the primary's hue, so the
 greys belong to the brand. The four status families are generated from fixed hues
 (`error 0`, `success 145`, `warning 40`, `info 210`) and do not move with your brand.
 
@@ -135,12 +135,6 @@ sRGB can show at that luminance. So a shade's contrast against anything is the s
 whatever the hue, and a role can name its shade outright. The cost is chroma where
 sRGB runs out: the light stops of blues and violets go toward grey, and the dark stops
 of yellows and greens go toward olive. Your exact hex is not a stop on its own ramp.
-
-A derived family produces a ramp and role set structurally identical to a chosen one.
-Nothing downstream can tell them apart, which is why two records exist: the prose
-`$note`, and `$derived: {secondary: bool, accent: bool}` — the machine-readable half,
-read by the Figma pipeline so every invented hue gets a description on its variable.
-The Figma ramp is where an invented hue looks most like a decision someone made.
 
 **Roles.** `standards.colors.modes` holds role templates: a `{palette.family.shade}`
 reference, which resolves to hex, or a literal. Each role's shade is chosen once, so

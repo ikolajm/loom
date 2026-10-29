@@ -28,6 +28,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { resolveIntent } = require('../generate-configs/resolve-intent');
+const { OPTIONAL_FAMILIES } = require('../generate-configs/generate-colors');
 const { loadConfig } = require('../config-paths');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -620,8 +621,9 @@ function checkBaseConfigProvenance() {
 // This cannot be a provenance check. Local IS a brand and its VALUES are supposed to
 // differ — that is the whole point of the slot, and base-config-provenance's own comment
 // says a check that reads whatever is local checks nothing. What must not differ is the
-// SHAPE: a brand changes what a token is, never which tokens exist. So this compares key
-// paths and ignores every value.
+// SHAPE: a brand changes what a token is, never which tokens exist — with one exception,
+// an optional colour family the brand did not answer, which has no ramp and no roles. So
+// this compares key paths, ignores every value, and lets those families be missing.
 //
 // Absent local set passes and says so — a fresh clone has none, and that is the
 // supported state rather than a failure.
@@ -662,10 +664,14 @@ function checkConfigParity() {
     const b = keyPaths(JSON.parse(fs.readFileSync(localPath, 'utf8')), '', new Set());
     compared += a.size;
 
-    // $note is prose and $derived records which families were invented for THAT brand.
-    // Both are per-brand by construction and neither declares a token.
-    const skip = (k) => k.split('.').some((seg) => seg === '$note' || seg === '$derived');
-    const missing = [...a].filter((k) => !b.has(k) && !skip(k));
+    // $note is prose, per-brand by construction, and declares no token.
+    const skip = (k) => k.split('.').includes('$note');
+    // palette.<family>, roles.<family> and print-roles.<family> for an optional family.
+    const optional = (k) => {
+      const [top, family] = k.split('.');
+      return ['palette', 'roles', 'print-roles'].includes(top) && OPTIONAL_FAMILIES.includes(family);
+    };
+    const missing = [...a].filter((k) => !b.has(k) && !skip(k) && !optional(k));
     const extra = [...b].filter((k) => !a.has(k) && !skip(k));
 
     // Report a handful, not a wall: a stale local usually differs by a whole subtree and

@@ -13,7 +13,7 @@
       ],
       "composition": "slottable"
     },
-    "$note": "Orthogonal model — variant (treatment: filled/outline/ghost) and color (primary/secondary/destructive/success/warning/neutral) are INDEPENDENT CVA axes. Color is declared once as 4 CSS-var token refs. Only bg is read (and fg, to detect the family-less `inherit`): the tone classes are emitted per family in generate-tokens-css.js from colors.json, which is also where neutral’s on-surface/outline edge split is decided. `text` and `border` here are kept for shape and are covered by no gate, because variant-keys walks `variants` rather than `colors`. Each treatment is a fixed consumer of those vars (see shared TREATMENT_CLASSES) — no N×M compound matrix. neutral's text/border split lets its outline stay a subtle line with readable on-surface text. INTENSITY is the third axis: color picks the family, intensity picks solid or soft. It is not a cva variant, because color and intensity together select ONE class (tone-error against tone-error-soft) and each cva axis contributes its own class independently; a lookup on the family says it without a colours-times-intensities matrix. Shared with badge through buildToneLookup, because the two drifted apart once already — badge declared containers and button declared base roles, so each could reach exactly one intensity and neither could reach the other's. NO TONE AND NO TREATMENT is spelled variant=ghost color=inherit. tone-inherit sets every --tone-* to transparent/currentColor and treat-ghost reads --tone-text, so the pair resolves to a transparent background and the inherited colour — which is what loom.base already gives a bare button, making the two restatements of each other. Reach for it when the consumer's own class owns the appearance. Note it still carries data-size, so it takes the height, padding and action font of its tier; markup written by hand as `button interactive control` takes none of those. inherit has no family and therefore no soft form, and ignores intensity.",
+    "$note": "Orthogonal model — variant (treatment: filled/outline/ghost) and color (primary/destructive/success/warning/neutral/info) are INDEPENDENT CVA axes. Color offers only the families every brand has: secondary exists only where a brand answers it, and the catalog is shared, so a brand with secondary applies tone-secondary in markup. Color is declared once as 4 CSS-var token refs. Only bg is read (and fg, to detect the family-less `inherit`): the tone classes are emitted per family in generate-tokens-css.js from colors.json, which is also where neutral’s on-surface/outline edge split is decided. `text` and `border` here are kept for shape and are covered by no gate, because variant-keys walks `variants` rather than `colors`. Each treatment is a fixed consumer of those vars (see shared TREATMENT_CLASSES) — no N×M compound matrix. neutral's text/border split lets its outline stay a subtle line with readable on-surface text. INTENSITY is the third axis: color picks the family, intensity picks solid or soft. It is not a cva variant, because color and intensity together select ONE class (tone-error against tone-error-soft) and each cva axis contributes its own class independently; a lookup on the family says it without a colours-times-intensities matrix. Shared with badge through buildToneLookup, because the two drifted apart once already — badge declared containers and button declared base roles, so each could reach exactly one intensity and neither could reach the other's. NO TONE AND NO TREATMENT is spelled variant=ghost color=inherit. tone-inherit sets every --tone-* to transparent/currentColor and treat-ghost reads --tone-text, so the pair resolves to a transparent background and the inherited colour — which is what loom.base already gives a bare button, making the two restatements of each other. Reach for it when the consumer's own class owns the appearance. Note it still carries data-size, so it takes the height, padding and action font of its tier; markup written by hand as `button interactive control` takes none of those. inherit has no family and therefore no soft form, and ignores intensity.",
     "treatments": [
       "filled",
       "outline",
@@ -25,12 +25,6 @@
         "fg": "color/primary/on-primary",
         "text": "color/primary/primary",
         "border": "color/primary/primary"
-      },
-      "secondary": {
-        "bg": "color/secondary/secondary",
-        "fg": "color/secondary/on-secondary",
-        "text": "color/secondary/secondary",
-        "border": "color/secondary/secondary"
       },
       "destructive": {
         "bg": "color/error/error",
@@ -160,12 +154,6 @@
         "fg": "color/primary/on-primary",
         "text": "color/primary/primary",
         "border": "color/primary/primary"
-      },
-      "secondary": {
-        "bg": "color/secondary/secondary",
-        "fg": "color/secondary/on-secondary",
-        "text": "color/secondary/secondary",
-        "border": "color/secondary/secondary"
       },
       "destructive": {
         "bg": "color/error/error",

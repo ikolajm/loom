@@ -1,7 +1,7 @@
 /**
  * Generate colors.json from questionnaire inputs.
  *
- * Input: { primary: "#hex", secondary?: "#hex", accent?: "#hex" }
+ * Input: { primary: "#hex", secondary?: "#hex", accent?: "#hex", defaultMode: "light" | "dark" }
  * Output: colors.json matching Phase 1 locked structure (palette + roles)
  *
  * Source of truth for role mappings: standards.json → colors.modes
@@ -9,8 +9,7 @@
 const {
   generatePalette,
   generateNeutralPalette,
-  generateStatusPalette,
-  deriveAnalogous
+  generateStatusPalette
 } = require('./utils/color');
 
 const STATUS_HUES = {
@@ -20,18 +19,15 @@ const STATUS_HUES = {
   info: 210
 };
 
+// Families that exist only when the brand answers them. An unanswered one has no ramp
+// and no roles, so its tone classes are not emitted either: a family nobody picked is
+// a hue that looks like a decision, and a fallback to primary would be a class claiming
+// a meaning it does not carry.
+const OPTIONAL_FAMILIES = ['secondary', 'accent'];
+
 function generate(answers, standards) {
   const primary = answers.primary;
-  // Rotations are small and on the same side of the wheel — see deriveAnalogous.
-  // Whether a value was chosen or derived is carried into $note below, because the
-  // generated ramps are structurally identical either way and nothing downstream
-  // can tell them apart.
-  const SECONDARY_ROTATION = 30;
-  const ACCENT_ROTATION = 60;
-  const secondaryChosen = Boolean(answers.secondary);
-  const accentChosen = Boolean(answers.accent);
-  const secondary = answers.secondary || deriveAnalogous(primary, SECONDARY_ROTATION);
-  const accent = answers.accent || deriveAnalogous(primary, ACCENT_ROTATION);
+  const answered = OPTIONAL_FAMILIES.filter((f) => answers[f]);
 
   // --- Generate palettes ---
   // Every ramp places its shades by luminance (see utils/color.js), so a shade has
@@ -39,8 +35,7 @@ function generate(answers, standards) {
   // standards.json name its shade outright instead of searching for one.
   const palette = {
     primary: generatePalette(primary),
-    secondary: generatePalette(secondary),
-    accent: generatePalette(accent),
+    ...Object.fromEntries(answered.map((f) => [f, generatePalette(answers[f])])),
     neutral: generateNeutralPalette(primary),
     error: generateStatusPalette(STATUS_HUES.error),
     success: generateStatusPalette(STATUS_HUES.success),
@@ -50,7 +45,8 @@ function generate(answers, standards) {
 
   // --- Resolve role mappings ---
   // standards.json defines role templates as {palette.family.shade} references or
-  // literal values. References resolve to hex from the generated palette.
+  // literal values. References resolve to hex from the generated palette. A group named
+  // for an unanswered optional family is left out whole.
   //
   // Any other brace template, or a reference to a shade the palette lacks, throws.
   // An unresolved template once travelled as a literal string all the way into the
@@ -58,6 +54,7 @@ function generate(answers, standards) {
   function resolveTable(mode) {
     const table = {};
     for (const [group, groupRoles] of Object.entries(standards.colors.modes[mode])) {
+      if (OPTIONAL_FAMILIES.includes(group) && !answered.includes(group)) continue;
       table[group] = {};
       for (const [role, template] of Object.entries(groupRoles)) {
         if (typeof template !== 'string' || !template.startsWith('{')) {
@@ -83,11 +80,13 @@ function generate(answers, standards) {
   }
 
   return {
-    $note: `Generated from primary: ${primary} (chosen). secondary: ${secondary} (${secondaryChosen ? 'chosen' : `DERIVED — analogous +${SECONDARY_ROTATION}° from primary, nobody picked it; set "secondary" in your answers file to choose one`}). accent: ${accent} (${accentChosen ? 'chosen' : `DERIVED — analogous +${ACCENT_ROTATION}° from primary, nobody picked it; set "accent" in your answers file to choose one`}). Neutral tinted toward the primary's hue. A derived family generates a full ramp and role set identical in structure to a chosen one, so this note is the only thing recording which is which. Questionnaire is the override mechanism — change inputs and regenerate.`,
-    // Machine-readable half of the note above. The Figma pipeline reads this to put
-    // a description on every derived variable, because the Figma ramp is where an
-    // invented hue looks most like a decision someone made.
-    $derived: { secondary: !secondaryChosen, accent: !accentChosen },
+    $note: [
+      `Generated from primary ${primary}${answered.map((f) => `, ${f} ${answers[f]}`).join('')}.`,
+      `Neutral tinted toward the primary's hue.`,
+      ...OPTIONAL_FAMILIES.filter((f) => !answered.includes(f))
+        .map((f) => `No ${f}: unanswered, so it has no ramp and no roles.`),
+      'Questionnaire is the override mechanism — change inputs and regenerate.',
+    ].join(' '),
 
     // The brand's one mode. Lives here, with the generated colors, because it is a
     // per-project answer: standards.json declares itself locked across projects.
@@ -96,10 +95,19 @@ function generate(answers, standards) {
     roles: resolveTable(mode),
     // Print always uses the light table. Browsers drop backgrounds when printing but
     // keep text colors, so a dark brand would print pale text on white paper. Carried
-    // for every brand so the config's shape does not depend on the answer; tokens.css
-    // emits it only when it differs from `roles`.
+    // for every brand; tokens.css emits it only when it differs from `roles`.
     'print-roles': resolveTable('light')
   };
 }
 
-module.exports = { generate };
+// The role templates for a generated colors.json: its mode's table in standards.json,
+// with the groups the brand did not answer left out, as they are from its roles. Figma
+// aliases these by name, so a template for an absent family would name a variable no
+// stylesheet declares.
+function roleTemplates(standards, colors) {
+  return Object.fromEntries(
+    Object.entries(standards.colors.modes[colors.mode]).filter(([group]) => group in colors.roles)
+  );
+}
+
+module.exports = { generate, roleTemplates, OPTIONAL_FAMILIES };

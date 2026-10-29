@@ -1,9 +1,8 @@
 /**
- * Color utility module for palette generation.
- * Handles hex/HSL conversion, shade generation, and complementary color derivation.
+ * Color utility module for palette generation: hex conversion and shade generation.
  */
 
-// --- Hex ↔ HSL Conversion ---
+// --- Hex ↔ RGB, HSL → hex ---
 
 function hexToRgb(hex) {
   hex = hex.replace('#', '');
@@ -21,25 +20,6 @@ function rgbToHex(r, g, b) {
     return val.toString(16).padStart(2, '0');
   };
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-function rgbToHsl(r, g, b) {
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0, s = 0;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
-    }
-  }
-
-  return { h: h * 360, s: s * 100, l: l * 100 };
 }
 
 function hslToRgb(h, s, l) {
@@ -66,11 +46,6 @@ function hslToRgb(h, s, l) {
     g: hue2rgb(p, q, h),
     b: hue2rgb(p, q, h - 1/3)
   };
-}
-
-function hexToHsl(hex) {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHsl(r, g, b);
 }
 
 function hslToHex(h, s, l) {
@@ -222,56 +197,11 @@ function generateStatusPalette(hue) {
   return generatePalette(hslToHex(hue, 75, 42));
 }
 
-// --- Color Derivation ---
-
-/**
- * Derive complementary color (opposite on color wheel).
- * Used for secondary when not provided.
- */
-function deriveComplementary(hex) {
-  const { h, s, l } = hexToHsl(hex);
-  return hslToHex((h + 180) % 360, s * 0.85, l);
-}
-
-/**
- * Derive triadic color (120° rotation on color wheel).
- * Used for accent when not provided.
- */
-function deriveTriadic(hex) {
-  const { h, s, l } = hexToHsl(hex);
-  return hslToHex((h + 120) % 360, s * 0.9, l);
-}
-
-/**
- * Derive an analogous color — a small rotation on the same side of the wheel.
- *
- * This is what fills an absent `secondary` or `accent`, and the rotation is
- * deliberately small. Complementary (180°) and triadic (120°) are correct colour
- * theory and the wrong default: a teal primary derived a fire-engine red secondary
- * and a magenta accent, neither of which anyone chose, both of which shipped into
- * tokens.css and the Figma ramps looking exactly as deliberate as the primary.
- * An analogous derivation stays in the primary's family, so an unspecified value
- * reads as a plausible second brand colour rather than as a mistake.
- *
- * Both are still guesses. The provenance note in the generated colors.json and the
- * Figma variable descriptions are what stop a guess from reading as a decision —
- * see generate-colors.js. deriveComplementary and deriveTriadic are kept for
- * callers that want a deliberate contrast rather than a default.
- */
-function deriveAnalogous(hex, degrees) {
-  const { h, s, l } = hexToHsl(hex);
-  return hslToHex((h + degrees + 360) % 360, s * 0.9, l);
-}
-
 module.exports = {
   hexToRgb,
   rgbToHex,
-  hexToHsl,
   hslToHex,
   generatePalette,
   generateNeutralPalette,
-  generateStatusPalette,
-  deriveComplementary,
-  deriveTriadic,
-  deriveAnalogous
+  generateStatusPalette
 };
