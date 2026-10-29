@@ -6,8 +6,8 @@ states as named decisions instead of per-project choices.
 
 The coherence is the product. Tokens name the values; the class layer names the
 combinations, which is the part a values-only system cannot carry and the reason
-everything built on Loom looks like one hand made it — a Next app, a Vite app and a
-server-rendered template alike, the last with no framework under it at all.
+everything built on Loom looks like one hand made it. The class layer is plain CSS, so
+it needs no framework under it.
 
 Two things ride along. **Figma** takes the same substrate as variables, text styles
 and effect styles, so the design surface and the code surface read from one source.
