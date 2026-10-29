@@ -1,6 +1,6 @@
 {
   "name": "loom-design-system",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Token-driven design system generator — produces a CSS substrate of tokens and a class layer, Figma variables and styles, and a handful of React atoms where behavior needs one, from a single config source.",
   "license": "MIT",
   "author": "Jacob Ikola",
