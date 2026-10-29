@@ -117,7 +117,9 @@ scale, and the universal families (`body`, `action`, `label`, `input`) from
 `generate-effects.js` does one transform worth knowing: it parses each CSS shadow
 shorthand into `{offset-x, offset-y, blur, spread, alpha}` as `shadow-properties`,
 because Figma binds effect variables per property and cannot take a shorthand string.
-Under `flat` every shadow is `none`, so `shadow-properties` comes out empty.
+Under `flat` every shadow is `none`, which parses to every property at zero, so a flat
+brand still gets `shadow/1` to `shadow/3` in Figma, invisible, matching the
+`--shadow-N: none` its CSS declares. A shorthand the parser cannot read stops the run.
 
 ### The one real computation: color
 
