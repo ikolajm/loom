@@ -12,6 +12,7 @@
     "switch"
   ],
   "layout": [
-    "dialog"
+    "dialog",
+    "tabs"
   ]
 }

@@ -29,7 +29,8 @@ independent axes (treatment, tone, size) that a typed prop is the cheaper contra
 What ships is one reference per distinct way of wiring something to the class layer:
 `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for
 the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix
-form control. **Anything else you need, build.** Radix is already the primitive layer,
+form control, `tabs` for roving focus across a list. Its panels unmount when inactive
+unless `keepMounted` keeps them in the tree, hidden. **Anything else you need, build.** Radix is already the primitive layer,
 and a real interactive primitive should use a real library (carousel -> embla,
 date-picker -> Radix).
 
