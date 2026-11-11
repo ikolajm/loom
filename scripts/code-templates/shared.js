@@ -213,6 +213,7 @@ function getComponentRegistry(configs) {
 
     // === Layout ===
     'Dialog': { generator: 'radix-dialogs#generateRadixDialog', source: layoutConfig, key: 'dialog', element: 'div', htmlType: 'HTMLAttributes<HTMLDivElement>', noInteractive: true, noChildren: true, layout: 'stack', role: 'dialog', textFamily: 'body', category: 'Layout' },
+    'Tabs': { generator: 'radix-tabs#generateRadixTabs', source: layoutConfig, key: 'tabs', baseKey: 'tab', category: 'Layout' },
 
     // === Feedback ===
 

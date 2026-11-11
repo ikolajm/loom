@@ -40,6 +40,10 @@
     },
     "default": { "size": "md" }
   },
+  "tabs": {
+    "$base": "tab",
+    "$note": "The Tabs atom, named for its file. It declares nothing of its own: the ladder and the look are `tab`'s, which emits the classes."
+  },
   "table": {
     "variants": {
       "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline" }
