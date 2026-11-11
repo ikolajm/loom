@@ -774,6 +774,17 @@ const BASE_RULES = {
   textarea: ['display: inline-flex;', 'align-items: center;', 'width: 100%;',
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
+  // Not recoveries: tabs arrived after the atoms were dropped. The track. Its corner is
+  // the tab's radius plus the inset, so the thumb's corner and the track's stay concentric
+  // at every brand radius; the inset is written twice, in one rule, rather than given a
+  // property of its own.
+  'tab-list': ['display: inline-flex;', 'align-items: center;', 'gap: var(--space-1);',
+               'padding: var(--space-1);', 'background-color: var(--surface-1);',
+               'border-radius: calc(var(--radius-component) + var(--space-1));'],
+  // A tab at rest. The selected state is in the tab-selection section.
+  tab: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;',
+        'white-space: nowrap;', 'background-color: transparent;',
+        'color: var(--on-surface-variant);', 'border: 0;'],
 };
 
 // Emitted classes that need no `display`, and why. Anything else missing one is a bug —
@@ -815,6 +826,7 @@ const APPEARANCE_ONLY = new Set([
   'dialog', 'separator', 'skeleton', 'spinner', 'table',
   'textarea',
   'checkbox', 'radio', 'switch',
+  'tab', 'tab-list',
 ]);
 
 const TEXT_FAMILY = {
@@ -824,6 +836,7 @@ const TEXT_FAMILY = {
   'list-item': 'body', spinner: null, skeleton: 'body', table: 'body',
   checkbox: null, radio: null, switch: null,
   textarea: 'input',
+  tab: 'action', 'tab-list': null,
 };
 
 // Schema key -> class name, where they differ. `input` is styled by the shared
@@ -1874,7 +1887,7 @@ function buildSectionDrawnToggles() {
  *
  * Under a contrast theme the browser replaces background and border colours with system
  * ones, so a drawn control's state — a fill, a gradient, a clipped mark — can vanish.
- * These opt the checkbox, radio and switch out of that adjustment and paint them in
+ * These opt the checkbox, radio, switch and tab out of that adjustment and paint them in
  * system colours instead:
  * Canvas and CanvasText at rest, Highlight and HighlightText when checked, GrayText when
  * disabled. The switch has no border, so its edge is an inset box-shadow, which changes no
@@ -1933,6 +1946,43 @@ function buildSectionForcedColors() {
     background-color: GrayText;
     color: Canvas;
   }
+
+  /* A tab's state is its fill, which the theme would drop, leaving every tab alike, so
+     tabs opt out the way the toggles do. */
+  .tab {
+    forced-color-adjust: none;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  .tab[aria-selected="true"] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .tab:disabled {
+    color: GrayText;
+  }
+}`;
+}
+
+/**
+ * The selected tab.
+ *
+ * `aria-selected` rather than a framework's data attribute: it is what the tab says to
+ * assistive tech, so the look and the announcement cannot disagree, and a tab list marked
+ * up without a framework gets the same look. (0,2,0) outranks `.tab`'s own colours in the
+ * same layer.
+ *
+ * The solid primary fill is the state cue on its own. It clears the 3:1 WCAG 1.4.11 asks
+ * of one against the `--surface-1` track, where a surface-step thumb or the soft container
+ * does not: the container matches the track's luminance, so it separates by hue alone.
+ */
+function buildSectionTabSelection() {
+  return `/* === Tab selection === */
+.tab[aria-selected="true"] {
+  background-color: var(--primary);
+  color: var(--on-primary);
 }`;
 }
 
@@ -2126,6 +2176,8 @@ function generateComponents() {
     buildSectionComponentClasses(),
     '',
     buildSectionDialogParts(),
+    '',
+    buildSectionTabSelection(),
     '',
     buildSectionSwitchThumb(),
     '',

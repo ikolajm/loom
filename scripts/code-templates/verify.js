@@ -382,8 +382,6 @@ const UNCONSUMED_VARIANT_KEYS = {
   'track-bg': 'progress/slider internals — the parts are not named yet',
   'fill-bg': 'same as track-bg',
   'thumb-bg': 'same as track-bg',
-  'indicator': 'tabs internals — not named yet',
-  'indicator-width': 'same as indicator',
   'gap': 'declared on a variant, but gap ramps per size; the size block already emits it',
 };
 
