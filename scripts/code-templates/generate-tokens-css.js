@@ -775,11 +775,15 @@ const BASE_RULES = {
              'background-color: var(--surface);', 'color: var(--on-surface);',
              'border: var(--bw-1) solid var(--tone-border, var(--outline));'],
   // Not recoveries: tabs arrived after the atoms were dropped. The track. Its corner is
-  // the tab's radius plus the inset, so the thumb's corner and the track's stay concentric
-  // at every brand radius; the inset is written twice, in one rule, rather than given a
-  // property of its own.
-  'tab-list': ['display: inline-flex;', 'align-items: center;', 'gap: var(--space-1);',
-               'padding: var(--space-1);', 'background-color: var(--surface-1);',
+  // the tab's radius plus the inset, so the selected tab's corner and the track's stay
+  // concentric at every brand radius; the inset is written twice, in one rule, rather than
+  // given a property of its own. `fit-content` because a flex column or a grid stretches
+  // an auto-width child, and a stretched track paints across the row with its tabs bunched
+  // at one end. A full-width track is the consumer's override: `width: auto` on the list
+  // and `flex: 1` on its tabs. The background is in the tab-selection section, at zero
+  // specificity.
+  'tab-list': ['display: inline-flex;', 'align-items: center;', 'width: fit-content;',
+               'gap: var(--space-1);', 'padding: var(--space-1);',
                'border-radius: calc(var(--radius-component) + var(--space-1));'],
   // A tab at rest. The selected state is in the tab-selection section.
   tab: ['display: inline-flex;', 'align-items: center;', 'justify-content: center;',
@@ -1980,6 +1984,17 @@ function buildSectionForcedColors() {
  */
 function buildSectionTabSelection() {
   return `/* === Tab selection === */
+
+/* The track is one surface step off the page by default. On a raised surface that
+   step is the surface itself and the track vanishes, so a surface class picks the
+   step instead: \`tab-list surface\` on a surface-1 panel separates from it as the
+   default separates from the page. :where() is what lets it: the surface classes are
+   in loom.css, an earlier file of the same layer, so a plain .tab-list rule would
+   outrank them. The selected tab's primary fill reads on every surface step. */
+:where(.tab-list) {
+  background-color: var(--surface-1);
+}
+
 .tab[aria-selected="true"] {
   background-color: var(--primary);
   color: var(--on-primary);
