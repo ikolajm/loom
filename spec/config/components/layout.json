@@ -30,6 +30,16 @@
     },
     "default": { "variant": "default", "size": "md" }
   },
+  "tab": {
+    "$note": "One tab in a `.tab-list`: the list is a tinted track, the selected tab filled primary on it. Selection reads `aria-selected`, never a framework's data attribute, so the look cannot disagree with what assistive tech announces and a tab list rendered without a framework looks the same. Every label takes the same weight, so selecting one moves nothing beside it. The fill is the state cue, and it is solid because nothing fainter carries one: a surface step against the track is well short of the 3:1 WCAG 1.4.11 asks, and the soft container matches the track's luminance and separates by hue alone. Heights are the control ladder, as button's.",
+    "sizes": {
+      "$constant": { "radius": "radius/component" },
+      "sm": { "height": "height/control-sm", "x-padding": "{scale.3}", "y-padding": "{scale.1}", "gap": "{scale.1}", "icon-size": "icon/icon-1" },
+      "md": { "height": "height/control-md", "x-padding": "{scale.4}", "y-padding": "{scale.2}", "gap": "{scale.2}", "icon-size": "icon/icon-2" },
+      "lg": { "height": "height/control-lg", "x-padding": "{scale.6}", "y-padding": "{scale.3}", "gap": "{scale.2}", "icon-size": "icon/icon-3" }
+    },
+    "default": { "size": "md" }
+  },
   "table": {
     "variants": {
       "default": { "header-fg": "color/surface/on-surface-variant", "row-fg": "color/surface/on-surface", "border": "color/outline/outline" }

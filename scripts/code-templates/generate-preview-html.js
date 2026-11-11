@@ -284,6 +284,31 @@ const CLASS_STRIP = [
     </div>`,
   ].join(NL)),
 
+  section('Tabs', [
+    lede(`<code>.tab-list</code> is the track and each <code>.tab</code> sits in it; the
+      selected one is filled primary. Selection is <code>aria-selected</code>, so the look
+      is whatever the tab tells a screen reader. The fill is solid because a fainter one
+      cannot carry the state on its own; every label keeps one weight, and nothing moves
+      on a switch. The keyboard is the page's own script here, roving focus and arrow
+      keys, which is the part a consumer takes from a library.`),
+    `    <div class="tab-list" role="tablist" aria-label="Project">
+      <button class="tab interactive control" data-size="md" role="tab" id="pv-tab-overview" aria-controls="pv-panel-overview" aria-selected="true">Overview</button>
+      <button class="tab interactive control" data-size="md" role="tab" id="pv-tab-activity" aria-controls="pv-panel-activity" aria-selected="false" tabindex="-1">Activity</button>
+      <button class="tab interactive control" data-size="md" role="tab" id="pv-tab-settings" aria-controls="pv-panel-settings" aria-selected="false" tabindex="-1">Settings</button>
+      <button class="tab interactive control" data-size="md" role="tab" aria-selected="false" tabindex="-1" disabled>Archive</button>
+    </div>
+    <div class="pv-details text-body-md" role="tabpanel" id="pv-panel-overview" aria-labelledby="pv-tab-overview" tabindex="0">The first panel. Arrow keys move between the tabs; Tab leaves the list for this panel.</div>
+    <div class="pv-details text-body-md" role="tabpanel" id="pv-panel-activity" aria-labelledby="pv-tab-activity" tabindex="0" hidden>The second panel, hidden by its attribute rather than a class.</div>
+    <div class="pv-details text-body-md" role="tabpanel" id="pv-panel-settings" aria-labelledby="pv-tab-settings" tabindex="0" hidden>The third panel. The disabled tab is skipped by the arrow keys.</div>`,
+    lede(`The small and large tiers, on the control ladder. Under a coarse pointer every
+      tier grows to the touch floor, and the track grows with it.`),
+    ...['sm', 'lg'].map((s) => `    <div class="tab-list" role="tablist" aria-label="Range, ${s}">
+      <button class="tab interactive control" data-size="${s}" role="tab" aria-selected="true">Day</button>
+      <button class="tab interactive control" data-size="${s}" role="tab" aria-selected="false" tabindex="-1">Week</button>
+      <button class="tab interactive control" data-size="${s}" role="tab" aria-selected="false" tabindex="-1">Month</button>
+    </div>`),
+  ].join(NL)),
+
   section('A removable filter is a button', [
     lede(`Badges are labels and never targets. A filter chip you can dismiss is one
       control with one intent &mdash; remove this filter &mdash; so it is a button with a
@@ -445,8 +470,9 @@ const PAGE_CSS = `    body { max-width: 64rem; margin: 0 auto; padding: var(--sp
     .pv-details { padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }
     .pv-scroll { height: 5rem; overflow-y: auto; padding: var(--space-3); border: var(--bw-1) solid var(--outline); border-radius: var(--radius-card); }`;
 
-const PAGE_SCRIPT = `    // Sets the indeterminate checkbox, which is a DOM property with no attribute, and opens
-    // and closes the dialog demos. Nothing else on the page is scripted.
+const PAGE_SCRIPT = `    // Sets the indeterminate checkbox, which is a DOM property with no attribute, opens
+    // and closes the dialog demos, and drives the tab lists. Nothing else on the page is
+    // scripted.
     (function () {
       document.getElementById('pv-indeterminate').indeterminate = true;
 
@@ -462,6 +488,34 @@ const PAGE_SCRIPT = `    // Sets the indeterminate checkbox, which is a DOM prop
       document.getElementById('pv-open-fixed').addEventListener('click', function () { showFixed(true); });
       document.getElementById('pv-close-fixed').addEventListener('click', function () { showFixed(false); });
       ov.addEventListener('click', function () { showFixed(false); });
+
+      // Tabs, activating on focus: one Tab stop per list, arrow keys and Home and End
+      // between the enabled tabs. Attributes only, so the classes carry the whole look.
+      document.querySelectorAll('[role="tablist"]').forEach(function (list) {
+        var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]:not(:disabled)'));
+        function select(tab) {
+          tabs.forEach(function (t) {
+            var on = t === tab;
+            t.setAttribute('aria-selected', String(on));
+            t.tabIndex = on ? 0 : -1;
+            var panel = document.getElementById(t.getAttribute('aria-controls'));
+            if (panel) panel.hidden = !on;
+          });
+          tab.focus();
+        }
+        list.addEventListener('click', function (e) {
+          var tab = e.target.closest('[role="tab"]');
+          if (tab && tabs.indexOf(tab) > -1) select(tab);
+        });
+        list.addEventListener('keydown', function (e) {
+          var i = tabs.indexOf(document.activeElement);
+          if (i < 0) return;
+          var next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+          if (next === undefined) return;
+          e.preventDefault();
+          select(tabs[(next + tabs.length) % tabs.length]);
+        });
+      });
     })();`;
 
 function generate() {
