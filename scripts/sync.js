@@ -2,7 +2,7 @@
 /**
  * sync.js — install the Loom catalog and the token substrate into a consuming project.
  *
- * Usage: node scripts/sync.js <project-dir> [--tokens] [--refresh]
+ * Usage: node scripts/sync.js <project-dir> [--answers <file>] [--tokens] [--refresh]
  *
  *   --answers <file>  the brand to build from, resolved into a throwaway config root so
  *                     this repo's own spec/config/local/ is never written to
@@ -184,6 +184,19 @@ function main(argv) {
   // Every child process reads the same config set, so --refresh cannot rebuild the atoms
   // against one brand while the substrate comes from another.
   const childEnv = cfgRoot ? { ...process.env, LOOM_LOCAL_CONFIG: cfgRoot } : process.env;
+
+  // Before anything is written, so a brand that fails leaves the project as it was. Only
+  // the contrast checks: a sync never runs the full set, and the rest are not about the brand.
+  console.log('Checking the brand\'s contrast:');
+  try {
+    execFileSync('node', [path.join(LOOM_ROOT, 'scripts/code-templates/verify.js'), '--brand'], {
+      stdio: ['ignore', 'inherit', 'inherit'],
+      env: childEnv,
+    });
+  } catch {
+    if (cfgRoot) fs.rmSync(cfgRoot, { recursive: true, force: true });
+    die('Sync stopped: this brand fails the contrast checks above. Nothing was written to the project.');
+  }
 
   if (flags.has('--refresh')) {
     console.log('Regenerating the catalog from spec/...');

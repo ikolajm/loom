@@ -19,9 +19,10 @@ cp spec/answers.example.json spec/answers.json
 ```
 
 [`../spec/questionnaire.md`](../spec/questionnaire.md) is the full key reference. Then
-run the three pipelines:
+install Loom's dependencies once and run the three pipelines:
 
 ```bash
+npm install
 npm run configs      # spec/answers.json -> spec/config/local/  (git-ignored)
 npm run generate     # -> React catalog (catalog/) + the four stylesheets
 npm run figma        # -> Figma plugin scripts (paste into the Figma console)
@@ -37,9 +38,9 @@ Two things follow: hand-edit `spec/config/local/` rather than `spec/config/base/
 fails the `base-config-provenance` check on the next generate; and deleting
 `spec/config/local/` reverts you to Loom's default look.
 
-**The `npm install` is only for the compile gate.** Generating Loom is pure Node with no
-dependencies; the typecheck over `catalog/` skips itself when `node_modules` is absent
-rather than failing a generate that is otherwise fine.
+**`npm run generate` needs the `npm install`.** It parses the stylesheets with `postcss`
+to check every class the components use, and stops without it. `npm run configs`,
+`npm run figma` and a sync without `--refresh` run with no install.
 
 To check that a brand landed, open [`preview.html`](preview.html) after generating. No
 dev server and no route in your project — a static file answers the question.
@@ -94,11 +95,15 @@ from their manifests; your project owns its lockfile, so Loom reports deps rathe
 installing them. The components need React 19 and the packages their manifests name; they
 need no CSS framework at all.
 
+**A sync checks your brand's contrast first.** If a color pair fails, it stops before
+writing anything and names the pair. It runs only the contrast checks, because the rest of
+`verify` is about the catalog rather than your brand.
+
 A sync always regenerates the substrate, so your tokens are current by construction; only
-`catalog/*.tsx` can lag behind the schemas it was built from. The sync **reports** that in
-one line rather than repairing it, because rebuilding the atoms runs the whole pipeline
-including a typecheck, and refreshing a brand should not fail on a surface it has never
-heard of. Pass `--refresh` when you do want them rebuilt.
+`catalog/*.tsx` can lag behind the schemas it was built from. The sync copies the catalog
+as it stands and **does not warn** about that, because rebuilding the atoms runs the whole
+pipeline including a typecheck, and refreshing a brand should not fail on a surface it has
+never heard of. Pass `--refresh` when you do want them rebuilt.
 
 ---
 
