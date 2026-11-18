@@ -30,7 +30,9 @@ What ships is one reference per distinct way of wiring something to the class la
 `button` and `badge` for tone x treatment x `data-size` plus `asChild`, `form-field` for
 the validity cascade into `.control`, `dialog` for a Radix portal, `select` for a Radix
 form control, `tabs` for roving focus across a list. Its panels unmount when inactive
-unless `keepMounted` keeps them in the tree, hidden. **Anything else you need, build.** Radix is already the primitive layer,
+unless `keepMounted` keeps them in the tree, hidden. Its track sits one surface step off
+the page, `surface-1`, so on a `surface-1` panel or bar it vanishes; a surface class on
+the list picks the step instead, `<TabsList className="surface">`. **Anything else you need, build.** Radix is already the primitive layer,
 and a real interactive primitive should use a real library (carousel -> embla,
 date-picker -> Radix).
 
