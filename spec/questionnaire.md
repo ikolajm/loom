@@ -1,13 +1,12 @@
 # Describing your design system — `answers.json`
 
 **This is where you tell Loom what your product should look like.** You answer up to
-thirteen questions in one small file, and Loom generates the rest: a color system in
-light and dark, a type ramp, spacing, radii, shadows, the CSS class layer built on them,
-and the same values as Figma variables and styles.
+thirteen questions in one small file, and Loom generates the rest: a color system in one
+mode, light or dark, a type ramp, spacing, radii, shadows, the CSS class layer built on
+them, and the same values as Figma variables and styles.
 
-**Only one answer is required** — your `primary` brand color. Everything else has a
-sensible default or is derived from what you did answer, so the shortest useful answers
-file is three lines.
+**Two answers are required** — your `primary` brand color and `defaultMode`. Everything
+else has a sensible default, so the shortest useful answers file is four lines.
 
 ## Start here
 
@@ -16,7 +15,7 @@ Copy the template, edit it, run three commands:
     cp spec/answers.example.json spec/answers.json    # 1. your copy, git-ignored
 
 Open `spec/answers.json` in any text editor and change the values (the reference below
-explains each one). Then:
+explains each one). Then, after one `npm install`:
 
     npm run configs     # 2. turn your answers into token configs
     npm run generate    # 3. build the React catalog + tokens.css

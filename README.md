@@ -13,10 +13,32 @@ Two things ride along. **Figma** takes the same substrate as variables, text sty
 and effect styles, so the design surface and the code surface read from one source.
 A small set of **React components** covers what CSS cannot express — focus traps,
 portals, keyboard navigation, positioning — copied into your project rather than
-installed from it, and yours to edit once they land.
+installed from it. Each sync replaces those files, so a change you want to keep goes
+where you use the component.
 
 Loom started as a personal engine for spinning up consistent projects. It is open
 source for the model.
+
+---
+
+## What it does
+
+### Change the brand in one file
+
+![Three changed answers in a git diff, then npm run loom:sync updating the project](docs/media/change.gif)
+
+A project keeps its brand in `loom-answers.json`. Here three answers change: the
+primary color, the corner style and the default mode. `npm run loom:sync` then rebuilds
+the project's stylesheets from those answers and copies in the current components.
+
+### Every style follows
+
+![Loom's preview page crossfading from a dark blue brand to a light green one](docs/media/preview.gif)
+
+The same preview page in both brands, with no change to its markup. Buttons, form
+fields and selection controls all take the new palette, corners and mode. Loom keeps
+your color's hue but places each shade by luminance so contrast holds, which means the
+exact value can move: `#0f8a5f` here becomes a primary of `#006645`.
 
 ---
 
@@ -42,7 +64,7 @@ source for the model.
                                 │
                                 ▼
                          consuming project
-                         (copy what you need, own the copies)
+                         (synced in; your changes stay where you use them)
 ```
 
 Change a value in `spec/answers.json` → regenerate → every output moves together,
@@ -71,7 +93,7 @@ or does not land in one place.
 
 | You want to | Read |
 |---|---|
-| Use Loom in a project | [`docs/quickstart.md`](docs/quickstart.md) — build a brand, sync it in, the four wire-in steps |
+| Use Loom in a project | [`docs/quickstart.md`](docs/quickstart.md) — build a brand, sync it in, the three wire-in steps |
 | Look up what the stylesheets hold | [`docs/substrate.md`](docs/substrate.md) — the four CSS files, the layer order, tones and treatments, the spacing categories, reading the tokens with no CSS engine |
 | Know what components ship, and their contracts | [`docs/catalog.md`](docs/catalog.md) — manifests, the install flow, the native-first recipes |
 | Build the Figma file | [`docs/figma.md`](docs/figma.md) — the paste workflow, the console's failure modes, font availability |
@@ -98,7 +120,8 @@ spec/                  Single source of truth
   questionnaire.md     ← the tiered intake that drives base/ tokens
   answers.example.json ← committed template — copy to answers.json (git-ignored) and edit
 
-scripts/               The two codegen pipelines
+scripts/               The three pipelines
+  generate-configs/    ← spec/answers.json → the config set
   code-templates/      ← React catalog + the four stylesheets
   figma-*/             ← Figma variables / styles / page layout
   assemble-figma.js    ← bundles the Figma plugin scripts

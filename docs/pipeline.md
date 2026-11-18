@@ -170,7 +170,7 @@ redirects.
 | Target | Emits |
 |---|---|
 | `tokens` | `tokens.css`, `loom.css`, `loom.components.css`, `main.css` |
-| `components` | `catalog/*.tsx` + `*.manifest.json` + `cn.ts` + `atoms.json` — written to `catalog/`, not the output dir |
+| `components` | `catalog/*.tsx` + `*.manifest.json` + `cn.ts` + `atoms.json` + `classes.json` — written to `catalog/`, not the output dir |
 | `preview-html` | `docs/preview.html` — written to the repo, not the output dir |
 | `verify` | nothing — runs the invariant checks and fails the run |
 
@@ -183,8 +183,8 @@ components, and hoisting it means the tier blocks hold only what actually ramps.
 
 `answers.json` is copied into the output as a receipt, but **only on a full run**. A
 partial run is how a private brand file reaches somewhere it shouldn't:
-`--only tokens --output <consumer>/src` is a real invocation — `sync.js` uses it — and it
-would otherwise drop an answers file into consumer source trees with nothing ignoring it.
+`--only tokens --output <dir>` is a real invocation — `sync.js` uses it — and `<dir>` can
+be a consumer's source tree, where nothing would ignore an answers file.
 
 ### `verify` is the gate, and it runs last
 
@@ -261,8 +261,8 @@ committed set — the mechanism that put a local dashboard's orange on master fo
 ## Stage 3 — config set → Figma
 
 `scripts/assemble-figma.js` emits `00_shared-utils.js` (helpers, defined globally,
-pasted first) plus the numbered step scripts, each a self-contained async IIFE carrying its
-own `CONFIG` object inlined as JSON.
+pasted first) plus the numbered step scripts, each an async IIFE that calls those helpers
+and carries its own `CONFIG` object inlined as JSON.
 
 Assembly is mechanical: read the template, slice everything before its
 `// --- Pipeline ---` marker (that prefix is the `_shared.js` helper copy, already in
@@ -286,14 +286,16 @@ semantics because it is the only one that aliases nothing.
 
 ## The consumer path
 
-`npm run sync <project-dir> [--tokens] [--refresh]` — `scripts/sync.js`.
+`npm run sync -- <project-dir> [--answers <file>] [--tokens] [--refresh]` — `scripts/sync.js`.
 
-1. `--refresh` regenerates the catalog first.
-2. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
+1. `contrast`, `tone-contrast` and `border-contrast` run against the brand being synced
+   (`verify.js --brand`). A failure stops the sync before anything is written.
+2. `--refresh` regenerates the catalog.
+3. Every atom in `catalog/` copies in, plus `cn.ts`, plus the stylesheets. There is no
    pick list: the dependency graph is one edge — everything needs `cn`, which copies
    unconditionally anyway — so resolving a subset would walk a graph to return what it
    was handed.
-3. Every delivered file is **overwritten unconditionally**, and carries a generated
+4. Every delivered file is **overwritten unconditionally**, and carries a generated
    header saying so. There is no edit detection, and a deleted file returns on the next
    run — [`catalog.md`'s Install section](catalog.md#install) has the contract and the
    reasoning.
@@ -318,7 +320,7 @@ line. It reports; it never installs.
 ## Cross-references
 
 - [`../spec/questionnaire.md`](../spec/questionnaire.md) — every answer key
-- [`catalog.md`](catalog.md) — manifests, the install flow, the override mechanism
+- [`catalog.md`](catalog.md) — manifests, the install flow, where overrides go
 - [`class-layer.md`](class-layer.md) — what a component schema can and cannot express
 - [`figma.md`](figma.md) — pasting the emitted scripts, and the console's failure modes
 - [`gotchas.md`](gotchas.md) — the traps, including config resolution and the cascade

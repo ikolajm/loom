@@ -7,9 +7,9 @@ For each component's concrete contract — kind, dependencies, variants, tokens 
 The model in one paragraph: Loom ships the components in
 [`../catalog/atoms.json`](../catalog/atoms.json) and delivers `cn` alongside them, which
 is not a component. `npm run sync`
-writes every atom into `src/components/loom/`, every run. Atoms are project-owned after
-install: edit freely, no upstream auto-flow. A consuming project ships atom files and
-nothing else — no stories, no harness.
+writes every atom into `src/components/loom/`, every run, replacing what is there. A
+change you want to keep goes where you use the atom: a className, a prop or a wrapper. A
+consuming project ships atom files and nothing else — no stories, no harness.
 
 **Appearance is not here at all.** A card, a badge's shape, an input's padding and a
 table's rules are classes in `loom.components.css` — plain CSS with nothing React-shaped
@@ -32,7 +32,9 @@ the validity cascade into `.control`, `dialog` for a Radix portal, `select` for 
 form control, `tabs` for roving focus across a list. Its panels unmount when inactive
 unless `keepMounted` keeps them in the tree, hidden. Its track sits one surface step off
 the page, `surface-1`, so on a `surface-1` panel or bar it vanishes; a surface class on
-the list picks the step instead, `<TabsList className="surface">`. **Anything else you need, build.** Radix is already the primitive layer,
+the list picks the step instead, `<TabsList className="surface">`. `checkbox`, `radio` and
+`switch` are native inputs that pick up the field's error, and `checkbox` also sets its
+mixed state. **Anything else you need, build.** Radix is already the primitive layer,
 and a real interactive primitive should use a real library (carousel -> embla,
 date-picker -> Radix).
 
@@ -50,13 +52,12 @@ Loom project looks plain because the personality is yours to add.
 | **The catalog** | `catalog/` in this repo — every atom in its blessed state, and what the preview page's class layer is built against. | This repo |
 | **Production app** | Catalog + project-authored atom files only. No stories, no harness. | Consuming project |
 
-`catalog/` is the canonical state. A consuming project holds its *own* atoms in *their
-current state* — synced atoms with whatever local edits it has applied, plus
-project-authored atoms that haven't been promoted to the catalog yet.
+`catalog/` is the canonical state. A consuming project holds the synced atoms as
+delivered, plus any atoms it has written itself, kept outside `src/components/loom/` so a
+sync leaves them alone.
 
-Diffing a project's atoms against `catalog/` is the upstream-pitch surface. If the
-project's `Button` has grown variants the catalog `Button` doesn't have, that's the
-trigger for a manual upstream port.
+A project-authored atom, or a wrapper that keeps being rewritten, is the upstream-pitch
+surface. That's the trigger for a manual port into the templates.
 
 ---
 
@@ -170,9 +171,9 @@ fix available was an override naming each file, which the next atom arrives outs
 which is safe only where nothing else writes. Delivered into `src/` itself, the four files
 would replace a project's own `main.css` or `tokens.css` without a word.
 
-**There is no override config layer and no install-time customization.** The copy in
-your tree is the override mechanism, which is why the sync overwrites it unconditionally
-rather than trying to merge.
+**There is no override config layer and no install-time customization.** Overrides live
+at the call site, in a className, a prop or a wrapper, which is why the sync can overwrite
+its own files unconditionally rather than trying to merge.
 
 ---
 
@@ -229,7 +230,7 @@ to drift.
 
 | Value | Meaning |
 |---|---|
-| `none` | Leaf atom, no slot pattern (e.g., `helper-text`) |
+| `none` | Leaf atom, no slot pattern (e.g., `checkbox`) |
 | `slot` | Radix Slot — supports `asChild` for root replacement (no sibling content) |
 | `slottable` | Radix Slot + Slottable — supports `asChild` alongside sibling icons / content. The current `Button` pattern |
 | `children-as-function` | Render-prop pattern |
@@ -264,8 +265,3 @@ never verified either. The seam between appearance and behavior is closed at gen
 stylesheets actually emit, so a name the CSS does not define stops the build.
 `atom-class-coverage` re-checks the emitted catalog as a backstop.
 [`pipeline.md`](pipeline.md#verify-is-the-gate-and-it-runs-last) has the full check list.
-
-A note on generated code: when an atom's Radix primitive has no template wired, the
-generator falls back to CVA-only output and marks it `// TODO: wrap with <primitive>`.
-That marker is a deliberate fallback signal, not unfinished work. No atom in the current
-catalog carries one.

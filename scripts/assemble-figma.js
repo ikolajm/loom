@@ -130,7 +130,7 @@ function buildAllSteps() {
     steps.push(slim(`${String(num).padStart(2, '0')}_primitives_${collection}`, `${jsonLine('CONFIG', config)}\n${template}`));
   }
 
-  primStep(1, 'color', { palette: colors.palette, derived: colors.$derived || {} }, 'color.js');
+  primStep(1, 'color', { palette: colors.palette }, 'color.js');
   primStep(2, 'spacing', standards.spacing.scale, 'spacing.js');
   primStep(3, 'radius', standards.sizing['border-radius'], 'radius.js');
   primStep(4, 'border-width', standards.sizing['border-width'], 'border-width.js');

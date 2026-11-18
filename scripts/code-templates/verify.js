@@ -1414,9 +1414,7 @@ function checkFigmaCodeSyntax() {
 // are template fragments, not modules. figma-assembly compiles them in their assembled
 // form, which is the only form they have a meaning in.
 //
-// Skipped without an install, like typecheck, and for the same reason: generating Loom
-// needs no dependencies, so losing this on a fresh clone beats failing a generate that is
-// otherwise fine.
+// Skipped without a compiler, like typecheck and for the same reason.
 function checkTypecheckScripts() {
   const tsc = path.join(ROOT, 'node_modules/typescript/bin/tsc');
   if (!fs.existsSync(tsc)) return { failures: [], note: 'root deps not installed - skipped' };
@@ -1431,10 +1429,9 @@ function checkTypecheckScripts() {
 // The atoms are TypeScript, and nothing else in this repo compiles them. `tsc --noEmit`
 // over `catalog/` against the root tsconfig.
 //
-// Skipped when the root has no node_modules. Generating Loom needs no install — this is
-// the only
-// thing that does, and losing it silently on a fresh clone beats failing a generate
-// that is otherwise fine. CI installs.
+// Skipped when the root has no compiler, so `--only verify` still reports on the rest.
+// A full generate needs the install regardless: classManifest() parses with postcss.
+// CI installs.
 function checkTypecheck() {
   const tsc = path.join(ROOT, 'node_modules/typescript/bin/tsc');
   if (!fs.existsSync(tsc)) return { failures: [], note: 'root deps not installed — skipped' };
@@ -1745,6 +1742,19 @@ function checkPreviewCoverage() {
     note: `${applied.size} atom-applied and component classes against docs/preview.html, ${Object.keys(PREVIEW_SKIPS).length} skipped`,
   };
 }
+// Runs each check, prints its line and any failures, and returns how many failed.
+function runChecks(checks) {
+  let failed = 0;
+  for (const [name, run] of checks) {
+    const result = run();
+    const status = result.failures.length ? 'FAIL' : 'ok';
+    console.log(`  ${name.padEnd(23)} ${result.note} — ${status}`);
+    for (const f of result.failures) console.log(`    ${f}`);
+    if (result.failures.length) failed++;
+  }
+  return failed;
+}
+
 function verify() {
   const atoms = atomNames();
   // Lazy, so the registry's own names are readable before anything runs: doc-counts
@@ -1778,19 +1788,27 @@ function verify() {
     ['typecheck-scripts', () => checkTypecheckScripts()],
   ];
 
-  let failed = 0;
-  for (const [name, run] of checks) {
-    const result = run();
-    const status = result.failures.length ? 'FAIL' : 'ok';
-    console.log(`  ${name.padEnd(23)} ${result.note} — ${status}`);
-    for (const f of result.failures) console.log(`    ${f}`);
-    if (result.failures.length) failed++;
-  }
-
+  const failed = runChecks(checks);
   if (failed) {
     console.error(`\nVerification failed: ${failed} of ${checks.length} checks.`);
     process.exit(1);
   }
 }
+
+// The checks a brand can fail, for sync.js, which builds a project's brand without ever
+// running the full set. Only these: the rest are about the catalog and the generator, and
+// a brand refresh should not stop over them. They read the colour config and nothing
+// else, so they need no install. A child process, because LOOM_LOCAL_CONFIG is read when
+// config-paths loads.
+function verifyBrand() {
+  const checks = [
+    ['contrast', () => checkContrast()],
+    ['tone-contrast', () => checkToneContrast()],
+    ['border-contrast', () => checkBorderContrast()],
+  ];
+  if (runChecks(checks)) process.exit(1);
+}
+
+if (require.main === module && process.argv.includes('--brand')) verifyBrand();
 
 module.exports = { verify };
