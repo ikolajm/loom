@@ -20,8 +20,8 @@ step scripts.
 1. Open the target Figma file and open a plugin **console** (any dev plugin -> Plugins ->
    Development -> Open console).
 2. Paste **`00_shared-utils.js` first** — it defines the helpers the steps reference.
-3. Paste the step scripts **in numeric order**. Re-running one later only needs its own
-   step script re-pasted.
+3. Paste the step scripts **in numeric order**. The steps are not idempotent, so a later
+   rebuild starts by clearing the file, as below.
 
 Step `14` (text styles) runs the font-availability check and reports per family. A font
 this Figma cannot render is substituted with Inter so the paste completes — see
@@ -67,12 +67,11 @@ against the globals it defines — rather than emitting one self-contained scrip
 its old variables and styles until you run the paste again. "The generator is fixed" and
 "the file is fixed" are separate claims, and only the second is checkable by looking.
 
-**Re-pasting `00` into a console that has already run it silently halts.** Top-level
-`const`/`let` cannot be redeclared, so the second paste dies at the first collision and
-every helper below it never reloads — including the fix you just made. `assemble-figma.js`
-emits the bundle with top-level declarations rewritten to `var` so re-pastes redefine
-cleanly; the one case left is the first hop out of a `const`-era session, which needs a
-console reload.
+**`00` can be pasted again, with one exception.** Top-level `const`/`let` cannot be
+redeclared, so a second paste would die at the first collision and every helper below it
+would never reload — including the fix you just made. `assemble-figma.js` emits the bundle
+with top-level declarations rewritten to `var` so re-pastes redefine cleanly; the one case
+left is the first hop out of a `const`-era session, which needs a console reload.
 
 **Variable IDs are session-specific.** A step resolves the references it needs in its own
 run. An ID carried across runs points at nothing, and does so without complaining.

@@ -183,7 +183,7 @@ A surface with no CSS engine — an email, a templating language, a report build
 still use Loom's decisions by reading `tokens.css` as a table of values rather than linking
 it as a stylesheet. It is already in that shape: nearly every declaration is a resolved
 literal on the line, and the aliases that are not resolve in one hop, never a chain. The
-semantic names (`--primary`, `--on-surface-variant`, `--space-6`, `--br-md`) are the
+semantic names (`--primary`, `--on-surface-variant`, `--space-6`, `--radius-card`) are the
 interface worth designing against; the numbered palette underneath them moves when a brand
 changes.
 

@@ -19,8 +19,8 @@ intrinsic size. **Pass an array, not a fragment.**
 This fails silently in the direction that matters: the component renders, so a typecheck
 and a build both pass. `badge` carried the same bug in a worse form — it imported `Slot`
 without `Slottable` at all, so `badge asChild` had never applied classes in any version.
-No story exercised it, which is why it went unseen. Any generated component wiring
-`asChild` needs a story that actually exercises it.
+Nothing exercised it, which is why it went unseen. Any generated component wiring
+`asChild` has to be tried in a real render, because no check here will catch this.
 
 **Parked deliberately: `asChild` + `iconOnly` together.** That mode wraps children in
 `span.icon-slot`, which becomes Slot's only child, so the classes land on the span and the
