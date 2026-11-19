@@ -1964,6 +1964,12 @@ function buildSectionForcedColors() {
     color: HighlightText;
   }
 
+  .tab-list[data-variant="underline"] .tab[aria-selected="true"] {
+    background-color: Canvas;
+    color: CanvasText;
+    border-block-end-color: Highlight;
+  }
+
   .tab:disabled {
     color: GrayText;
   }
@@ -1981,6 +1987,9 @@ function buildSectionForcedColors() {
  * The solid primary fill is the state cue on its own. It clears the 3:1 WCAG 1.4.11 asks
  * of one against the `--surface-1` track, where a surface-step thumb or the soft container
  * does not: the container matches the track's luminance, so it separates by hue alone.
+ *
+ * The underline variant carries the state in shape instead: a `--primary-border` rule, the
+ * role held to 3:1 against every surface, and no track to measure against.
  */
 function buildSectionTabSelection() {
   return `/* === Tab selection === */
@@ -1998,6 +2007,31 @@ function buildSectionTabSelection() {
 .tab[aria-selected="true"] {
   background-color: var(--primary);
   color: var(--on-primary);
+}
+
+/* The underline variant: no track, a hairline under the list, and a rule under the selected
+   tab that sits on the hairline. Every tab reserves the rule's width, so a switch moves
+   nothing. The list wraps, since it spans its container rather than fitting its tabs. */
+.tab-list[data-variant="underline"] {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  border-block-end: var(--bw-1) solid var(--outline-subtle);
+}
+
+.tab-list[data-variant="underline"] .tab {
+  margin-block-end: calc(-1 * var(--bw-1));
+  border-radius: 0;
+  border-block-end: var(--bw-2) solid transparent;
+}
+
+.tab-list[data-variant="underline"] .tab[aria-selected="true"] {
+  background-color: transparent;
+  color: var(--on-surface);
+  border-block-end-color: var(--primary-border);
 }`;
 }
 
