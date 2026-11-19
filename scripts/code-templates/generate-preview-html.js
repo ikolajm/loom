@@ -317,6 +317,15 @@ const CLASS_STRIP = [
       </div>
       <p class="text-body-sm text-on-surface-variant">A panel's own tabs, over the text they switch.</p>
     </div>`,
+    lede(`The underline variant, for tabs that should not outweigh what they switch:
+      <code>data-variant="underline"</code> on the list drops the track, and a rule under
+      the selected tab carries the state in shape.`),
+    `    <div class="tab-list" data-variant="underline" role="tablist" aria-label="Source">
+      <button class="tab interactive control" data-size="md" role="tab" aria-selected="true">Schema</button>
+      <button class="tab interactive control" data-size="md" role="tab" aria-selected="false" tabindex="-1">Tokens</button>
+      <button class="tab interactive control" data-size="md" role="tab" aria-selected="false" tabindex="-1">Output</button>
+      <button class="tab interactive control" data-size="md" role="tab" aria-selected="false" tabindex="-1" disabled>Archive</button>
+    </div>`,
   ].join(NL)),
 
   section('A removable filter is a button', [

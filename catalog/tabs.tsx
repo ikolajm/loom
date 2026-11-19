@@ -9,6 +9,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from './cn';
 
 type TabsSize = 'sm' | 'md' | 'lg';
+type TabsVariant = 'filled' | 'underline';
 
 const SelectedContext = createContext<string | undefined>(undefined);
 const SizeContext = createContext<TabsSize>('md');
@@ -37,10 +38,10 @@ Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = forwardRef<
   React.ComponentRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { size?: TabsSize }
->(({ size = 'md', className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { size?: TabsSize; variant?: TabsVariant }
+>(({ size = 'md', variant = 'filled', className, ...props }, ref) => (
   <SizeContext.Provider value={size}>
-    <TabsPrimitive.List ref={ref} className={cn('tab-list', className)} {...props} />
+    <TabsPrimitive.List ref={ref} className={cn('tab-list', className)} data-variant={variant} {...props} />
   </SizeContext.Provider>
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;

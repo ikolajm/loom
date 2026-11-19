@@ -13,7 +13,8 @@ const { filterSizes } = require('./helpers');
  * an empty string so it never flips from uncontrolled to controlled when the first tab is
  * picked.
  *
- * The size rides context from the list to its tabs, so a list is sized once.
+ * The size rides context from the list to its tabs, so a list is sized once. The variant
+ * is the list's alone: the class layer reaches its tabs from `data-variant`.
  */
 function generateRadixTabs(name, config) {
   const sizes = filterSizes(config.sizes);
@@ -27,6 +28,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from './cn';
 
 type TabsSize = ${sizeUnion};
+type TabsVariant = 'filled' | 'underline';
 
 const SelectedContext = createContext<string | undefined>(undefined);
 const SizeContext = createContext<TabsSize>('${defaultSize}');
@@ -55,10 +57,10 @@ Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = forwardRef<
   React.ComponentRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { size?: TabsSize }
->(({ size = '${defaultSize}', className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { size?: TabsSize; variant?: TabsVariant }
+>(({ size = '${defaultSize}', variant = 'filled', className, ...props }, ref) => (
   <SizeContext.Provider value={size}>
-    <TabsPrimitive.List ref={ref} className={cn('${cls('tab-list', 'tabs')}', className)} {...props} />
+    <TabsPrimitive.List ref={ref} className={cn('${cls('tab-list', 'tabs')}', className)} data-variant={variant} {...props} />
   </SizeContext.Provider>
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;

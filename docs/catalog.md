@@ -32,7 +32,8 @@ the validity cascade into `.control`, `dialog` for a Radix portal, `select` for 
 form control, `tabs` for roving focus across a list. Its panels unmount when inactive
 unless `keepMounted` keeps them in the tree, hidden. Its track sits one surface step off
 the page, `surface-1`, so on a `surface-1` panel or bar it vanishes; a surface class on
-the list picks the step instead, `<TabsList className="surface">`. `checkbox`, `radio` and
+the list picks the step instead, `<TabsList className="surface">`. `<TabsList
+variant="underline">` drops the track for a rule under the selected tab. `checkbox`, `radio` and
 `switch` are native inputs that pick up the field's error, and `checkbox` also sets its
 mixed state. **Anything else you need, build.** Radix is already the primitive layer,
 and a real interactive primitive should use a real library (carousel -> embla,
