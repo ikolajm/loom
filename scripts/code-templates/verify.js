@@ -13,7 +13,7 @@
  *   css-parse         — the emitted stylesheets parse at all (postcss)
  *   doc-counts        — hand-written "N components/atoms/patterns/groups" claims match,
  *                       and docs/pipeline.md's check list matches this file's registry
- *   manifest-deps     — every relative import is declared (regression guard on aacc481)
+ *   manifest-deps     — every relative import is declared
  *   base-config-provenance — the committed base configs are what answers.example generates
  *   touch-target      — every height ladder honours standards.json's touch-target.min
  *   contrast          — every on-X/X colour pair clears WCAG AA, on screen and in print
@@ -117,6 +117,34 @@ function checkCssParse() {
     }
   }
   return { failures, note: `${EMITTED.length} stylesheets, ${rules} rules` };
+}
+
+// --- var-references ----------------------------------------------------------
+// Every `var(--x)` in the emitted CSS names a property the emitted CSS defines.
+//
+// An undefined property is not an error to a browser: the declaration computes to its
+// initial value and nothing reports it. The textarea's literal min-heights were wrapped as
+// tokens, so `.textarea` shipped `min-height: var(--height-80px)` and its siblings, which
+// no stylesheet defines, and a textarea had no minimum height. Every other gate was green.
+//
+// Strict on fallbacks too: a reference that only ever resolves to its fallback is a dead
+// path, and a property a consumer is meant to set belongs in tokens.css with a default.
+function checkVarReferences() {
+  if (!parseComplete()) return NOT_PARSED;
+  const defined = new Set();
+  const refs = [];
+  for (const { name, root } of sheets()) {
+    root.walkDecls((d) => {
+      if (d.prop.startsWith('--')) defined.add(d.prop);
+      for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+        refs.push({ name, prop: m[1], selector: d.parent && d.parent.selector });
+      }
+    });
+  }
+  const failures = refs
+    .filter((r) => !defined.has(r.prop))
+    .map((r) => `${r.name}: ${r.selector || '(at-rule)'} reads ${r.prop}, which no emitted stylesheet defines`);
+  return { failures, note: `${refs.length} references against ${defined.size} defined properties` };
 }
 
 // Every markdown file in the repo is checked for hand-written counts. This used to be
@@ -376,13 +404,7 @@ const CONSUMED_VARIANT_KEYS = new Set(['bg', 'fg', 'border', 'shadow',
 
 const UNCONSUMED_VARIANT_KEYS = {
   'hover-bg': 'hover is a state, and the layer has no state hook on a variant yet',
-  'active-bg': 'same as hover-bg',
-  'from': 'a gradient start; the layer emits no gradients',
   'overlay': 'a scrim colour, which belongs to whatever renders the scrim',
-  'track-bg': 'progress/slider internals — the parts are not named yet',
-  'fill-bg': 'same as track-bg',
-  'thumb-bg': 'same as track-bg',
-  'gap': 'declared on a variant, but gap ramps per size; the size block already emits it',
 };
 
 function checkVariantKeys() {
@@ -1762,6 +1784,7 @@ function verify() {
   // is the drift the gate exists to catch.
   const checks = [
     ['css-parse', () => checkCssParse()],
+    ['var-references', () => checkVarReferences()],
     ['doc-counts', () => checkDocCounts(atoms, checks.map(([n]) => n))],
     ['manifest-deps', () => checkManifestDeps(atoms)],
     ['interactive-implies-control', () => checkInteractiveImpliesControl(atoms)],

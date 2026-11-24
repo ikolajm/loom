@@ -63,9 +63,8 @@ function loadAnswers(args) {
   // ignored rather than honoured. Without this, `npm run configs -- --default-set` writes
   // whatever brand you are testing into the committed set: the npm script bakes in
   // `--input spec/answers.json`, which is git-ignored precisely because it holds your
-  // brand and not Loom's. That is the mechanism of e935de3, which put a local dashboard's
-  // colors on master for a day — the redirect to spec/config/local/ closed the ordinary
-  // write path and left this one open.
+  // brand and not Loom's. That is how a local dashboard's colors reached master: the
+  // redirect to spec/config/local/ closed the ordinary write path and left this one open.
   if (args['default-set']) {
     const example = path.join(PIPELINE_ROOT, 'spec/answers.example.json');
     const overridden = [

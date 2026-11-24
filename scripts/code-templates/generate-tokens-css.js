@@ -489,7 +489,7 @@ function buildComponentClass(name, cfg, textFamily) {
     if (gap) d.push(`gap: ${gap};`);
     if (src.radius) d.push(`border-radius: ${CSS_TOKEN(src.radius, 'radius-')};`);
     if (src.height) d.push(`height: ${CSS_SPACE(src.height) || CSS_TOKEN(src.height, 'height-')};`);
-    if (src['min-height']) d.push(`min-height: ${CSS_TOKEN(src['min-height'], 'height-')};`);
+    if (src['min-height']) d.push(`min-height: ${CSS_SPACE(src['min-height']) || CSS_TOKEN(src['min-height'], 'height-')};`);
     // A square: one token driving both axes (the spinner's ring, an icon-only button tier).
     if (src.size) {
       const sz = CSS_SPACE(src.size)
@@ -665,12 +665,6 @@ const CELL_SIZED = new Set(['table']);
  * height with no border, background or text colour, so a text field rendered as bare text
  * on the page. Nothing failed: every class was present, which is all `class-coverage`
  * could see.
- *
- * Every line below is recovered from the atom that the class replaced, read out of
- * `git show 0e4547a^:catalog/<name>.tsx` — the commit before the appearance-only atoms
- * were dropped. Recovered rather than redesigned on purpose: a faithful restore cannot
- * break something that rendered correctly before, and a judgement call here could not be
- * checked in a browser.
  *
  * `class-box-model` in verify.js asserts every line reaches the output.
  */
@@ -1050,6 +1044,14 @@ button,
   background-color: transparent;
   background-image: none;
   border: 0;
+}
+
+/* === Text Elements === */
+/* DialogTitle renders an <h2> and DialogDescription a <p>, and the UA's margins on both
+   stack on the gap .dialog spaces its parts with. Cleared by class, not on every <h2> and
+   <p>, so a consumer's prose keeps its own spacing; :where() so any consumer rule wins. */
+:where(.dialog-title, .dialog-description) {
+  margin: 0;
 }
 
 /* === Focus === */
