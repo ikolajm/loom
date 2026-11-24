@@ -188,7 +188,7 @@ be a consumer's source tree, where nothing would ignore an answers file.
 
 ### `verify` is the gate, and it runs last
 
-The checks, in order: `css-parse`, `doc-counts`, `manifest-deps`,
+The checks, in order: `css-parse`, `var-references`, `doc-counts`, `manifest-deps`,
 `interactive-implies-control`, `class-coverage`, `preview-coverage`,
 `atom-class-coverage`, `class-box-model`, `phantom-parts`, `variant-keys`,
 `height-roles`, `base-config-provenance`, `config-parity`, `dead-exports`,
